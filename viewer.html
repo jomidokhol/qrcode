@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitShare | Viewer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            background: #000000; color: #ffffff; margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            display: flex; align-items: center; justify-content: center;
+            height: 100vh;
+        }
+        #container { text-align: center; display: none; padding: 20px; width: 100%; max-width: 400px; }
+        .icon { font-size: 4.5rem; color: #6366f1; margin-bottom: 20px; }
+        .btn {
+            background: #6366f1; color: white; border: none; padding: 16px 32px;
+            border-radius: 16px; font-weight: 700; cursor: pointer;
+            text-decoration: none; display: flex; align-items: center; justify-content: center;
+            gap: 10px; margin-top: 25px;
+        }
+        .empty-text { opacity: 0.2; font-size: 0.8rem; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+
+    <div id="empty" class="empty-text">SECURE VIEWER IDLE</div>
+
+    <div id="container">
+        <div id="vIcon" class="icon"></div>
+        <h2 id="vName" style="word-break: break-all; margin: 0 0 8px 0;">File Name</h2>
+        <p id="vSize" style="opacity: 0.5; margin: 0;">0.00 MB</p>
+        <a id="vDownload" class="btn" download><i class="fas fa-download"></i> Download File</a>
+        <p style="margin-top: 30px; font-size: 0.7rem; opacity: 0.3;">GitShare Pro - Encrypted Link</p>
+    </div>
+
+    <script>
+        window.onload = () => {
+            const params = new URLSearchParams(window.location.search);
+            const encodedData = params.get('f');
+
+            if (encodedData) {
+                try {
+                    const data = JSON.parse(atob(encodedData));
+                    document.getElementById('empty').style.display = 'none';
+                    document.getElementById('container').style.display = 'block';
+
+                    document.getElementById('vName').innerText = data.n;
+                    document.getElementById('vSize').innerText = data.s + " MB";
+                    
+                    // GitHub Raw URL for direct download
+                    const rawUrl = `https://raw.githubusercontent.com/jomidokhol/qrcode/main/${data.p}`;
+                    document.getElementById('vDownload').href = rawUrl;
+
+                    // Icon selection
+                    let icon = 'fa-file-alt';
+                    if(data.n.match(/\.(jpg|jpeg|png|gif)$/i)) icon = 'fa-file-image';
+                    else if(data.n.match(/\.(mp4|webm)$/i)) icon = 'fa-file-video';
+                    else if(data.n.match(/\.(pdf)$/i)) icon = 'fa-file-pdf';
+                    document.getElementById('vIcon').innerHTML = `<i class="fas ${icon}"></i>`;
+                } catch (e) {
+                    document.getElementById('empty').innerText = "LINK EXPIRED OR INVALID";
+                }
+            }
+        };
+    </script>
+</body>
+</html>
