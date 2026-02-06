@@ -3,369 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuickShare | Pro File Hosting</title>
+    <title>GitShare Pro | QR Generator</title>
     
-    <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- QRCode Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
-    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
     <style>
-        :root {
-            --brand: #6366f1;
-            --brand-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            --bg: #f8fafc;
-            --glass: rgba(255, 255, 255, 0.9);
-            --text-main: #0f172a;
-            --text-sub: #64748b;
-            --success: #10b981;
-            --error: #ef4444;
-            --radius-lg: 24px;
-            --radius-md: 16px;
-            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-        }
+        :root { --primary: #6366f1; --bg: #ffffff; --card: #f8fafc; --text: #0f172a; --border: #e2e8f0; }
+        .dark-mode { --bg: #000000; --card: #111111; --text: #ffffff; --border: #222222; }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); transition: 0.4s; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .container { width: 100%; max-width: 500px; }
+        .main-card { background: var(--card); border: 1px solid var(--border); border-radius: 32px; padding: 30px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2); }
 
-        body {
-            background-color: var(--bg);
-            background-image: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0, transparent 50%), 
-                              radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.05) 0, transparent 50%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-main);
-            padding: 20px;
-        }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .logo { font-weight: 800; font-size: 1.4rem; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        .theme-btn { background: var(--border); border: none; width: 40px; height: 40px; border-radius: 12px; cursor: pointer; color: var(--text); }
 
-        .app-card {
-            background: var(--glass);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            width: 100%;
-            max-width: 900px;
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow);
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            overflow: hidden;
-            animation: appEntry 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+        #loaderInline { display: none; text-align: center; padding: 20px; }
+        .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        @keyframes appEntry {
-            from { opacity: 0; transform: translateY(40px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
+        .upload-box { border: 2px dashed var(--primary); border-radius: 24px; padding: 40px 20px; text-align: center; cursor: pointer; background: rgba(99, 102, 241, 0.05); }
+        
+        #resultArea { display: none; margin-top: 25px; padding-top: 25px; border-top: 1px solid var(--border); text-align: center; }
+        .qr-wrapper { width: 200px; height: 200px; margin: 0 auto 20px; background: white; padding: 10px; border-radius: 16px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        #qrcode canvas { width: 100% !important; height: 100% !important; }
 
-        /* --- Left Side: Upload --- */
-        .upload-section {
-            padding: 40px;
-            border-right: 1px solid #e2e8f0;
-        }
+        .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left; margin-top: 20px; }
+        .control-item label { font-size: 0.7rem; font-weight: 700; display: block; margin-bottom: 5px; opacity: 0.7; }
+        input[type="color"] { width: 100%; height: 35px; border: none; border-radius: 5px; background: none; cursor: pointer; }
 
-        .header { margin-bottom: 30px; }
-        .logo { 
-            display: flex; align-items: center; gap: 10px; font-weight: 800; 
-            font-size: 1.5rem; background: var(--brand-gradient);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
-        }
-
-        .drop-zone {
-            border: 2px dashed #cbd5e1;
-            border-radius: var(--radius-md);
-            padding: 40px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: rgba(248, 250, 252, 0.5);
-            margin-bottom: 20px;
-        }
-
-        .drop-zone:hover, .drop-zone.active {
-            border-color: var(--brand);
-            background: #f5f3ff;
-            transform: translateY(-2px);
-        }
-
-        .drop-zone i { font-size: 3rem; color: var(--brand); margin-bottom: 15px; }
-
-        /* --- Progress Bar --- */
-        .progress-wrapper {
-            margin: 20px 0;
-            display: none;
-        }
-        .progress-meta { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 8px; font-weight: 600; }
-        .progress-track { height: 8px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
-        .progress-fill { height: 100%; width: 0%; background: var(--brand-gradient); transition: width 0.3s ease; }
-
-        /* --- Right Side: Result --- */
-        .result-section {
-            padding: 40px;
-            background: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            position: relative;
-        }
-
-        .qr-placeholder {
-            width: 220px; height: 220px;
-            background: #f1f5f9;
-            border-radius: var(--radius-md);
-            display: flex; align-items: center; justify-content: center;
-            color: var(--text-sub); border: 1px solid #e2e8f0;
-        }
-
-        #qrcode canvas {
-            border-radius: 12px;
-            padding: 10px;
-            background: white;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-        .url-box {
-            width: 100%; margin-top: 25px; background: #f8fafc;
-            border: 1px solid #e2e8f0; border-radius: 12px;
-            padding: 12px; font-size: 0.85rem; color: var(--brand);
-            word-break: break-all; cursor: pointer; transition: all 0.2s;
-        }
-
-        .url-box:hover { background: #f1f5f9; }
-
-        .btn {
-            width: 100%; border: none; padding: 14px; border-radius: 12px;
-            font-weight: 700; cursor: pointer; transition: all 0.3s;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            margin-top: 15px;
-        }
-
-        .btn-primary { background: var(--brand-gradient); color: white; }
-        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3); }
-        .btn-primary:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; box-shadow: none; }
-
-        .btn-outline { background: white; border: 1px solid #e2e8f0; color: var(--text-main); }
-        .btn-outline:hover { background: #f8fafc; }
-
-        /* Toast notifications */
-        .toast {
-            position: fixed; bottom: 20px; right: 20px; padding: 16px 24px;
-            background: var(--text-main); color: white; border-radius: 12px;
-            display: none; animation: slideIn 0.3s ease; z-index: 1000;
-        }
-        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-
-        @media (max-width: 768px) {
-            .app-card { grid-template-columns: 1fr; }
-            .upload-section { border-right: none; border-bottom: 1px solid #e2e8f0; }
-        }
+        .btn { width: 100%; padding: 14px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-action { background: var(--border); color: var(--text); font-size: 0.85rem; }
     </style>
 </head>
 <body>
 
-    <div class="app-card">
-        <!-- Upload Part -->
-        <div class="upload-section">
+    <div class="container">
+        <div class="main-card">
             <div class="header">
-                <div class="logo"><i class="fas fa-bolt"></i> QuickShare</div>
-                <p style="color: var(--text-sub); font-size: 0.9rem;">Host and share files instantly via QR.</p>
+                <div class="logo"><i class="fas fa-bolt"></i> GitShare</div>
+                <button class="theme-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
             </div>
 
-            <div class="drop-zone" id="dropZone">
-                <i class="fas fa-cloud-arrow-up"></i>
-                <h4 style="margin-bottom: 5px;">Upload your file</h4>
-                <p style="color: var(--text-sub); font-size: 0.8rem;">Images, Videos, PDFs (Max 20MB)</p>
-                <input type="file" id="fileInput" hidden accept="image/*,video/*,application/pdf">
+            <div id="uploaderView">
+                <div class="upload-box" id="dropZone">
+                    <i class="fas fa-cloud-arrow-up" style="font-size: 2.5rem; color: var(--primary);"></i>
+                    <h3 id="uploadTitle" style="margin-top:10px;">Choose a file</h3>
+                    <input type="file" id="fileInput" hidden>
+                </div>
+                
+                <div id="loaderInline">
+                    <div class="spinner"></div>
+                    <p style="font-size: 0.85rem; font-weight: 600;">Processing...</p>
+                </div>
+
+                <button class="btn btn-primary" id="uploadBtn" disabled>Generate QR Code</button>
             </div>
 
-            <div id="filePreview" style="display: none; margin-bottom: 20px;">
-                <div style="display: flex; align-items: center; gap: 12px; background: #f1f5f9; padding: 12px; border-radius: 12px;">
-                    <i class="fas fa-file-circle-check" style="font-size: 1.5rem; color: var(--brand);"></i>
-                    <div style="flex: 1; overflow: hidden;">
-                        <div id="fileName" style="font-weight: 600; font-size: 0.9rem; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">filename.jpg</div>
-                        <div id="fileSize" style="font-size: 0.75rem; color: var(--text-sub);">2.4 MB</div>
+            <div id="resultArea">
+                <div class="qr-wrapper"><div id="qrcode"></div></div>
+                
+                <div class="control-grid">
+                    <div class="control-item">
+                        <label>QR Color</label>
+                        <input type="color" id="qrColor" value="#000000">
                     </div>
-                    <i class="fas fa-times" id="removeFile" style="cursor: pointer; color: var(--error);"></i>
+                    <div class="control-item">
+                        <label>Background</label>
+                        <input type="color" id="qrBg" value="#ffffff">
+                    </div>
+                    <div class="control-item" style="grid-column: span 2;">
+                        <label>Download Resolution</label>
+                        <input type="range" id="qrSize" min="200" max="1500" value="600" style="width: 100%; accent-color: var(--primary);">
+                    </div>
                 </div>
-            </div>
 
-            <div class="progress-wrapper" id="progressWrapper">
-                <div class="progress-meta">
-                    <span id="statusText">Uploading...</span>
-                    <span id="percentText">0%</span>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                    <button class="btn btn-action" id="downloadQRBtn"><i class="fas fa-download"></i> Save QR</button>
+                    <button class="btn btn-action" id="copyBtn"><i class="fas fa-link"></i> Copy URL</button>
                 </div>
-                <div class="progress-track">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-            </div>
-
-            <button class="btn btn-primary" id="uploadBtn" disabled>
-                <i class="fas fa-paper-plane"></i> Generate Link & QR
-            </button>
-        </div>
-
-        <!-- Result Part -->
-        <div class="result-section">
-            <div id="qrContainer" class="qr-placeholder">
-                <div style="padding: 20px;">
-                    <i class="fas fa-qrcode" style="font-size: 3rem; margin-bottom: 10px; display: block;"></i>
-                    <p style="font-size: 0.8rem;">Your QR code will appear here after upload</p>
-                </div>
-            </div>
-
-            <div id="resultActions" style="display: none; width: 100%;">
-                <div class="url-box" id="shareUrl" title="Click to copy"></div>
-                <button class="btn btn-outline" id="copyBtn"><i class="fas fa-copy"></i> Copy Link</button>
-                <button class="btn btn-outline" style="background: transparent; border: none; font-size: 0.85rem; margin-top: 5px;" onclick="location.reload()">
-                    <i class="fas fa-redo"></i> Upload Another
+                <button class="btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="location.reload()">
+                    Upload New File
                 </button>
             </div>
         </div>
     </div>
 
-    <div class="toast" id="toast"></div>
-
-    <script type="module">
-        // --- FIREBASE SETUP (MODULAR SDK) ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCFNNXY4oRMg8AjhWa9PqCN8gdILmwdRk0",
-            authDomain: "autopay-api.firebaseapp.com",
-            projectId: "autopay-api",
-            storageBucket: "autopay-api.firebasestorage.app",
-            messagingSenderId: "560907178391",
-            appId: "1:560907178391:web:aa544aedc91be464cd74d2"
+    <script>
+        const GIT = {
+            token: "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",
+            owner: "jomidokhol",
+            repo: "qrcode",
+            branch: "main",
+            domain: "https://qrcode-gen-weld.vercel.app" // আপনার ডোমেইন
         };
 
-        const app = initializeApp(firebaseConfig);
-        const storage = getStorage(app);
-
-        // --- DOM ELEMENTS ---
-        const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('dropZone');
         const uploadBtn = document.getElementById('uploadBtn');
-        const filePreview = document.getElementById('filePreview');
-        const fileNameDisp = document.getElementById('fileName');
-        const fileSizeDisp = document.getElementById('fileSize');
-        const removeFile = document.getElementById('removeFile');
-        const progressWrapper = document.getElementById('progressWrapper');
-        const progressFill = document.getElementById('progressFill');
-        const percentText = document.getElementById('percentText');
-        const qrContainer = document.getElementById('qrContainer');
-        const resultActions = document.getElementById('resultActions');
-        const shareUrl = document.getElementById('shareUrl');
-        const copyBtn = document.getElementById('copyBtn');
-
+        const loader = document.getElementById('loaderInline');
+        const resultArea = document.getElementById('resultArea');
+        const qrcodeDiv = document.getElementById('qrcode');
+        let currentUrl = "";
         let selectedFile = null;
 
-        // --- EVENTS ---
+        document.getElementById('themeToggle').onclick = () => {
+            document.body.classList.toggle('dark-mode');
+        };
+
         dropZone.onclick = () => fileInput.click();
-
-        dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('active'); };
-        dropZone.ondragleave = () => dropZone.classList.remove('active');
-        dropZone.ondrop = (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('active');
-            handleFile(e.dataTransfer.files[0]);
-        };
-
-        fileInput.onchange = (e) => handleFile(e.target.files[0]);
-
-        removeFile.onclick = () => {
-            selectedFile = null;
-            filePreview.style.display = 'none';
-            dropZone.style.display = 'block';
-            uploadBtn.disabled = true;
-        };
-
-        function handleFile(file) {
-            if (!file) return;
-            if (file.size > 20 * 1024 * 1024) {
-                showToast("File too large! Max 20MB allowed.", "error");
-                return;
+        fileInput.onchange = (e) => {
+            selectedFile = e.target.files[0];
+            if(selectedFile) {
+                document.getElementById('uploadTitle').innerText = selectedFile.name;
+                uploadBtn.disabled = false;
             }
-            selectedFile = file;
-            fileNameDisp.innerText = file.name;
-            fileSizeDisp.innerText = (file.size / (1024 * 1024)).toFixed(2) + " MB";
-            
-            dropZone.style.display = 'none';
-            filePreview.style.display = 'block';
-            uploadBtn.disabled = false;
-        }
+        };
 
         uploadBtn.onclick = async () => {
-            if (!selectedFile) return;
+            loader.style.display = 'block';
+            uploadBtn.style.display = 'none';
+            const reader = new FileReader();
+            reader.readAsDataURL(selectedFile);
+            reader.onload = async () => {
+                const base64 = reader.result.split(',')[1];
+                const fileName = Date.now() + "_" + selectedFile.name;
+                const path = `uploads/${fileName}`;
 
-            uploadBtn.disabled = true;
-            progressWrapper.style.display = 'block';
-            
-            const fileRef = ref(storage, `uploads/${Date.now()}_${selectedFile.name}`);
-            const uploadTask = uploadBytesResumable(fileRef, selectedFile);
-
-            uploadTask.on('state_changed', 
-                (snapshot) => {
-                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    progressFill.style.width = progress + '%';
-                    percentText.innerText = Math.round(progress) + '%';
-                }, 
-                (error) => {
-                    showToast("Upload failed. Try again.", "error");
-                    uploadBtn.disabled = false;
-                }, 
-                () => {
-                    getDownloadURL(uploadTask.snapshot.ref).then((url) => {
-                        finalizeResult(url);
+                try {
+                    const res = await fetch(`https://api.github.com/repos/${GIT.owner}/${GIT.repo}/contents/${path}`, {
+                        method: "PUT",
+                        headers: { "Authorization": `token ${GIT.token}`, "Content-Type": "application/json" },
+                        body: JSON.stringify({ message: "upload", content: base64, branch: GIT.branch })
                     });
-                }
-            );
+
+                    if (res.ok) {
+                        const fileData = { n: selectedFile.name, p: path, s: (selectedFile.size / (1024*1024)).toFixed(2) };
+                        // জেনারেটেড ইউআরএল ফরম্যাট: ডোমেইন/viewer.html?f=FILE_ID
+                        currentUrl = `${GIT.domain}/viewer.html?f=${btoa(JSON.stringify(fileData))}`;
+                        
+                        document.getElementById('uploaderView').style.display = 'none';
+                        resultArea.style.display = 'block';
+                        generateQR();
+                    }
+                } catch (e) { alert("Error: " + e.message); }
+                loader.style.display = 'none';
+            };
         };
 
-        function finalizeResult(url) {
-            progressWrapper.style.display = 'none';
-            uploadBtn.innerHTML = `<i class="fas fa-check"></i> Finished`;
-            
-            // Clear placeholder
-            qrContainer.innerHTML = '';
-            qrContainer.classList.remove('qr-placeholder');
-            
-            // Generate QR
-            QRCode.toCanvas(url, {
-                width: 220,
+        function generateQR() {
+            qrcodeDiv.innerHTML = '';
+            QRCode.toCanvas(currentUrl, {
+                width: document.getElementById('qrSize').value,
                 margin: 2,
-                color: { dark: '#0f172a', light: '#ffffff' }
-            }, (err, canvas) => {
-                if (err) console.error(err);
-                qrContainer.appendChild(canvas);
-            });
-
-            shareUrl.innerText = url;
-            resultActions.style.display = 'block';
-            showToast("Success! File is now live.", "success");
+                color: { dark: document.getElementById('qrColor').value, light: document.getElementById('qrBg').value }
+            }, (err, canvas) => { qrcodeDiv.appendChild(canvas); });
         }
 
-        copyBtn.onclick = () => {
-            navigator.clipboard.writeText(shareUrl.innerText);
-            showToast("Link copied to clipboard!");
-            copyBtn.innerHTML = `<i class="fas fa-check"></i> Copied`;
-            setTimeout(() => { copyBtn.innerHTML = `<i class="fas fa-copy"></i> Copy Link`; }, 2000);
+        document.getElementById('qrColor').oninput = generateQR;
+        document.getElementById('qrBg').oninput = generateQR;
+        document.getElementById('qrSize').oninput = generateQR;
+
+        document.getElementById('downloadQRBtn').onclick = () => {
+            const link = document.createElement('a');
+            link.download = 'qrcode.png';
+            link.href = qrcodeDiv.querySelector('canvas').toDataURL();
+            link.click();
         };
 
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg;
-            toast.style.display = 'block';
-            setTimeout(() => { toast.style.display = 'none'; }, 3000);
-        }
+        document.getElementById('copyBtn').onclick = () => {
+            navigator.clipboard.writeText(currentUrl);
+            alert("Sharable URL Copied!");
+        };
     </script>
 </body>
 </html>
