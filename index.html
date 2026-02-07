@@ -9,6 +9,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     
+    <!-- Third-party Library for QR Extraction (NEW ADDITION) -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.1.0/dist/jsQR.min.js"></script> 
+    <!-- End Third-party Library -->
+    
     <!-- Firebase SDK Scripts (Added for Sign-in) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -18,6 +22,14 @@
         /* Theme Change: Green and White */
         :root { --primary: #10b981; --bg: #ffffff; --card: #f8fafc; --text: #0f172a; --border: #e2e8f0; --shadow: rgba(0, 0, 0, 0.1); }
         .dark-mode { --bg: #000000; --card: #111111; --text: #ffffff; --border: #222222; --shadow: rgba(255, 255, 255, 0.1); }
+        
+        /* NEW ADDITION: Style for the reset button in dark mode to force white background/black text */
+        .dark-mode .extractor-reset-btn {
+            background: var(--text) !important; /* Force white background */
+            border-color: var(--text) !important; /* Force white border */
+            color: var(--bg) !important; /* Force black text for contrast */
+        }
+        /* END NEW ADDITION */
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { 
@@ -31,7 +43,7 @@
             user-select: none;
         }
         /* New Addition 3: Enable selection for specific elements */
-        input, .link-url, .upload-box #uploadTitle, #linkUploadTitle, footer p, #toast {
+        input, .link-url, .upload-box #uploadTitle, #linkUploadTitle, #extractorUploadTitle, footer p, #toast { /* ADDED #extractorUploadTitle */
             -webkit-user-select: text;
             -moz-user-select: text;
             -ms-user-select: text;
@@ -102,6 +114,7 @@
         .upload-box img { display:block; margin: 0 auto 10px; } /* Ensures image is centered */
         
         #resultArea { display: none; margin-top: 25px; padding-top: 25px; border-top: 1px solid var(--border); text-align: center; }
+        #extractorResultArea { display: none; margin-top: 25px; padding-top: 25px; border-top: 1px solid var(--border); text-align: center; } /* ADDED */
         .qr-wrapper { width: 200px; height: 200px; margin: 0 auto 20px; background: white; padding: 10px; border-radius: 16px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         /* Change 4A: Target all canvas inside qr-wrapper to prevent UI zoom */
         .qr-wrapper canvas { width: 100% !important; height: 100% !important; }
@@ -317,7 +330,7 @@
         .link-url { word-break: break-all; font-size: 0.9rem; padding: 10px; background: var(--border); border-radius: 8px; margin-top: 10px; }
         
         /* Hidden Views */
-        #mainOptionsView, #linkToQrView, #uploadToQrView, #uploadToLinkView { display: none; }
+        #mainOptionsView, #linkToQrView, #uploadToQrView, #uploadToLinkView, #qrExtractorView { display: none; } /* ADDED #qrExtractorView */
     </style>
 </head>
 <body>
@@ -369,6 +382,16 @@
                             <p>Upload file, host it, and get various direct link options.</p>
                         </div>
                     </div>
+                    
+                    <!-- NEW ADDITION: QR Code Extractor Option (ICON CHANGED) -->
+                    <div class="option-card" onclick="setView('qrExtractorView')">
+                        <i class="fas fa-camera"></i> 
+                        <div>
+                            <h4>QR Code Extractor</h4>
+                            <p>Upload an image to extract the embedded data (text/URL).</p>
+                        </div>
+                    </div>
+                    <!-- END NEW ADDITION -->
                 </div>
 
                 <!-- 1. Link to QR View -->
@@ -472,6 +495,16 @@
                     </div>
 
                     <div id="resultArea">
+                        <!-- NEW ADDITION 1: QR Success Preview -->
+                        <div id="qrSuccessDisplay" style="text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border);">
+                            <i class="fas fa-check-circle" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 10px;"></i>
+                            <h4 style="margin-bottom: 5px;">File Uploaded Successfully!</h4>
+                            <div id="qrResultFilePreview" style="margin-top: 15px;">
+                                <!-- Placeholder for cloned preview (icon, image, or text) -->
+                            </div>
+                        </div>
+                        <!-- END NEW ADDITION 1 -->
+                        
                         <div class="qr-wrapper"><div id="qrcode"></div></div>
                         <div class="control-grid" style="grid-template-columns: 1fr;">
                             <label style="font-size: 0.7rem; font-weight: 700;">Resolution</label>
@@ -577,6 +610,54 @@
                     </div>
                     <!-- END CHANGE 2 -->
                 </div>
+                
+                <!-- NEW ADDITION 2: QR Code Extractor View -->
+                <div id="qrExtractorView" style="display: none;">
+                    <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
+                    <h3 style="margin-bottom: 15px;">QR Code Extractor</h3>
+
+                    <div id="extractorUploaderView">
+                        <div class="upload-box" id="extractorDropZone">
+                            <button class="remove-file-btn" id="removeFileExtractorBtn" style="display: none;"><i class="fas fa-times"></i></button>
+                            <i class="fas fa-qrcode" id="uploadIconExtractor" style="font-size: 2.5rem; color: var(--primary);"></i>
+                            <div class="file-icon-preview" id="fileIconExtractor" style="display: none;">
+                                <i class="fas fa-folder"></i>
+                                <span class="file-ext" id="fileExtExtractor"></span>
+                            </div>
+                            <img id="imagePreviewExtractor" style="display:none; max-width: 100px; max-height: 100px; border-radius: 8px; margin: 0 auto 10px;">
+                            <h3 id="extractorUploadTitle" style="margin-top:10px;">Choose a QR Code Image</h3>
+                            <input type="file" id="extractorFileInput" hidden accept="image/*">
+                        </div>
+                        
+                        <button class="btn btn-primary" id="extractBtn" disabled>Extract QR Code</button>
+                    </div>
+
+                    <div id="extractorResultArea" style="display: none;">
+                        <!-- Preview/Success Area -->
+                        <div id="extractorSuccessDisplay" style="text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border);">
+                            <i class="fas fa-check-circle" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 10px;"></i>
+                            <h4 style="margin-bottom: 5px;">Extraction Successful!</h4>
+                            <div id="extractorResultFilePreview" style="margin-top: 15px;">
+                                <!-- Placeholder for cloned preview -->
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="font-size: 0.7rem; font-weight: 700;">Extracted Data:</label>
+                            <div id="extractedDataDisplay" class="link-url"></div>
+                        </div>
+
+                        <div id="extractorActionButtons" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                            <!-- Buttons added dynamically by JS -->
+                        </div>
+                        
+                        <!-- MODIFIED: Added class for dark mode styling -->
+                        <button class="btn extractor-reset-btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="location.reload()">
+                            Upload New Image
+                        </button>
+                    </div>
+                </div>
+                <!-- END NEW ADDITION 2 -->
 
             </div>
         </div>
@@ -630,6 +711,7 @@
             linkToQrView: document.getElementById('linkToQrView'),
             uploadToQrView: document.getElementById('uploadToQrView'),
             uploadToLinkView: document.getElementById('uploadToLinkView'),
+            qrExtractorView: document.getElementById('qrExtractorView'), // ADDED
         };
         
         // --- Original Upload to QR Elements ---
@@ -651,6 +733,8 @@
         // New Change 3: File icon preview
         const fileIconQr = document.getElementById('fileIconQr');
         const fileExtQr = document.getElementById('fileExtQr');
+        // NEW ADDITION 1: QR Result File Preview
+        const qrResultFilePreview = document.getElementById('qrResultFilePreview');
 
 
         // --- Upload to Link Elements ---
@@ -697,6 +781,22 @@
         const signInButton = document.getElementById('signInButton'); 
         // --- End Elements ---
         
+        // NEW ADDITION 2: QR Code Extractor Elements
+        const extractorFileInput = document.getElementById('extractorFileInput');
+        const extractorDropZone = document.getElementById('extractorDropZone');
+        const extractBtn = document.getElementById('extractBtn');
+        const extractorResultArea = document.getElementById('extractorResultArea');
+        let extractorSelectedFile = null;
+        const uploadIconExtractor = document.getElementById('uploadIconExtractor');
+        const imagePreviewExtractor = document.getElementById('imagePreviewExtractor');
+        const removeFileExtractorBtn = document.getElementById('removeFileExtractorBtn');
+        const fileIconExtractor = document.getElementById('fileIconExtractor');
+        const fileExtExtractor = document.getElementById('fileExtExtractor');
+        const extractedDataDisplay = document.getElementById('extractedDataDisplay');
+        const extractorActionButtons = document.getElementById('extractorActionButtons');
+        // END NEW ADDITION 2
+
+        
         // New Change 3: List of supported text/code file extensions
         const CODE_EXTENSIONS = ['html', 'css', 'js', 'java', 'py', 'python', 'sql', 'pdf', 'xml', 'txt', 'kordova', 'json', 'yml', 'md'];
         
@@ -728,7 +828,7 @@
             // Step 2: Close color picker when changing views
             customColorPicker.style.display = 'none';
 
-            if (currentView === 'uploadToQrView' || currentView === 'uploadToLinkView') {
+            if (currentView === 'uploadToQrView' || currentView === 'uploadToLinkView' || currentView === 'qrExtractorView') { // ADDED qrExtractorView
                 // Reset file-related view states before switching
                 resetUploadView(currentView);
             }
@@ -782,6 +882,7 @@
                 if (imagePreviewQr) { imagePreviewQr.style.display = 'none'; imagePreviewQr.src = ''; }
                 if (fileIconQr) fileIconQr.style.display = 'none';
                 if (removeFileQrBtn) removeFileQrBtn.style.display = 'none';
+                if (qrResultFilePreview) qrResultFilePreview.innerHTML = ''; // NEW ADDITION 1
 
 
             } else if (viewId === 'uploadToLinkView') {
@@ -814,6 +915,24 @@
                 if (directLink) directLink.innerText = '';
                 const resultFilePreview = document.getElementById('resultFilePreview');
                 if (resultFilePreview) resultFilePreview.innerHTML = '';
+            } else if (viewId === 'qrExtractorView') { // NEW ADDITION 2
+                document.getElementById('extractorUploadTitle').innerHTML = 'Choose a QR Code Image';
+                extractorDropZone.style.borderColor = 'var(--primary)'; 
+                extractorDropZone.style.backgroundColor = 'rgba(99, 102, 241, 0.05)';
+                extractBtn.disabled = true;
+                extractorResultArea.style.display = 'none';
+                document.getElementById('extractorUploaderView').style.display = 'block';
+                extractorSelectedFile = null;
+                extractorFileInput.value = '';
+                
+                if (uploadIconExtractor) uploadIconExtractor.style.display = 'block';
+                if (imagePreviewExtractor) { imagePreviewExtractor.style.display = 'none'; imagePreviewExtractor.src = ''; }
+                if (fileIconExtractor) fileIconExtractor.style.display = 'none';
+                if (removeFileExtractorBtn) removeFileExtractorBtn.style.display = 'none';
+                if (extractedDataDisplay) extractedDataDisplay.innerText = '';
+                if (extractorActionButtons) extractorActionButtons.innerHTML = '';
+                const extractorResultFilePreview = document.getElementById('extractorResultFilePreview');
+                if (extractorResultFilePreview) extractorResultFilePreview.innerHTML = '';
             }
         }
         
@@ -898,7 +1017,7 @@
             // New Change 3: Shorten filename
             const fileNameParts = file.name.split('.');
             const ext = fileNameParts.length > 1 ? fileNameParts.pop().toLowerCase() : '';
-            const baseName = fileNameParts.join('.');
+            const baseName = fileNameParts.slice(0, -1).join('.'); // Join all parts except the extension
             const displayName = baseName.length > 20 ? baseName.substring(0, 20) + '...' : baseName;
             // Updated size display
             titleEl.innerHTML = `<b>${displayName}${ext ? '.' + ext : ''}</b><br>Size: ${displaySize}`; 
@@ -1132,6 +1251,12 @@
             currentUrl = uploadedUrl;
             document.getElementById('uploaderView').style.display = 'none';
             resultArea.style.display = 'block';
+            
+            // NEW ADDITION 1: Display success preview
+            if (selectedFile) {
+                displaySuccessPreview(selectedFile, qrResultFilePreview);
+            }
+
             // Use the stored QR size on the result page
             const currentQrSize = document.getElementById('qrSize').value;
             generateQR(currentUrl, qrcodeDiv, currentQrSize);
@@ -1189,6 +1314,10 @@
                 currentUrl = uploadedUrl;
                 document.getElementById('uploaderView').style.display = 'none';
                 resultArea.style.display = 'block';
+                
+                // NEW ADDITION 1: Display success preview
+                displaySuccessPreview(selectedFile, qrResultFilePreview);
+
                 generateQR(currentUrl, qrcodeDiv, document.getElementById('qrSize').value);
             }, 
             (percent) => {
@@ -1269,7 +1398,7 @@
             
             const fileNameParts = file.name.split('.');
             const ext = fileNameParts.length > 1 ? fileNameParts.pop().toLowerCase() : '';
-            const baseName = fileNameParts.join('.');
+            const baseName = fileNameParts.slice(0, -1).join('.'); // Join all parts except the extension
             const displayName = baseName.length > 20 ? baseName.substring(0, 20) + '...' : baseName;
 
             const iconContainer = document.createElement('div');
@@ -1511,6 +1640,177 @@
             };
         }
         
+        // NEW ADDITION: Data Cleaning Function
+        function cleanExtractedData(rawData) {
+            // Logic for WIFI:T:WPA;P:password;S:ssid;H:false;
+            if (rawData.startsWith('WIFI:')) {
+                const dataParts = rawData.substring(5).split(';');
+                let password = '';
+                for (const part of dataParts) {
+                    if (part.startsWith('P:')) {
+                        password = part.substring(2).trim(); // Remove 'P:' and trim whitespace
+                        return password; 
+                    }
+                }
+                // If no password found, return the SSID (S:) or the whole thing
+                let ssid = '';
+                for (const part of dataParts) {
+                    if (part.startsWith('S:')) {
+                        ssid = part.substring(2).trim();
+                        return ssid; // Return SSID if P: is not present
+                    }
+                }
+            }
+            // Add logic for other formats (e.g., MECARD, TEL) if needed later
+            
+            // If no cleaning is done, return the raw data
+            return rawData;
+        }
+
+        // NEW ADDITION 2: QR Code Extractor Logic
+        extractorDropZone.onclick = () => extractorFileInput.click();
+        extractorFileInput.onchange = (e) => {
+            extractorSelectedFile = e.target.files[0];
+            if(extractorSelectedFile) {
+                // Check if it's an image file for extraction
+                if (!extractorSelectedFile.type.startsWith('image/')) {
+                    document.getElementById('extractorUploadTitle').innerHTML = `<b>${extractorSelectedFile.name}</b><br><span style="color: red;">File must be an image.</span>`;
+                    extractBtn.disabled = true;
+                    extractorSelectedFile = null;
+                    extractorFileInput.value = '';
+                    // Manual reset of preview icons on error
+                    uploadIconExtractor.style.display = 'block';
+                    imagePreviewExtractor.style.display = 'none';
+                    fileIconExtractor.style.display = 'none';
+                    removeFileExtractorBtn.style.display = 'none';
+                    return;
+                }
+                
+                // Use helper function to process file and update preview (includes size check)
+                const success = setFilePreview(extractorSelectedFile, document.getElementById('extractorUploadTitle'), uploadIconExtractor, imagePreviewExtractor, fileIconExtractor, fileExtExtractor, removeFileExtractorBtn);
+                extractBtn.disabled = !success; 
+                if (!success) {
+                    extractorSelectedFile = null; 
+                    extractorFileInput.value = ''; 
+                }
+            }
+        };
+
+        removeFileExtractorBtn.onclick = (e) => {
+            e.stopPropagation(); 
+            resetUploadView('qrExtractorView');
+        };
+
+        // Core Extraction Function using jsQR
+        function extractQRFromImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.drawImage(img, 0, 0, img.width, img.height);
+                        const imageData = ctx.getImageData(0, 0, img.width, img.height);
+
+                        try {
+                            // jsQR function call
+                            const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                                inversionAttempts: "dontInvert", 
+                            });
+                            
+                            if (code) {
+                                resolve(code.data);
+                            } else {
+                                reject("No QR code found in the image.");
+                            }
+                        } catch (error) {
+                            reject("Error processing image for QR: " + error.message);
+                        }
+                    };
+                    img.onerror = () => reject("Error loading image.");
+                    img.src = e.target.result;
+                };
+                reader.onerror = () => reject("Error reading file.");
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        extractBtn.onclick = async () => {
+            if (!extractorSelectedFile) return;
+
+            extractBtn.disabled = true;
+            document.getElementById('extractorUploadTitle').innerHTML = 'Processing Image...';
+
+            try {
+                const rawData = await extractQRFromImage(extractorSelectedFile);
+                const cleanedData = cleanExtractedData(rawData); // NEW ADDITION: Clean the data
+                
+                // 1. Update Preview/Success Area
+                displaySuccessPreview(extractorSelectedFile, document.getElementById('extractorResultFilePreview'));
+                document.getElementById('extractorUploadTitle').innerHTML = 'Choose a QR Code Image'; 
+                
+                // 2. Display extracted data
+                extractedDataDisplay.innerText = cleanedData; // Use cleaned data
+
+                // 3. Setup action buttons
+                extractorActionButtons.innerHTML = ''; 
+                
+                const isUrl = rawData.startsWith('http://') || rawData.startsWith('https://');
+
+                // Button: Copy
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'btn btn-action';
+                copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                copyBtn.onclick = () => { navigator.clipboard.writeText(cleanedData); showToast("Data Copied!"); }; // Copy cleaned data
+                
+                // Button: Download Text
+                const downloadTxtBtn = document.createElement('button');
+                downloadTxtBtn.className = 'btn btn-action';
+                downloadTxtBtn.innerHTML = '<i class="fas fa-download"></i> Download Text';
+                downloadTxtBtn.onclick = () => {
+                    const link = document.createElement('a');
+                    link.download = 'qrcode_data.txt';
+                    // Download raw data or cleaned data? Downloading cleaned data (the displayed one) is more user-friendly.
+                    link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(cleanedData); 
+                    link.click();
+                };
+                
+                // Determine button layout (Max 3 buttons, 2 per row if needed)
+                if (isUrl && rawData === cleanedData) { // Only show open link if it's a raw URL (not cleaned WIFI password)
+                    // Button: Open Link (If URL)
+                    const openLinkBtn = document.createElement('button');
+                    openLinkBtn.className = 'btn btn-action';
+                    openLinkBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> Open Link';
+                    openLinkBtn.onclick = () => window.open(cleanedData, '_blank');
+                    
+                    extractorActionButtons.style.gridTemplateColumns = '1fr 1fr 1fr';
+                    extractorActionButtons.appendChild(openLinkBtn);
+                    extractorActionButtons.appendChild(downloadTxtBtn); 
+                    extractorActionButtons.appendChild(copyBtn); 
+
+                } else {
+                    // Two-column grid with Copy and Download Text
+                    extractorActionButtons.style.gridTemplateColumns = '1fr 1fr';
+                    extractorActionButtons.appendChild(copyBtn);
+                    extractorActionButtons.appendChild(downloadTxtBtn);
+                }
+
+                // 4. Switch View
+                document.getElementById('extractorUploaderView').style.display = 'none';
+                extractorResultArea.style.display = 'block';
+
+            } catch (error) {
+                showToast(`Extraction Failed: ${error}`);
+                document.getElementById('extractorUploadTitle').innerHTML = 'Choose a QR Code Image'; 
+                extractBtn.disabled = false; 
+            }
+        };
+        // END NEW ADDITION 2
+
+
         // Change 4: Initialize Auth Listener
         setupAuthListener();
         
