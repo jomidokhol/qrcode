@@ -1,3 +1,5 @@
+--- START OF FILE qrcode.html ---
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,17 +12,47 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
-        :root { --primary: #6366f1; --bg: #ffffff; --card: #f8fafc; --text: #0f172a; --border: #e2e8f0; }
-        .dark-mode { --bg: #000000; --card: #111111; --text: #ffffff; --border: #222222; }
+        :root { --primary: #6366f1; --bg: #ffffff; --card: #f8fafc; --text: #0f172a; --border: #e2e8f0; --shadow: rgba(0, 0, 0, 0.1); }
+        .dark-mode { --bg: #000000; --card: #111111; --text: #ffffff; --border: #222222; --shadow: rgba(255, 255, 255, 0.1); }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background-color: var(--bg); color: var(--text); transition: 0.4s; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .container { width: 100%; max-width: 500px; }
-        .main-card { background: var(--card); border: 1px solid var(--border); border-radius: 32px; padding: 30px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2); }
-
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        body { background-color: var(--bg); color: var(--text); transition: 0.4s; min-height: 100vh; display: flex; flex-direction: column; }
+        
+        /* Sticky Header */
+        header { 
+            position: sticky; top: 0; z-index: 1000; width: 100%; 
+            background: var(--bg); border-bottom: 1px solid var(--border); 
+            padding: 15px 20px; box-shadow: 0 2px 4px var(--shadow);
+            display: flex; justify-content: center;
+        }
+        .header-content { 
+            width: 100%; max-width: 500px; display: flex; 
+            justify-content: space-between; align-items: center; 
+        }
         .logo { font-weight: 800; font-size: 1.4rem; color: var(--primary); display: flex; align-items: center; gap: 8px; }
-        .theme-btn { background: var(--border); border: none; width: 40px; height: 40px; border-radius: 12px; cursor: pointer; color: var(--text); }
+        .header-actions { display: flex; align-items: center; gap: 10px; }
+        .theme-btn, .action-btn { background: var(--border); border: none; width: 40px; height: 40px; border-radius: 12px; cursor: pointer; color: var(--text); transition: 0.3s; }
+        .action-btn { background: var(--primary); color: white; font-size: 0.8rem; font-weight: 600; padding: 0 15px; width: auto; }
+        .action-btn:hover { opacity: 0.9; }
+
+        /* Main Content Area */
+        .main-content { 
+            flex-grow: 1; display: flex; justify-content: center; align-items: center; 
+            padding: 20px; 
+        }
+        .container { width: 100%; max-width: 500px; }
+        .main-card { background: var(--card); border: 1px solid var(--border); border-radius: 32px; padding: 30px; box-shadow: 0 25px 50px -12px var(--shadow); }
+
+        /* Sticky Footer */
+        footer { 
+            position: sticky; bottom: 0; z-index: 1000; width: 100%; 
+            background: var(--bg); border-top: 1px solid var(--border); 
+            padding: 15px 20px; text-align: center; font-size: 0.8rem; 
+            opacity: 0.7;
+        }
+
+        /* Original Styles (modified for layout) */
+        .header-card { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; display: none; /* Hidden in favor of sticky header */ }
 
         /* Progress Bar UI */
         #progressContainer { display: none; margin-top: 20px; text-align: left; }
@@ -38,54 +70,210 @@
         .btn { width: 100%; padding: 14px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-action { background: var(--border); color: var(--text); font-size: 0.85rem; }
+        .btn-link { background: var(--primary); color: white; font-size: 0.9rem; font-weight: 600; padding: 18px; }
+
+        /* New Styles for Options */
+        .option-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 15px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 20px; }
+        .option-card:hover { border-color: var(--primary); background: rgba(99, 102, 241, 0.05); }
+        .option-card i { font-size: 1.8rem; color: var(--primary); }
+        .option-card h4 { margin: 0; font-weight: 800; }
+        .option-card p { margin: 0; font-size: 0.8rem; opacity: 0.7; }
+        .back-btn { background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-bottom: 20px; width: 150px; }
+
+        /* Toast Notification */
+        #toast {
+            visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; 
+            border-radius: 8px; padding: 16px; position: fixed; z-index: 1; left: 50%; bottom: 30px; 
+            transform: translateX(-50%); font-size: 0.9rem;
+        }
+        #toast.show { visibility: visible; -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @-webkit-keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
+        @keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
+        @-webkit-keyframes fadeout { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
+        @keyframes fadeout { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
+
+        /* Skeleton Loader */
+        .skeleton { background: var(--border); animation: pulse 1.5s infinite ease-in-out; border-radius: 4px; }
+        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+        .qr-skeleton { width: 200px; height: 200px; margin: 0 auto 20px; border-radius: 16px; }
+        #linkOptionsArea { padding-top: 20px; border-top: 1px solid var(--border); margin-top: 20px; }
+        .link-url { word-break: break-all; font-size: 0.9rem; padding: 10px; background: var(--border); border-radius: 8px; margin-top: 10px; }
+        
+        /* Hidden Views */
+        #mainOptionsView, #linkToQrView, #uploadToQrView, #uploadToLinkView { display: none; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="main-card">
-            <div class="header">
-                <div class="logo"><i class="fas fa-bolt"></i> Nur Share</div>
+    <header>
+        <div class="header-content">
+            <div class="logo"><i class="fas fa-bolt"></i> Nur Share</div>
+            <div class="header-actions">
+                <button class="action-btn" onclick="showToast('Google Sign-in/Sign-up Placeholder')">
+                    <i class="fab fa-google"></i> Sign In
+                </button>
                 <button class="theme-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
             </div>
+        </div>
+    </header>
 
-            <div id="uploaderView">
-                <div class="upload-box" id="dropZone">
-                    <i class="fas fa-cloud-arrow-up" style="font-size: 2.5rem; color: var(--primary);"></i>
-                    <h3 id="uploadTitle" style="margin-top:10px;">Choose a file</h3>
-                    <input type="file" id="fileInput" hidden>
+    <div class="main-content">
+        <div class="container">
+            <div class="main-card">
+                <!-- Main Options View -->
+                <div id="mainOptionsView">
+                    <h2 style="margin-bottom: 25px; text-align: center;">Choose Your Service</h2>
+                    
+                    <div class="option-card" onclick="setView('linkToQrView')">
+                        <i class="fas fa-link"></i>
+                        <div>
+                            <h4>লিঙ্কে কিউআর (Link to QR)</h4>
+                            <p>Generate QR Code from any text or URL.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="option-card" onclick="setView('uploadToQrView')">
+                        <i class="fas fa-qrcode"></i>
+                        <div>
+                            <h4>আপলোড টু কিউ আর (Upload to QR)</h4>
+                            <p>Upload file, host it, and get a shareable QR Code.</p>
+                        </div>
+                    </div>
+
+                    <div class="option-card" onclick="setView('uploadToLinkView')">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <div>
+                            <h4>আপলোড টু লিঙ্ক (Upload to Link)</h4>
+                            <p>Upload file, host it, and get various direct link options.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1. Link to QR View -->
+                <div id="linkToQrView">
+                    <button class="btn back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i> Back to Menu</button>
+                    <h3 style="margin-bottom: 15px;">Link to QR Generator</h3>
+
+                    <input type="text" id="linkInput" placeholder="Paste your URL or text here..." style="width: 100%; padding: 15px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 1rem; margin-bottom: 20px;" oninput="generateLinkQr()">
+
+                    <div id="linkQrResultArea" style="text-align: center;">
+                        <div class="qr-wrapper"><div id="linkQrcode"></div></div>
+                        
+                        <div class="control-grid" style="grid-template-columns: 1fr 1fr;">
+                            <div>
+                                <label style="font-size: 0.7rem; font-weight: 700;">Resolution</label>
+                                <input type="range" id="linkQrSize" min="200" max="1500" value="600" style="width: 100%; accent-color: var(--primary);" oninput="generateLinkQr()">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.7rem; font-weight: 700;">Color</label>
+                                <input type="color" id="linkQrColor" value="#6366f1" style="width: 100%; height: 38px; border: none; padding: 0;" oninput="generateLinkQr()">
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                            <button class="btn btn-action" id="downloadLinkQRBtn"><i class="fas fa-download"></i> Save QR</button>
+                            <button class="btn btn-action" id="copyLinkBtn"><i class="fas fa-link"></i> Copy Text</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Upload to QR View (Original Logic) -->
+                <div id="uploadToQrView">
+                    <button class="btn back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i> Back to Menu</button>
+                    <h3 style="margin-bottom: 15px;">Upload to QR Code</h3>
+
+                    <div id="uploaderView">
+                        <div class="upload-box" id="dropZone">
+                            <i class="fas fa-cloud-arrow-up" style="font-size: 2.5rem; color: var(--primary);"></i>
+                            <h3 id="uploadTitle" style="margin-top:10px;">Choose a file</h3>
+                            <input type="file" id="fileInput" hidden>
+                        </div>
+                        
+                        <!-- Real Progress Bar -->
+                        <div id="progressContainer">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="font-size: 0.8rem; opacity: 0.7;">Uploading...</span>
+                                <span id="percentLabel">0%</span>
+                            </div>
+                            <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+                        </div>
+
+                        <button class="btn btn-primary" id="uploadBtn" disabled>Generate</button>
+                    </div>
+
+                    <div id="resultArea">
+                        <div class="qr-wrapper"><div id="qrcode"></div></div>
+                        <div class="control-grid" style="grid-template-columns: 1fr;">
+                            <label style="font-size: 0.7rem; font-weight: 700;">Resolution</label>
+                            <input type="range" id="qrSize" min="200" max="1500" value="600" style="width: 100%; accent-color: var(--primary);">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                            <button class="btn btn-action" id="downloadQRBtn"><i class="fas fa-download"></i> Save QR</button>
+                            <button class="btn btn-action" id="copyBtn"><i class="fas fa-link"></i> Copy URL</button>
+                        </div>
+                        <button class="btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="location.reload()">
+                            Upload New File
+                        </button>
+                    </div>
                 </div>
                 
-                <!-- Real Progress Bar -->
-                <div id="progressContainer">
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="font-size: 0.8rem; opacity: 0.7;">Uploading...</span>
-                        <span id="percentLabel">0%</span>
+                <!-- 3. Upload to Link View -->
+                <div id="uploadToLinkView">
+                    <button class="btn back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i> Back to Menu</button>
+                    <h3 style="margin-bottom: 15px;">Upload to Link</h3>
+
+                    <div id="linkUploaderView">
+                        <div class="upload-box" id="linkDropZone">
+                            <i class="fas fa-cloud-arrow-up" style="font-size: 2.5rem; color: var(--primary);"></i>
+                            <h3 id="linkUploadTitle" style="margin-top:10px;">Choose a file</h3>
+                            <input type="file" id="linkFileInput" hidden>
+                        </div>
+                        
+                        <div id="linkProgressContainer" style="display: none; margin-top: 20px; text-align: left;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="font-size: 0.8rem; opacity: 0.7;">Uploading...</span>
+                                <span id="linkPercentLabel">0%</span>
+                            </div>
+                            <div class="progress-track"><div class="progress-fill" id="linkProgressFill"></div></div>
+                        </div>
+
+                        <button class="btn btn-primary" id="linkUploadBtn" disabled>Generate Link</button>
                     </div>
-                    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+                    <div id="linkResultArea" style="display: none;">
+                        <h4 style="margin-bottom: 15px;">Your Sharable Links</h4>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="font-size: 0.7rem; font-weight: 700;">Direct Link:</label>
+                            <div id="directLink" class="link-url"></div>
+                            <button class="btn btn-action" style="margin-top: 5px;" onclick="copyLink('#directLink')"><i class="fas fa-copy"></i> Copy Direct Link</button>
+                        </div>
+
+                        <div style="margin-bottom: 15px;">
+                            <label style="font-size: 0.7rem; font-weight: 700;">HTML Full Link (Viewer):</label>
+                            <div id="viewerLink" class="link-url"></div>
+                            <button class="btn btn-action" style="margin-top: 5px;" onclick="copyLink('#viewerLink')"><i class="fas fa-copy"></i> Copy HTML Link</button>
+                        </div>
+
+                        <button class="btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="location.reload()">
+                            Upload New File
+                        </button>
+                    </div>
                 </div>
 
-                <button class="btn btn-primary" id="uploadBtn" disabled>Generate</button>
-            </div>
-
-            <div id="resultArea">
-                <div class="qr-wrapper"><div id="qrcode"></div></div>
-                <div class="control-grid" style="grid-template-columns: 1fr;">
-                    <label style="font-size: 0.7rem; font-weight: 700;">Resolution</label>
-                    <input type="range" id="qrSize" min="200" max="1500" value="600" style="width: 100%; accent-color: var(--primary);">
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-                    <button class="btn btn-action" id="downloadQRBtn"><i class="fas fa-download"></i> Save QR</button>
-                    <button class="btn btn-action" id="copyBtn"><i class="fas fa-link"></i> Copy URL</button>
-                </div>
-                <button class="btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="location.reload()">
-                    Upload New File
-                </button>
             </div>
         </div>
     </div>
+    
+    <footer>
+        <p>&copy; 2024 Nur Share Pro. Developed by Nur.</p>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast"></div>
 
     <script>
+        // --- Core Configuration (No Change) ---
         const GIT = {
             token: "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",
             owner: "jomidokhol",
@@ -93,7 +281,21 @@
             branch: "main",
             domain: "https://qrcode-gen-weld.vercel.app"
         };
+        // --- End Core Configuration ---
 
+        // --- Global State and Elements ---
+        let currentView = 'mainOptionsView';
+        let currentUrl = "";
+        let selectedFile = null;
+
+        const views = {
+            mainOptionsView: document.getElementById('mainOptionsView'),
+            linkToQrView: document.getElementById('linkToQrView'),
+            uploadToQrView: document.getElementById('uploadToQrView'),
+            uploadToLinkView: document.getElementById('uploadToLinkView'),
+        };
+        
+        // --- Original Upload to QR Elements ---
         const fileInput = document.getElementById('fileInput');
         const dropZone = document.getElementById('dropZone');
         const uploadBtn = document.getElementById('uploadBtn');
@@ -102,12 +304,148 @@
         const percentLabel = document.getElementById('percentLabel');
         const resultArea = document.getElementById('resultArea');
         const qrcodeDiv = document.getElementById('qrcode');
-        let currentUrl = "";
-        let selectedFile = null;
+
+        // --- Upload to Link Elements ---
+        const linkFileInput = document.getElementById('linkFileInput');
+        const linkDropZone = document.getElementById('linkDropZone');
+        const linkUploadBtn = document.getElementById('linkUploadBtn');
+        const linkProgressContainer = document.getElementById('linkProgressContainer');
+        const linkProgressFill = document.getElementById('linkProgressFill');
+        const linkPercentLabel = document.getElementById('linkPercentLabel');
+        const linkResultArea = document.getElementById('linkResultArea');
+        let linkSelectedFile = null;
+
+        // --- Link to QR Elements ---
+        const linkInput = document.getElementById('linkInput');
+        const linkQrcodeDiv = document.getElementById('linkQrcode');
+        const linkQrSize = document.getElementById('linkQrSize');
+        const linkQrColor = document.getElementById('linkQrColor');
+        const downloadLinkQRBtn = document.getElementById('downloadLinkQRBtn');
+        const copyLinkBtn = document.getElementById('copyLinkBtn');
+        // --- End Elements ---
+
+        // --- Utility Functions ---
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
+        function setView(newView) {
+            if (currentView === 'uploadToQrView' || currentView === 'uploadToLinkView') {
+                // Reset file-related view states before switching
+                resetUploadView(currentView);
+            }
+            
+            Object.keys(views).forEach(view => {
+                views[view].style.display = view === newView ? 'block' : 'none';
+            });
+            currentView = newView;
+
+            if (newView === 'linkToQrView') {
+                // Initialize Link QR on view entry
+                generateLinkQr();
+            }
+
+            // Update browser history (for mobile/browser back button)
+            history.pushState({ view: newView }, `Nur Share | ${newView}`);
+        }
+
+        function copyLink(selector) {
+            const text = document.querySelector(selector).innerText;
+            navigator.clipboard.writeText(text);
+            showToast("URL Copied!");
+        }
+
+        function resetUploadView(viewId) {
+            if(viewId === 'uploadToQrView') {
+                document.getElementById('uploadTitle').innerText = 'Choose a file';
+                uploadBtn.disabled = true;
+                progressContainer.style.display = 'none';
+                uploadBtn.style.display = 'block';
+                resultArea.style.display = 'none';
+                document.getElementById('uploaderView').style.display = 'block';
+                selectedFile = null;
+                fileInput.value = '';
+                progressFill.style.width = '0%';
+                percentLabel.innerText = '0%';
+            } else if (viewId === 'uploadToLinkView') {
+                document.getElementById('linkUploadTitle').innerText = 'Choose a file';
+                linkUploadBtn.disabled = true;
+                linkProgressContainer.style.display = 'none';
+                linkUploadBtn.style.display = 'block';
+                linkResultArea.style.display = 'none';
+                document.getElementById('linkUploaderView').style.display = 'block';
+                linkSelectedFile = null;
+                linkFileInput.value = '';
+                linkProgressFill.style.width = '0%';
+                linkPercentLabel.innerText = '0%';
+            }
+        }
+        
+        // --- Initialization ---
+
+        // Set initial view
+        setView('mainOptionsView');
+
+        // Handle back button (History API)
+        window.onpopstate = (event) => {
+            const state = event.state;
+            if (state && state.view) {
+                setView(state.view);
+            } else {
+                setView('mainOptionsView'); // Fallback
+            }
+        };
+
+        // Reload Alert
+        window.onbeforeunload = (e) => {
+            if (selectedFile || linkSelectedFile) {
+                const message = "Are you sure you want to leave? Your upload might be interrupted.";
+                e.returnValue = message;
+                return message;
+            }
+        };
 
         document.getElementById('themeToggle').onclick = () => {
             document.body.classList.toggle('dark-mode');
         };
+
+        // --- 1. Link to QR Logic ---
+
+        function generateLinkQr() {
+            const text = linkInput.value || 'Paste a URL or text here to generate QR.';
+            const size = linkQrSize.value;
+            const darkColor = linkQrColor.value;
+
+            linkQrcodeDiv.innerHTML = '';
+            QRCode.toCanvas(text, {
+                width: size,
+                margin: 2,
+                color: { dark: darkColor, light: '#ffffff' }
+            }, (err, canvas) => { 
+                if(!err) linkQrcodeDiv.appendChild(canvas); 
+            });
+        }
+        
+        linkQrSize.oninput = generateLinkQr;
+        linkQrColor.oninput = generateLinkQr;
+
+        downloadLinkQRBtn.onclick = () => {
+            const link = document.createElement('a');
+            link.download = 'link_qrcode.png';
+            link.href = linkQrcodeDiv.querySelector('canvas').toDataURL();
+            link.click();
+        };
+
+        copyLinkBtn.onclick = () => {
+            navigator.clipboard.writeText(linkInput.value);
+            showToast("Link/Text Copied!");
+        };
+
+        // --- 2. Upload to QR Logic (Original) ---
 
         dropZone.onclick = () => fileInput.click();
         fileInput.onchange = (e) => {
@@ -124,53 +462,30 @@
             progressContainer.style.display = 'block';
             uploadBtn.style.display = 'none';
 
-            const reader = new FileReader();
-            reader.readAsDataURL(selectedFile);
-            reader.onload = () => {
-                const base64 = reader.result.split(',')[1];
-                const fileName = Date.now() + "_" + selectedFile.name;
-                const path = `uploads/${fileName}`;
-
-                // GitHub Content API handles data as a single PUT request. 
-                // Using XMLHttpRequest to track the actual data transfer.
-                const xhr = new XMLHttpRequest();
-                xhr.open("PUT", `https://api.github.com/repos/${GIT.owner}/${GIT.repo}/contents/${path}`);
-                xhr.setRequestHeader("Authorization", `token ${GIT.token}`);
-                xhr.setRequestHeader("Content-Type", "application/json");
-
-                xhr.upload.onprogress = (e) => {
-                    if (e.lengthComputable) {
-                        const percent = Math.round((e.loaded / e.total) * 100);
-                        progressFill.style.width = percent + "%";
-                        percentLabel.innerText = percent + "%";
-                    }
-                };
-
-                xhr.onload = () => {
-                    if (xhr.status === 201 || xhr.status === 200) {
-                        const fileData = { n: selectedFile.name, p: path, s: (selectedFile.size / (1024*1024)).toFixed(2) };
-                        currentUrl = `${GIT.domain}/viewer.html?f=${btoa(JSON.stringify(fileData))}`;
-                        document.getElementById('uploaderView').style.display = 'none';
-                        resultArea.style.display = 'block';
-                        generateQR();
-                    } else {
-                        alert("Upload Error!");
-                        location.reload();
-                    }
-                };
-
-                xhr.send(JSON.stringify({ message: "upload", content: base64, branch: GIT.branch }));
-            };
+            uploadFileToGithub(selectedFile, (uploadedUrl) => {
+                currentUrl = uploadedUrl;
+                document.getElementById('uploaderView').style.display = 'none';
+                resultArea.style.display = 'block';
+                generateQR(currentUrl, qrcodeDiv, document.getElementById('qrSize').value);
+            }, 
+            (percent) => {
+                progressFill.style.width = percent + "%";
+                percentLabel.innerText = percent + "%";
+            });
         };
 
-        function generateQR() {
-            qrcodeDiv.innerHTML = '';
-            QRCode.toCanvas(currentUrl, {
-                width: document.getElementById('qrSize').value,
+        function generateQR(url, targetDiv, size) {
+            targetDiv.innerHTML = '';
+            QRCode.toCanvas(url, {
+                width: size,
                 margin: 2,
                 color: { dark: '#000000', light: '#ffffff' }
-            }, (err, canvas) => { qrcodeDiv.appendChild(canvas); });
+            }, (err, canvas) => { 
+                if(!err) targetDiv.appendChild(canvas); 
+            });
         }
+
+        document.getElementById('qrSize').oninput = () => generateQR(currentUrl, qrcodeDiv, document.getElementById('qrSize').value);
 
         document.getElementById('downloadQRBtn').onclick = () => {
             const link = document.createElement('a');
@@ -181,8 +496,87 @@
 
         document.getElementById('copyBtn').onclick = () => {
             navigator.clipboard.writeText(currentUrl);
-            alert("Sharable URL Copied!");
+            showToast("Sharable URL Copied!");
         };
+
+        // --- 3. Upload to Link Logic ---
+
+        linkDropZone.onclick = () => linkFileInput.click();
+        linkFileInput.onchange = (e) => {
+            linkSelectedFile = e.target.files[0];
+            if(linkSelectedFile) {
+                document.getElementById('linkUploadTitle').innerText = linkSelectedFile.name;
+                linkUploadBtn.disabled = false;
+            }
+        };
+
+        linkUploadBtn.onclick = () => {
+            if(!linkSelectedFile) return;
+            
+            linkProgressContainer.style.display = 'block';
+            linkUploadBtn.style.display = 'none';
+
+            uploadFileToGithub(linkSelectedFile, (uploadedUrl) => {
+                const directLink = `https://raw.githubusercontent.com/${GIT.owner}/${GIT.repo}/${GIT.branch}/${uploadedUrl.split('?p=')[0].split('/viewer.html?f=')[0].split(GIT.domain + "/")[1]}`;
+                const viewerLink = uploadedUrl;
+
+                document.getElementById('directLink').innerText = directLink;
+                document.getElementById('viewerLink').innerText = viewerLink;
+
+                document.getElementById('linkUploaderView').style.display = 'none';
+                linkResultArea.style.display = 'block';
+            }, 
+            (percent) => {
+                linkProgressFill.style.width = percent + "%";
+                linkPercentLabel.innerText = percent + "%";
+            }, 
+            'link'); // Pass an identifier to differentiate progress elements
+        };
+
+        // --- Shared Upload Function ---
+        function uploadFileToGithub(file, onSuccess, onProgress, viewType = 'qr') {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+
+            reader.onload = () => {
+                const base64 = reader.result.split(',')[1];
+                const fileName = Date.now() + "_" + file.name;
+                const path = `uploads/${fileName}`;
+
+                const xhr = new XMLHttpRequest();
+                xhr.open("PUT", `https://api.github.com/repos/${GIT.owner}/${GIT.repo}/contents/${path}`);
+                xhr.setRequestHeader("Authorization", `token ${GIT.token}`);
+                xhr.setRequestHeader("Content-Type", "application/json");
+
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable) {
+                        const percent = Math.round((e.loaded / e.total) * 100);
+                        onProgress(percent);
+                    }
+                };
+
+                xhr.onload = () => {
+                    if (xhr.status === 201 || xhr.status === 200) {
+                        const fileData = { n: file.name, p: path, s: (file.size / (1024*1024)).toFixed(2) };
+                        const uploadedUrl = `${GIT.domain}/viewer.html?f=${btoa(JSON.stringify(fileData))}`;
+                        onSuccess(uploadedUrl);
+                        showToast("File Uploaded Successfully!");
+                    } else {
+                        showToast("Upload Error!");
+                        // Reset progress/buttons for error state
+                        if (viewType === 'qr') {
+                            resetUploadView('uploadToQrView');
+                        } else {
+                            resetUploadView('uploadToLinkView');
+                        }
+                    }
+                };
+
+                xhr.send(JSON.stringify({ message: "upload", content: base64, branch: GIT.branch }));
+            };
+        }
     </script>
 </body>
 </html>
+
+--- END OF FILE qrcode.html ---
