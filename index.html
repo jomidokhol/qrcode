@@ -301,7 +301,6 @@
 
 
         // --- Core Configuration (GitHub API - Restored to original variable name 'GIT') ---
-        // Change 3: Config is already correct based on qrcode.html content
         const GIT = {
             token: "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",
             owner: "jomidokhol",
@@ -466,6 +465,18 @@
             firebase.auth().onAuthStateChanged(updateSignInUI);
         }
         
+        // FIX 2: Define function for logo change (for automatic update)
+        function updateLogoImage() {
+            const logoImage = document.getElementById('logoImage');
+            if (logoImage) { // Ensure element exists
+                if (document.body.classList.contains('dark-mode')) {
+                    logoImage.src = 'https://i.ibb.co.com/dqHSB7H/1000043162-removebg-preview.png';
+                } else {
+                    logoImage.src = 'https://i.ibb.co.com/GvQzP8ZK/1000043160-removebg-preview.png';
+                }
+            }
+        }
+        
         // --- Initialization ---
 
         // Set initial view
@@ -492,14 +503,8 @@
 
         document.getElementById('themeToggle').onclick = () => {
             document.body.classList.toggle('dark-mode');
-            // Change 1: Dark Mode Logo Update
-            const logoImage = document.getElementById('logoImage');
-            if (document.body.classList.contains('dark-mode')) {
-                logoImage.src = 'https://i.ibb.co.com/dqHSB7H/1000043162-removebg-preview.png';
-            } else {
-                logoImage.src = 'https://i.ibb.co.com/GvQzP8ZK/1000043160-removebg-preview.png';
-            }
-            // End Change 1
+            // FIX 2: Call the function on toggle
+            updateLogoImage(); 
         };
 
         // --- 1. Link to QR Logic ---
@@ -677,6 +682,17 @@
                         }
                     }
                 };
+                
+                // FIX 1: Add onerror handler for network failures/timeouts
+                xhr.onerror = () => { 
+                    showToast("Upload failed due to a network error or connection issue.");
+                    if (viewType === 'qr') {
+                        resetUploadView('uploadToQrView');
+                    } else {
+                        resetUploadView('uploadToLinkView');
+                    }
+                };
+                // END FIX 1
 
                 xhr.send(JSON.stringify({ message: "upload", content: base64, branch: GIT.branch }));
             };
@@ -684,6 +700,9 @@
         
         // Change 4: Initialize Auth Listener
         setupAuthListener();
+        
+        // FIX 2: Initial call to set correct logo on page load
+        updateLogoImage(); 
     </script>
 </body>
 </html>
