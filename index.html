@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,7 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     
-    <!-- Firebase SDK Scripts (Required for Firebase Configuration) -->
+    <!-- Firebase SDK Scripts (Added for Sign-in) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <!-- End Firebase SDK Scripts -->
@@ -48,7 +47,7 @@
             padding: 20px; 
         }
         .container { width: 100%; max-width: 500px; }
-        .main-card { background: var(--card); border: 1px solid var(--border); border-radius: 32px; padding: 30px; box-shadow: 0 25px 50px -12px var(--shadow); }
+        .main-card { background: var(--card); border: 1px solid var(--border); border-radius: 32px; padding: 30px; box-shadow: 0 25px 50px -12p var(--shadow); }
 
         /* Sticky Footer */
         footer { 
@@ -120,7 +119,7 @@
                 Nur Share
             </div>
             <div class="header-actions">
-                <button class="action-btn" onclick="showToast('Google Sign-in/Sign-up Placeholder')">
+                <button class="action-btn" onclick="googleSignIn()">
                     <i class="fab fa-google"></i> Sign In
                 </button>
                 <button class="theme-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
@@ -138,7 +137,6 @@
                     <div class="option-card" onclick="setView('linkToQrView')">
                         <i class="fas fa-link"></i>
                         <div>
-                            <!-- All text is now English -->
                             <h4>Link to QR</h4>
                             <p>Generate QR Code from any text or URL.</p>
                         </div>
@@ -147,7 +145,6 @@
                     <div class="option-card" onclick="setView('uploadToQrView')">
                         <i class="fas fa-qrcode"></i>
                         <div>
-                            <!-- All text is now English -->
                             <h4>Upload to QR</h4>
                             <p>Upload file, host it, and get a shareable QR Code.</p>
                         </div>
@@ -156,7 +153,6 @@
                     <div class="option-card" onclick="setView('uploadToLinkView')">
                         <i class="fas fa-cloud-upload-alt"></i>
                         <div>
-                            <!-- All text is now English -->
                             <h4>Upload to Link</h4>
                             <p>Upload file, host it, and get various direct link options.</p>
                         </div>
@@ -288,7 +284,7 @@
     <div id="toast"></div>
 
     <script>
-        // --- Firebase Configuration (New) ---
+        // --- Firebase Configuration (Required for Sign-in) ---
         const FIREBASE_CONFIG = {
             apiKey: "AIzaSyCFNNXY4oRMg8AjhWa9PqCN8gdILmwdRk0",
             authDomain: "autopay-api.firebaseapp.com",
@@ -299,13 +295,12 @@
             measurementId: "G-X7D91TPCWL"
         };
         
-        // Initialize Firebase (for future use of auth/db, though upload is via GitHub)
-        // This is included to satisfy the requirement of configuring Firebase.
-        // if (firebase.apps.length === 0) { firebase.initializeApp(FIREBASE_CONFIG); }
+        // Initialize Firebase
+        if (firebase.apps.length === 0) { firebase.initializeApp(FIREBASE_CONFIG); }
 
 
-        // --- Core Configuration (GitHub API kept for upload logic, but token/repo is separate from FIREBASE_CONFIG) ---
-        const GIT_UPLOAD_CONFIG = {
+        // --- Core Configuration (GitHub API - Restored to original variable name 'GIT') ---
+        const GIT = {
             token: "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",
             owner: "jomidokhol",
             repo: "qrcode",
@@ -414,6 +409,22 @@
                 linkProgressFill.style.width = '0%';
                 linkPercentLabel.innerText = '0%';
             }
+        }
+        
+        // --- Google Sign-in Implementation (Fix 2) ---
+        function googleSignIn() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithPopup(provider)
+                .then((result) => {
+                    const user = result.user;
+                    showToast(`Signed in as: ${user.displayName}. (Profile view placeholder)`);
+                    // Here you would typically update the header UI to show the user's profile picture and name
+                })
+                .catch((error) => {
+                    // Handle Errors here.
+                    const errorMessage = error.message;
+                    showToast(`Sign in failed: ${errorMessage}`);
+                });
         }
         
         // --- Initialization ---
@@ -548,14 +559,12 @@
             linkUploadBtn.style.display = 'none';
 
             uploadFileToGithub(linkSelectedFile, (uploadedUrl) => {
-                // The uploadedUrl structure is based on the viewer.html path. We extract the raw path from it.
-                const path = uploadedUrl.split('/viewer.html?f=')[0].split(GIT_UPLOAD_CONFIG.domain + "/")[1];
-                
                 // Decode the file data from the URL to get the exact file path
                 const base64Data = uploadedUrl.split('?f=')[1];
                 const fileData = JSON.parse(atob(base64Data));
                 
-                const directLink = `https://raw.githubusercontent.com/${GIT_UPLOAD_CONFIG.owner}/${GIT_UPLOAD_CONFIG.repo}/${GIT_UPLOAD_CONFIG.branch}/${fileData.p}`;
+                // Construct Direct Link using the restored GIT config
+                const directLink = `https://raw.githubusercontent.com/${GIT.owner}/${GIT.repo}/${GIT.branch}/${fileData.p}`;
                 const viewerLink = uploadedUrl;
 
                 document.getElementById('directLink').innerText = directLink;
@@ -571,7 +580,7 @@
             'link'); // Pass an identifier to differentiate progress elements
         };
 
-        // --- Shared Upload Function ---
+        // --- Shared Upload Function (Fix 1 - Using restored GIT variable) ---
         function uploadFileToGithub(file, onSuccess, onProgress, viewType = 'qr') {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -582,8 +591,9 @@
                 const path = `uploads/${fileName}`;
 
                 const xhr = new XMLHttpRequest();
-                xhr.open("PUT", `https://api.github.com/repos/${GIT_UPLOAD_CONFIG.owner}/${GIT_UPLOAD_CONFIG.repo}/contents/${path}`);
-                xhr.setRequestHeader("Authorization", `token ${GIT_UPLOAD_CONFIG.token}`);
+                // Use the restored GIT variable for API calls
+                xhr.open("PUT", `https://api.github.com/repos/${GIT.owner}/${GIT.repo}/contents/${path}`);
+                xhr.setRequestHeader("Authorization", `token ${GIT.token}`);
                 xhr.setRequestHeader("Content-Type", "application/json");
 
                 xhr.upload.onprogress = (e) => {
@@ -596,11 +606,12 @@
                 xhr.onload = () => {
                     if (xhr.status === 201 || xhr.status === 200) {
                         const fileData = { n: file.name, p: path, s: (file.size / (1024*1024)).toFixed(2) };
-                        const uploadedUrl = `${GIT_UPLOAD_CONFIG.domain}/viewer.html?f=${btoa(JSON.stringify(fileData))}`;
+                        // Use the restored GIT variable for URL construction
+                        const uploadedUrl = `${GIT.domain}/viewer.html?f=${btoa(JSON.stringify(fileData))}`;
                         onSuccess(uploadedUrl);
                         showToast("File Uploaded Successfully!");
                     } else {
-                        showToast("Upload Error!");
+                        showToast("Upload Error! Status: " + xhr.status);
                         // Reset progress/buttons for error state
                         if (viewType === 'qr') {
                             resetUploadView('uploadToQrView');
@@ -610,7 +621,7 @@
                     }
                 };
 
-                xhr.send(JSON.stringify({ message: "upload", content: base64, branch: GIT_UPLOAD_CONFIG.branch }));
+                xhr.send(JSON.stringify({ message: "upload", content: base64, branch: GIT.branch }));
             };
         }
     </script>
