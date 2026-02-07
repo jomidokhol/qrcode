@@ -20,8 +20,24 @@
         .dark-mode { --bg: #000000; --card: #111111; --text: #ffffff; --border: #222222; --shadow: rgba(255, 255, 255, 0.1); }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background-color: var(--bg); color: var(--text); transition: 0.4s; min-height: 100vh; display: flex; flex-direction: column; }
-        
+        body { 
+            background-color: var(--bg); color: var(--text); 
+            transition: 0.4s; min-height: 100vh; display: flex; 
+            flex-direction: column; 
+            /* New Addition 3: Disable text selection by default */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        /* New Addition 3: Enable selection for specific elements */
+        input, .link-url, .upload-box #uploadTitle, #linkUploadTitle, footer p, #toast {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+
         /* Sticky Header */
         header { 
             position: sticky; top: 0; z-index: 1000; width: 100%; 
@@ -41,6 +57,20 @@
         .action-btn { background: var(--primary); color: white; font-size: 0.8rem; font-weight: 600; padding: 0 15px; width: auto; }
         .action-btn:hover { opacity: 0.9; }
 
+        /* New Addition 2: Disable button blue highlight on press/focus */
+        .btn:focus, .btn:active, 
+        .theme-btn:focus, .theme-btn:active, 
+        .action-btn:focus, .action-btn:active,
+        .option-card:focus, .option-card:active,
+        .icon-back-btn:focus, .icon-back-btn:active,
+        .clear-input-btn:focus, .clear-input-btn:active,
+        .paste-btn:focus, .paste-btn:active,
+        .remove-file-btn:focus, .remove-file-btn:active {
+            outline: none;
+            -webkit-tap-highlight-color: transparent; 
+            box-shadow: none;
+        }
+
         /* Main Content Area */
         .main-content { 
             flex-grow: 1; display: flex; justify-content: center; align-items: center; 
@@ -51,7 +81,8 @@
 
         /* Sticky Footer */
         footer { 
-            position: sticky; bottom: 0; z-index: 1000; width: 100%; 
+            /* CHANGE 2: Removed sticky positioning */
+            width: 100%; 
             background: var(--bg); border-top: 1px solid var(--border); 
             padding: 15px 20px; text-align: center; font-size: 0.8rem; 
             opacity: 0.7;
@@ -66,11 +97,14 @@
         .progress-fill { background: var(--primary); height: 100%; width: 0%; transition: width 0.1s; }
         #percentLabel, #linkPercentLabel { font-size: 0.8rem; font-weight: 700; color: var(--primary); }
 
-        .upload-box { border: 2px dashed var(--primary); border-radius: 24px; padding: 40px 20px; text-align: center; cursor: pointer; background: rgba(99, 102, 241, 0.05); }
+        /* Change 2: Removed padding top/bottom to better center image and text */
+        .upload-box { border: 2px dashed var(--primary); border-radius: 24px; padding: 20px; text-align: center; cursor: pointer; background: rgba(99, 102, 241, 0.05); position: relative; } 
+        .upload-box img { display:block; margin: 0 auto 10px; } /* Ensures image is centered */
         
         #resultArea { display: none; margin-top: 25px; padding-top: 25px; border-top: 1px solid var(--border); text-align: center; }
         .qr-wrapper { width: 200px; height: 200px; margin: 0 auto 20px; background: white; padding: 10px; border-radius: 16px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        #qrcode canvas { width: 100% !important; height: 100% !important; }
+        /* Change 4A: Target all canvas inside qr-wrapper to prevent UI zoom */
+        .qr-wrapper canvas { width: 100% !important; height: 100% !important; }
 
         .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left; margin-top: 20px; }
         .btn { width: 100%; padding: 14px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
@@ -84,7 +118,96 @@
         .option-card i { font-size: 1.8rem; color: var(--primary); }
         .option-card h4 { margin: 0; font-weight: 800; }
         .option-card p { margin: 0; font-size: 0.8rem; opacity: 0.7; }
-        .back-btn { background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-bottom: 20px; width: 150px; }
+        
+        /* Change 1: New style for icon-only back button (Color change logic removed as it inherits from --text) */
+        .icon-back-btn { 
+            background: transparent; border: 1px solid var(--border); 
+            font-size: 1rem; margin-bottom: 20px; 
+            width: 40px; height: 40px; border-radius: 50%;
+            cursor: pointer;
+            color: var(--text); /* Ensures color is set by theme */
+            display: flex; align-items: center; justify-content: center;
+            padding: 0;
+            transition: 0.3s;
+        }
+        .icon-back-btn:hover { background: var(--border); }
+
+        /* New Change 2: Style for input control buttons (Clear/Paste) */
+        .input-controls { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            position: absolute; 
+            right: 15px; 
+            top: 50%; 
+            transform: translateY(-50%);
+        }
+        .input-wrapper { position: relative; margin-bottom: 20px; }
+        .clear-input-btn, .paste-btn {
+            background: transparent; 
+            border: none; 
+            color: var(--text); 
+            opacity: 0.6; 
+            cursor: pointer; 
+            font-size: 1rem;
+            padding: 5px;
+            transition: 0.2s;
+        }
+        .clear-input-btn:hover, .paste-btn:hover { opacity: 1; }
+
+        /* New Change 1: Style for file removal button (UPDATED FOR CHANGE 3) */
+        .remove-file-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--border); /* Changed for gray color */
+            color: var(--text); /* Changed for gray color */
+            border: 1px solid var(--text); /* Added a border */
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            font-size: 0.7rem;
+            display: none; /* Controlled by JS */
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.3s;
+            z-index: 10;
+            opacity: 0.8;
+        }
+        .remove-file-btn:hover { 
+            background: var(--text); /* Darken on hover */
+            color: var(--bg); /* Change text to white on hover */
+            opacity: 1;
+        }
+
+        /* New Change 3: Style for generic file icon preview */
+        .file-icon-preview {
+            display: block;
+            margin: 0 auto 10px;
+            font-size: 3rem;
+            color: var(--primary);
+            position: relative;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .file-icon-preview i { font-size: 3rem; }
+        .file-ext {
+            position: absolute;
+            bottom: 5px;
+            right: 0px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            background: var(--text);
+            color: var(--bg);
+            padding: 2px 4px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
 
         /* Toast Notification */
         #toast {
@@ -162,10 +285,19 @@
 
                 <!-- 1. Link to QR View -->
                 <div id="linkToQrView">
-                    <button class="btn back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i> Back to Menu</button>
+                    <!-- Change 1: Replaced button with icon-only back button -->
+                    <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
                     <h3 style="margin-bottom: 15px;">Link to QR Generator</h3>
 
-                    <input type="text" id="linkInput" placeholder="Paste your URL or text here..." style="width: 100%; padding: 15px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 1rem; margin-bottom: 20px;" oninput="generateLinkQr()">
+                    <!-- New Change 2: Input wrapper for clear/paste buttons -->
+                    <div class="input-wrapper">
+                        <input type="text" id="linkInput" placeholder="Paste your URL or text here..." style="width: 100%; padding: 15px; padding-right: 80px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 1rem;" oninput="generateLinkQr()">
+                        <div class="input-controls">
+                            <button class="clear-input-btn" id="clearLinkInputBtn" style="display: none;"><i class="fas fa-times"></i></button>
+                            <button class="paste-btn" id="pasteLinkInputBtn"><i class="fas fa-paste"></i></button>
+                        </div>
+                    </div>
+                    <!-- End New Change 2 -->
 
                     <div id="linkQrResultArea" style="text-align: center;">
                         <div class="qr-wrapper"><div id="linkQrcode"></div></div>
@@ -177,9 +309,12 @@
                             </div>
                             <div>
                                 <label style="font-size: 0.7rem; font-weight: 700;">Color</label>
-                                <input type="color" id="linkQrColor" value="#10b981" style="width: 100%; height: 38px; border: none; padding: 0;" oninput="generateLinkQr()">
+                                <!-- Change 4: Default color set to black -->
+                                <input type="color" id="linkQrColor" value="#000000" style="width: 100%; height: 38px; border: none; padding: 0;" oninput="generateLinkQr()">
                             </div>
                         </div>
+                        <!-- Change 3: Added Size Display for Link QR -->
+                        <span id="linkQrCodeSizeDisplay" style="font-size: 0.8rem; font-weight: 600; text-align: right; margin-top: 5px; display: block;">600px | Size: N/A</span>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
                             <button class="btn btn-action" id="downloadLinkQRBtn"><i class="fas fa-download"></i> Save QR</button>
@@ -190,12 +325,23 @@
 
                 <!-- 2. Upload to QR View (Original Logic) -->
                 <div id="uploadToQrView">
-                    <button class="btn back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i> Back to Menu</button>
+                    <!-- Change 1: Replaced button with icon-only back button -->
+                    <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
                     <h3 style="margin-bottom: 15px;">Upload to QR Code</h3>
 
                     <div id="uploaderView">
                         <div class="upload-box" id="dropZone">
-                            <i class="fas fa-cloud-arrow-up" style="font-size: 2.5rem; color: var(--primary);"></i>
+                            <!-- New Change 1: File removal button -->
+                            <button class="remove-file-btn" id="removeFileQrBtn" style="display: none;"><i class="fas fa-times"></i></button>
+                            <!-- Change 2: File preview elements -->
+                            <i class="fas fa-cloud-arrow-up" id="uploadIconQr" style="font-size: 2.5rem; color: var(--primary);"></i>
+                            <!-- New Change 3: File icon preview -->
+                            <div class="file-icon-preview" id="fileIconQr" style="display: none;">
+                                <i class="fas fa-folder"></i>
+                                <span class="file-ext" id="fileExtQr"></span>
+                            </div>
+                            <!-- Change 2: Img preview element (margin: 0 auto needed for centering) -->
+                            <img id="imagePreviewQr" style="display:none; max-width: 100px; max-height: 100px; border-radius: 8px; margin: 0 auto 10px;">
                             <h3 id="uploadTitle" style="margin-top:10px;">Choose a file</h3>
                             <input type="file" id="fileInput" hidden>
                         </div>
@@ -217,6 +363,8 @@
                         <div class="control-grid" style="grid-template-columns: 1fr;">
                             <label style="font-size: 0.7rem; font-weight: 700;">Resolution</label>
                             <input type="range" id="qrSize" min="200" max="1500" value="600" style="width: 100%; accent-color: var(--primary);">
+                            <!-- Change 3: Added Size Display -->
+                            <span id="qrCodeSizeDisplay" style="font-size: 0.8rem; font-weight: 600; text-align: right; margin-top: 5px;">600px | Size: N/A</span>
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
                             <button class="btn btn-action" id="downloadQRBtn"><i class="fas fa-download"></i> Save QR</button>
@@ -230,12 +378,23 @@
                 
                 <!-- 3. Upload to Link View -->
                 <div id="uploadToLinkView">
-                    <button class="btn back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i> Back to Menu</button>
+                    <!-- Change 1: Replaced button with icon-only back button -->
+                    <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
                     <h3 style="margin-bottom: 15px;">Upload to Link</h3>
 
                     <div id="linkUploaderView">
                         <div class="upload-box" id="linkDropZone">
-                            <i class="fas fa-cloud-arrow-up" style="font-size: 2.5rem; color: var(--primary);"></i>
+                            <!-- New Change 1: File removal button -->
+                            <button class="remove-file-btn" id="removeFileLinkBtn" style="display: none;"><i class="fas fa-times"></i></button>
+                            <!-- Change 2: File preview elements -->
+                            <i class="fas fa-cloud-arrow-up" id="uploadIconLink" style="font-size: 2.5rem; color: var(--primary);"></i>
+                            <!-- New Change 3: File icon preview -->
+                            <div class="file-icon-preview" id="fileIconLink" style="display: none;">
+                                <i class="fas fa-folder"></i>
+                                <span class="file-ext" id="fileExtLink"></span>
+                            </div>
+                            <!-- Change 2: Img preview element (margin: 0 auto needed for centering) -->
+                            <img id="imagePreviewLink" style="display:none; max-width: 100px; max-height: 100px; border-radius: 8px; margin: 0 auto 10px;">
                             <h3 id="linkUploadTitle" style="margin-top:10px;">Choose a file</h3>
                             <input type="file" id="linkFileInput" hidden>
                         </div>
@@ -252,25 +411,47 @@
                         <button class="btn btn-primary" id="linkUploadBtn" disabled>Generate Link</button>
                     </div>
 
+                    <!-- CHANGE 2: Updated Link Result Area -->
                     <div id="linkResultArea" style="display: none;">
-                        <h4 style="margin-bottom: 15px;">Your Sharable Links</h4>
                         
+                        <!-- New: Preview/Success Area -->
+                        <div id="linkSuccessDisplay" style="text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border);">
+                            <i class="fas fa-check-circle" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 10px;"></i>
+                            <h4 style="margin-bottom: 5px;">File Uploaded Successfully!</h4>
+                            <div id="resultFilePreview" style="margin-top: 15px;">
+                                <!-- Placeholder for cloned preview (icon, image, or text) -->
+                            </div>
+                        </div>
+                        
+                        <!-- Direct Link (Initially Visible) -->
                         <div style="margin-bottom: 15px;">
-                            <label style="font-size: 0.7rem; font-weight: 700;">Direct Link:</label>
+                            <label style="font-size: 0.7rem; font-weight: 700;">Direct Link (Download):</label>
                             <div id="directLink" class="link-url"></div>
                             <button class="btn btn-action" style="margin-top: 5px;" onclick="copyLink('#directLink')"><i class="fas fa-copy"></i> Copy Direct Link</button>
                         </div>
 
+                        <!-- New: Link Selector -->
                         <div style="margin-bottom: 15px;">
-                            <label style="font-size: 0.7rem; font-weight: 700;">HTML Full Link (Viewer):</label>
-                            <div id="viewerLink" class="link-url"></div>
-                            <button class="btn btn-action" style="margin-top: 5px;" onclick="copyLink('#viewerLink')"><i class="fas fa-copy"></i> Copy HTML Link</button>
+                            <label for="linkSelector" style="font-size: 0.7rem; font-weight: 700;">Other Link Formats:</label>
+                            <select id="linkSelector" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.9rem; margin-top: 5px;" onchange="updateLinkFormatDisplay()">
+                                <option value="viewer">Viewer's Link</option>
+                                <option value="html">HTML Full Link</option>
+                                <option value="bbcode">BBCode</option>
+                                <option value="bbcode_full">BBCode Full Link</option>
+                            </select>
+                        </div>
+
+                        <!-- New: Link Format Display Area (Shared) -->
+                        <div style="margin-bottom: 15px;">
+                            <div id="linkFormatDisplay" class="link-url">Select a format to display.</div>
+                            <button class="btn btn-action" style="margin-top: 5px;" onclick="copyLinkFormat()"><i class="fas fa-copy"></i> Copy Selected Link</button>
                         </div>
 
                         <button class="btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="location.reload()">
                             Upload New File
                         </button>
                     </div>
+                    <!-- END CHANGE 2 -->
                 </div>
 
             </div>
@@ -331,6 +512,17 @@
         const percentLabel = document.getElementById('percentLabel');
         const resultArea = document.getElementById('resultArea');
         const qrcodeDiv = document.getElementById('qrcode');
+        // Change 2: New elements for file preview
+        const uploadIconQr = document.getElementById('uploadIconQr');
+        const imagePreviewQr = document.getElementById('imagePreviewQr');
+        // Change 3: New element for QR size display
+        const qrCodeSizeDisplay = document.getElementById('qrCodeSizeDisplay');
+        // New Change 1: File removal button
+        const removeFileQrBtn = document.getElementById('removeFileQrBtn');
+        // New Change 3: File icon preview
+        const fileIconQr = document.getElementById('fileIconQr');
+        const fileExtQr = document.getElementById('fileExtQr');
+
 
         // --- Upload to Link Elements ---
         const linkFileInput = document.getElementById('linkFileInput');
@@ -341,6 +533,15 @@
         const linkPercentLabel = document.getElementById('linkPercentLabel');
         const linkResultArea = document.getElementById('linkResultArea');
         let linkSelectedFile = null;
+        // Change 2: New elements for link file preview
+        const uploadIconLink = document.getElementById('uploadIconLink');
+        const imagePreviewLink = document.getElementById('imagePreviewLink');
+        // New Change 1: File removal button
+        const removeFileLinkBtn = document.getElementById('removeFileLinkBtn');
+        // New Change 3: File icon preview
+        const fileIconLink = document.getElementById('fileIconLink');
+        const fileExtLink = document.getElementById('fileExtLink');
+
 
         // --- Link to QR Elements ---
         const linkInput = document.getElementById('linkInput');
@@ -349,10 +550,18 @@
         const linkQrColor = document.getElementById('linkQrColor');
         const downloadLinkQRBtn = document.getElementById('downloadLinkQRBtn');
         const copyLinkBtn = document.getElementById('copyLinkBtn');
+        // Change 3: New element for Link QR size display
+        const linkQrCodeSizeDisplay = document.getElementById('linkQrCodeSizeDisplay');
+        // New Change 2: Clear and Paste buttons
+        const clearLinkInputBtn = document.getElementById('clearLinkInputBtn');
+        const pasteLinkInputBtn = document.getElementById('pasteLinkInputBtn');
         
         // --- Added for Change 4 ---
         const signInButton = document.getElementById('signInButton'); 
         // --- End Elements ---
+        
+        // New Change 3: List of supported text/code file extensions
+        const CODE_EXTENSIONS = ['html', 'css', 'js', 'java', 'py', 'python', 'sql', 'pdf', 'xml', 'txt', 'kordova', 'json', 'yml', 'md'];
 
         // --- Utility Functions ---
 
@@ -373,6 +582,9 @@
                 views[view].style.display = view === newView ? 'block' : 'none';
             });
             currentView = newView;
+
+            // CHANGE 4: Save current view to localStorage
+            localStorage.setItem('lastView', newView);
 
             if (newView === 'linkToQrView') {
                 // Initialize Link QR on view entry
@@ -405,6 +617,14 @@
                 fileInput.value = '';
                 progressFill.style.width = '0%';
                 percentLabel.innerText = '0%';
+                
+                // Change 2, New Change 1, New Change 3: Reset preview elements for QR
+                if (uploadIconQr) uploadIconQr.style.display = 'block';
+                if (imagePreviewQr) { imagePreviewQr.style.display = 'none'; imagePreviewQr.src = ''; }
+                if (fileIconQr) fileIconQr.style.display = 'none';
+                if (removeFileQrBtn) removeFileQrBtn.style.display = 'none';
+
+
             } else if (viewId === 'uploadToLinkView') {
                 // Change 2: Updated reset for file preview
                 document.getElementById('linkUploadTitle').innerHTML = 'Choose a file';
@@ -420,6 +640,28 @@
                 linkFileInput.value = '';
                 linkProgressFill.style.width = '0%';
                 linkPercentLabel.innerText = '0%';
+                
+                // Change 2, New Change 1, New Change 3: Reset preview elements for Link
+                if (uploadIconLink) uploadIconLink.style.display = 'block';
+                if (imagePreviewLink) { imagePreviewLink.style.display = 'none'; imagePreviewLink.src = ''; }
+                if (fileIconLink) fileIconLink.style.display = 'none';
+                if (removeFileLinkBtn) removeFileLinkBtn.style.display = 'none';
+                
+                // CHANGE 2: Reset link selector and display
+                const linkSelector = document.getElementById('linkSelector');
+                if (linkSelector) {
+                    linkSelector.value = 'viewer';
+                    linkSelector.removeAttribute('data-viewer');
+                    linkSelector.removeAttribute('data-html');
+                    linkSelector.removeAttribute('data-bbcode');
+                    linkSelector.removeAttribute('data-bbcode-full');
+                }
+                const linkFormatDisplay = document.getElementById('linkFormatDisplay');
+                if (linkFormatDisplay) linkFormatDisplay.innerText = 'Select a format to display.';
+                const directLink = document.getElementById('directLink');
+                if (directLink) directLink.innerText = '';
+                const resultFilePreview = document.getElementById('resultFilePreview');
+                if (resultFilePreview) resultFilePreview.innerHTML = '';
             }
         }
         
@@ -476,11 +718,74 @@
                 }
             }
         }
+
+        // New Change 3: Helper function to process file preview (UPDATED FOR CHANGE 1)
+        function setFilePreview(file, titleEl, iconEl, imgEl, fileIconEl, fileExtEl, removeBtn) {
+            const fileSizeMB = file.size / (1024 * 1024);
+            
+            // CHANGE 1: 20MB Limit Check
+            if (fileSizeMB > 20) {
+                const fileSizeDisplay = fileSizeMB.toFixed(2) + ' MB';
+                titleEl.innerHTML = `<b>${file.name}</b><br><span style="color: red;">Size (${fileSizeDisplay}) exceeds 20 MB limit.</span>`;
+                iconEl.style.display = 'block';
+                imgEl.style.display = 'none';
+                fileIconEl.style.display = 'none';
+                removeBtn.style.display = 'none';
+                return false; // Indicate failure
+            }
+            
+            // CHANGE 1: File Size Display Logic (MB or KB)
+            let displaySize;
+            if (fileSizeMB < 0.01) {
+                const fileSizeKB = (file.size / 1024).toFixed(2);
+                displaySize = `${fileSizeKB} KB`;
+            } else {
+                displaySize = `${fileSizeMB.toFixed(2)} MB`;
+            }
+
+            // New Change 3: Shorten filename
+            const fileNameParts = file.name.split('.');
+            const ext = fileNameParts.length > 1 ? fileNameParts.pop().toLowerCase() : '';
+            const baseName = fileNameParts.join('.');
+            const displayName = baseName.length > 20 ? baseName.substring(0, 20) + '...' : baseName;
+            // Updated size display
+            titleEl.innerHTML = `<b>${displayName}${ext ? '.' + ext : ''}</b><br>Size: ${displaySize}`; 
+
+            // Reset all preview icons
+            iconEl.style.display = 'none';
+            imgEl.style.display = 'none';
+            fileIconEl.style.display = 'none';
+            removeBtn.style.display = 'block';
+
+            // New Change 3: Logic for supported code/text files
+            if (CODE_EXTENSIONS.includes(ext)) {
+                fileIconEl.style.display = 'flex';
+                fileExtEl.innerText = ext;
+            } 
+            // Change 2: Logic for images
+            else if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imgEl.src = e.target.result;
+                    imgEl.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } 
+            // Default: Original upload icon
+            else {
+                iconEl.style.display = 'block';
+            }
+            
+            return true; // Indicate success
+        }
         
         // --- Initialization ---
 
         // Set initial view
-        setView('mainOptionsView');
+        // CHANGE 4: Restore view from localStorage or default to mainOptionsView
+        const lastView = localStorage.getItem('lastView');
+        const initialView = (lastView && views[lastView]) ? lastView : 'mainOptionsView';
+        setView(initialView);
 
         // Handle back button (History API)
         window.onpopstate = (event) => {
@@ -509,23 +814,78 @@
 
         // --- 1. Link to QR Logic ---
 
+        function updateLinkInputControls() {
+            clearLinkInputBtn.style.display = linkInput.value.trim() ? 'block' : 'none';
+        }
+
         function generateLinkQr() {
-            const text = linkInput.value || 'Paste a URL or text here to generate QR.';
+            const text = linkInput.value.trim();
             const size = linkQrSize.value;
             const darkColor = linkQrColor.value;
 
+            // New Change 2: Update clear button visibility
+            updateLinkInputControls();
+
+            // Change 4B & New Change 3: Hide QR if input is empty, and reset display
+            if (!text) {
+                linkQrcodeDiv.innerHTML = '';
+                linkQrcodeDiv.parentElement.style.opacity = 0.3; 
+                if (linkQrCodeSizeDisplay) linkQrCodeSizeDisplay.innerText = `${size}px | Size: N/A`;
+                return;
+            }
+
+            // Reset visual state
+            linkQrcodeDiv.parentElement.style.opacity = 1;
+            
             linkQrcodeDiv.innerHTML = '';
             QRCode.toCanvas(text, {
                 width: size,
                 margin: 2,
-                color: { dark: darkColor, light: '#ffffff' }
+                // Change 4: Dark color comes from input, light is hardcoded white
+                color: { dark: darkColor, light: '#ffffff' } 
             }, (err, canvas) => { 
-                if(!err) linkQrcodeDiv.appendChild(canvas); 
+                if(!err) {
+                    linkQrcodeDiv.appendChild(canvas); 
+                    
+                    // Change 3: Update size display after generation
+                    if (linkQrCodeSizeDisplay && canvas) {
+                        const dataURL = canvas.toDataURL('image/png', 1.0);
+                        // Rough estimate for base64 image size
+                        const sizeInBytes = (dataURL.length * 0.75) - 2; 
+                        const sizeInKB = (sizeInBytes / 1024).toFixed(2);
+                        linkQrCodeSizeDisplay.innerText = `${size}px | Size: ${sizeInKB} KB`;
+                    }
+                } else {
+                    if (linkQrCodeSizeDisplay) linkQrCodeSizeDisplay.innerText = `Error generating QR.`;
+                }
             });
         }
         
-        linkQrSize.oninput = generateLinkQr;
-        linkQrColor.oninput = generateLinkQr;
+        // Setup Link Input Handlers
+        linkInput.addEventListener('input', generateLinkQr);
+
+        linkQrSize.oninput = (e) => {
+            const size = e.target.value;
+            if (linkQrCodeSizeDisplay) linkQrCodeSizeDisplay.innerText = `${size}px | Size: Calculating...`;
+            generateLinkQr();
+        }
+
+        clearLinkInputBtn.onclick = () => {
+            linkInput.value = '';
+            generateLinkQr();
+        };
+
+        pasteLinkInputBtn.onclick = async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                linkInput.value = text;
+                generateLinkQr();
+                showToast("Pasted from clipboard!");
+            } catch (err) {
+                showToast("Failed to read clipboard.");
+            }
+        };
+
 
         downloadLinkQRBtn.onclick = () => {
             const link = document.createElement('a');
@@ -545,14 +905,20 @@
         fileInput.onchange = (e) => {
             selectedFile = e.target.files[0];
             if(selectedFile) {
-                // Change 2: Update file preview/feedback for QR Upload
-                const fileSizeMB = (selectedFile.size / (1024 * 1024)).toFixed(2);
-                document.getElementById('uploadTitle').innerHTML = `<b>${selectedFile.name}</b><br>Size: ${fileSizeMB} MB`;
-                dropZone.style.borderColor = 'var(--text)'; // Visual change
-                dropZone.style.backgroundColor = 'var(--card)'; // Visual change
-                // End Change 2
-                uploadBtn.disabled = false;
+                // New Change 3: Use helper function to process file and update preview (UPDATED FOR CHANGE 1)
+                const success = setFilePreview(selectedFile, document.getElementById('uploadTitle'), uploadIconQr, imagePreviewQr, fileIconQr, fileExtQr, removeFileQrBtn);
+                uploadBtn.disabled = !success; // Disable if not successful
+                if (!success) {
+                    selectedFile = null; // Clear selected file if limit exceeded
+                    fileInput.value = ''; // Clear file input
+                }
             }
+        };
+        
+        // New Change 1: File removal button logic for QR
+        removeFileQrBtn.onclick = (e) => {
+            e.stopPropagation(); // Stop event from propagating to dropZone (which would trigger file dialog)
+            resetUploadView('uploadToQrView');
         };
 
         uploadBtn.onclick = () => {
@@ -560,6 +926,7 @@
             
             progressContainer.style.display = 'block';
             uploadBtn.style.display = 'none';
+            removeFileQrBtn.style.display = 'none'; // Hide remove button during upload
 
             uploadFileToGithub(selectedFile, (uploadedUrl) => {
                 currentUrl = uploadedUrl;
@@ -573,6 +940,7 @@
             });
         };
 
+        // Change 3: Refactored to include size calculation
         function generateQR(url, targetDiv, size) {
             targetDiv.innerHTML = '';
             QRCode.toCanvas(url, {
@@ -580,11 +948,29 @@
                 margin: 2,
                 color: { dark: '#000000', light: '#ffffff' }
             }, (err, canvas) => { 
-                if(!err) targetDiv.appendChild(canvas); 
+                if(!err) {
+                    targetDiv.appendChild(canvas); 
+                    
+                    // Change 3: Update size display after generation
+                    if (qrCodeSizeDisplay && canvas) {
+                        const dataURL = canvas.toDataURL('image/png', 1.0);
+                        // Rough estimate for base64 image size
+                        const sizeInBytes = (dataURL.length * 0.75) - 2; 
+                        const sizeInKB = (sizeInBytes / 1024).toFixed(2);
+                        qrCodeSizeDisplay.innerText = `${size}px | Size: ${sizeInKB} KB`;
+                    }
+                } else {
+                    if (qrCodeSizeDisplay) qrCodeSizeDisplay.innerText = `Error generating QR.`;
+                }
             });
         }
 
-        document.getElementById('qrSize').oninput = () => generateQR(currentUrl, qrcodeDiv, document.getElementById('qrSize').value);
+        document.getElementById('qrSize').oninput = (e) => {
+            const size = e.target.value;
+            // Change 3: Update display placeholder on slider move
+            if (qrCodeSizeDisplay) qrCodeSizeDisplay.innerText = `${size}px | Size: Calculating...`;
+            generateQR(currentUrl, qrcodeDiv, size);
+        };
 
         document.getElementById('downloadQRBtn').onclick = () => {
             const link = document.createElement('a');
@@ -598,39 +984,155 @@
             showToast("Sharable URL Copied!");
         };
 
-        // --- 3. Upload to Link Logic ---
+        // --- 3. Upload to Link Logic (UPDATED FOR CHANGE 2) ---
 
         linkDropZone.onclick = () => linkFileInput.click();
         linkFileInput.onchange = (e) => {
             linkSelectedFile = e.target.files[0];
             if(linkSelectedFile) {
-                // Change 2: Update file preview/feedback for Link Upload
-                const fileSizeMB = (linkSelectedFile.size / (1024 * 1024)).toFixed(2);
-                document.getElementById('linkUploadTitle').innerHTML = `<b>${linkSelectedFile.name}</b><br>Size: ${fileSizeMB} MB`;
-                linkDropZone.style.borderColor = 'var(--text)'; // Visual change
-                linkDropZone.style.backgroundColor = 'var(--card)'; // Visual change
-                // End Change 2
-                linkUploadBtn.disabled = false;
+                // New Change 3: Use helper function to process file and update preview
+                const success = setFilePreview(linkSelectedFile, document.getElementById('linkUploadTitle'), uploadIconLink, imagePreviewLink, fileIconLink, fileExtLink, removeFileLinkBtn);
+                linkUploadBtn.disabled = !success; // Disable if not successful
+                if (!success) {
+                    linkSelectedFile = null; 
+                    linkFileInput.value = ''; 
+                }
             }
         };
+        
+        // New Change 1: File removal button logic for Link
+        removeFileLinkBtn.onclick = (e) => {
+            e.stopPropagation(); 
+            resetUploadView('uploadToLinkView');
+        };
+        
+        // CHANGE 2: Helper function to display the file preview in the result area
+        function displaySuccessPreview(file, targetEl) {
+            targetEl.innerHTML = '';
+            
+            const fileNameParts = file.name.split('.');
+            const ext = fileNameParts.length > 1 ? fileNameParts.pop().toLowerCase() : '';
+            const baseName = fileNameParts.join('.');
+            const displayName = baseName.length > 20 ? baseName.substring(0, 20) + '...' : baseName;
+
+            const iconContainer = document.createElement('div');
+            iconContainer.className = 'file-icon-preview';
+            iconContainer.style.margin = '15px auto 10px'; 
+            
+            let displayElement = null;
+
+            if (CODE_EXTENSIONS.includes(ext)) {
+                iconContainer.innerHTML = `<i class="fas fa-folder"></i><span class="file-ext" style="bottom: 0px; right: -5px; background: var(--text); color: var(--bg);">${ext}</span>`;
+                displayElement = iconContainer;
+            } 
+            else if (file.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.style.maxWidth = '100px'; 
+                img.style.maxHeight = '100px'; 
+                img.style.borderRadius = '8px'; 
+                img.style.margin = '0 auto 10px';
+                const reader = new FileReader();
+                reader.onload = (e) => { img.src = e.target.result; };
+                reader.readAsDataURL(file);
+                displayElement = img;
+            } 
+            else {
+                iconContainer.innerHTML = `<i class="fas fa-cloud-arrow-up"></i>`;
+                displayElement = iconContainer;
+            }
+
+            if (displayElement) {
+                targetEl.appendChild(displayElement);
+                const nameP = document.createElement('p');
+                nameP.style.fontSize = '0.9rem';
+                nameP.style.opacity = '0.8';
+                nameP.innerText = `${displayName}${ext ? '.' + ext : ''}`;
+                targetEl.appendChild(nameP);
+            }
+        }
+        
+        // CHANGE 2: Function to update the link display based on selector
+        function updateLinkFormatDisplay() {
+            const selector = document.getElementById('linkSelector');
+            const displayArea = document.getElementById('linkFormatDisplay');
+            const format = selector.value;
+            let linkText = '';
+
+            switch (format) {
+                case 'viewer':
+                    linkText = selector.dataset.viewer || 'Error: Viewer link not found.';
+                    break;
+                case 'html':
+                    linkText = selector.dataset.html || 'Error: HTML link not found.';
+                    break;
+                case 'bbcode':
+                    linkText = selector.dataset.bbcode || 'Error: BBCode not found.';
+                    break;
+                case 'bbcode_full':
+                    linkText = selector.dataset.bbcodeFull || 'Error: BBCode Full link not found.';
+                    break;
+                default:
+                    linkText = 'Select a format to display.';
+            }
+
+            displayArea.innerText = linkText;
+        }
+
+        // CHANGE 2: Function to copy the selected link
+        function copyLinkFormat() {
+            const text = document.getElementById('linkFormatDisplay').innerText;
+            if (text && !text.startsWith('Error') && text !== 'Select a format to display.') {
+                navigator.clipboard.writeText(text);
+                showToast("Selected Link Copied!");
+            } else {
+                showToast("No valid link selected or format not ready.");
+            }
+        }
+
 
         linkUploadBtn.onclick = () => {
             if(!linkSelectedFile) return;
             
             linkProgressContainer.style.display = 'block';
             linkUploadBtn.style.display = 'none';
+            removeFileLinkBtn.style.display = 'none'; // Hide remove button during upload
 
             uploadFileToGithub(linkSelectedFile, (uploadedUrl) => {
                 // Decode the file data from the URL to get the exact file path
                 const base64Data = uploadedUrl.split('?f=')[1];
                 const fileData = JSON.parse(atob(base64Data));
                 
-                // Construct Direct Link using the restored GIT config
+                // Construct Links
                 const directLink = `https://raw.githubusercontent.com/${GIT.owner}/${GIT.repo}/${GIT.branch}/${fileData.p}`;
-                const viewerLink = uploadedUrl;
+                const viewerLink = uploadedUrl; 
 
+                const fileName = fileData.n;
+                const fileNameWithoutExt = fileName.split('.').slice(0, -1).join('.');
+
+                // 1. HTML Full Link: <a href="file link"><img src="file direct link" alt="file name without extension" border="0"></a>
+                const htmlFullLink = `<a href="${viewerLink}"><img src="${directLink}" alt="${fileNameWithoutExt}" border="0"></a>`;
+                // 2. Viewer's Link (using the Vercel hosted viewer page)
+                const viewersLink = viewerLink; 
+                // 3. BBCode: [img]file link[/img] (using direct link for the image)
+                const bbcode = `[img]${directLink}[/img]`;
+                // 4. BBCode full link: [url=VIEWER_LINK][img]DIRECT_LINK[/img][/url]
+                const bbcodeFull = `[url=${viewerLink}][img]${directLink}[/img][/url]`;
+                
+                // Store links on the selector element
+                const linkSelector = document.getElementById('linkSelector');
+                linkSelector.dataset.viewer = viewersLink;
+                linkSelector.dataset.html = htmlFullLink;
+                linkSelector.dataset.bbcode = bbcode;
+                linkSelector.dataset.bbcodeFull = bbcodeFull;
+
+                // Set Direct Link (always visible)
                 document.getElementById('directLink').innerText = directLink;
-                document.getElementById('viewerLink').innerText = viewerLink;
+                
+                // Display success message and cloned preview
+                displaySuccessPreview(linkSelectedFile, document.getElementById('resultFilePreview'));
+
+                // Set initial selected link format (default is 'viewer')
+                updateLinkFormatDisplay(); 
 
                 document.getElementById('linkUploaderView').style.display = 'none';
                 linkResultArea.style.display = 'block';
@@ -703,6 +1205,9 @@
         
         // FIX 2: Initial call to set correct logo on page load
         updateLogoImage(); 
+        
+        // New Change 2: Initial call for link input
+        updateLinkInputControls();
     </script>
 </body>
 </html>
