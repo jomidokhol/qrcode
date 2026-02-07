@@ -207,6 +207,94 @@
             border-radius: 4px;
             text-transform: uppercase;
         }
+        
+        /* Step 2: Styles for Square Color Input and Custom Picker */
+        .color-selector-wrapper { position: relative; }
+        .color-square-btn {
+            width: 38px;
+            height: 38px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: inline-block;
+            vertical-align: middle;
+            position: relative;
+        }
+        .color-square-btn:hover { opacity: 0.9; }
+        
+        /* Hidden Native Color Input (Used to get value only) */
+        .hidden-color-input {
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+        }
+        
+        /* Step 2: Custom Color Picker Dropdown */
+        #customColorPicker {
+            position: absolute;
+            z-index: 20;
+            padding: 15px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--shadow);
+            top: 45px;
+            left: 0;
+            width: 250px;
+            display: none;
+        }
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .color-swatch {
+            width: 100%;
+            padding-top: 100%; 
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            transition: transform 0.1s;
+        }
+        .color-swatch:hover { transform: scale(1.05); }
+
+        /* Step 1: Custom Dropdown for Link Formats */
+        #linkFormatToggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 5px;
+        }
+        #linkFormatToggle:hover { border-color: var(--primary); }
+        #linkOptionsDropdown {
+            position: absolute;
+            z-index: 10;
+            width: 100%;
+            max-width: 500px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--shadow);
+            padding: 15px;
+            margin-top: 5px;
+            display: none;
+            left: 50%;
+            transform: translateX(-50%);
+        }
 
 
         /* Toast Notification */
@@ -302,23 +390,48 @@
                     <div id="linkQrResultArea" style="text-align: center;">
                         <div class="qr-wrapper"><div id="linkQrcode"></div></div>
                         
-                        <div class="control-grid" style="grid-template-columns: 1fr 1fr;">
+                        <!-- Step 2: Updated grid layout for new color options -->
+                        <div class="control-grid" style="grid-template-columns: 1fr 1fr 1fr;">
                             <div>
                                 <label style="font-size: 0.7rem; font-weight: 700;">Resolution</label>
                                 <input type="range" id="linkQrSize" min="200" max="1500" value="600" style="width: 100%; accent-color: var(--primary);" oninput="generateLinkQr()">
                             </div>
-                            <div>
-                                <label style="font-size: 0.7rem; font-weight: 700;">Color</label>
-                                <!-- Change 4: Default color set to black -->
-                                <input type="color" id="linkQrColor" value="#000000" style="width: 100%; height: 38px; border: none; padding: 0;" oninput="generateLinkQr()">
+                            <!-- Step 2: Color Picker Section (Foreground) -->
+                            <div class="color-selector-wrapper">
+                                <label style="font-size: 0.7rem; font-weight: 700;">Color (Foreground)</label> 
+                                <span class="color-square-btn" id="linkQrColorBtn" onclick="toggleColorPicker('linkQrColorBtn', 'linkQrColor', 'linkQrBackgroundBtn')">
+                                    <input type="color" id="linkQrColor" value="#000000" class="hidden-color-input" oninput="updateColorPreview(this, 'linkQrColorBtn'); generateLinkQr();" onclick="event.stopPropagation()">
+                                </span>
+                            </div>
+                            <!-- Step 2: Color Picker Section (Background) -->
+                            <div class="color-selector-wrapper">
+                                <label style="font-size: 0.7rem; font-weight: 700;">Background Color</label> 
+                                <span class="color-square-btn" id="linkQrBackgroundBtn" style="background-color: #ffffff;" onclick="toggleColorPicker('linkQrBackgroundBtn', 'linkQrBackground', 'linkQrColorBtn')">
+                                    <input type="color" id="linkQrBackground" value="#ffffff" class="hidden-color-input" oninput="updateColorPreview(this, 'linkQrBackgroundBtn'); generateLinkQr();" onclick="event.stopPropagation()">
+                                </span>
                             </div>
                         </div>
+                        
+                        <!-- Step 2: Custom Color Picker Overlay -->
+                        <div id="customColorPicker" style="display: none;">
+                            <span style="font-size: 0.8rem; font-weight: 700; display: block; margin-bottom: 10px;">Select a Color</span>
+                            <div class="color-palette" id="colorPalette">
+                                <div class="color-swatch" style="background-color: #000000;" onclick="selectPresetColor('#000000')"></div>
+                                <div class="color-swatch" style="background-color: #10b981;" onclick="selectPresetColor('#10b981')"></div>
+                                <div class="color-swatch" style="background-color: #3b82f6;" onclick="selectPresetColor('#3b82f6')"></div>
+                                <div class="color-swatch" style="background-color: #ef4444;" onclick="selectPresetColor('#ef4444')"></div>
+                                <div class="color-swatch" style="background-color: #ffffff; border-color: #ccc;" onclick="selectPresetColor('#ffffff')"></div>
+                            </div>
+                            <label style="font-size: 0.7rem; font-weight: 700;">Hex Code:</label>
+                            <input type="text" id="hexInput" placeholder="#000000" maxlength="7" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.9rem;" oninput="updateHexColor(this.value)">
+                        </div>
+
                         <!-- Change 3: Added Size Display for Link QR -->
                         <span id="linkQrCodeSizeDisplay" style="font-size: 0.8rem; font-weight: 600; text-align: right; margin-top: 5px; display: block;">600px | Size: N/A</span>
 
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                        <!-- Step 2: Removed copy button, updated grid to 1fr -->
+                        <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 15px;">
                             <button class="btn btn-action" id="downloadLinkQRBtn"><i class="fas fa-download"></i> Save QR</button>
-                            <button class="btn btn-action" id="copyLinkBtn"><i class="fas fa-link"></i> Copy Text</button>
                         </div>
                     </div>
                 </div>
@@ -430,21 +543,32 @@
                             <button class="btn btn-action" style="margin-top: 5px;" onclick="copyLink('#directLink')"><i class="fas fa-copy"></i> Copy Direct Link</button>
                         </div>
 
-                        <!-- New: Link Selector -->
-                        <div style="margin-bottom: 15px;">
-                            <label for="linkSelector" style="font-size: 0.7rem; font-weight: 700;">Other Link Formats:</label>
-                            <select id="linkSelector" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.9rem; margin-top: 5px;" onchange="updateLinkFormatDisplay()">
-                                <option value="viewer">Viewer's Link</option>
-                                <option value="html">HTML Full Link</option>
-                                <option value="bbcode">BBCode</option>
-                                <option value="bbcode_full">BBCode Full Link</option>
-                            </select>
+                        <!-- Step 1: Replaced Select with Custom Dropdown Trigger -->
+                        <div style="margin-bottom: 15px; position: relative;">
+                            <label style="font-size: 0.7rem; font-weight: 700; display: block; margin-bottom: 10px;">Other Link Formats:</label>
+                            
+                            <div id="linkFormatToggle" onclick="toggleLinkOptions()">
+                                <span id="selectedLinkFormatText">Viewer's Link</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+
+                            <div id="linkOptionsDropdown">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                    <button class="btn btn-action" onclick="selectLinkFormat('viewer', 'Viewer\'s Link')" style="font-size: 0.8rem; padding: 10px;">Viewer's Link</button>
+                                    <button class="btn btn-action" onclick="selectLinkFormat('html_full', 'HTML Full Link')" style="font-size: 0.8rem; padding: 10px;">HTML Full Link</button>
+                                    <button class="btn btn-action" onclick="selectLinkFormat('html_image', 'HTML Image Tag')" style="font-size: 0.8rem; padding: 10px;">HTML Image Tag</button>
+                                    <button class="btn btn-action" onclick="selectLinkFormat('bbcode', 'BBCode')" style="font-size: 0.8rem; padding: 10px;">BBCode</button>
+                                    <button class="btn btn-action" onclick="selectLinkFormat('bbcode_full', 'BBCode Full Link')" style="font-size: 0.8rem; padding: 10px; grid-column: span 2;">BBCode Full Link</button>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- New: Link Format Display Area (Shared) -->
                         <div style="margin-bottom: 15px;">
-                            <div id="linkFormatDisplay" class="link-url">Select a format to display.</div>
-                            <button class="btn btn-action" style="margin-top: 5px;" onclick="copyLinkFormat()"><i class="fas fa-copy"></i> Copy Selected Link</button>
+                            <label style="font-size: 0.7rem; font-weight: 700;">Selected Link Format:</label>
+                            <div id="linkFormatDisplay" class="link-url">Click a format above to display.</div>
+                            <!-- Updated copy button to use the new JS function -->
+                            <button class="btn btn-action" style="margin-top: 5px;" onclick="copySelectedLink()"><i class="fas fa-copy"></i> Copy Selected Link</button>
                         </div>
 
                         <button class="btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="location.reload()">
@@ -495,6 +619,11 @@
         let currentView = 'mainOptionsView';
         let currentUrl = "";
         let selectedFile = null;
+        // Step 1 & 3: Global variable for link formats
+        let uploadedLinkFormats = null; 
+        
+        // Step 2: Color picker state
+        let activeColorTarget = null; // 'linkQrColor' or 'linkQrBackground'
 
         const views = {
             mainOptionsView: document.getElementById('mainOptionsView'),
@@ -548,8 +677,16 @@
         const linkQrcodeDiv = document.getElementById('linkQrcode');
         const linkQrSize = document.getElementById('linkQrSize');
         const linkQrColor = document.getElementById('linkQrColor');
+        // Step 2: New background color element
+        const linkQrBackground = document.getElementById('linkQrBackground');
+        // Step 2: New color button elements
+        const linkQrColorBtn = document.getElementById('linkQrColorBtn');
+        const linkQrBackgroundBtn = document.getElementById('linkQrBackgroundBtn');
+        const customColorPicker = document.getElementById('customColorPicker');
+        const hexInput = document.getElementById('hexInput');
+
         const downloadLinkQRBtn = document.getElementById('downloadLinkQRBtn');
-        const copyLinkBtn = document.getElementById('copyLinkBtn');
+        // const copyLinkBtn = document.getElementById('copyLinkBtn'); // DELETED
         // Change 3: New element for Link QR size display
         const linkQrCodeSizeDisplay = document.getElementById('linkQrCodeSizeDisplay');
         // New Change 2: Clear and Paste buttons
@@ -562,6 +699,21 @@
         
         // New Change 3: List of supported text/code file extensions
         const CODE_EXTENSIONS = ['html', 'css', 'js', 'java', 'py', 'python', 'sql', 'pdf', 'xml', 'txt', 'kordova', 'json', 'yml', 'md'];
+        
+        // Step 3: Utility function to calculate SHA-256 hash of a file
+        function calculateFileHash(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    const buffer = e.target.result;
+                    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+                    const hashArray = Array.from(new Uint8Array(hashBuffer));
+                    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                    resolve(hashHex);
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }
 
         // --- Utility Functions ---
 
@@ -573,6 +725,9 @@
         }
 
         function setView(newView) {
+            // Step 2: Close color picker when changing views
+            customColorPicker.style.display = 'none';
+
             if (currentView === 'uploadToQrView' || currentView === 'uploadToLinkView') {
                 // Reset file-related view states before switching
                 resetUploadView(currentView);
@@ -602,6 +757,10 @@
         }
 
         function resetUploadView(viewId) {
+            // Step 1: Close and reset link options dropdown
+            document.getElementById('linkOptionsDropdown').style.display = 'none';
+            document.getElementById('selectedLinkFormatText').innerText = 'Viewer\'s Link';
+
             if(viewId === 'uploadToQrView') {
                 // Change 2: Updated reset for file preview
                 document.getElementById('uploadTitle').innerHTML = 'Choose a file';
@@ -647,17 +806,10 @@
                 if (fileIconLink) fileIconLink.style.display = 'none';
                 if (removeFileLinkBtn) removeFileLinkBtn.style.display = 'none';
                 
-                // CHANGE 2: Reset link selector and display
-                const linkSelector = document.getElementById('linkSelector');
-                if (linkSelector) {
-                    linkSelector.value = 'viewer';
-                    linkSelector.removeAttribute('data-viewer');
-                    linkSelector.removeAttribute('data-html');
-                    linkSelector.removeAttribute('data-bbcode');
-                    linkSelector.removeAttribute('data-bbcode-full');
-                }
+                // CHANGE 2: Reset link selector and display (Step 3: Updated to clear global variable)
+                uploadedLinkFormats = null; 
                 const linkFormatDisplay = document.getElementById('linkFormatDisplay');
-                if (linkFormatDisplay) linkFormatDisplay.innerText = 'Select a format to display.';
+                if (linkFormatDisplay) linkFormatDisplay.innerText = 'Click a format above to display.';
                 const directLink = document.getElementById('directLink');
                 if (directLink) directLink.innerText = '';
                 const resultFilePreview = document.getElementById('resultFilePreview');
@@ -813,6 +965,82 @@
         };
 
         // --- 1. Link to QR Logic ---
+        
+        // Step 2: Custom Color Picker Logic
+        function toggleColorPicker(buttonId, targetInputId, otherButtonId) {
+            const button = document.getElementById(buttonId);
+            const otherButton = document.getElementById(otherButtonId);
+            
+            // If the picker is already open and clicked again, close it
+            if (customColorPicker.style.display === 'block' && activeColorTarget === targetInputId) {
+                customColorPicker.style.display = 'none';
+                activeColorTarget = null;
+                return;
+            }
+
+            // Set active target and update picker position/content
+            activeColorTarget = targetInputId;
+            const rect = button.getBoundingClientRect();
+            const containerRect = document.querySelector('.main-card').getBoundingClientRect();
+            
+            // Position the picker relative to the button inside the main-card
+            customColorPicker.style.top = (rect.bottom - containerRect.top + 5) + 'px';
+            customColorPicker.style.left = (rect.left - containerRect.left) + 'px';
+
+            // Set current value in hex input
+            hexInput.value = document.getElementById(targetInputId).value;
+            
+            // Display the picker
+            customColorPicker.style.display = 'block';
+        }
+
+        function selectPresetColor(color) {
+            if (activeColorTarget) {
+                const input = document.getElementById(activeColorTarget);
+                const btn = document.getElementById(activeColorTarget === 'linkQrColor' ? 'linkQrColorBtn' : 'linkQrBackgroundBtn');
+
+                input.value = color;
+                btn.style.backgroundColor = color;
+                hexInput.value = color; // Update hex input in the picker
+
+                generateLinkQr(); // Regenerate QR
+                customColorPicker.style.display = 'none'; // Close picker
+                activeColorTarget = null;
+            }
+        }
+        
+        function updateHexColor(hex) {
+            // Simple hex validation (optional)
+            if (/^#([0-9A-F]{3}){1,2}$/i.test(hex)) {
+                if (activeColorTarget) {
+                    const input = document.getElementById(activeColorTarget);
+                    const btn = document.getElementById(activeColorTarget === 'linkQrColor' ? 'linkQrColorBtn' : 'linkQrBackgroundBtn');
+                    
+                    input.value = hex;
+                    btn.style.backgroundColor = hex;
+                    generateLinkQr();
+                }
+            }
+        }
+        
+        function updateColorPreview(input, buttonId) {
+            const button = document.getElementById(buttonId);
+            button.style.backgroundColor = input.value;
+            // Native input's oninput is called, but we still trigger generateLinkQr from the native input event handler in HTML
+        }
+        
+        // Add a click listener to the body to close the picker when clicking outside
+        document.body.addEventListener('click', (e) => {
+            if (customColorPicker.style.display === 'block' && 
+                !customColorPicker.contains(e.target) && 
+                !linkQrColorBtn.contains(e.target) && 
+                !linkQrBackgroundBtn.contains(e.target)) {
+                customColorPicker.style.display = 'none';
+                activeColorTarget = null;
+            }
+        });
+        
+        // End Step 2 Color Picker Logic
 
         function updateLinkInputControls() {
             clearLinkInputBtn.style.display = linkInput.value.trim() ? 'block' : 'none';
@@ -822,6 +1050,8 @@
             const text = linkInput.value.trim();
             const size = linkQrSize.value;
             const darkColor = linkQrColor.value;
+            // Step 2: Get background color
+            const lightColor = linkQrBackground.value; 
 
             // New Change 2: Update clear button visibility
             updateLinkInputControls();
@@ -842,7 +1072,8 @@
                 width: size,
                 margin: 2,
                 // Change 4: Dark color comes from input, light is hardcoded white
-                color: { dark: darkColor, light: '#ffffff' } 
+                // Step 2: Use selected background color
+                color: { dark: darkColor, light: lightColor } 
             }, (err, canvas) => { 
                 if(!err) {
                     linkQrcodeDiv.appendChild(canvas); 
@@ -894,12 +1125,17 @@
             link.click();
         };
 
-        copyLinkBtn.onclick = () => {
-            navigator.clipboard.writeText(linkInput.value);
-            showToast("Link/Text Copied!");
-        };
-
         // --- 2. Upload to QR Logic (Original) ---
+
+        // Step 3: Function to handle displaying cached QR result (now called after GitHub check)
+        function handleCachedQr(uploadedUrl) {
+            currentUrl = uploadedUrl;
+            document.getElementById('uploaderView').style.display = 'none';
+            resultArea.style.display = 'block';
+            // Use the stored QR size on the result page
+            const currentQrSize = document.getElementById('qrSize').value;
+            generateQR(currentUrl, qrcodeDiv, currentQrSize);
+        }
 
         dropZone.onclick = () => fileInput.click();
         fileInput.onchange = (e) => {
@@ -921,14 +1157,35 @@
             resetUploadView('uploadToQrView');
         };
 
-        uploadBtn.onclick = () => {
+        uploadBtn.onclick = async () => {
             if(!selectedFile) return;
             
+            // --- Step 3: GITHUB DEDUPLICATION CHECK ---
+            uploadBtn.disabled = true;
+            document.getElementById('uploadTitle').innerHTML = 'Checking file existence...';
+            
+            const fileHash = await calculateFileHash(selectedFile);
+            const fileExt = selectedFile.name.split('.').pop().toLowerCase();
+            const expectedPath = `uploads/${fileHash}.${fileExt}`;
+            
+            const cachedUrl = await checkFileExistenceOnGithub(expectedPath);
+
+            if (cachedUrl) {
+                showToast("File found on GitHub. Displaying QR.");
+                handleCachedQr(cachedUrl);
+                return; // Stop execution
+            }
+            // --- END DEDUPLICATION CHECK ---
+            
+            document.getElementById('uploadTitle').innerHTML = 'File not found. Ready to upload.';
+            uploadBtn.disabled = false; // Re-enable for the user to proceed if they wish
+            
+            // Proceed with upload
             progressContainer.style.display = 'block';
             uploadBtn.style.display = 'none';
             removeFileQrBtn.style.display = 'none'; // Hide remove button during upload
 
-            uploadFileToGithub(selectedFile, (uploadedUrl) => {
+            uploadFileToGithub(selectedFile, fileHash, (uploadedUrl) => {
                 currentUrl = uploadedUrl;
                 document.getElementById('uploaderView').style.display = 'none';
                 resultArea.style.display = 'block';
@@ -937,7 +1194,7 @@
             (percent) => {
                 progressFill.style.width = percent + "%";
                 percentLabel.innerText = percent + "%";
-            });
+            }, 'qr'); 
         };
 
         // Change 3: Refactored to include size calculation
@@ -960,7 +1217,7 @@
                         qrCodeSizeDisplay.innerText = `${size}px | Size: ${sizeInKB} KB`;
                     }
                 } else {
-                    if (qrCodeSizeDisplay) qrCodeSizeDisplay.innerText = `Error generating QR.`;
+                    if (qrCodeCodeSizeDisplay) qrCodeCodeSizeDisplay.innerText = `Error generating QR.`;
                 }
             });
         }
@@ -984,7 +1241,7 @@
             showToast("Sharable URL Copied!");
         };
 
-        // --- 3. Upload to Link Logic (UPDATED FOR CHANGE 2) ---
+        // --- 3. Upload to Link Logic (UPDATED FOR CHANGE 2, Step 1, Step 3) ---
 
         linkDropZone.onclick = () => linkFileInput.click();
         linkFileInput.onchange = (e) => {
@@ -1051,108 +1308,161 @@
             }
         }
         
-        // CHANGE 2: Function to update the link display based on selector
-        function updateLinkFormatDisplay() {
-            const selector = document.getElementById('linkSelector');
-            const displayArea = document.getElementById('linkFormatDisplay');
-            const format = selector.value;
-            let linkText = '';
+        // Step 3: Function to handle displaying cached Link result (and upload success)
+        function handleCachedLink(uploadedUrl, file) {
+            const base64Data = uploadedUrl.split('?f=')[1];
+            const fileData = JSON.parse(atob(base64Data));
+            
+            // Construct Links
+            const directLink = `https://raw.githubusercontent.com/${GIT.owner}/${GIT.repo}/${GIT.branch}/${fileData.p}`;
+            const viewerLink = uploadedUrl; 
 
-            switch (format) {
-                case 'viewer':
-                    linkText = selector.dataset.viewer || 'Error: Viewer link not found.';
-                    break;
-                case 'html':
-                    linkText = selector.dataset.html || 'Error: HTML link not found.';
-                    break;
-                case 'bbcode':
-                    linkText = selector.dataset.bbcode || 'Error: BBCode not found.';
-                    break;
-                case 'bbcode_full':
-                    linkText = selector.dataset.bbcodeFull || 'Error: BBCode Full link not found.';
-                    break;
-                default:
-                    linkText = 'Select a format to display.';
-            }
+            const fileName = fileData.n;
+            const fileNameWithoutExt = fileName.split('.').slice(0, -1).join('.');
 
-            displayArea.innerText = linkText;
+            // Store links in global object
+            uploadedLinkFormats = {
+                direct: directLink,
+                viewer: viewerLink, 
+                html_full: `<a href="${viewerLink}"><img src="${directLink}" alt="${fileNameWithoutExt}" border="0"></a>`,
+                html_image: `<img src="${directLink}" alt="${fileNameWithoutExt}" border="0">`, // Step 3: NEW FORMAT
+                bbcode: `[img]${directLink}[/img]`,
+                bbcode_full: `[url=${viewerLink}][img]${directLink}[/img][/url]`
+            };
+            
+            // Set Direct Link (always visible)
+            document.getElementById('directLink').innerText = directLink;
+            
+            // Display success message and cloned preview
+            displaySuccessPreview(file, document.getElementById('resultFilePreview'));
+
+            // Set initial selected link format (default is 'viewer')
+            selectLinkFormat('viewer', 'Viewer\'s Link'); 
+
+            document.getElementById('linkUploaderView').style.display = 'none';
+            linkResultArea.style.display = 'block';
+        }
+        
+        // Step 1: Function to toggle link options dropdown
+        function toggleLinkOptions() {
+            const dropdown = document.getElementById('linkOptionsDropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
         }
 
-        // CHANGE 2: Function to copy the selected link
-        function copyLinkFormat() {
+        // Step 3: Function to update the link display based on format key
+        function selectLinkFormat(formatKey, formatName) {
+            const displayArea = document.getElementById('linkFormatDisplay');
+            if (!uploadedLinkFormats) {
+                displayArea.innerText = 'Error: Links not ready.';
+                return;
+            }
+
+            const linkText = uploadedLinkFormats[formatKey] || 'Error: Invalid format selected.';
+            displayArea.innerText = linkText;
+            document.getElementById('selectedLinkFormatText').innerText = formatName;
+            document.getElementById('linkOptionsDropdown').style.display = 'none'; // Step 1: Close dropdown
+        }
+
+        // Step 3: Function to copy the selected link
+        function copySelectedLink() {
             const text = document.getElementById('linkFormatDisplay').innerText;
-            if (text && !text.startsWith('Error') && text !== 'Select a format to display.') {
+            if (text && !text.startsWith('Error') && text !== 'Click a format above to display.') {
                 navigator.clipboard.writeText(text);
                 showToast("Selected Link Copied!");
             } else {
-                showToast("No valid link selected or format not ready.");
+                showToast("No valid link selected.");
             }
         }
 
 
-        linkUploadBtn.onclick = () => {
+        linkUploadBtn.onclick = async () => {
             if(!linkSelectedFile) return;
+            
+            // --- Step 3: GITHUB DEDUPLICATION CHECK ---
+            linkUploadBtn.disabled = true;
+            document.getElementById('linkUploadTitle').innerHTML = 'Checking file existence...';
+            
+            const fileHash = await calculateFileHash(linkSelectedFile);
+            const fileExt = linkSelectedFile.name.split('.').pop().toLowerCase();
+            const expectedPath = `uploads/${fileHash}.${fileExt}`;
+            
+            const cachedUrl = await checkFileExistenceOnGithub(expectedPath);
+
+            if (cachedUrl) {
+                showToast("File found on GitHub. Displaying Link.");
+                handleCachedLink(cachedUrl, linkSelectedFile); // Pass the file object
+                return; // Stop execution
+            }
+            // --- END DEDUPLICATION CHECK ---
+            
+            document.getElementById('linkUploadTitle').innerHTML = 'File not found. Ready to upload.';
+            linkUploadBtn.disabled = false; // Re-enable for the user to proceed if they wish
+            
             
             linkProgressContainer.style.display = 'block';
             linkUploadBtn.style.display = 'none';
             removeFileLinkBtn.style.display = 'none'; // Hide remove button during upload
 
-            uploadFileToGithub(linkSelectedFile, (uploadedUrl) => {
-                // Decode the file data from the URL to get the exact file path
-                const base64Data = uploadedUrl.split('?f=')[1];
-                const fileData = JSON.parse(atob(base64Data));
-                
-                // Construct Links
-                const directLink = `https://raw.githubusercontent.com/${GIT.owner}/${GIT.repo}/${GIT.branch}/${fileData.p}`;
-                const viewerLink = uploadedUrl; 
-
-                const fileName = fileData.n;
-                const fileNameWithoutExt = fileName.split('.').slice(0, -1).join('.');
-
-                // 1. HTML Full Link: <a href="file link"><img src="file direct link" alt="file name without extension" border="0"></a>
-                const htmlFullLink = `<a href="${viewerLink}"><img src="${directLink}" alt="${fileNameWithoutExt}" border="0"></a>`;
-                // 2. Viewer's Link (using the Vercel hosted viewer page)
-                const viewersLink = viewerLink; 
-                // 3. BBCode: [img]file link[/img] (using direct link for the image)
-                const bbcode = `[img]${directLink}[/img]`;
-                // 4. BBCode full link: [url=VIEWER_LINK][img]DIRECT_LINK[/img][/url]
-                const bbcodeFull = `[url=${viewerLink}][img]${directLink}[/img][/url]`;
-                
-                // Store links on the selector element
-                const linkSelector = document.getElementById('linkSelector');
-                linkSelector.dataset.viewer = viewersLink;
-                linkSelector.dataset.html = htmlFullLink;
-                linkSelector.dataset.bbcode = bbcode;
-                linkSelector.dataset.bbcodeFull = bbcodeFull;
-
-                // Set Direct Link (always visible)
-                document.getElementById('directLink').innerText = directLink;
-                
-                // Display success message and cloned preview
-                displaySuccessPreview(linkSelectedFile, document.getElementById('resultFilePreview'));
-
-                // Set initial selected link format (default is 'viewer')
-                updateLinkFormatDisplay(); 
-
-                document.getElementById('linkUploaderView').style.display = 'none';
-                linkResultArea.style.display = 'block';
+            // Use handleCachedLink as the success callback
+            uploadFileToGithub(linkSelectedFile, fileHash, (uploadedUrl) => {
+                handleCachedLink(uploadedUrl, linkSelectedFile);
             }, 
             (percent) => {
                 linkProgressFill.style.width = percent + "%";
                 linkPercentLabel.innerText = percent + "%";
-            }, 
-            'link'); // Pass an identifier to differentiate progress elements
+            }, 'link'); 
         };
+        
+        // Step 3: New function to check file existence on GitHub
+        function checkFileExistenceOnGithub(path) {
+            return new Promise((resolve) => {
+                const xhr = new XMLHttpRequest();
+                // GitHub API URL for file content
+                xhr.open("GET", `https://api.github.com/repos/${GIT.owner}/${GIT.repo}/contents/${path}`);
+                xhr.setRequestHeader("Authorization", `token ${GIT.token}`);
 
-        // --- Shared Upload Function (Fix 1 - Using restored GIT variable) ---
-        function uploadFileToGithub(file, onSuccess, onProgress, viewType = 'qr') {
+                xhr.onload = () => {
+                    if (xhr.status === 200) {
+                        // File found. Construct the uploaded URL from the file metadata.
+                        const fileData = { 
+                            n: path.split('/').pop(), // Use full file name for display
+                            p: path, 
+                            s: 'N/A' // Size not easily available here, set to N/A for metadata
+                        };
+                        // Note: The original file name is lost here, but the URL is valid.
+                        // We reverse engineer the viewer link based on the path.
+                        const uploadedUrl = `${GIT.domain}/viewer.html?f=${btoa(JSON.stringify(fileData))}`;
+                        resolve(uploadedUrl);
+                    } else if (xhr.status === 404) {
+                        // File not found. Proceed with upload.
+                        resolve(null);
+                    } else {
+                        // Other error (e.g., rate limit, network). Treat as not found to attempt upload.
+                        showToast(`GitHub check error: ${xhr.status}`);
+                        resolve(null);
+                    }
+                };
+                
+                xhr.onerror = () => {
+                    showToast("Network error during GitHub check.");
+                    resolve(null);
+                };
+
+                xhr.send();
+            });
+        }
+
+
+        // --- Shared Upload Function (Fix 1 - Using restored GIT variable, Step 3: Changed file name to use hash) ---
+        function uploadFileToGithub(file, fileHash, onSuccess, onProgress, viewType = 'qr') {
             const reader = new FileReader();
             reader.readAsDataURL(file);
 
             reader.onload = () => {
                 const base64 = reader.result.split(',')[1];
-                const fileName = Date.now() + "_" + file.name;
-                const path = `uploads/${fileName}`;
+                const fileExt = file.name.split('.').pop();
+                // Step 3: Use file hash for the permanent path
+                const path = `uploads/${fileHash}.${fileExt}`;
 
                 const xhr = new XMLHttpRequest();
                 // Use the restored GIT variable for API calls
@@ -1172,6 +1482,7 @@
                         const fileData = { n: file.name, p: path, s: (file.size / (1024*1024)).toFixed(2) };
                         // Use the restored GIT variable for URL construction
                         const uploadedUrl = `${GIT.domain}/viewer.html?f=${btoa(JSON.stringify(fileData))}`;
+                        
                         onSuccess(uploadedUrl);
                         showToast("File Uploaded Successfully!");
                     } else {
@@ -1208,6 +1519,10 @@
         
         // New Change 2: Initial call for link input
         updateLinkInputControls();
+        
+        // Step 2: Set initial color previews
+        linkQrColorBtn.style.backgroundColor = linkQrColor.value;
+        linkQrBackgroundBtn.style.backgroundColor = linkQrBackground.value;
     </script>
 </body>
 </html>
