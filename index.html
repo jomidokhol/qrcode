@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nur Share Pro | QR Generator</title>
+    <title>Nur Share | QR Generator</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
@@ -35,7 +35,7 @@
         }
         /* Logo Update with Image */
         .logo { font-weight: 800; font-size: 1.4rem; color: var(--primary); display: flex; align-items: center; gap: 8px; }
-        .logo img { height: 30px; }
+        .logo img { height: 50px; }
         .header-actions { display: flex; align-items: center; gap: 10px; }
         .theme-btn, .action-btn { background: var(--border); border: none; width: 40px; height: 40px; border-radius: 12px; cursor: pointer; color: var(--text); transition: 0.3s; }
         .action-btn { background: var(--primary); color: white; font-size: 0.8rem; font-weight: 600; padding: 0 15px; width: auto; }
@@ -115,11 +115,12 @@
         <div class="header-content">
             <!-- Logo with Image -->
             <div class="logo">
-                <img src="https://i.ibb.co.com/GvQzP8ZK/1000043160-removebg-preview.png" alt="Nur Share Logo">
-                Nur Share
+                <!-- Change 1: Added ID for JS logo change in dark mode -->
+                <img id="logoImage" src="https://i.ibb.co.com/GvQzP8ZK/1000043160-removebg-preview.png" alt="Logo">
             </div>
             <div class="header-actions">
-                <button class="action-btn" onclick="googleSignIn()">
+                <!-- Change 4: Added ID for JS sign-in UI update -->
+                <button class="action-btn" id="signInButton" onclick="googleSignIn()">
                     <i class="fab fa-google"></i> Sign In
                 </button>
                 <button class="theme-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
@@ -277,7 +278,7 @@
     </div>
     
     <footer>
-        <p>&copy; 2024 Nur Share Pro. Developed by Nur.</p>
+        <p>&copy; 2026 Nur Share. Developed by <b>Nur</b>.</p>
     </footer>
 
     <!-- Toast Notification -->
@@ -300,6 +301,7 @@
 
 
         // --- Core Configuration (GitHub API - Restored to original variable name 'GIT') ---
+        // Change 3: Config is already correct based on qrcode.html content
         const GIT = {
             token: "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",
             owner: "jomidokhol",
@@ -348,6 +350,9 @@
         const linkQrColor = document.getElementById('linkQrColor');
         const downloadLinkQRBtn = document.getElementById('downloadLinkQRBtn');
         const copyLinkBtn = document.getElementById('copyLinkBtn');
+        
+        // --- Added for Change 4 ---
+        const signInButton = document.getElementById('signInButton'); 
         // --- End Elements ---
 
         // --- Utility Functions ---
@@ -387,7 +392,11 @@
 
         function resetUploadView(viewId) {
             if(viewId === 'uploadToQrView') {
-                document.getElementById('uploadTitle').innerText = 'Choose a file';
+                // Change 2: Updated reset for file preview
+                document.getElementById('uploadTitle').innerHTML = 'Choose a file';
+                dropZone.style.borderColor = 'var(--primary)'; // Reset visual
+                dropZone.style.backgroundColor = 'rgba(99, 102, 241, 0.05)'; // Reset visual
+                // End Change 2
                 uploadBtn.disabled = true;
                 progressContainer.style.display = 'none';
                 uploadBtn.style.display = 'block';
@@ -398,7 +407,11 @@
                 progressFill.style.width = '0%';
                 percentLabel.innerText = '0%';
             } else if (viewId === 'uploadToLinkView') {
-                document.getElementById('linkUploadTitle').innerText = 'Choose a file';
+                // Change 2: Updated reset for file preview
+                document.getElementById('linkUploadTitle').innerHTML = 'Choose a file';
+                linkDropZone.style.borderColor = 'var(--primary)'; // Reset visual
+                linkDropZone.style.backgroundColor = 'rgba(99, 102, 241, 0.05)'; // Reset visual
+                // End Change 2
                 linkUploadBtn.disabled = true;
                 linkProgressContainer.style.display = 'none';
                 linkUploadBtn.style.display = 'block';
@@ -411,6 +424,27 @@
             }
         }
         
+        // Change 4: Function to update the UI based on auth state
+        function updateSignInUI(user) {
+            if (user) {
+                // User is signed in. Change button to profile picture.
+                signInButton.onclick = () => showToast(`Signed in as: ${user.displayName}. (Profile view placeholder)`);
+                signInButton.innerHTML = `<img src="${user.photoURL}" alt="${user.displayName}" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;">`;
+                signInButton.style.padding = '0';
+                signInButton.style.width = '40px';
+                signInButton.style.height = '40px';
+                signInButton.style.background = 'transparent';
+            } else {
+                // User is signed out. Restore the original button.
+                signInButton.onclick = googleSignIn;
+                signInButton.innerHTML = '<i class="fab fa-google"></i> Sign In';
+                signInButton.style.padding = '0 15px';
+                signInButton.style.width = 'auto';
+                signInButton.style.height = '40px';
+                signInButton.style.background = 'var(--primary)';
+            }
+        }
+
         // --- Google Sign-in Implementation (Fix 2) ---
         function googleSignIn() {
             const provider = new firebase.auth.GoogleAuthProvider();
@@ -418,13 +452,18 @@
                 .then((result) => {
                     const user = result.user;
                     showToast(`Signed in as: ${user.displayName}. (Profile view placeholder)`);
-                    // Here you would typically update the header UI to show the user's profile picture and name
+                    // UI update handled by onAuthStateChanged listener
                 })
                 .catch((error) => {
                     // Handle Errors here.
                     const errorMessage = error.message;
                     showToast(`Sign in failed: ${errorMessage}`);
                 });
+        }
+        
+        function setupAuthListener() {
+            // Change 4: Set up listener to update UI when auth state changes
+            firebase.auth().onAuthStateChanged(updateSignInUI);
         }
         
         // --- Initialization ---
@@ -453,6 +492,14 @@
 
         document.getElementById('themeToggle').onclick = () => {
             document.body.classList.toggle('dark-mode');
+            // Change 1: Dark Mode Logo Update
+            const logoImage = document.getElementById('logoImage');
+            if (document.body.classList.contains('dark-mode')) {
+                logoImage.src = 'https://i.ibb.co.com/dqHSB7H/1000043162-removebg-preview.png';
+            } else {
+                logoImage.src = 'https://i.ibb.co.com/GvQzP8ZK/1000043160-removebg-preview.png';
+            }
+            // End Change 1
         };
 
         // --- 1. Link to QR Logic ---
@@ -493,7 +540,12 @@
         fileInput.onchange = (e) => {
             selectedFile = e.target.files[0];
             if(selectedFile) {
-                document.getElementById('uploadTitle').innerText = selectedFile.name;
+                // Change 2: Update file preview/feedback for QR Upload
+                const fileSizeMB = (selectedFile.size / (1024 * 1024)).toFixed(2);
+                document.getElementById('uploadTitle').innerHTML = `<b>${selectedFile.name}</b><br>Size: ${fileSizeMB} MB`;
+                dropZone.style.borderColor = 'var(--text)'; // Visual change
+                dropZone.style.backgroundColor = 'var(--card)'; // Visual change
+                // End Change 2
                 uploadBtn.disabled = false;
             }
         };
@@ -547,7 +599,12 @@
         linkFileInput.onchange = (e) => {
             linkSelectedFile = e.target.files[0];
             if(linkSelectedFile) {
-                document.getElementById('linkUploadTitle').innerText = linkSelectedFile.name;
+                // Change 2: Update file preview/feedback for Link Upload
+                const fileSizeMB = (linkSelectedFile.size / (1024 * 1024)).toFixed(2);
+                document.getElementById('linkUploadTitle').innerHTML = `<b>${linkSelectedFile.name}</b><br>Size: ${fileSizeMB} MB`;
+                linkDropZone.style.borderColor = 'var(--text)'; // Visual change
+                linkDropZone.style.backgroundColor = 'var(--card)'; // Visual change
+                // End Change 2
                 linkUploadBtn.disabled = false;
             }
         };
@@ -624,6 +681,9 @@
                 xhr.send(JSON.stringify({ message: "upload", content: base64, branch: GIT.branch }));
             };
         }
+        
+        // Change 4: Initialize Auth Listener
+        setupAuthListener();
     </script>
 </body>
 </html>
