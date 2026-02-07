@@ -1,4 +1,3 @@
---- START OF FILE qrcode.html ---
 
 <!DOCTYPE html>
 <html lang="en">
@@ -10,9 +9,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK Scripts (Required for Firebase Configuration) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <!-- End Firebase SDK Scripts -->
 
     <style>
-        :root { --primary: #6366f1; --bg: #ffffff; --card: #f8fafc; --text: #0f172a; --border: #e2e8f0; --shadow: rgba(0, 0, 0, 0.1); }
+        /* Theme Change: Green and White */
+        :root { --primary: #10b981; --bg: #ffffff; --card: #f8fafc; --text: #0f172a; --border: #e2e8f0; --shadow: rgba(0, 0, 0, 0.1); }
         .dark-mode { --bg: #000000; --card: #111111; --text: #ffffff; --border: #222222; --shadow: rgba(255, 255, 255, 0.1); }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -29,7 +34,9 @@
             width: 100%; max-width: 500px; display: flex; 
             justify-content: space-between; align-items: center; 
         }
+        /* Logo Update with Image */
         .logo { font-weight: 800; font-size: 1.4rem; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        .logo img { height: 30px; }
         .header-actions { display: flex; align-items: center; gap: 10px; }
         .theme-btn, .action-btn { background: var(--border); border: none; width: 40px; height: 40px; border-radius: 12px; cursor: pointer; color: var(--text); transition: 0.3s; }
         .action-btn { background: var(--primary); color: white; font-size: 0.8rem; font-weight: 600; padding: 0 15px; width: auto; }
@@ -55,10 +62,10 @@
         .header-card { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; display: none; /* Hidden in favor of sticky header */ }
 
         /* Progress Bar UI */
-        #progressContainer { display: none; margin-top: 20px; text-align: left; }
+        #progressContainer, #linkProgressContainer { display: none; margin-top: 20px; text-align: left; }
         .progress-track { background: var(--border); height: 10px; border-radius: 10px; overflow: hidden; margin-top: 10px; }
         .progress-fill { background: var(--primary); height: 100%; width: 0%; transition: width 0.1s; }
-        #percentLabel { font-size: 0.8rem; font-weight: 700; color: var(--primary); }
+        #percentLabel, #linkPercentLabel { font-size: 0.8rem; font-weight: 700; color: var(--primary); }
 
         .upload-box { border: 2px dashed var(--primary); border-radius: 24px; padding: 40px 20px; text-align: center; cursor: pointer; background: rgba(99, 102, 241, 0.05); }
         
@@ -107,7 +114,11 @@
 
     <header>
         <div class="header-content">
-            <div class="logo"><i class="fas fa-bolt"></i> Nur Share</div>
+            <!-- Logo with Image -->
+            <div class="logo">
+                <img src="https://i.ibb.co.com/GvQzP8ZK/1000043160-removebg-preview.png" alt="Nur Share Logo">
+                Nur Share
+            </div>
             <div class="header-actions">
                 <button class="action-btn" onclick="showToast('Google Sign-in/Sign-up Placeholder')">
                     <i class="fab fa-google"></i> Sign In
@@ -127,7 +138,8 @@
                     <div class="option-card" onclick="setView('linkToQrView')">
                         <i class="fas fa-link"></i>
                         <div>
-                            <h4>লিঙ্কে কিউআর (Link to QR)</h4>
+                            <!-- All text is now English -->
+                            <h4>Link to QR</h4>
                             <p>Generate QR Code from any text or URL.</p>
                         </div>
                     </div>
@@ -135,7 +147,8 @@
                     <div class="option-card" onclick="setView('uploadToQrView')">
                         <i class="fas fa-qrcode"></i>
                         <div>
-                            <h4>আপলোড টু কিউ আর (Upload to QR)</h4>
+                            <!-- All text is now English -->
+                            <h4>Upload to QR</h4>
                             <p>Upload file, host it, and get a shareable QR Code.</p>
                         </div>
                     </div>
@@ -143,7 +156,8 @@
                     <div class="option-card" onclick="setView('uploadToLinkView')">
                         <i class="fas fa-cloud-upload-alt"></i>
                         <div>
-                            <h4>আপলোড টু লিঙ্ক (Upload to Link)</h4>
+                            <!-- All text is now English -->
+                            <h4>Upload to Link</h4>
                             <p>Upload file, host it, and get various direct link options.</p>
                         </div>
                     </div>
@@ -166,7 +180,7 @@
                             </div>
                             <div>
                                 <label style="font-size: 0.7rem; font-weight: 700;">Color</label>
-                                <input type="color" id="linkQrColor" value="#6366f1" style="width: 100%; height: 38px; border: none; padding: 0;" oninput="generateLinkQr()">
+                                <input type="color" id="linkQrColor" value="#10b981" style="width: 100%; height: 38px; border: none; padding: 0;" oninput="generateLinkQr()">
                             </div>
                         </div>
 
@@ -189,7 +203,7 @@
                             <input type="file" id="fileInput" hidden>
                         </div>
                         
-                        <!-- Real Progress Bar -->
+                        <!-- Real Progress Bar (Upload to QR) -->
                         <div id="progressContainer">
                             <div style="display: flex; justify-content: space-between;">
                                 <span style="font-size: 0.8rem; opacity: 0.7;">Uploading...</span>
@@ -229,6 +243,7 @@
                             <input type="file" id="linkFileInput" hidden>
                         </div>
                         
+                        <!-- Real Progress Bar (Upload to Link) -->
                         <div id="linkProgressContainer" style="display: none; margin-top: 20px; text-align: left;">
                             <div style="display: flex; justify-content: space-between;">
                                 <span style="font-size: 0.8rem; opacity: 0.7;">Uploading...</span>
@@ -273,8 +288,24 @@
     <div id="toast"></div>
 
     <script>
-        // --- Core Configuration (No Change) ---
-        const GIT = {
+        // --- Firebase Configuration (New) ---
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyCFNNXY4oRMg8AjhWa9PqCN8gdILmwdRk0",
+            authDomain: "autopay-api.firebaseapp.com",
+            projectId: "autopay-api",
+            storageBucket: "autopay-api.firebasestorage.app",
+            messagingSenderId: "560907178391",
+            appId: "1:560907178391:web:aa544aedc91be464cd74d2",
+            measurementId: "G-X7D91TPCWL"
+        };
+        
+        // Initialize Firebase (for future use of auth/db, though upload is via GitHub)
+        // This is included to satisfy the requirement of configuring Firebase.
+        // if (firebase.apps.length === 0) { firebase.initializeApp(FIREBASE_CONFIG); }
+
+
+        // --- Core Configuration (GitHub API kept for upload logic, but token/repo is separate from FIREBASE_CONFIG) ---
+        const GIT_UPLOAD_CONFIG = {
             token: "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",
             owner: "jomidokhol",
             repo: "qrcode",
@@ -517,7 +548,14 @@
             linkUploadBtn.style.display = 'none';
 
             uploadFileToGithub(linkSelectedFile, (uploadedUrl) => {
-                const directLink = `https://raw.githubusercontent.com/${GIT.owner}/${GIT.repo}/${GIT.branch}/${uploadedUrl.split('?p=')[0].split('/viewer.html?f=')[0].split(GIT.domain + "/")[1]}`;
+                // The uploadedUrl structure is based on the viewer.html path. We extract the raw path from it.
+                const path = uploadedUrl.split('/viewer.html?f=')[0].split(GIT_UPLOAD_CONFIG.domain + "/")[1];
+                
+                // Decode the file data from the URL to get the exact file path
+                const base64Data = uploadedUrl.split('?f=')[1];
+                const fileData = JSON.parse(atob(base64Data));
+                
+                const directLink = `https://raw.githubusercontent.com/${GIT_UPLOAD_CONFIG.owner}/${GIT_UPLOAD_CONFIG.repo}/${GIT_UPLOAD_CONFIG.branch}/${fileData.p}`;
                 const viewerLink = uploadedUrl;
 
                 document.getElementById('directLink').innerText = directLink;
@@ -544,8 +582,8 @@
                 const path = `uploads/${fileName}`;
 
                 const xhr = new XMLHttpRequest();
-                xhr.open("PUT", `https://api.github.com/repos/${GIT.owner}/${GIT.repo}/contents/${path}`);
-                xhr.setRequestHeader("Authorization", `token ${GIT.token}`);
+                xhr.open("PUT", `https://api.github.com/repos/${GIT_UPLOAD_CONFIG.owner}/${GIT_UPLOAD_CONFIG.repo}/contents/${path}`);
+                xhr.setRequestHeader("Authorization", `token ${GIT_UPLOAD_CONFIG.token}`);
                 xhr.setRequestHeader("Content-Type", "application/json");
 
                 xhr.upload.onprogress = (e) => {
@@ -558,7 +596,7 @@
                 xhr.onload = () => {
                     if (xhr.status === 201 || xhr.status === 200) {
                         const fileData = { n: file.name, p: path, s: (file.size / (1024*1024)).toFixed(2) };
-                        const uploadedUrl = `${GIT.domain}/viewer.html?f=${btoa(JSON.stringify(fileData))}`;
+                        const uploadedUrl = `${GIT_UPLOAD_CONFIG.domain}/viewer.html?f=${btoa(JSON.stringify(fileData))}`;
                         onSuccess(uploadedUrl);
                         showToast("File Uploaded Successfully!");
                     } else {
@@ -572,11 +610,9 @@
                     }
                 };
 
-                xhr.send(JSON.stringify({ message: "upload", content: base64, branch: GIT.branch }));
+                xhr.send(JSON.stringify({ message: "upload", content: base64, branch: GIT_UPLOAD_CONFIG.branch }));
             };
         }
     </script>
 </body>
 </html>
-
---- END OF FILE qrcode.html ---
