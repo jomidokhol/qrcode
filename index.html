@@ -3,17 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nur Share | QR Generator</title>
+    <title>Nur Share | QR & Tools Generator</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     
-    <!-- Third-party Library for QR Extraction (NEW ADDITION) -->
+    <!-- Third-party Library for QR Extraction -->
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.1.0/dist/jsQR.min.js"></script> 
-    <!-- End Third-party Library -->
     
-    <!-- Firebase SDK Scripts (Added for Sign-in) -->
+    <!-- NEW LIBRARIES FOR ADDED TOOLS -->
+    <!-- LameJS for MP3 Encoding -->
+    <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
+    <!-- PDF.js for PDF Extraction -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <!-- JSZip for ZIP Extraction -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- Gifshot for Video to GIF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gifshot/0.3.2/gifshot.min.js"></script>
+    <!-- End New Libraries -->
+    
+    <!-- Firebase SDK Scripts -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <!-- End Firebase SDK Scripts -->
@@ -23,31 +33,23 @@
         :root { --primary: #10b981; --bg: #ffffff; --card: #f8fafc; --text: #0f172a; --border: #e2e8f0; --shadow: rgba(0, 0, 0, 0.1); }
         .dark-mode { --bg: #000000; --card: #111111; --text: #ffffff; --border: #222222; --shadow: rgba(255, 255, 255, 0.1); }
         
-        /* NEW ADDITION: Style for the reset button in dark mode to force white background/black text */
         .dark-mode .extractor-reset-btn {
-            background: var(--text) !important; /* Force white background */
-            border-color: var(--text) !important; /* Force white border */
-            color: var(--bg) !important; /* Force black text for contrast */
+            background: var(--text) !important; 
+            border-color: var(--text) !important; 
+            color: var(--bg) !important; 
         }
-        /* END NEW ADDITION */
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { 
             background-color: var(--bg); color: var(--text); 
             transition: 0.4s; min-height: 100vh; display: flex; 
             flex-direction: column; 
-            /* New Addition 3: Disable text selection by default */
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
+            -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
         }
-        /* New Addition 3: Enable selection for specific elements */
-        input, .link-url, .upload-box #uploadTitle, #linkUploadTitle, #extractorUploadTitle, footer p, #toast { /* ADDED #extractorUploadTitle */
-            -webkit-user-select: text;
-            -moz-user-select: text;
-            -ms-user-select: text;
-            user-select: text;
+        
+        input, .link-url, .upload-box #uploadTitle, #linkUploadTitle, #extractorUploadTitle, 
+        #mp3UploadTitle, #pdfUploadTitle, #zipUploadTitle, #gifUploadTitle, footer p, #toast {
+            -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text;
         }
 
         /* Sticky Header */
@@ -61,7 +63,6 @@
             width: 100%; max-width: 500px; display: flex; 
             justify-content: space-between; align-items: center; 
         }
-        /* Logo Update with Image */
         .logo { font-weight: 800; font-size: 1.4rem; color: var(--primary); display: flex; align-items: center; gap: 8px; }
         .logo img { height: 50px; }
         .header-actions { display: flex; align-items: center; gap: 10px; }
@@ -69,18 +70,11 @@
         .action-btn { background: var(--primary); color: white; font-size: 0.8rem; font-weight: 600; padding: 0 15px; width: auto; }
         .action-btn:hover { opacity: 0.9; }
 
-        /* New Addition 2: Disable button blue highlight on press/focus */
-        .btn:focus, .btn:active, 
-        .theme-btn:focus, .theme-btn:active, 
-        .action-btn:focus, .action-btn:active,
-        .option-card:focus, .option-card:active,
-        .icon-back-btn:focus, .icon-back-btn:active,
-        .clear-input-btn:focus, .clear-input-btn:active,
-        .paste-btn:focus, .paste-btn:active,
-        .remove-file-btn:focus, .remove-file-btn:active {
-            outline: none;
-            -webkit-tap-highlight-color: transparent; 
-            box-shadow: none;
+        .btn:focus, .btn:active, .theme-btn:focus, .theme-btn:active, 
+        .action-btn:focus, .action-btn:active, .option-card:focus, .option-card:active,
+        .icon-back-btn:focus, .icon-back-btn:active, .clear-input-btn:focus, .clear-input-btn:active,
+        .paste-btn:focus, .paste-btn:active, .remove-file-btn:focus, .remove-file-btn:active {
+            outline: none; -webkit-tap-highlight-color: transparent; box-shadow: none;
         }
 
         /* Main Content Area */
@@ -91,32 +85,21 @@
         .container { width: 100%; max-width: 500px; }
         .main-card { background: var(--card); border: 1px solid var(--border); border-radius: 32px; padding: 30px; box-shadow: 0 25px 50px -12p var(--shadow); }
 
-        /* Sticky Footer */
         footer { 
-            /* CHANGE 2: Removed sticky positioning */
-            width: 100%; 
-            background: var(--bg); border-top: 1px solid var(--border); 
-            padding: 15px 20px; text-align: center; font-size: 0.8rem; 
-            opacity: 0.7;
+            width: 100%; background: var(--bg); border-top: 1px solid var(--border); 
+            padding: 15px 20px; text-align: center; font-size: 0.8rem; opacity: 0.7;
         }
 
-        /* Original Styles (modified for layout) */
-        .header-card { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; display: none; /* Hidden in favor of sticky header */ }
-
-        /* Progress Bar UI */
         #progressContainer, #linkProgressContainer { display: none; margin-top: 20px; text-align: left; }
         .progress-track { background: var(--border); height: 10px; border-radius: 10px; overflow: hidden; margin-top: 10px; }
         .progress-fill { background: var(--primary); height: 100%; width: 0%; transition: width 0.1s; }
         #percentLabel, #linkPercentLabel { font-size: 0.8rem; font-weight: 700; color: var(--primary); }
 
-        /* Change 2: Removed padding top/bottom to better center image and text */
         .upload-box { border: 2px dashed var(--primary); border-radius: 24px; padding: 20px; text-align: center; cursor: pointer; background: rgba(99, 102, 241, 0.05); position: relative; } 
-        .upload-box img { display:block; margin: 0 auto 10px; } /* Ensures image is centered */
+        .upload-box img { display:block; margin: 0 auto 10px; }
         
-        #resultArea { display: none; margin-top: 25px; padding-top: 25px; border-top: 1px solid var(--border); text-align: center; }
-        #extractorResultArea { display: none; margin-top: 25px; padding-top: 25px; border-top: 1px solid var(--border); text-align: center; } /* ADDED */
+        #resultArea, #extractorResultArea { display: none; margin-top: 25px; padding-top: 25px; border-top: 1px solid var(--border); text-align: center; }
         .qr-wrapper { width: 200px; height: 200px; margin: 0 auto 20px; background: white; padding: 10px; border-radius: 16px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        /* Change 4A: Target all canvas inside qr-wrapper to prevent UI zoom */
         .qr-wrapper canvas { width: 100% !important; height: 100% !important; }
 
         .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left; margin-top: 20px; }
@@ -125,225 +108,118 @@
         .btn-action { background: var(--border); color: var(--text); font-size: 0.85rem; }
         .btn-link { background: var(--primary); color: white; font-size: 0.9rem; font-weight: 600; padding: 18px; }
 
-        /* New Styles for Options */
         .option-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 15px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 20px; }
         .option-card:hover { border-color: var(--primary); background: rgba(99, 102, 241, 0.05); }
         .option-card i { font-size: 1.8rem; color: var(--primary); }
         .option-card h4 { margin: 0; font-weight: 800; }
         .option-card p { margin: 0; font-size: 0.8rem; opacity: 0.7; }
         
-        /* Change 1: New style for icon-only back button (Color change logic removed as it inherits from --text) */
         .icon-back-btn { 
             background: transparent; border: 1px solid var(--border); 
             font-size: 1rem; margin-bottom: 20px; 
             width: 40px; height: 40px; border-radius: 50%;
-            cursor: pointer;
-            color: var(--text); /* Ensures color is set by theme */
+            cursor: pointer; color: var(--text); 
             display: flex; align-items: center; justify-content: center;
-            padding: 0;
-            transition: 0.3s;
+            padding: 0; transition: 0.3s;
         }
         .icon-back-btn:hover { background: var(--border); }
 
-        /* New Change 2: Style for input control buttons (Clear/Paste) */
         .input-controls { 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-            position: absolute; 
-            right: 15px; 
-            top: 50%; 
+            display: flex; align-items: center; gap: 10px; 
+            position: absolute; right: 15px; top: 50%; 
             transform: translateY(-50%);
         }
         .input-wrapper { position: relative; margin-bottom: 20px; }
         .clear-input-btn, .paste-btn {
-            background: transparent; 
-            border: none; 
-            color: var(--text); 
-            opacity: 0.6; 
-            cursor: pointer; 
-            font-size: 1rem;
-            padding: 5px;
-            transition: 0.2s;
+            background: transparent; border: none; color: var(--text); 
+            opacity: 0.6; cursor: pointer; font-size: 1rem;
+            padding: 5px; transition: 0.2s;
         }
         .clear-input-btn:hover, .paste-btn:hover { opacity: 1; }
 
-        /* New Change 1: Style for file removal button (UPDATED FOR CHANGE 3) */
         .remove-file-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: var(--border); /* Changed for gray color */
-            color: var(--text); /* Changed for gray color */
-            border: 1px solid var(--text); /* Added a border */
-            border-radius: 50%;
-            width: 25px;
-            height: 25px;
-            font-size: 0.7rem;
-            display: none; /* Controlled by JS */
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: 0.3s;
-            z-index: 10;
-            opacity: 0.8;
+            position: absolute; top: 10px; right: 10px;
+            background: var(--border); color: var(--text); 
+            border: 1px solid var(--text); border-radius: 50%;
+            width: 25px; height: 25px; font-size: 0.7rem;
+            display: none; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.3s; z-index: 10; opacity: 0.8;
         }
-        .remove-file-btn:hover { 
-            background: var(--text); /* Darken on hover */
-            color: var(--bg); /* Change text to white on hover */
-            opacity: 1;
-        }
+        .remove-file-btn:hover { background: var(--text); color: var(--bg); opacity: 1; }
 
-        /* New Change 3: Style for generic file icon preview */
         .file-icon-preview {
-            display: block;
-            margin: 0 auto 10px;
-            font-size: 3rem;
-            color: var(--primary);
-            position: relative;
-            width: 80px;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: block; margin: 0 auto 10px; font-size: 3rem;
+            color: var(--primary); position: relative;
+            width: 80px; height: 80px; display: flex;
+            align-items: center; justify-content: center;
         }
         .file-icon-preview i { font-size: 3rem; }
         .file-ext {
-            position: absolute;
-            bottom: 5px;
-            right: 0px;
-            font-size: 0.6rem;
-            font-weight: 700;
-            background: var(--text);
-            color: var(--bg);
-            padding: 2px 4px;
-            border-radius: 4px;
-            text-transform: uppercase;
+            position: absolute; bottom: 5px; right: 0px;
+            font-size: 0.6rem; font-weight: 700;
+            background: var(--text); color: var(--bg);
+            padding: 2px 4px; border-radius: 4px; text-transform: uppercase;
         }
         
-        /* Step 2: Styles for Square Color Input and Custom Picker */
+        /* Styles for New Tools */
+        .preview-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+        .file-list-item { 
+            background: var(--card); border: 1px solid var(--border); 
+            padding: 10px; border-radius: 8px; font-size: 0.8rem; 
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px;
+        }
+        .file-list-item .fname { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 70%; }
+        
+        /* Red Icon Style for PDF/ZIP */
+        .red-icon i { color: #ef4444 !important; }
+
+        /* Color Picker */
         .color-selector-wrapper { position: relative; }
         .color-square-btn {
-            width: 38px;
-            height: 38px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: 0.3s;
-            display: inline-block;
-            vertical-align: middle;
-            position: relative;
+            width: 38px; height: 38px; border: 1px solid var(--border);
+            border-radius: 8px; cursor: pointer; transition: 0.3s;
+            display: inline-block; vertical-align: middle; position: relative;
         }
         .color-square-btn:hover { opacity: 0.9; }
+        .hidden-color-input { opacity: 0; position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer; padding: 0; margin: 0; }
         
-        /* Hidden Native Color Input (Used to get value only) */
-        .hidden-color-input {
-            opacity: 0;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-            padding: 0;
-            margin: 0;
-        }
-        
-        /* Step 2: Custom Color Picker Dropdown */
         #customColorPicker {
-            position: absolute;
-            z-index: 20;
-            padding: 15px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            box-shadow: 0 4px 12px var(--shadow);
-            top: 45px;
-            left: 0;
-            width: 250px;
-            display: none;
+            position: absolute; z-index: 20; padding: 15px;
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 12px; box-shadow: 0 4px 12px var(--shadow);
+            top: 45px; left: 0; width: 250px; display: none;
         }
-        .color-palette {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        .color-swatch {
-            width: 100%;
-            padding-top: 100%; 
-            border-radius: 8px;
-            cursor: pointer;
-            border: 1px solid var(--border);
-            transition: transform 0.1s;
-        }
+        .color-palette { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 10px; }
+        .color-swatch { width: 100%; padding-top: 100%; border-radius: 8px; cursor: pointer; border: 1px solid var(--border); transition: transform 0.1s; }
         .color-swatch:hover { transform: scale(1.05); }
 
-        /* Step 1: Custom Dropdown for Link Formats */
-        #linkFormatToggle {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            background: var(--bg);
-            cursor: pointer;
-            transition: 0.3s;
-            margin-top: 5px;
-        }
+        #linkFormatToggle { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); cursor: pointer; transition: 0.3s; margin-top: 5px; }
         #linkFormatToggle:hover { border-color: var(--primary); }
-        #linkOptionsDropdown {
-            position: absolute;
-            z-index: 10;
-            width: 100%;
-            max-width: 500px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            box-shadow: 0 4px 12px var(--shadow);
-            padding: 15px;
-            margin-top: 5px;
-            display: none;
-            left: 50%;
-            transform: translateX(-50%);
-        }
+        #linkOptionsDropdown { position: absolute; z-index: 10; width: 100%; max-width: 500px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 4px 12px var(--shadow); padding: 15px; margin-top: 5px; display: none; left: 50%; transform: translateX(-50%); }
 
-
-        /* Toast Notification */
-        #toast {
-            visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; 
-            border-radius: 8px; padding: 16px; position: fixed; z-index: 1; left: 50%; bottom: 30px; 
-            transform: translateX(-50%); font-size: 0.9rem;
-        }
+        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 1; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 0.9rem; }
         #toast.show { visibility: visible; -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @-webkit-keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
         @keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
         @-webkit-keyframes fadeout { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
         @keyframes fadeout { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
 
-        /* Skeleton Loader */
-        .skeleton { background: var(--border); animation: pulse 1.5s infinite ease-in-out; border-radius: 4px; }
-        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
-        .qr-skeleton { width: 200px; height: 200px; margin: 0 auto 20px; border-radius: 16px; }
-        #linkOptionsArea { padding-top: 20px; border-top: 1px solid var(--border); margin-top: 20px; }
         .link-url { word-break: break-all; font-size: 0.9rem; padding: 10px; background: var(--border); border-radius: 8px; margin-top: 10px; }
         
-        /* Hidden Views */
-        #mainOptionsView, #linkToQrView, #uploadToQrView, #uploadToLinkView, #qrExtractorView { display: none; } /* ADDED #qrExtractorView */
+        /* Views */
+        #mainOptionsView, #linkToQrView, #uploadToQrView, #uploadToLinkView, #qrExtractorView,
+        #mp4ToMp3View, #pdfExtractorView, #zipExtractorView, #videoToGifView { display: none; }
     </style>
 </head>
 <body>
 
     <header>
         <div class="header-content">
-            <!-- Logo with Image -->
             <div class="logo">
-                <!-- Change 1: Added ID for JS logo change in dark mode -->
                 <img id="logoImage" src="https://i.ibb.co.com/GvQzP8ZK/1000043160-removebg-preview.png" alt="Logo">
             </div>
             <div class="header-actions">
-                <!-- Change 4: Added ID for JS sign-in UI update -->
                 <button class="action-btn" id="signInButton" onclick="googleSignIn()">
                     <i class="fab fa-google"></i> Sign In
                 </button>
@@ -359,48 +235,79 @@
                 <div id="mainOptionsView">
                     <h2 style="margin-bottom: 25px; text-align: center;">Choose Your Service</h2>
                     
-                    <div class="option-card" onclick="setView('linkToQrView')">
-                        <i class="fas fa-link"></i>
-                        <div>
-                            <h4>Link to QR</h4>
-                            <p>Generate QR Code from any text or URL.</p>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 0;">
+                        <!-- Existing Tools -->
+                        <div class="option-card" onclick="setView('linkToQrView')">
+                            <i class="fas fa-link"></i>
+                            <div>
+                                <h4>Link to QR</h4>
+                                <p>Generate QR Code from any text or URL.</p>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="option-card" onclick="setView('uploadToQrView')">
-                        <i class="fas fa-qrcode"></i>
-                        <div>
-                            <h4>Upload to QR</h4>
-                            <p>Upload file, host it, and get a shareable QR Code.</p>
+                        
+                        <div class="option-card" onclick="setView('uploadToQrView')">
+                            <i class="fas fa-qrcode"></i>
+                            <div>
+                                <h4>Upload to QR</h4>
+                                <p>Upload file, host it, and get a shareable QR Code.</p>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="option-card" onclick="setView('uploadToLinkView')">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <div>
-                            <h4>Upload to Link</h4>
-                            <p>Upload file, host it, and get various direct link options.</p>
+                        <div class="option-card" onclick="setView('uploadToLinkView')">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <div>
+                                <h4>Upload to Link</h4>
+                                <p>Upload file, host it, and get various direct link options.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="option-card" onclick="setView('qrExtractorView')">
+                            <i class="fas fa-camera"></i> 
+                            <div>
+                                <h4>QR Code Extractor</h4>
+                                <p>Upload an image to extract the embedded data.</p>
+                            </div>
+                        </div>
+
+                        <!-- NEW TOOLS ADDED HERE -->
+                        <div class="option-card" onclick="setView('mp4ToMp3View')">
+                            <i class="fas fa-music"></i> 
+                            <div>
+                                <h4>MP4 to MP3</h4>
+                                <p>Convert video to audio with preview.</p>
+                            </div>
+                        </div>
+
+                        <div class="option-card" onclick="setView('pdfExtractorView')">
+                            <i class="fas fa-file-pdf"></i> 
+                            <div>
+                                <h4>PDF Extractor</h4>
+                                <p>Extract images from PDF pages.</p>
+                            </div>
+                        </div>
+
+                        <div class="option-card" onclick="setView('zipExtractorView')">
+                            <i class="fas fa-file-zipper"></i> 
+                            <div>
+                                <h4>ZIP Extractor</h4>
+                                <p>Extract and download files from ZIP.</p>
+                            </div>
+                        </div>
+
+                        <div class="option-card" onclick="setView('videoToGifView')">
+                            <i class="fas fa-video"></i> 
+                            <div>
+                                <h4>Video to GIF</h4>
+                                <p>Convert short clips to GIF animation.</p>
+                            </div>
                         </div>
                     </div>
-                    
-                    <!-- NEW ADDITION: QR Code Extractor Option (ICON CHANGED) -->
-                    <div class="option-card" onclick="setView('qrExtractorView')">
-                        <i class="fas fa-camera"></i> 
-                        <div>
-                            <h4>QR Code Extractor</h4>
-                            <p>Upload an image to extract the embedded data (text/URL).</p>
-                        </div>
-                    </div>
-                    <!-- END NEW ADDITION -->
                 </div>
 
                 <!-- 1. Link to QR View -->
                 <div id="linkToQrView">
-                    <!-- Change 1: Replaced button with icon-only back button -->
                     <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
                     <h3 style="margin-bottom: 15px;">Link to QR Generator</h3>
-
-                    <!-- New Change 2: Input wrapper for clear/paste buttons -->
                     <div class="input-wrapper">
                         <input type="text" id="linkInput" placeholder="Paste your URL or text here..." style="width: 100%; padding: 15px; padding-right: 80px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 1rem;" oninput="generateLinkQr()">
                         <div class="input-controls">
@@ -408,25 +315,19 @@
                             <button class="paste-btn" id="pasteLinkInputBtn"><i class="fas fa-paste"></i></button>
                         </div>
                     </div>
-                    <!-- End New Change 2 -->
-
                     <div id="linkQrResultArea" style="text-align: center;">
                         <div class="qr-wrapper"><div id="linkQrcode"></div></div>
-                        
-                        <!-- Step 2: Updated grid layout for new color options -->
                         <div class="control-grid" style="grid-template-columns: 1fr 1fr 1fr;">
                             <div>
                                 <label style="font-size: 0.7rem; font-weight: 700;">Resolution</label>
                                 <input type="range" id="linkQrSize" min="200" max="1500" value="600" style="width: 100%; accent-color: var(--primary);" oninput="generateLinkQr()">
                             </div>
-                            <!-- Step 2: Color Picker Section (Foreground) -->
                             <div class="color-selector-wrapper">
                                 <label style="font-size: 0.7rem; font-weight: 700;">Color (Foreground)</label> 
                                 <span class="color-square-btn" id="linkQrColorBtn" onclick="toggleColorPicker('linkQrColorBtn', 'linkQrColor', 'linkQrBackgroundBtn')">
                                     <input type="color" id="linkQrColor" value="#000000" class="hidden-color-input" oninput="updateColorPreview(this, 'linkQrColorBtn'); generateLinkQr();" onclick="event.stopPropagation()">
                                 </span>
                             </div>
-                            <!-- Step 2: Color Picker Section (Background) -->
                             <div class="color-selector-wrapper">
                                 <label style="font-size: 0.7rem; font-weight: 700;">Background Color</label> 
                                 <span class="color-square-btn" id="linkQrBackgroundBtn" style="background-color: #ffffff;" onclick="toggleColorPicker('linkQrBackgroundBtn', 'linkQrBackground', 'linkQrColorBtn')">
@@ -434,8 +335,6 @@
                                 </span>
                             </div>
                         </div>
-                        
-                        <!-- Step 2: Custom Color Picker Overlay -->
                         <div id="customColorPicker" style="display: none;">
                             <span style="font-size: 0.8rem; font-weight: 700; display: block; margin-bottom: 10px;">Select a Color</span>
                             <div class="color-palette" id="colorPalette">
@@ -448,41 +347,29 @@
                             <label style="font-size: 0.7rem; font-weight: 700;">Hex Code:</label>
                             <input type="text" id="hexInput" placeholder="#000000" maxlength="7" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.9rem;" oninput="updateHexColor(this.value)">
                         </div>
-
-                        <!-- Change 3: Added Size Display for Link QR -->
                         <span id="linkQrCodeSizeDisplay" style="font-size: 0.8rem; font-weight: 600; text-align: right; margin-top: 5px; display: block;">600px | Size: N/A</span>
-
-                        <!-- Step 2: Removed copy button, updated grid to 1fr -->
                         <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 15px;">
                             <button class="btn btn-action" id="downloadLinkQRBtn"><i class="fas fa-download"></i> Save QR</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- 2. Upload to QR View (Original Logic) -->
+                <!-- 2. Upload to QR View -->
                 <div id="uploadToQrView">
-                    <!-- Change 1: Replaced button with icon-only back button -->
                     <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
                     <h3 style="margin-bottom: 15px;">Upload to QR Code</h3>
-
                     <div id="uploaderView">
                         <div class="upload-box" id="dropZone">
-                            <!-- New Change 1: File removal button -->
                             <button class="remove-file-btn" id="removeFileQrBtn" style="display: none;"><i class="fas fa-times"></i></button>
-                            <!-- Change 2: File preview elements -->
                             <i class="fas fa-cloud-arrow-up" id="uploadIconQr" style="font-size: 2.5rem; color: var(--primary);"></i>
-                            <!-- New Change 3: File icon preview -->
                             <div class="file-icon-preview" id="fileIconQr" style="display: none;">
                                 <i class="fas fa-folder"></i>
                                 <span class="file-ext" id="fileExtQr"></span>
                             </div>
-                            <!-- Change 2: Img preview element (margin: 0 auto needed for centering) -->
                             <img id="imagePreviewQr" style="display:none; max-width: 100px; max-height: 100px; border-radius: 8px; margin: 0 auto 10px;">
                             <h3 id="uploadTitle" style="margin-top:10px;">Choose a file</h3>
                             <input type="file" id="fileInput" hidden>
                         </div>
-                        
-                        <!-- Real Progress Bar (Upload to QR) -->
                         <div id="progressContainer">
                             <div style="display: flex; justify-content: space-between;">
                                 <span style="font-size: 0.8rem; opacity: 0.7;">Uploading...</span>
@@ -490,62 +377,44 @@
                             </div>
                             <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
                         </div>
-
                         <button class="btn btn-primary" id="uploadBtn" disabled>Generate</button>
                     </div>
-
                     <div id="resultArea">
-                        <!-- NEW ADDITION 1: QR Success Preview -->
                         <div id="qrSuccessDisplay" style="text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border);">
                             <i class="fas fa-check-circle" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 10px;"></i>
                             <h4 style="margin-bottom: 5px;">File Uploaded Successfully!</h4>
-                            <div id="qrResultFilePreview" style="margin-top: 15px;">
-                                <!-- Placeholder for cloned preview (icon, image, or text) -->
-                            </div>
+                            <div id="qrResultFilePreview" style="margin-top: 15px;"></div>
                         </div>
-                        <!-- END NEW ADDITION 1 -->
-                        
                         <div class="qr-wrapper"><div id="qrcode"></div></div>
                         <div class="control-grid" style="grid-template-columns: 1fr;">
                             <label style="font-size: 0.7rem; font-weight: 700;">Resolution</label>
                             <input type="range" id="qrSize" min="200" max="1500" value="600" style="width: 100%; accent-color: var(--primary);">
-                            <!-- Change 3: Added Size Display -->
                             <span id="qrCodeSizeDisplay" style="font-size: 0.8rem; font-weight: 600; text-align: right; margin-top: 5px;">600px | Size: N/A</span>
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
                             <button class="btn btn-action" id="downloadQRBtn"><i class="fas fa-download"></i> Save QR</button>
                             <button class="btn btn-action" id="copyBtn"><i class="fas fa-link"></i> Copy URL</button>
                         </div>
-                        <button class="btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="location.reload()">
-                            Upload New File
-                        </button>
+                        <button class="btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="location.reload()">Upload New File</button>
                     </div>
                 </div>
                 
                 <!-- 3. Upload to Link View -->
                 <div id="uploadToLinkView">
-                    <!-- Change 1: Replaced button with icon-only back button -->
                     <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
                     <h3 style="margin-bottom: 15px;">Upload to Link</h3>
-
                     <div id="linkUploaderView">
                         <div class="upload-box" id="linkDropZone">
-                            <!-- New Change 1: File removal button -->
                             <button class="remove-file-btn" id="removeFileLinkBtn" style="display: none;"><i class="fas fa-times"></i></button>
-                            <!-- Change 2: File preview elements -->
                             <i class="fas fa-cloud-arrow-up" id="uploadIconLink" style="font-size: 2.5rem; color: var(--primary);"></i>
-                            <!-- New Change 3: File icon preview -->
                             <div class="file-icon-preview" id="fileIconLink" style="display: none;">
                                 <i class="fas fa-folder"></i>
                                 <span class="file-ext" id="fileExtLink"></span>
                             </div>
-                            <!-- Change 2: Img preview element (margin: 0 auto needed for centering) -->
                             <img id="imagePreviewLink" style="display:none; max-width: 100px; max-height: 100px; border-radius: 8px; margin: 0 auto 10px;">
                             <h3 id="linkUploadTitle" style="margin-top:10px;">Choose a file</h3>
                             <input type="file" id="linkFileInput" hidden>
                         </div>
-                        
-                        <!-- Real Progress Bar (Upload to Link) -->
                         <div id="linkProgressContainer" style="display: none; margin-top: 20px; text-align: left;">
                             <div style="display: flex; justify-content: space-between;">
                                 <span style="font-size: 0.8rem; opacity: 0.7;">Uploading...</span>
@@ -553,38 +422,25 @@
                             </div>
                             <div class="progress-track"><div class="progress-fill" id="linkProgressFill"></div></div>
                         </div>
-
                         <button class="btn btn-primary" id="linkUploadBtn" disabled>Generate Link</button>
                     </div>
-
-                    <!-- CHANGE 2: Updated Link Result Area -->
                     <div id="linkResultArea" style="display: none;">
-                        
-                        <!-- New: Preview/Success Area -->
                         <div id="linkSuccessDisplay" style="text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border);">
                             <i class="fas fa-check-circle" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 10px;"></i>
                             <h4 style="margin-bottom: 5px;">File Uploaded Successfully!</h4>
-                            <div id="resultFilePreview" style="margin-top: 15px;">
-                                <!-- Placeholder for cloned preview (icon, image, or text) -->
-                            </div>
+                            <div id="resultFilePreview" style="margin-top: 15px;"></div>
                         </div>
-                        
-                        <!-- Direct Link (Initially Visible) -->
                         <div style="margin-bottom: 15px;">
                             <label style="font-size: 0.7rem; font-weight: 700;">Direct Link (Download):</label>
                             <div id="directLink" class="link-url"></div>
                             <button class="btn btn-action" style="margin-top: 5px;" onclick="copyLink('#directLink')"><i class="fas fa-copy"></i> Copy Direct Link</button>
                         </div>
-
-                        <!-- Step 1: Replaced Select with Custom Dropdown Trigger -->
                         <div style="margin-bottom: 15px; position: relative;">
                             <label style="font-size: 0.7rem; font-weight: 700; display: block; margin-bottom: 10px;">Other Link Formats:</label>
-                            
                             <div id="linkFormatToggle" onclick="toggleLinkOptions()">
                                 <span id="selectedLinkFormatText">Viewer's Link</span>
                                 <i class="fas fa-chevron-down"></i>
                             </div>
-
                             <div id="linkOptionsDropdown">
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                                     <button class="btn btn-action" onclick="selectLinkFormat('viewer', 'Viewer\'s Link')" style="font-size: 0.8rem; padding: 10px;">Viewer's Link</button>
@@ -595,27 +451,19 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- New: Link Format Display Area (Shared) -->
                         <div style="margin-bottom: 15px;">
                             <label style="font-size: 0.7rem; font-weight: 700;">Selected Link Format:</label>
                             <div id="linkFormatDisplay" class="link-url">Click a format above to display.</div>
-                            <!-- Updated copy button to use the new JS function -->
                             <button class="btn btn-action" style="margin-top: 5px;" onclick="copySelectedLink()"><i class="fas fa-copy"></i> Copy Selected Link</button>
                         </div>
-
-                        <button class="btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="location.reload()">
-                            Upload New File
-                        </button>
+                        <button class="btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="location.reload()">Upload New File</button>
                     </div>
-                    <!-- END CHANGE 2 -->
                 </div>
                 
-                <!-- NEW ADDITION 2: QR Code Extractor View -->
+                <!-- 4. QR Code Extractor View -->
                 <div id="qrExtractorView" style="display: none;">
                     <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
                     <h3 style="margin-bottom: 15px;">QR Code Extractor</h3>
-
                     <div id="extractorUploaderView">
                         <div class="upload-box" id="extractorDropZone">
                             <button class="remove-file-btn" id="removeFileExtractorBtn" style="display: none;"><i class="fas fa-times"></i></button>
@@ -628,36 +476,145 @@
                             <h3 id="extractorUploadTitle" style="margin-top:10px;">Choose a QR Code Image</h3>
                             <input type="file" id="extractorFileInput" hidden accept="image/*">
                         </div>
-                        
                         <button class="btn btn-primary" id="extractBtn" disabled>Extract QR Code</button>
                     </div>
-
                     <div id="extractorResultArea" style="display: none;">
-                        <!-- Preview/Success Area -->
                         <div id="extractorSuccessDisplay" style="text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border);">
                             <i class="fas fa-check-circle" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 10px;"></i>
                             <h4 style="margin-bottom: 5px;">Extraction Successful!</h4>
-                            <div id="extractorResultFilePreview" style="margin-top: 15px;">
-                                <!-- Placeholder for cloned preview -->
-                            </div>
+                            <div id="extractorResultFilePreview" style="margin-top: 15px;"></div>
                         </div>
-                        
                         <div style="margin-bottom: 15px;">
                             <label style="font-size: 0.7rem; font-weight: 700;">Extracted Data:</label>
                             <div id="extractedDataDisplay" class="link-url"></div>
                         </div>
-
-                        <div id="extractorActionButtons" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-                            <!-- Buttons added dynamically by JS -->
-                        </div>
-                        
-                        <!-- MODIFIED: Added class for dark mode styling -->
-                        <button class="btn extractor-reset-btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="location.reload()">
-                            Upload New Image
-                        </button>
+                        <div id="extractorActionButtons" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;"></div>
+                        <button class="btn extractor-reset-btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="location.reload()">Upload New Image</button>
                     </div>
                 </div>
-                <!-- END NEW ADDITION 2 -->
+
+                <!-- 5. MP4 to MP3 Converter View -->
+                <div id="mp4ToMp3View">
+                    <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
+                    <h3 style="margin-bottom: 15px;">MP4 to MP3 Converter</h3>
+                    <div id="mp3UploaderView">
+                        <div class="upload-box" id="mp3DropZone">
+                            <button class="remove-file-btn" id="removeFileMp3Btn" style="display: none;"><i class="fas fa-times"></i></button>
+                            <i class="fas fa-music" id="uploadIconMp3" style="font-size: 2.5rem; color: var(--primary);"></i>
+                            <h3 id="mp3UploadTitle" style="margin-top:10px;">Choose an MP4 File</h3>
+                            <input type="file" id="mp3FileInput" hidden accept="video/mp4">
+                        </div>
+                        <div id="mp3PreviewArea" style="display:none; margin-top:15px; text-align:center;">
+                            <video id="sourceVideo" controls style="width:100%; max-height:200px; border-radius:12px;"></video>
+                        </div>
+                        <button class="btn btn-primary" id="convertMp3Btn" disabled>Convert to MP3</button>
+                    </div>
+                    <div id="mp3ResultArea" style="display: none;">
+                        <div style="text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border);">
+                            <i class="fas fa-check-circle" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 10px;"></i>
+                            <h4 style="margin-bottom: 5px;">Conversion Successful!</h4>
+                        </div>
+                        <label style="font-size: 0.7rem; font-weight: 700;">Audio Preview:</label>
+                        <audio id="resultAudio" controls style="width:100%; margin-top:10px;"></audio>
+                        <button class="btn btn-action" id="downloadMp3Btn" style="margin-top: 15px;"><i class="fas fa-download"></i> Download MP3</button>
+                        <button class="btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="location.reload()">Convert Another File</button>
+                    </div>
+                </div>
+
+                <!-- 6. PDF Extractor View -->
+                <div id="pdfExtractorView">
+                    <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
+                    <h3 style="margin-bottom: 15px;">PDF Extractor</h3>
+                    <div id="pdfUploaderView">
+                        <div class="upload-box" id="pdfDropZone">
+                            <button class="remove-file-btn" id="removeFilePdfBtn" style="display: none;"><i class="fas fa-times"></i></button>
+                            <!-- Red Icon for PDF -->
+                            <div class="file-icon-preview red-icon" id="fileIconPdf" style="display: block;">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+                            <h3 id="pdfUploadTitle" style="margin-top:10px;">Choose a PDF File</h3>
+                            <input type="file" id="pdfFileInput" hidden accept="application/pdf">
+                        </div>
+                        <div style="margin-top: 15px; display: flex; align-items: center; justify-content: space-between;">
+                            <label style="font-size: 0.8rem; font-weight: 600;">Image Quality:</label>
+                            <select id="pdfQuality" style="padding: 5px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+                                <option value="1.0">Standard</option>
+                                <option value="2.0">High</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" id="extractPdfBtn" disabled>Extract Images</button>
+                    </div>
+                    <div id="pdfResultArea" style="display: none;">
+                        <div style="text-align: center; margin-bottom: 15px;">
+                            <i class="fas fa-check-circle" style="font-size: 2.5rem; color: var(--primary);"></i>
+                            <h4 style="margin: 10px 0;">Extraction Successful!</h4>
+                            <p id="pdfPageCount" style="font-size: 0.8rem;"></p>
+                        </div>
+                        <button class="btn btn-action" id="downloadSelectedPdfBtn" style="margin-bottom: 15px;"><i class="fas fa-download"></i> Download Selected</button>
+                        <div id="pdfPagesGrid" class="preview-grid"></div>
+                        <button class="btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="location.reload()">New Extraction</button>
+                    </div>
+                </div>
+
+                <!-- 7. ZIP Extractor View -->
+                <div id="zipExtractorView">
+                    <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
+                    <h3 style="margin-bottom: 15px;">ZIP Extractor</h3>
+                    <div id="zipUploaderView">
+                        <div class="upload-box" id="zipDropZone">
+                            <button class="remove-file-btn" id="removeFileZipBtn" style="display: none;"><i class="fas fa-times"></i></button>
+                            <!-- Red Icon for ZIP -->
+                            <div class="file-icon-preview red-icon" id="fileIconZip" style="display: block;">
+                                <i class="fas fa-file-zipper"></i>
+                            </div>
+                            <h3 id="zipUploadTitle" style="margin-top:10px;">Choose a ZIP File</h3>
+                            <input type="file" id="zipFileInput" hidden accept=".zip,application/zip,application/x-zip-compressed">
+                        </div>
+                        <button class="btn btn-primary" id="extractZipBtn" disabled>Extract Files</button>
+                    </div>
+                    <div id="zipResultArea" style="display: none;">
+                        <div style="text-align: center; margin-bottom: 15px;">
+                            <i class="fas fa-check-circle" style="font-size: 2.5rem; color: var(--primary);"></i>
+                            <h4 style="margin: 10px 0;">Extraction Successful!</h4>
+                        </div>
+                        <div id="zipFileList" style="max-height: 300px; overflow-y: auto;"></div>
+                        <button class="btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="location.reload()">New Extraction</button>
+                    </div>
+                </div>
+
+                <!-- 8. Video to GIF View -->
+                <div id="videoToGifView">
+                    <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
+                    <h3 style="margin-bottom: 15px;">Video to GIF</h3>
+                    <div id="gifUploaderView">
+                        <div class="upload-box" id="gifDropZone">
+                            <button class="remove-file-btn" id="removeFileGifBtn" style="display: none;"><i class="fas fa-times"></i></button>
+                            <i class="fas fa-video" id="uploadIconGif" style="font-size: 2.5rem; color: var(--primary);"></i>
+                            <h3 id="gifUploadTitle" style="margin-top:10px;">Choose Video (Max 30s, 10MB)</h3>
+                            <input type="file" id="gifFileInput" hidden accept="video/*">
+                        </div>
+                        <div id="gifPreviewArea" style="display:none; margin-top:15px; text-align:center;">
+                            <video id="gifSourceVideo" controls style="width:100%; max-height:200px; border-radius:12px;"></video>
+                        </div>
+                        <div style="margin-top: 15px; display: flex; align-items: center; justify-content: space-between;">
+                            <label style="font-size: 0.8rem; font-weight: 600;">Resolution:</label>
+                            <select id="gifResolution" style="padding: 5px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+                                <option value="200">200px (Fast)</option>
+                                <option value="300" selected>300px (Standard)</option>
+                                <option value="400">400px (High)</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" id="convertGifBtn" disabled>Convert to GIF</button>
+                        <p id="gifLoading" style="text-align:center; font-size:0.8rem; margin-top:10px; display:none;">Converting... This may take a moment.</p>
+                    </div>
+                    <div id="gifResultArea" style="display: none;">
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <img id="resultGif" style="max-width: 100%; border-radius: 12px; border: 1px solid var(--border);">
+                        </div>
+                        <button class="btn btn-action" id="downloadGifBtn"><i class="fas fa-download"></i> Download GIF</button>
+                        <button class="btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="location.reload()">Convert Another</button>
+                    </div>
+                </div>
 
             </div>
         </div>
@@ -671,7 +628,7 @@
     <div id="toast"></div>
 
     <script>
-        // --- Firebase Configuration (Required for Sign-in) ---
+        // --- Firebase Configuration ---
         const FIREBASE_CONFIG = {
             apiKey: "AIzaSyCFNNXY4oRMg8AjhWa9PqCN8gdILmwdRk0",
             authDomain: "autopay-api.firebaseapp.com",
@@ -682,11 +639,8 @@
             measurementId: "G-X7D91TPCWL"
         };
         
-        // Initialize Firebase
         if (firebase.apps.length === 0) { firebase.initializeApp(FIREBASE_CONFIG); }
 
-
-        // --- Core Configuration (GitHub API - Restored to original variable name 'GIT') ---
         const GIT = {
             token: "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",
             owner: "jomidokhol",
@@ -694,27 +648,27 @@
             branch: "main",
             domain: "https://qrcode-gen-weld.vercel.app"
         };
-        // --- End Core Configuration ---
 
         // --- Global State and Elements ---
         let currentView = 'mainOptionsView';
         let currentUrl = "";
         let selectedFile = null;
-        // Step 1 & 3: Global variable for link formats
         let uploadedLinkFormats = null; 
-        
-        // Step 2: Color picker state
-        let activeColorTarget = null; // 'linkQrColor' or 'linkQrBackground'
+        let activeColorTarget = null;
 
         const views = {
             mainOptionsView: document.getElementById('mainOptionsView'),
             linkToQrView: document.getElementById('linkToQrView'),
             uploadToQrView: document.getElementById('uploadToQrView'),
             uploadToLinkView: document.getElementById('uploadToLinkView'),
-            qrExtractorView: document.getElementById('qrExtractorView'), // ADDED
+            qrExtractorView: document.getElementById('qrExtractorView'),
+            mp4ToMp3View: document.getElementById('mp4ToMp3View'),
+            pdfExtractorView: document.getElementById('pdfExtractorView'),
+            zipExtractorView: document.getElementById('zipExtractorView'),
+            videoToGifView: document.getElementById('videoToGifView')
         };
         
-        // --- Original Upload to QR Elements ---
+        // --- Elements (Standard) ---
         const fileInput = document.getElementById('fileInput');
         const dropZone = document.getElementById('dropZone');
         const uploadBtn = document.getElementById('uploadBtn');
@@ -723,21 +677,15 @@
         const percentLabel = document.getElementById('percentLabel');
         const resultArea = document.getElementById('resultArea');
         const qrcodeDiv = document.getElementById('qrcode');
-        // Change 2: New elements for file preview
         const uploadIconQr = document.getElementById('uploadIconQr');
         const imagePreviewQr = document.getElementById('imagePreviewQr');
-        // Change 3: New element for QR size display
         const qrCodeSizeDisplay = document.getElementById('qrCodeSizeDisplay');
-        // New Change 1: File removal button
         const removeFileQrBtn = document.getElementById('removeFileQrBtn');
-        // New Change 3: File icon preview
         const fileIconQr = document.getElementById('fileIconQr');
         const fileExtQr = document.getElementById('fileExtQr');
-        // NEW ADDITION 1: QR Result File Preview
         const qrResultFilePreview = document.getElementById('qrResultFilePreview');
 
-
-        // --- Upload to Link Elements ---
+        // --- Elements (Link) ---
         const linkFileInput = document.getElementById('linkFileInput');
         const linkDropZone = document.getElementById('linkDropZone');
         const linkUploadBtn = document.getElementById('linkUploadBtn');
@@ -746,42 +694,30 @@
         const linkPercentLabel = document.getElementById('linkPercentLabel');
         const linkResultArea = document.getElementById('linkResultArea');
         let linkSelectedFile = null;
-        // Change 2: New elements for link file preview
         const uploadIconLink = document.getElementById('uploadIconLink');
         const imagePreviewLink = document.getElementById('imagePreviewLink');
-        // New Change 1: File removal button
         const removeFileLinkBtn = document.getElementById('removeFileLinkBtn');
-        // New Change 3: File icon preview
         const fileIconLink = document.getElementById('fileIconLink');
         const fileExtLink = document.getElementById('fileExtLink');
 
-
-        // --- Link to QR Elements ---
+        // --- Elements (Link to QR) ---
         const linkInput = document.getElementById('linkInput');
         const linkQrcodeDiv = document.getElementById('linkQrcode');
         const linkQrSize = document.getElementById('linkQrSize');
         const linkQrColor = document.getElementById('linkQrColor');
-        // Step 2: New background color element
         const linkQrBackground = document.getElementById('linkQrBackground');
-        // Step 2: New color button elements
         const linkQrColorBtn = document.getElementById('linkQrColorBtn');
         const linkQrBackgroundBtn = document.getElementById('linkQrBackgroundBtn');
         const customColorPicker = document.getElementById('customColorPicker');
         const hexInput = document.getElementById('hexInput');
-
         const downloadLinkQRBtn = document.getElementById('downloadLinkQRBtn');
-        // const copyLinkBtn = document.getElementById('copyLinkBtn'); // DELETED
-        // Change 3: New element for Link QR size display
         const linkQrCodeSizeDisplay = document.getElementById('linkQrCodeSizeDisplay');
-        // New Change 2: Clear and Paste buttons
         const clearLinkInputBtn = document.getElementById('clearLinkInputBtn');
         const pasteLinkInputBtn = document.getElementById('pasteLinkInputBtn');
         
-        // --- Added for Change 4 ---
         const signInButton = document.getElementById('signInButton'); 
-        // --- End Elements ---
-        
-        // NEW ADDITION 2: QR Code Extractor Elements
+
+        // --- Elements (Extractor) ---
         const extractorFileInput = document.getElementById('extractorFileInput');
         const extractorDropZone = document.getElementById('extractorDropZone');
         const extractBtn = document.getElementById('extractBtn');
@@ -794,13 +730,45 @@
         const fileExtExtractor = document.getElementById('fileExtExtractor');
         const extractedDataDisplay = document.getElementById('extractedDataDisplay');
         const extractorActionButtons = document.getElementById('extractorActionButtons');
-        // END NEW ADDITION 2
 
-        
-        // New Change 3: List of supported text/code file extensions
+        // --- NEW TOOL ELEMENTS ---
+        // MP4 to MP3
+        const mp3FileInput = document.getElementById('mp3FileInput');
+        const mp3DropZone = document.getElementById('mp3DropZone');
+        const convertMp3Btn = document.getElementById('convertMp3Btn');
+        const mp3ResultArea = document.getElementById('mp3ResultArea');
+        const resultAudio = document.getElementById('resultAudio');
+        const downloadMp3Btn = document.getElementById('downloadMp3Btn');
+        let mp3SelectedFile = null;
+
+        // PDF Extractor
+        const pdfFileInput = document.getElementById('pdfFileInput');
+        const pdfDropZone = document.getElementById('pdfDropZone');
+        const extractPdfBtn = document.getElementById('extractPdfBtn');
+        const pdfResultArea = document.getElementById('pdfResultArea');
+        const pdfPagesGrid = document.getElementById('pdfPagesGrid');
+        const downloadSelectedPdfBtn = document.getElementById('downloadSelectedPdfBtn');
+        let pdfSelectedFile = null;
+
+        // ZIP Extractor
+        const zipFileInput = document.getElementById('zipFileInput');
+        const zipDropZone = document.getElementById('zipDropZone');
+        const extractZipBtn = document.getElementById('extractZipBtn');
+        const zipResultArea = document.getElementById('zipResultArea');
+        const zipFileList = document.getElementById('zipFileList');
+        let zipSelectedFile = null;
+
+        // Video to GIF
+        const gifFileInput = document.getElementById('gifFileInput');
+        const gifDropZone = document.getElementById('gifDropZone');
+        const convertGifBtn = document.getElementById('convertGifBtn');
+        const gifResultArea = document.getElementById('gifResultArea');
+        const resultGif = document.getElementById('resultGif');
+        const downloadGifBtn = document.getElementById('downloadGifBtn');
+        let gifSelectedFile = null;
+
         const CODE_EXTENSIONS = ['html', 'css', 'js', 'java', 'py', 'python', 'sql', 'pdf', 'xml', 'txt', 'kordova', 'json', 'yml', 'md'];
         
-        // Step 3: Utility function to calculate SHA-256 hash of a file
         function calculateFileHash(file) {
             return new Promise((resolve) => {
                 const reader = new FileReader();
@@ -825,11 +793,9 @@
         }
 
         function setView(newView) {
-            // Step 2: Close color picker when changing views
             customColorPicker.style.display = 'none';
 
-            if (currentView === 'uploadToQrView' || currentView === 'uploadToLinkView' || currentView === 'qrExtractorView') { // ADDED qrExtractorView
-                // Reset file-related view states before switching
+            if (['uploadToQrView', 'uploadToLinkView', 'qrExtractorView', 'mp4ToMp3View', 'pdfExtractorView', 'zipExtractorView', 'videoToGifView'].includes(currentView)) { 
                 resetUploadView(currentView);
             }
             
@@ -838,15 +804,12 @@
             });
             currentView = newView;
 
-            // CHANGE 4: Save current view to localStorage
             localStorage.setItem('lastView', newView);
 
             if (newView === 'linkToQrView') {
-                // Initialize Link QR on view entry
                 generateLinkQr();
             }
 
-            // Update browser history (for mobile/browser back button)
             history.pushState({ view: newView }, `Nur Share | ${newView}`);
         }
 
@@ -857,16 +820,52 @@
         }
 
         function resetUploadView(viewId) {
-            // Step 1: Close and reset link options dropdown
             document.getElementById('linkOptionsDropdown').style.display = 'none';
             document.getElementById('selectedLinkFormatText').innerText = 'Viewer\'s Link';
 
-            if(viewId === 'uploadToQrView') {
-                // Change 2: Updated reset for file preview
+            // Common resets (simplified)
+            if(viewId === 'mp4ToMp3View') {
+                document.getElementById('mp3UploadTitle').innerHTML = 'Choose an MP4 File';
+                document.getElementById('mp3PreviewArea').style.display = 'none';
+                document.getElementById('sourceVideo').src = '';
+                convertMp3Btn.disabled = true;
+                mp3ResultArea.style.display = 'none';
+                document.getElementById('mp3UploaderView').style.display = 'block';
+                mp3FileInput.value = '';
+                document.getElementById('removeFileMp3Btn').style.display = 'none';
+                mp3SelectedFile = null;
+            } else if (viewId === 'pdfExtractorView') {
+                document.getElementById('pdfUploadTitle').innerHTML = 'Choose a PDF File';
+                extractPdfBtn.disabled = true;
+                pdfResultArea.style.display = 'none';
+                document.getElementById('pdfUploaderView').style.display = 'block';
+                pdfFileInput.value = '';
+                document.getElementById('removeFilePdfBtn').style.display = 'none';
+                pdfSelectedFile = null;
+                pdfPagesGrid.innerHTML = '';
+            } else if (viewId === 'zipExtractorView') {
+                document.getElementById('zipUploadTitle').innerHTML = 'Choose a ZIP File';
+                extractZipBtn.disabled = true;
+                zipResultArea.style.display = 'none';
+                document.getElementById('zipUploaderView').style.display = 'block';
+                zipFileInput.value = '';
+                document.getElementById('removeFileZipBtn').style.display = 'none';
+                zipSelectedFile = null;
+                zipFileList.innerHTML = '';
+            } else if (viewId === 'videoToGifView') {
+                document.getElementById('gifUploadTitle').innerHTML = 'Choose Video (Max 30s, 10MB)';
+                document.getElementById('gifPreviewArea').style.display = 'none';
+                document.getElementById('gifSourceVideo').src = '';
+                convertGifBtn.disabled = true;
+                gifResultArea.style.display = 'none';
+                document.getElementById('gifUploaderView').style.display = 'block';
+                gifFileInput.value = '';
+                document.getElementById('removeFileGifBtn').style.display = 'none';
+                gifSelectedFile = null;
+            }
+            // ... existing resets for other views ...
+            else if(viewId === 'uploadToQrView') {
                 document.getElementById('uploadTitle').innerHTML = 'Choose a file';
-                dropZone.style.borderColor = 'var(--primary)'; // Reset visual
-                dropZone.style.backgroundColor = 'rgba(99, 102, 241, 0.05)'; // Reset visual
-                // End Change 2
                 uploadBtn.disabled = true;
                 progressContainer.style.display = 'none';
                 uploadBtn.style.display = 'block';
@@ -876,21 +875,13 @@
                 fileInput.value = '';
                 progressFill.style.width = '0%';
                 percentLabel.innerText = '0%';
-                
-                // Change 2, New Change 1, New Change 3: Reset preview elements for QR
                 if (uploadIconQr) uploadIconQr.style.display = 'block';
                 if (imagePreviewQr) { imagePreviewQr.style.display = 'none'; imagePreviewQr.src = ''; }
                 if (fileIconQr) fileIconQr.style.display = 'none';
                 if (removeFileQrBtn) removeFileQrBtn.style.display = 'none';
-                if (qrResultFilePreview) qrResultFilePreview.innerHTML = ''; // NEW ADDITION 1
-
-
+                if (qrResultFilePreview) qrResultFilePreview.innerHTML = ''; 
             } else if (viewId === 'uploadToLinkView') {
-                // Change 2: Updated reset for file preview
                 document.getElementById('linkUploadTitle').innerHTML = 'Choose a file';
-                linkDropZone.style.borderColor = 'var(--primary)'; // Reset visual
-                linkDropZone.style.backgroundColor = 'rgba(99, 102, 241, 0.05)'; // Reset visual
-                // End Change 2
                 linkUploadBtn.disabled = true;
                 linkProgressContainer.style.display = 'none';
                 linkUploadBtn.style.display = 'block';
@@ -900,31 +891,18 @@
                 linkFileInput.value = '';
                 linkProgressFill.style.width = '0%';
                 linkPercentLabel.innerText = '0%';
-                
-                // Change 2, New Change 1, New Change 3: Reset preview elements for Link
                 if (uploadIconLink) uploadIconLink.style.display = 'block';
                 if (imagePreviewLink) { imagePreviewLink.style.display = 'none'; imagePreviewLink.src = ''; }
                 if (fileIconLink) fileIconLink.style.display = 'none';
                 if (removeFileLinkBtn) removeFileLinkBtn.style.display = 'none';
-                
-                // CHANGE 2: Reset link selector and display (Step 3: Updated to clear global variable)
                 uploadedLinkFormats = null; 
-                const linkFormatDisplay = document.getElementById('linkFormatDisplay');
-                if (linkFormatDisplay) linkFormatDisplay.innerText = 'Click a format above to display.';
-                const directLink = document.getElementById('directLink');
-                if (directLink) directLink.innerText = '';
-                const resultFilePreview = document.getElementById('resultFilePreview');
-                if (resultFilePreview) resultFilePreview.innerHTML = '';
-            } else if (viewId === 'qrExtractorView') { // NEW ADDITION 2
+            } else if (viewId === 'qrExtractorView') {
                 document.getElementById('extractorUploadTitle').innerHTML = 'Choose a QR Code Image';
-                extractorDropZone.style.borderColor = 'var(--primary)'; 
-                extractorDropZone.style.backgroundColor = 'rgba(99, 102, 241, 0.05)';
                 extractBtn.disabled = true;
                 extractorResultArea.style.display = 'none';
                 document.getElementById('extractorUploaderView').style.display = 'block';
                 extractorSelectedFile = null;
                 extractorFileInput.value = '';
-                
                 if (uploadIconExtractor) uploadIconExtractor.style.display = 'block';
                 if (imagePreviewExtractor) { imagePreviewExtractor.style.display = 'none'; imagePreviewExtractor.src = ''; }
                 if (fileIconExtractor) fileIconExtractor.style.display = 'none';
@@ -936,18 +914,15 @@
             }
         }
         
-        // Change 4: Function to update the UI based on auth state
         function updateSignInUI(user) {
             if (user) {
-                // User is signed in. Change button to profile picture.
-                signInButton.onclick = () => showToast(`Signed in as: ${user.displayName}. (Profile view placeholder)`);
+                signInButton.onclick = () => showToast(`Signed in as: ${user.displayName}.`);
                 signInButton.innerHTML = `<img src="${user.photoURL}" alt="${user.displayName}" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;">`;
                 signInButton.style.padding = '0';
                 signInButton.style.width = '40px';
                 signInButton.style.height = '40px';
                 signInButton.style.background = 'transparent';
             } else {
-                // User is signed out. Restore the original button.
                 signInButton.onclick = googleSignIn;
                 signInButton.innerHTML = '<i class="fab fa-google"></i> Sign In';
                 signInButton.style.padding = '0 15px';
@@ -957,31 +932,20 @@
             }
         }
 
-        // --- Google Sign-in Implementation (Fix 2) ---
         function googleSignIn() {
             const provider = new firebase.auth.GoogleAuthProvider();
             firebase.auth().signInWithPopup(provider)
-                .then((result) => {
-                    const user = result.user;
-                    showToast(`Signed in as: ${user.displayName}. (Profile view placeholder)`);
-                    // UI update handled by onAuthStateChanged listener
-                })
-                .catch((error) => {
-                    // Handle Errors here.
-                    const errorMessage = error.message;
-                    showToast(`Sign in failed: ${errorMessage}`);
-                });
+                .then((result) => { showToast(`Signed in as: ${result.user.displayName}`); })
+                .catch((error) => { showToast(`Sign in failed: ${error.message}`); });
         }
         
         function setupAuthListener() {
-            // Change 4: Set up listener to update UI when auth state changes
             firebase.auth().onAuthStateChanged(updateSignInUI);
         }
         
-        // FIX 2: Define function for logo change (for automatic update)
         function updateLogoImage() {
             const logoImage = document.getElementById('logoImage');
-            if (logoImage) { // Ensure element exists
+            if (logoImage) { 
                 if (document.body.classList.contains('dark-mode')) {
                     logoImage.src = 'https://i.ibb.co.com/dqHSB7H/1000043162-removebg-preview.png';
                 } else {
@@ -990,22 +954,19 @@
             }
         }
 
-        // New Change 3: Helper function to process file preview (UPDATED FOR CHANGE 1)
         function setFilePreview(file, titleEl, iconEl, imgEl, fileIconEl, fileExtEl, removeBtn) {
             const fileSizeMB = file.size / (1024 * 1024);
             
-            // CHANGE 1: 20MB Limit Check
             if (fileSizeMB > 20) {
                 const fileSizeDisplay = fileSizeMB.toFixed(2) + ' MB';
                 titleEl.innerHTML = `<b>${file.name}</b><br><span style="color: red;">Size (${fileSizeDisplay}) exceeds 20 MB limit.</span>`;
                 iconEl.style.display = 'block';
-                imgEl.style.display = 'none';
-                fileIconEl.style.display = 'none';
-                removeBtn.style.display = 'none';
-                return false; // Indicate failure
+                if(imgEl) imgEl.style.display = 'none';
+                if(fileIconEl) fileIconEl.style.display = 'none';
+                if(removeBtn) removeBtn.style.display = 'none';
+                return false; 
             }
             
-            // CHANGE 1: File Size Display Logic (MB or KB)
             let displaySize;
             if (fileSizeMB < 0.01) {
                 const fileSizeKB = (file.size / 1024).toFixed(2);
@@ -1014,64 +975,57 @@
                 displaySize = `${fileSizeMB.toFixed(2)} MB`;
             }
 
-            // New Change 3: Shorten filename
             const fileNameParts = file.name.split('.');
             const ext = fileNameParts.length > 1 ? fileNameParts.pop().toLowerCase() : '';
-            const baseName = fileNameParts.slice(0, -1).join('.'); // Join all parts except the extension
+            const baseName = fileNameParts.slice(0, -1).join('.'); 
             const displayName = baseName.length > 20 ? baseName.substring(0, 20) + '...' : baseName;
-            // Updated size display
+            
             titleEl.innerHTML = `<b>${displayName}${ext ? '.' + ext : ''}</b><br>Size: ${displaySize}`; 
 
-            // Reset all preview icons
-            iconEl.style.display = 'none';
-            imgEl.style.display = 'none';
-            fileIconEl.style.display = 'none';
-            removeBtn.style.display = 'block';
+            if(iconEl) iconEl.style.display = 'none';
+            if(imgEl) imgEl.style.display = 'none';
+            if(fileIconEl) fileIconEl.style.display = 'none';
+            if(removeBtn) removeBtn.style.display = 'block';
 
-            // New Change 3: Logic for supported code/text files
-            if (CODE_EXTENSIONS.includes(ext)) {
-                fileIconEl.style.display = 'flex';
-                fileExtEl.innerText = ext;
-            } 
-            // Change 2: Logic for images
-            else if (file.type.startsWith('image/')) {
+            if (CODE_EXTENSIONS.includes(ext) || ext === 'zip') {
+                if(fileIconEl) {
+                    fileIconEl.style.display = 'flex';
+                    if(fileExtEl) fileExtEl.innerText = ext;
+                }
+            } else if (file.type.startsWith('image/')) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    imgEl.src = e.target.result;
-                    imgEl.style.display = 'block';
+                    if(imgEl) {
+                        imgEl.src = e.target.result;
+                        imgEl.style.display = 'block';
+                    }
                 };
                 reader.readAsDataURL(file);
-            } 
-            // Default: Original upload icon
-            else {
-                iconEl.style.display = 'block';
+            } else {
+                if(fileIconEl && (ext === 'pdf' || ext === 'zip')) {
+                    fileIconEl.style.display = 'flex';
+                    // Force icon specific logic for red icons in CSS
+                } else if (iconEl) {
+                    iconEl.style.display = 'block';
+                }
             }
-            
-            return true; // Indicate success
+            return true; 
         }
         
         // --- Initialization ---
 
-        // Set initial view
-        // CHANGE 4: Restore view from localStorage or default to mainOptionsView
         const lastView = localStorage.getItem('lastView');
         const initialView = (lastView && views[lastView]) ? lastView : 'mainOptionsView';
         setView(initialView);
 
-        // Handle back button (History API)
         window.onpopstate = (event) => {
             const state = event.state;
-            if (state && state.view) {
-                setView(state.view);
-            } else {
-                setView('mainOptionsView'); // Fallback
-            }
+            if (state && state.view) { setView(state.view); } else { setView('mainOptionsView'); }
         };
 
-        // Reload Alert
         window.onbeforeunload = (e) => {
-            if (selectedFile || linkSelectedFile) {
-                const message = "Are you sure you want to leave? Your upload might be interrupted.";
+            if (selectedFile || linkSelectedFile || mp3SelectedFile) {
+                const message = "Are you sure you want to leave? Your upload/conversion might be interrupted.";
                 e.returnValue = message;
                 return message;
             }
@@ -1079,37 +1033,27 @@
 
         document.getElementById('themeToggle').onclick = () => {
             document.body.classList.toggle('dark-mode');
-            // FIX 2: Call the function on toggle
             updateLogoImage(); 
         };
 
-        // --- 1. Link to QR Logic ---
-        
-        // Step 2: Custom Color Picker Logic
+        // --- Link to QR Logic ---
         function toggleColorPicker(buttonId, targetInputId, otherButtonId) {
             const button = document.getElementById(buttonId);
             const otherButton = document.getElementById(otherButtonId);
             
-            // If the picker is already open and clicked again, close it
             if (customColorPicker.style.display === 'block' && activeColorTarget === targetInputId) {
                 customColorPicker.style.display = 'none';
                 activeColorTarget = null;
                 return;
             }
 
-            // Set active target and update picker position/content
             activeColorTarget = targetInputId;
             const rect = button.getBoundingClientRect();
             const containerRect = document.querySelector('.main-card').getBoundingClientRect();
             
-            // Position the picker relative to the button inside the main-card
             customColorPicker.style.top = (rect.bottom - containerRect.top + 5) + 'px';
             customColorPicker.style.left = (rect.left - containerRect.left) + 'px';
-
-            // Set current value in hex input
             hexInput.value = document.getElementById(targetInputId).value;
-            
-            // Display the picker
             customColorPicker.style.display = 'block';
         }
 
@@ -1117,24 +1061,20 @@
             if (activeColorTarget) {
                 const input = document.getElementById(activeColorTarget);
                 const btn = document.getElementById(activeColorTarget === 'linkQrColor' ? 'linkQrColorBtn' : 'linkQrBackgroundBtn');
-
                 input.value = color;
                 btn.style.backgroundColor = color;
-                hexInput.value = color; // Update hex input in the picker
-
-                generateLinkQr(); // Regenerate QR
-                customColorPicker.style.display = 'none'; // Close picker
+                hexInput.value = color; 
+                generateLinkQr(); 
+                customColorPicker.style.display = 'none'; 
                 activeColorTarget = null;
             }
         }
         
         function updateHexColor(hex) {
-            // Simple hex validation (optional)
             if (/^#([0-9A-F]{3}){1,2}$/i.test(hex)) {
                 if (activeColorTarget) {
                     const input = document.getElementById(activeColorTarget);
                     const btn = document.getElementById(activeColorTarget === 'linkQrColor' ? 'linkQrColorBtn' : 'linkQrBackgroundBtn');
-                    
                     input.value = hex;
                     btn.style.backgroundColor = hex;
                     generateLinkQr();
@@ -1145,21 +1085,14 @@
         function updateColorPreview(input, buttonId) {
             const button = document.getElementById(buttonId);
             button.style.backgroundColor = input.value;
-            // Native input's oninput is called, but we still trigger generateLinkQr from the native input event handler in HTML
         }
         
-        // Add a click listener to the body to close the picker when clicking outside
         document.body.addEventListener('click', (e) => {
-            if (customColorPicker.style.display === 'block' && 
-                !customColorPicker.contains(e.target) && 
-                !linkQrColorBtn.contains(e.target) && 
-                !linkQrBackgroundBtn.contains(e.target)) {
+            if (customColorPicker.style.display === 'block' && !customColorPicker.contains(e.target) && !linkQrColorBtn.contains(e.target) && !linkQrBackgroundBtn.contains(e.target)) {
                 customColorPicker.style.display = 'none';
                 activeColorTarget = null;
             }
         });
-        
-        // End Step 2 Color Picker Logic
 
         function updateLinkInputControls() {
             clearLinkInputBtn.style.display = linkInput.value.trim() ? 'block' : 'none';
@@ -1169,13 +1102,10 @@
             const text = linkInput.value.trim();
             const size = linkQrSize.value;
             const darkColor = linkQrColor.value;
-            // Step 2: Get background color
             const lightColor = linkQrBackground.value; 
 
-            // New Change 2: Update clear button visibility
             updateLinkInputControls();
 
-            // Change 4B & New Change 3: Hide QR if input is empty, and reset display
             if (!text) {
                 linkQrcodeDiv.innerHTML = '';
                 linkQrcodeDiv.parentElement.style.opacity = 0.3; 
@@ -1183,60 +1113,33 @@
                 return;
             }
 
-            // Reset visual state
             linkQrcodeDiv.parentElement.style.opacity = 1;
-            
             linkQrcodeDiv.innerHTML = '';
             QRCode.toCanvas(text, {
-                width: size,
-                margin: 2,
-                // Change 4: Dark color comes from input, light is hardcoded white
-                // Step 2: Use selected background color
-                color: { dark: darkColor, light: lightColor } 
+                width: size, margin: 2, color: { dark: darkColor, light: lightColor } 
             }, (err, canvas) => { 
                 if(!err) {
                     linkQrcodeDiv.appendChild(canvas); 
-                    
-                    // Change 3: Update size display after generation
                     if (linkQrCodeSizeDisplay && canvas) {
                         const dataURL = canvas.toDataURL('image/png', 1.0);
-                        // Rough estimate for base64 image size
                         const sizeInBytes = (dataURL.length * 0.75) - 2; 
                         const sizeInKB = (sizeInBytes / 1024).toFixed(2);
                         linkQrCodeSizeDisplay.innerText = `${size}px | Size: ${sizeInKB} KB`;
                     }
-                } else {
-                    if (linkQrCodeSizeDisplay) linkQrCodeSizeDisplay.innerText = `Error generating QR.`;
                 }
             });
         }
         
-        // Setup Link Input Handlers
         linkInput.addEventListener('input', generateLinkQr);
-
         linkQrSize.oninput = (e) => {
             const size = e.target.value;
             if (linkQrCodeSizeDisplay) linkQrCodeSizeDisplay.innerText = `${size}px | Size: Calculating...`;
             generateLinkQr();
         }
-
-        clearLinkInputBtn.onclick = () => {
-            linkInput.value = '';
-            generateLinkQr();
-        };
-
+        clearLinkInputBtn.onclick = () => { linkInput.value = ''; generateLinkQr(); };
         pasteLinkInputBtn.onclick = async () => {
-            try {
-                const text = await navigator.clipboard.readText();
-                linkInput.value = text;
-                generateLinkQr();
-                showToast("Pasted from clipboard!");
-            } catch (err) {
-                showToast("Failed to read clipboard.");
-            }
+            try { linkInput.value = await navigator.clipboard.readText(); generateLinkQr(); showToast("Pasted!"); } catch (err) { showToast("Clipboard Error"); }
         };
-
-
         downloadLinkQRBtn.onclick = () => {
             const link = document.createElement('a');
             link.download = 'link_qrcode.png';
@@ -1244,161 +1147,374 @@
             link.click();
         };
 
-        // --- 2. Upload to QR Logic (Original) ---
+        // --- NEW TOOLS LOGIC ---
 
-        // Step 3: Function to handle displaying cached QR result (now called after GitHub check)
-        function handleCachedQr(uploadedUrl) {
-            currentUrl = uploadedUrl;
-            document.getElementById('uploaderView').style.display = 'none';
-            resultArea.style.display = 'block';
-            
-            // NEW ADDITION 1: Display success preview
-            if (selectedFile) {
-                displaySuccessPreview(selectedFile, qrResultFilePreview);
+        // 1. MP4 to MP3 Logic
+        mp3DropZone.onclick = () => mp3FileInput.click();
+        mp3FileInput.onchange = (e) => {
+            mp3SelectedFile = e.target.files[0];
+            if(mp3SelectedFile) {
+                const titleEl = document.getElementById('mp3UploadTitle');
+                // Limit check (e.g. 50MB for client side processing)
+                if(mp3SelectedFile.size > 50 * 1024 * 1024) {
+                    titleEl.innerHTML = `File too large (>50MB).`;
+                    return;
+                }
+                
+                titleEl.innerHTML = `<b>${mp3SelectedFile.name}</b><br>Size: ${(mp3SelectedFile.size/1024/1024).toFixed(2)} MB`;
+                document.getElementById('uploadIconMp3').style.display = 'none';
+                document.getElementById('removeFileMp3Btn').style.display = 'block';
+                convertMp3Btn.disabled = false;
+
+                const videoURL = URL.createObjectURL(mp3SelectedFile);
+                const videoEl = document.getElementById('sourceVideo');
+                videoEl.src = videoURL;
+                document.getElementById('mp3PreviewArea').style.display = 'block';
             }
+        };
+        document.getElementById('removeFileMp3Btn').onclick = (e) => { e.stopPropagation(); resetUploadView('mp4ToMp3View'); };
 
-            // Use the stored QR size on the result page
-            const currentQrSize = document.getElementById('qrSize').value;
-            generateQR(currentUrl, qrcodeDiv, currentQrSize);
-        }
+        convertMp3Btn.onclick = async () => {
+            convertMp3Btn.disabled = true;
+            convertMp3Btn.innerText = "Converting... (This happens locally)";
+            
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const arrayBuffer = await mp3SelectedFile.arrayBuffer();
+                const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                
+                // Use LameJS to encode
+                const mp3Encoder = new lamejs.Mp3Encoder(1, audioBuffer.sampleRate, 128);
+                const samples = audioBuffer.getChannelData(0); // Mono for simplicity or mix down
+                const sampleBlockSize = 1152;
+                const mp3Data = [];
+                
+                // Convert Float32 to Int16
+                const samplesInt16 = new Int16Array(samples.length);
+                for (let i = 0; i < samples.length; i++) {
+                    samplesInt16[i] = samples[i] < 0 ? samples[i] * 0x8000 : samples[i] * 0x7FFF;
+                }
+                
+                for (let i = 0; i < samplesInt16.length; i += sampleBlockSize) {
+                    const sampleChunk = samplesInt16.subarray(i, i + sampleBlockSize);
+                    const mp3buf = mp3Encoder.encodeBuffer(sampleChunk);
+                    if (mp3buf.length > 0) mp3Data.push(mp3buf);
+                }
+                
+                const mp3buf = mp3Encoder.flush();
+                if (mp3buf.length > 0) mp3Data.push(mp3buf);
+                
+                const blob = new Blob(mp3Data, { type: 'audio/mp3' });
+                const url = URL.createObjectURL(blob);
+                
+                resultAudio.src = url;
+                downloadMp3Btn.onclick = () => {
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = mp3SelectedFile.name.replace(/\.[^/.]+$/, "") + ".mp3";
+                    a.click();
+                };
+                
+                document.getElementById('mp3UploaderView').style.display = 'none';
+                mp3ResultArea.style.display = 'block';
+                convertMp3Btn.innerText = "Convert to MP3";
+            } catch (error) {
+                showToast("Conversion Failed: " + error.message);
+                convertMp3Btn.disabled = false;
+                convertMp3Btn.innerText = "Convert to MP3";
+            }
+        };
 
+        // 2. PDF Extractor Logic
+        pdfDropZone.onclick = () => pdfFileInput.click();
+        pdfFileInput.onchange = (e) => {
+            pdfSelectedFile = e.target.files[0];
+            if(pdfSelectedFile) {
+                setFilePreview(pdfSelectedFile, document.getElementById('pdfUploadTitle'), null, null, document.getElementById('fileIconPdf'), null, document.getElementById('removeFilePdfBtn'));
+                extractPdfBtn.disabled = false;
+            }
+        };
+        document.getElementById('removeFilePdfBtn').onclick = (e) => { e.stopPropagation(); resetUploadView('pdfExtractorView'); };
+
+        extractPdfBtn.onclick = async () => {
+            extractPdfBtn.disabled = true;
+            extractPdfBtn.innerText = "Extracting Images...";
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+            try {
+                const arrayBuffer = await pdfSelectedFile.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                
+                const scale = parseFloat(document.getElementById('pdfQuality').value);
+                document.getElementById('pdfPageCount').innerText = `Total Pages: ${pdf.numPages}`;
+                pdfPagesGrid.innerHTML = '';
+                
+                const zip = new JSZip();
+                const imgFolder = zip.folder("images");
+
+                for(let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const viewport = page.getViewport({ scale: scale });
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+
+                    await page.render({ canvasContext: context, viewport: viewport }).promise;
+                    
+                    const imgUrl = canvas.toDataURL('image/jpeg');
+                    const wrapper = document.createElement('div');
+                    wrapper.style.position = 'relative';
+                    wrapper.innerHTML = `
+                        <img src="${imgUrl}" style="width:100%; border-radius:8px; border:1px solid var(--border);">
+                        <input type="checkbox" class="pdf-select-check" data-page="${i}" checked style="position:absolute; top:5px; right:5px; transform:scale(1.5);">
+                    `;
+                    pdfPagesGrid.appendChild(wrapper);
+                    
+                    // Add to zip logic preparation
+                    imgFolder.file(`page-${i}.jpg`, imgUrl.split(',')[1], {base64: true});
+                }
+
+                downloadSelectedPdfBtn.onclick = () => {
+                    const checkboxes = document.querySelectorAll('.pdf-select-check:checked');
+                    if(checkboxes.length === 0) { showToast("Select at least one page."); return; }
+                    
+                    if(checkboxes.length === 1) {
+                        const idx = checkboxes[0].getAttribute('data-page') - 1;
+                        const link = document.createElement('a');
+                        link.href = pdfPagesGrid.children[idx].querySelector('img').src;
+                        link.download = `page-${idx+1}.jpg`;
+                        link.click();
+                    } else {
+                        // Create specific zip for selected
+                         const selectedZip = new JSZip();
+                         checkboxes.forEach(cb => {
+                             const idx = parseInt(cb.getAttribute('data-page')) - 1;
+                             const src = pdfPagesGrid.children[idx].querySelector('img').src;
+                             selectedZip.file(`page-${idx+1}.jpg`, src.split(',')[1], {base64: true});
+                         });
+                         selectedZip.generateAsync({type:"blob"}).then(function(content) {
+                             const a = document.createElement('a');
+                             a.href = URL.createObjectURL(content);
+                             a.download = "selected_pages.zip";
+                             a.click();
+                         });
+                    }
+                };
+
+                document.getElementById('pdfUploaderView').style.display = 'none';
+                pdfResultArea.style.display = 'block';
+                extractPdfBtn.innerText = "Extract Images";
+            } catch (error) {
+                showToast("Error reading PDF: " + error.message);
+                extractPdfBtn.disabled = false;
+            }
+        };
+
+        // 3. ZIP Extractor Logic
+        zipDropZone.onclick = () => zipFileInput.click();
+        zipFileInput.onchange = (e) => {
+            zipSelectedFile = e.target.files[0];
+            if(zipSelectedFile) {
+                setFilePreview(zipSelectedFile, document.getElementById('zipUploadTitle'), null, null, document.getElementById('fileIconZip'), null, document.getElementById('removeFileZipBtn'));
+                extractZipBtn.disabled = false;
+            }
+        };
+        document.getElementById('removeFileZipBtn').onclick = (e) => { e.stopPropagation(); resetUploadView('zipExtractorView'); };
+
+        extractZipBtn.onclick = async () => {
+            extractZipBtn.disabled = true;
+            extractZipBtn.innerText = "Extracting...";
+            
+            try {
+                const zip = new JSZip();
+                const contents = await zip.loadAsync(zipSelectedFile);
+                zipFileList.innerHTML = '';
+                
+                Object.keys(contents.files).forEach(filename => {
+                    if(!contents.files[filename].dir) {
+                        const fileItem = document.createElement('div');
+                        fileItem.className = 'file-list-item';
+                        fileItem.innerHTML = `
+                            <span class="fname"><i class="fas fa-file"></i> ${filename}</span>
+                            <button class="btn-action" style="padding: 5px 10px; font-size: 0.7rem;">Download</button>
+                        `;
+                        
+                        fileItem.querySelector('button').onclick = async () => {
+                            const blob = await contents.files[filename].async("blob");
+                            const link = document.createElement('a');
+                            link.href = URL.createObjectURL(blob);
+                            link.download = filename.split('/').pop();
+                            link.click();
+                        };
+                        
+                        zipFileList.appendChild(fileItem);
+                    }
+                });
+
+                document.getElementById('zipUploaderView').style.display = 'none';
+                zipResultArea.style.display = 'block';
+                extractZipBtn.innerText = "Extract Files";
+            } catch(error) {
+                showToast("Error extracting ZIP: " + error.message);
+                extractZipBtn.disabled = false;
+            }
+        };
+
+        // 4. Video to GIF Logic
+        gifDropZone.onclick = () => gifFileInput.click();
+        gifFileInput.onchange = (e) => {
+            gifSelectedFile = e.target.files[0];
+            const titleEl = document.getElementById('gifUploadTitle');
+            
+            if(gifSelectedFile) {
+                if(gifSelectedFile.size > 10 * 1024 * 1024) {
+                    titleEl.innerHTML = `<span style="color:red;">File too large (>10MB)</span>`;
+                    return;
+                }
+                
+                // Load video to check duration
+                const videoURL = URL.createObjectURL(gifSelectedFile);
+                const videoEl = document.getElementById('gifSourceVideo');
+                videoEl.src = videoURL;
+                
+                videoEl.onloadedmetadata = () => {
+                    if(videoEl.duration > 30) {
+                        titleEl.innerHTML = `<span style="color:red;">Video too long (>30s)</span>`;
+                        gifSelectedFile = null;
+                        return;
+                    }
+                    titleEl.innerHTML = `<b>${gifSelectedFile.name}</b><br>Size: ${(gifSelectedFile.size/1024/1024).toFixed(2)} MB`;
+                    document.getElementById('uploadIconGif').style.display = 'none';
+                    document.getElementById('removeFileGifBtn').style.display = 'block';
+                    document.getElementById('gifPreviewArea').style.display = 'block';
+                    convertGifBtn.disabled = false;
+                };
+            }
+        };
+        document.getElementById('removeFileGifBtn').onclick = (e) => { e.stopPropagation(); resetUploadView('videoToGifView'); };
+
+        convertGifBtn.onclick = () => {
+            convertGifBtn.disabled = true;
+            document.getElementById('gifLoading').style.display = 'block';
+            
+            const res = parseInt(document.getElementById('gifResolution').value);
+            
+            gifshot.createGIF({
+                video: [document.getElementById('gifSourceVideo').src],
+                gifWidth: res,
+                gifHeight: res * 0.75, // approximate aspect
+                numFrames: 20, // Simplified for performance
+                frameDuration: 1
+            }, function(obj) {
+                if(!obj.error) {
+                    const image = obj.image;
+                    resultGif.src = image;
+                    
+                    downloadGifBtn.onclick = () => {
+                        const a = document.createElement('a');
+                        a.href = image;
+                        a.download = 'animation.gif';
+                        a.click();
+                    };
+                    
+                    document.getElementById('gifUploaderView').style.display = 'none';
+                    gifResultArea.style.display = 'block';
+                    document.getElementById('gifLoading').style.display = 'none';
+                } else {
+                    showToast("GIF Conversion Failed");
+                    document.getElementById('gifLoading').style.display = 'none';
+                    convertGifBtn.disabled = false;
+                }
+            });
+        };
+
+        // --- Existing Upload Logic (Simplified integration) ---
         dropZone.onclick = () => fileInput.click();
         fileInput.onchange = (e) => {
             selectedFile = e.target.files[0];
             if(selectedFile) {
-                // New Change 3: Use helper function to process file and update preview (UPDATED FOR CHANGE 1)
                 const success = setFilePreview(selectedFile, document.getElementById('uploadTitle'), uploadIconQr, imagePreviewQr, fileIconQr, fileExtQr, removeFileQrBtn);
-                uploadBtn.disabled = !success; // Disable if not successful
-                if (!success) {
-                    selectedFile = null; // Clear selected file if limit exceeded
-                    fileInput.value = ''; // Clear file input
-                }
+                uploadBtn.disabled = !success;
+                if (!success) { selectedFile = null; fileInput.value = ''; }
             }
         };
-        
-        // New Change 1: File removal button logic for QR
-        removeFileQrBtn.onclick = (e) => {
-            e.stopPropagation(); // Stop event from propagating to dropZone (which would trigger file dialog)
-            resetUploadView('uploadToQrView');
-        };
+        removeFileQrBtn.onclick = (e) => { e.stopPropagation(); resetUploadView('uploadToQrView'); };
 
         uploadBtn.onclick = async () => {
             if(!selectedFile) return;
-            
-            // --- Step 3: GITHUB DEDUPLICATION CHECK ---
             uploadBtn.disabled = true;
             document.getElementById('uploadTitle').innerHTML = 'Checking file existence...';
             
             const fileHash = await calculateFileHash(selectedFile);
             const fileExt = selectedFile.name.split('.').pop().toLowerCase();
             const expectedPath = `uploads/${fileHash}.${fileExt}`;
-            
             const cachedUrl = await checkFileExistenceOnGithub(expectedPath);
 
             if (cachedUrl) {
-                showToast("File found on GitHub. Displaying QR.");
                 handleCachedQr(cachedUrl);
-                return; // Stop execution
+                return;
             }
-            // --- END DEDUPLICATION CHECK ---
             
             document.getElementById('uploadTitle').innerHTML = 'File not found. Ready to upload.';
-            uploadBtn.disabled = false; // Re-enable for the user to proceed if they wish
-            
-            // Proceed with upload
             progressContainer.style.display = 'block';
             uploadBtn.style.display = 'none';
-            removeFileQrBtn.style.display = 'none'; // Hide remove button during upload
+            removeFileQrBtn.style.display = 'none';
 
             uploadFileToGithub(selectedFile, fileHash, (uploadedUrl) => {
                 currentUrl = uploadedUrl;
                 document.getElementById('uploaderView').style.display = 'none';
                 resultArea.style.display = 'block';
-                
-                // NEW ADDITION 1: Display success preview
                 displaySuccessPreview(selectedFile, qrResultFilePreview);
-
                 generateQR(currentUrl, qrcodeDiv, document.getElementById('qrSize').value);
-            }, 
-            (percent) => {
+            }, (percent) => {
                 progressFill.style.width = percent + "%";
                 percentLabel.innerText = percent + "%";
             }, 'qr'); 
         };
 
-        // Change 3: Refactored to include size calculation
         function generateQR(url, targetDiv, size) {
             targetDiv.innerHTML = '';
             QRCode.toCanvas(url, {
-                width: size,
-                margin: 2,
-                color: { dark: '#000000', light: '#ffffff' }
+                width: size, margin: 2, color: { dark: '#000000', light: '#ffffff' }
             }, (err, canvas) => { 
                 if(!err) {
                     targetDiv.appendChild(canvas); 
-                    
-                    // Change 3: Update size display after generation
                     if (qrCodeSizeDisplay && canvas) {
                         const dataURL = canvas.toDataURL('image/png', 1.0);
-                        // Rough estimate for base64 image size
                         const sizeInBytes = (dataURL.length * 0.75) - 2; 
                         const sizeInKB = (sizeInBytes / 1024).toFixed(2);
                         qrCodeSizeDisplay.innerText = `${size}px | Size: ${sizeInKB} KB`;
                     }
-                } else {
-                    if (qrCodeCodeSizeDisplay) qrCodeCodeSizeDisplay.innerText = `Error generating QR.`;
                 }
             });
         }
-
         document.getElementById('qrSize').oninput = (e) => {
             const size = e.target.value;
-            // Change 3: Update display placeholder on slider move
             if (qrCodeSizeDisplay) qrCodeSizeDisplay.innerText = `${size}px | Size: Calculating...`;
             generateQR(currentUrl, qrcodeDiv, size);
         };
-
         document.getElementById('downloadQRBtn').onclick = () => {
-            const link = document.createElement('a');
-            link.download = 'qrcode.png';
-            link.href = qrcodeDiv.querySelector('canvas').toDataURL();
-            link.click();
+            const link = document.createElement('a'); link.download = 'qrcode.png'; link.href = qrcodeDiv.querySelector('canvas').toDataURL(); link.click();
         };
-
-        document.getElementById('copyBtn').onclick = () => {
-            navigator.clipboard.writeText(currentUrl);
-            showToast("Sharable URL Copied!");
-        };
-
-        // --- 3. Upload to Link Logic (UPDATED FOR CHANGE 2, Step 1, Step 3) ---
+        document.getElementById('copyBtn').onclick = () => { navigator.clipboard.writeText(currentUrl); showToast("Copied!"); };
 
         linkDropZone.onclick = () => linkFileInput.click();
         linkFileInput.onchange = (e) => {
             linkSelectedFile = e.target.files[0];
             if(linkSelectedFile) {
-                // New Change 3: Use helper function to process file and update preview
                 const success = setFilePreview(linkSelectedFile, document.getElementById('linkUploadTitle'), uploadIconLink, imagePreviewLink, fileIconLink, fileExtLink, removeFileLinkBtn);
-                linkUploadBtn.disabled = !success; // Disable if not successful
-                if (!success) {
-                    linkSelectedFile = null; 
-                    linkFileInput.value = ''; 
-                }
+                linkUploadBtn.disabled = !success;
+                if (!success) { linkSelectedFile = null; linkFileInput.value = ''; }
             }
         };
+        removeFileLinkBtn.onclick = (e) => { e.stopPropagation(); resetUploadView('uploadToLinkView'); };
         
-        // New Change 1: File removal button logic for Link
-        removeFileLinkBtn.onclick = (e) => {
-            e.stopPropagation(); 
-            resetUploadView('uploadToLinkView');
-        };
-        
-        // CHANGE 2: Helper function to display the file preview in the result area
         function displaySuccessPreview(file, targetEl) {
             targetEl.innerHTML = '';
-            
             const fileNameParts = file.name.split('.');
             const ext = fileNameParts.length > 1 ? fileNameParts.pop().toLowerCase() : '';
-            const baseName = fileNameParts.slice(0, -1).join('.'); // Join all parts except the extension
+            const baseName = fileNameParts.slice(0, -1).join('.'); 
             const displayName = baseName.length > 20 ? baseName.substring(0, 20) + '...' : baseName;
 
             const iconContainer = document.createElement('div');
@@ -1407,420 +1523,225 @@
             
             let displayElement = null;
 
-            if (CODE_EXTENSIONS.includes(ext)) {
-                iconContainer.innerHTML = `<i class="fas fa-folder"></i><span class="file-ext" style="bottom: 0px; right: -5px; background: var(--text); color: var(--bg);">${ext}</span>`;
+            if (CODE_EXTENSIONS.includes(ext) || ext === 'zip' || ext === 'pdf') {
+                const iconClass = (ext === 'pdf' || ext === 'zip') ? 'red-icon' : '';
+                const iconFa = ext === 'pdf' ? 'fa-file-pdf' : (ext === 'zip' ? 'fa-file-zipper' : 'fa-folder');
+                iconContainer.className += ' ' + iconClass;
+                iconContainer.innerHTML = `<i class="fas ${iconFa}"></i><span class="file-ext" style="bottom: 0px; right: -5px; background: var(--text); color: var(--bg);">${ext}</span>`;
                 displayElement = iconContainer;
-            } 
-            else if (file.type.startsWith('image/')) {
+            } else if (file.type.startsWith('image/')) {
                 const img = document.createElement('img');
-                img.style.maxWidth = '100px'; 
-                img.style.maxHeight = '100px'; 
-                img.style.borderRadius = '8px'; 
-                img.style.margin = '0 auto 10px';
+                img.style.maxWidth = '100px'; img.style.maxHeight = '100px'; img.style.borderRadius = '8px'; img.style.margin = '0 auto 10px';
                 const reader = new FileReader();
                 reader.onload = (e) => { img.src = e.target.result; };
                 reader.readAsDataURL(file);
                 displayElement = img;
-            } 
-            else {
+            } else {
                 iconContainer.innerHTML = `<i class="fas fa-cloud-arrow-up"></i>`;
                 displayElement = iconContainer;
             }
-
             if (displayElement) {
                 targetEl.appendChild(displayElement);
                 const nameP = document.createElement('p');
-                nameP.style.fontSize = '0.9rem';
-                nameP.style.opacity = '0.8';
-                nameP.innerText = `${displayName}${ext ? '.' + ext : ''}`;
+                nameP.style.fontSize = '0.9rem'; nameP.style.opacity = '0.8'; nameP.innerText = `${displayName}${ext ? '.' + ext : ''}`;
                 targetEl.appendChild(nameP);
             }
         }
         
-        // Step 3: Function to handle displaying cached Link result (and upload success)
+        function handleCachedQr(uploadedUrl) {
+            currentUrl = uploadedUrl;
+            document.getElementById('uploaderView').style.display = 'none';
+            resultArea.style.display = 'block';
+            if (selectedFile) displaySuccessPreview(selectedFile, qrResultFilePreview);
+            generateQR(currentUrl, qrcodeDiv, document.getElementById('qrSize').value);
+        }
+
         function handleCachedLink(uploadedUrl, file) {
             const base64Data = uploadedUrl.split('?f=')[1];
             const fileData = JSON.parse(atob(base64Data));
-            
-            // Construct Links
             const directLink = `https://raw.githubusercontent.com/${GIT.owner}/${GIT.repo}/${GIT.branch}/${fileData.p}`;
             const viewerLink = uploadedUrl; 
+            const fileNameWithoutExt = fileData.n.split('.').slice(0, -1).join('.');
 
-            const fileName = fileData.n;
-            const fileNameWithoutExt = fileName.split('.').slice(0, -1).join('.');
-
-            // Store links in global object
             uploadedLinkFormats = {
-                direct: directLink,
-                viewer: viewerLink, 
+                direct: directLink, viewer: viewerLink, 
                 html_full: `<a href="${viewerLink}"><img src="${directLink}" alt="${fileNameWithoutExt}" border="0"></a>`,
-                html_image: `<img src="${directLink}" alt="${fileNameWithoutExt}" border="0">`, // Step 3: NEW FORMAT
-                bbcode: `[img]${directLink}[/img]`,
-                bbcode_full: `[url=${viewerLink}][img]${directLink}[/img][/url]`
+                html_image: `<img src="${directLink}" alt="${fileNameWithoutExt}" border="0">`, 
+                bbcode: `[img]${directLink}[/img]`, bbcode_full: `[url=${viewerLink}][img]${directLink}[/img][/url]`
             };
             
-            // Set Direct Link (always visible)
             document.getElementById('directLink').innerText = directLink;
-            
-            // Display success message and cloned preview
             displaySuccessPreview(file, document.getElementById('resultFilePreview'));
-
-            // Set initial selected link format (default is 'viewer')
             selectLinkFormat('viewer', 'Viewer\'s Link'); 
-
             document.getElementById('linkUploaderView').style.display = 'none';
             linkResultArea.style.display = 'block';
         }
         
-        // Step 1: Function to toggle link options dropdown
         function toggleLinkOptions() {
             const dropdown = document.getElementById('linkOptionsDropdown');
             dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
         }
 
-        // Step 3: Function to update the link display based on format key
         function selectLinkFormat(formatKey, formatName) {
             const displayArea = document.getElementById('linkFormatDisplay');
-            if (!uploadedLinkFormats) {
-                displayArea.innerText = 'Error: Links not ready.';
-                return;
-            }
-
-            const linkText = uploadedLinkFormats[formatKey] || 'Error: Invalid format selected.';
-            displayArea.innerText = linkText;
+            if (!uploadedLinkFormats) { displayArea.innerText = 'Error'; return; }
+            displayArea.innerText = uploadedLinkFormats[formatKey] || 'Error';
             document.getElementById('selectedLinkFormatText').innerText = formatName;
-            document.getElementById('linkOptionsDropdown').style.display = 'none'; // Step 1: Close dropdown
+            document.getElementById('linkOptionsDropdown').style.display = 'none';
         }
 
-        // Step 3: Function to copy the selected link
         function copySelectedLink() {
             const text = document.getElementById('linkFormatDisplay').innerText;
-            if (text && !text.startsWith('Error') && text !== 'Click a format above to display.') {
-                navigator.clipboard.writeText(text);
-                showToast("Selected Link Copied!");
-            } else {
-                showToast("No valid link selected.");
-            }
+            if (text && !text.startsWith('Error')) { navigator.clipboard.writeText(text); showToast("Copied!"); }
         }
-
 
         linkUploadBtn.onclick = async () => {
             if(!linkSelectedFile) return;
-            
-            // --- Step 3: GITHUB DEDUPLICATION CHECK ---
             linkUploadBtn.disabled = true;
             document.getElementById('linkUploadTitle').innerHTML = 'Checking file existence...';
             
             const fileHash = await calculateFileHash(linkSelectedFile);
             const fileExt = linkSelectedFile.name.split('.').pop().toLowerCase();
             const expectedPath = `uploads/${fileHash}.${fileExt}`;
-            
             const cachedUrl = await checkFileExistenceOnGithub(expectedPath);
 
-            if (cachedUrl) {
-                showToast("File found on GitHub. Displaying Link.");
-                handleCachedLink(cachedUrl, linkSelectedFile); // Pass the file object
-                return; // Stop execution
-            }
-            // --- END DEDUPLICATION CHECK ---
+            if (cachedUrl) { handleCachedLink(cachedUrl, linkSelectedFile); return; }
             
-            document.getElementById('linkUploadTitle').innerHTML = 'File not found. Ready to upload.';
-            linkUploadBtn.disabled = false; // Re-enable for the user to proceed if they wish
-            
-            
+            document.getElementById('linkUploadTitle').innerHTML = 'Ready to upload.';
             linkProgressContainer.style.display = 'block';
             linkUploadBtn.style.display = 'none';
-            removeFileLinkBtn.style.display = 'none'; // Hide remove button during upload
+            removeFileLinkBtn.style.display = 'none';
 
-            // Use handleCachedLink as the success callback
             uploadFileToGithub(linkSelectedFile, fileHash, (uploadedUrl) => {
                 handleCachedLink(uploadedUrl, linkSelectedFile);
-            }, 
-            (percent) => {
+            }, (percent) => {
                 linkProgressFill.style.width = percent + "%";
                 linkPercentLabel.innerText = percent + "%";
             }, 'link'); 
         };
         
-        // Step 3: New function to check file existence on GitHub
         function checkFileExistenceOnGithub(path) {
             return new Promise((resolve) => {
                 const xhr = new XMLHttpRequest();
-                // GitHub API URL for file content
                 xhr.open("GET", `https://api.github.com/repos/${GIT.owner}/${GIT.repo}/contents/${path}`);
                 xhr.setRequestHeader("Authorization", `token ${GIT.token}`);
-
                 xhr.onload = () => {
                     if (xhr.status === 200) {
-                        // File found. Construct the uploaded URL from the file metadata.
-                        const fileData = { 
-                            n: path.split('/').pop(), // Use full file name for display
-                            p: path, 
-                            s: 'N/A' // Size not easily available here, set to N/A for metadata
-                        };
-                        // Note: The original file name is lost here, but the URL is valid.
-                        // We reverse engineer the viewer link based on the path.
-                        const uploadedUrl = `${GIT.domain}/viewer.html?f=${btoa(JSON.stringify(fileData))}`;
-                        resolve(uploadedUrl);
-                    } else if (xhr.status === 404) {
-                        // File not found. Proceed with upload.
-                        resolve(null);
-                    } else {
-                        // Other error (e.g., rate limit, network). Treat as not found to attempt upload.
-                        showToast(`GitHub check error: ${xhr.status}`);
-                        resolve(null);
-                    }
+                        const fileData = { n: path.split('/').pop(), p: path, s: 'N/A' };
+                        resolve(`${GIT.domain}/viewer.html?f=${btoa(JSON.stringify(fileData))}`);
+                    } else resolve(null);
                 };
-                
-                xhr.onerror = () => {
-                    showToast("Network error during GitHub check.");
-                    resolve(null);
-                };
-
+                xhr.onerror = () => resolve(null);
                 xhr.send();
             });
         }
 
-
-        // --- Shared Upload Function (Fix 1 - Using restored GIT variable, Step 3: Changed file name to use hash) ---
         function uploadFileToGithub(file, fileHash, onSuccess, onProgress, viewType = 'qr') {
             const reader = new FileReader();
             reader.readAsDataURL(file);
-
             reader.onload = () => {
                 const base64 = reader.result.split(',')[1];
                 const fileExt = file.name.split('.').pop();
-                // Step 3: Use file hash for the permanent path
                 const path = `uploads/${fileHash}.${fileExt}`;
-
                 const xhr = new XMLHttpRequest();
-                // Use the restored GIT variable for API calls
                 xhr.open("PUT", `https://api.github.com/repos/${GIT.owner}/${GIT.repo}/contents/${path}`);
                 xhr.setRequestHeader("Authorization", `token ${GIT.token}`);
                 xhr.setRequestHeader("Content-Type", "application/json");
-
                 xhr.upload.onprogress = (e) => {
                     if (e.lengthComputable) {
                         const percent = Math.round((e.loaded / e.total) * 100);
                         onProgress(percent);
                     }
                 };
-
                 xhr.onload = () => {
                     if (xhr.status === 201 || xhr.status === 200) {
                         const fileData = { n: file.name, p: path, s: (file.size / (1024*1024)).toFixed(2) };
-                        // Use the restored GIT variable for URL construction
-                        const uploadedUrl = `${GIT.domain}/viewer.html?f=${btoa(JSON.stringify(fileData))}`;
-                        
-                        onSuccess(uploadedUrl);
-                        showToast("File Uploaded Successfully!");
+                        onSuccess(`${GIT.domain}/viewer.html?f=${btoa(JSON.stringify(fileData))}`);
+                        showToast("Uploaded Successfully!");
                     } else {
-                        showToast("Upload Error! Status: " + xhr.status);
-                        // Reset progress/buttons for error state
-                        if (viewType === 'qr') {
-                            resetUploadView('uploadToQrView');
-                        } else {
-                            resetUploadView('uploadToLinkView');
-                        }
+                        showToast("Error: " + xhr.status);
+                        if (viewType === 'qr') resetUploadView('uploadToQrView'); else resetUploadView('uploadToLinkView');
                     }
                 };
-                
-                // FIX 1: Add onerror handler for network failures/timeouts
                 xhr.onerror = () => { 
-                    showToast("Upload failed due to a network error or connection issue.");
-                    if (viewType === 'qr') {
-                        resetUploadView('uploadToQrView');
-                    } else {
-                        resetUploadView('uploadToLinkView');
-                    }
+                    showToast("Network Error");
+                    if (viewType === 'qr') resetUploadView('uploadToQrView'); else resetUploadView('uploadToLinkView');
                 };
-                // END FIX 1
-
                 xhr.send(JSON.stringify({ message: "upload", content: base64, branch: GIT.branch }));
             };
         }
-        
-        // NEW ADDITION: Data Cleaning Function
-        function cleanExtractedData(rawData) {
-            // Logic for WIFI:T:WPA;P:password;S:ssid;H:false;
-            if (rawData.startsWith('WIFI:')) {
-                const dataParts = rawData.substring(5).split(';');
-                let password = '';
-                for (const part of dataParts) {
-                    if (part.startsWith('P:')) {
-                        password = part.substring(2).trim(); // Remove 'P:' and trim whitespace
-                        return password; 
-                    }
-                }
-                // If no password found, return the SSID (S:) or the whole thing
-                let ssid = '';
-                for (const part of dataParts) {
-                    if (part.startsWith('S:')) {
-                        ssid = part.substring(2).trim();
-                        return ssid; // Return SSID if P: is not present
-                    }
-                }
-            }
-            // Add logic for other formats (e.g., MECARD, TEL) if needed later
-            
-            // If no cleaning is done, return the raw data
-            return rawData;
-        }
 
-        // NEW ADDITION 2: QR Code Extractor Logic
         extractorDropZone.onclick = () => extractorFileInput.click();
         extractorFileInput.onchange = (e) => {
             extractorSelectedFile = e.target.files[0];
             if(extractorSelectedFile) {
-                // Check if it's an image file for extraction
                 if (!extractorSelectedFile.type.startsWith('image/')) {
-                    document.getElementById('extractorUploadTitle').innerHTML = `<b>${extractorSelectedFile.name}</b><br><span style="color: red;">File must be an image.</span>`;
-                    extractBtn.disabled = true;
-                    extractorSelectedFile = null;
-                    extractorFileInput.value = '';
-                    // Manual reset of preview icons on error
-                    uploadIconExtractor.style.display = 'block';
-                    imagePreviewExtractor.style.display = 'none';
-                    fileIconExtractor.style.display = 'none';
-                    removeFileExtractorBtn.style.display = 'none';
+                    document.getElementById('extractorUploadTitle').innerHTML = `<span style="color: red;">File must be an image.</span>`;
                     return;
                 }
-                
-                // Use helper function to process file and update preview (includes size check)
                 const success = setFilePreview(extractorSelectedFile, document.getElementById('extractorUploadTitle'), uploadIconExtractor, imagePreviewExtractor, fileIconExtractor, fileExtExtractor, removeFileExtractorBtn);
                 extractBtn.disabled = !success; 
-                if (!success) {
-                    extractorSelectedFile = null; 
-                    extractorFileInput.value = ''; 
-                }
             }
         };
+        removeFileExtractorBtn.onclick = (e) => { e.stopPropagation(); resetUploadView('qrExtractorView'); };
 
-        removeFileExtractorBtn.onclick = (e) => {
-            e.stopPropagation(); 
-            resetUploadView('qrExtractorView');
-        };
-
-        // Core Extraction Function using jsQR
-        function extractQRFromImage(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        ctx.drawImage(img, 0, 0, img.width, img.height);
-                        const imageData = ctx.getImageData(0, 0, img.width, img.height);
-
-                        try {
-                            // jsQR function call
-                            const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                                inversionAttempts: "dontInvert", 
-                            });
-                            
-                            if (code) {
-                                resolve(code.data);
-                            } else {
-                                reject("No QR code found in the image.");
-                            }
-                        } catch (error) {
-                            reject("Error processing image for QR: " + error.message);
-                        }
-                    };
-                    img.onerror = () => reject("Error loading image.");
-                    img.src = e.target.result;
-                };
-                reader.onerror = () => reject("Error reading file.");
-                reader.readAsDataURL(file);
-            });
-        }
-        
         extractBtn.onclick = async () => {
             if (!extractorSelectedFile) return;
-
             extractBtn.disabled = true;
-            document.getElementById('extractorUploadTitle').innerHTML = 'Processing Image...';
-
+            document.getElementById('extractorUploadTitle').innerHTML = 'Processing...';
             try {
-                const rawData = await extractQRFromImage(extractorSelectedFile);
-                const cleanedData = cleanExtractedData(rawData); // NEW ADDITION: Clean the data
-                
-                // 1. Update Preview/Success Area
-                displaySuccessPreview(extractorSelectedFile, document.getElementById('extractorResultFilePreview'));
-                document.getElementById('extractorUploadTitle').innerHTML = 'Choose a QR Code Image'; 
-                
-                // 2. Display extracted data
-                extractedDataDisplay.innerText = cleanedData; // Use cleaned data
+                const rawData = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            canvas.width = img.width; canvas.height = img.height;
+                            ctx.drawImage(img, 0, 0);
+                            const imageData = ctx.getImageData(0, 0, img.width, img.height);
+                            const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
+                            if (code) resolve(code.data); else reject("No QR code found.");
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(extractorSelectedFile);
+                });
 
-                // 3. Setup action buttons
+                displaySuccessPreview(extractorSelectedFile, document.getElementById('extractorResultFilePreview'));
+                extractedDataDisplay.innerText = rawData;
                 extractorActionButtons.innerHTML = ''; 
                 
-                const isUrl = rawData.startsWith('http://') || rawData.startsWith('https://');
-
-                // Button: Copy
                 const copyBtn = document.createElement('button');
                 copyBtn.className = 'btn btn-action';
                 copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
-                copyBtn.onclick = () => { navigator.clipboard.writeText(cleanedData); showToast("Data Copied!"); }; // Copy cleaned data
+                copyBtn.onclick = () => { navigator.clipboard.writeText(rawData); showToast("Copied!"); }; 
                 
-                // Button: Download Text
                 const downloadTxtBtn = document.createElement('button');
                 downloadTxtBtn.className = 'btn btn-action';
                 downloadTxtBtn.innerHTML = '<i class="fas fa-download"></i> Download Text';
                 downloadTxtBtn.onclick = () => {
                     const link = document.createElement('a');
                     link.download = 'qrcode_data.txt';
-                    // Download raw data or cleaned data? Downloading cleaned data (the displayed one) is more user-friendly.
-                    link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(cleanedData); 
+                    link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(rawData); 
                     link.click();
                 };
                 
-                // Determine button layout (Max 3 buttons, 2 per row if needed)
-                if (isUrl && rawData === cleanedData) { // Only show open link if it's a raw URL (not cleaned WIFI password)
-                    // Button: Open Link (If URL)
-                    const openLinkBtn = document.createElement('button');
-                    openLinkBtn.className = 'btn btn-action';
-                    openLinkBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> Open Link';
-                    openLinkBtn.onclick = () => window.open(cleanedData, '_blank');
-                    
-                    extractorActionButtons.style.gridTemplateColumns = '1fr 1fr 1fr';
-                    extractorActionButtons.appendChild(openLinkBtn);
-                    extractorActionButtons.appendChild(downloadTxtBtn); 
-                    extractorActionButtons.appendChild(copyBtn); 
+                extractorActionButtons.style.gridTemplateColumns = '1fr 1fr';
+                extractorActionButtons.appendChild(copyBtn);
+                extractorActionButtons.appendChild(downloadTxtBtn);
 
-                } else {
-                    // Two-column grid with Copy and Download Text
-                    extractorActionButtons.style.gridTemplateColumns = '1fr 1fr';
-                    extractorActionButtons.appendChild(copyBtn);
-                    extractorActionButtons.appendChild(downloadTxtBtn);
-                }
-
-                // 4. Switch View
                 document.getElementById('extractorUploaderView').style.display = 'none';
                 extractorResultArea.style.display = 'block';
-
             } catch (error) {
-                showToast(`Extraction Failed: ${error}`);
-                document.getElementById('extractorUploadTitle').innerHTML = 'Choose a QR Code Image'; 
+                showToast(error);
                 extractBtn.disabled = false; 
             }
         };
-        // END NEW ADDITION 2
 
-
-        // Change 4: Initialize Auth Listener
         setupAuthListener();
-        
-        // FIX 2: Initial call to set correct logo on page load
         updateLogoImage(); 
-        
-        // New Change 2: Initial call for link input
         updateLinkInputControls();
-        
-        // Step 2: Set initial color previews
         linkQrColorBtn.style.backgroundColor = linkQrColor.value;
         linkQrBackgroundBtn.style.backgroundColor = linkQrBackground.value;
     </script>
