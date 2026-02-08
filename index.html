@@ -35,7 +35,7 @@
         }
         
         input, .link-url, .upload-box #uploadTitle, #linkUploadTitle, #extractorUploadTitle, 
-        #mp3UploadTitle, #pdfUploadTitle, #zipUploadTitle, #gifUploadTitle, footer p, #toast {
+        #mp3UploadTitle, #pdfUploadTitle, #zipUploadTitle, #gifUploadTitle, footer p, #toast, .filename-input {
             -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text;
         }
 
@@ -59,7 +59,8 @@
         .btn:focus, .btn:active, .theme-btn:focus, .theme-btn:active, 
         .action-btn:focus, .action-btn:active, .option-card:focus, .option-card:active,
         .icon-back-btn:focus, .icon-back-btn:active, .clear-input-btn:focus, .clear-input-btn:active,
-        .paste-btn:focus, .paste-btn:active, .remove-file-btn:focus, .remove-file-btn:active {
+        .paste-btn:focus, .paste-btn:active, .remove-file-btn:focus, .remove-file-btn:active,
+        .settings-btn:focus, .settings-btn:active {
             outline: none; -webkit-tap-highlight-color: transparent; box-shadow: none;
         }
 
@@ -205,6 +206,38 @@
         
         .bulk-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
 
+        .pdf-overlay-controls {
+            position: absolute; top: 5px; right: 5px; 
+            display: flex; gap: 5px; align-items: center; 
+            background: rgba(255,255,255,0.9); padding: 4px; 
+            border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .pdf-page-num {
+            position: absolute; top: 5px; left: 5px;
+            background: rgba(0,0,0,0.7); color: white;
+            padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;
+        }
+        .mini-download-btn {
+            background: var(--primary); border: none; color: white;
+            width: 24px; height: 24px; border-radius: 4px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; cursor: pointer;
+        }
+
+        .filename-wrapper { display: flex; gap: 5px; margin-top: 15px; align-items: center; }
+        .filename-input { flex-grow: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+        .filename-ext { padding: 12px; background: var(--border); border-radius: 8px; font-size: 0.8rem; font-weight: 700; }
+
+        .settings-btn {
+            position: fixed; bottom: 20px; left: 20px;
+            width: 45px; height: 45px; border-radius: 50%;
+            background: var(--card); border: 1px solid var(--border);
+            color: var(--text); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 4px 12px var(--shadow); z-index: 999;
+            transition: 0.3s; font-size: 1.2rem;
+        }
+        .settings-btn:hover { background: var(--border); transform: rotate(45deg); }
+
         #mainOptionsView, #linkToQrView, #uploadToQrView, #uploadToLinkView, #qrExtractorView,
         #mp4ToMp3View, #pdfExtractorView, #zipExtractorView, #videoToGifView { display: none; }
     </style>
@@ -221,6 +254,8 @@
             </div>
         </div>
     </header>
+
+    <button class="settings-btn" id="settingsBtn" onclick="showToast('Settings (Coming Soon)')"><i class="fas fa-cog"></i></button>
 
     <div class="main-content">
         <div class="container">
@@ -338,6 +373,12 @@
                             <input type="text" id="hexInput" placeholder="#000000" maxlength="7" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.9rem;" oninput="updateHexColor(this.value)">
                         </div>
                         <span id="linkQrCodeSizeDisplay" style="font-size: 0.8rem; font-weight: 600; text-align: right; margin-top: 5px; display: block;">600px | Size: N/A</span>
+                        
+                        <div class="filename-wrapper">
+                            <input type="text" id="linkQrFilename" class="filename-input" value="qrcode" placeholder="Enter Filename">
+                            <span class="filename-ext">.png</span>
+                        </div>
+
                         <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 15px;">
                             <button class="btn btn-action" id="downloadLinkQRBtn"><i class="fas fa-download"></i> Save QR</button>
                         </div>
@@ -487,6 +528,10 @@
                         <div class="upload-box" id="mp3DropZone">
                             <button class="remove-file-btn" id="removeFileMp3Btn" style="display: none;"><i class="fas fa-times"></i></button>
                             <i class="fas fa-music" id="uploadIconMp3" style="font-size: 2.5rem; color: var(--primary);"></i>
+                            <div class="file-icon-preview" id="fileIconMp3" style="display: none;">
+                                <i class="fas fa-file-video"></i>
+                                <span class="file-ext" style="background: var(--text); color: var(--bg);">MP4</span>
+                            </div>
                             <h3 id="mp3UploadTitle" style="margin-top:10px;">Choose an MP4 File</h3>
                             <input type="file" id="mp3FileInput" hidden accept="video/mp4">
                         </div>
@@ -509,6 +554,12 @@
                         </div>
                         <label style="font-size: 0.7rem; font-weight: 700;">Audio Preview:</label>
                         <audio id="resultAudio" controls style="width:100%; margin-top:10px;"></audio>
+                        
+                        <div class="filename-wrapper">
+                            <input type="text" id="mp3Filename" class="filename-input" placeholder="Enter Filename">
+                            <span class="filename-ext">.mp3</span>
+                        </div>
+
                         <button class="btn btn-action" id="downloadMp3Btn" style="margin-top: 15px;"><i class="fas fa-download"></i> Download MP3</button>
                         <button class="btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="location.reload()">Convert Another File</button>
                     </div>
@@ -584,7 +635,7 @@
                             <i class="fas fa-check-circle" style="font-size: 2.5rem; color: var(--primary);"></i>
                             <h4 style="margin: 10px 0;">Extraction Successful!</h4>
                         </div>
-                        <button class="btn btn-action" id="downloadAllZipBtn" style="margin-bottom: 15px;"><i class="fas fa-file-zipper"></i> Download All as ZIP</button>
+                        <button class="btn btn-action" id="downloadAllZipBtn" style="margin-bottom: 15px;"><i class="fas fa-file-arrow-down"></i> Download All</button>
                         <div id="zipFileList" style="max-height: 300px; overflow-y: auto;"></div>
                         <button class="btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="location.reload()">New Extraction</button>
                     </div>
@@ -626,7 +677,13 @@
                         <div style="text-align: center; margin-bottom: 20px;">
                             <img id="resultGif" style="max-width: 100%; border-radius: 12px; border: 1px solid var(--border);">
                         </div>
-                        <button class="btn btn-action" id="downloadGifBtn"><i class="fas fa-download"></i> Download GIF</button>
+                        
+                        <div class="filename-wrapper">
+                            <input type="text" id="gifFilename" class="filename-input" placeholder="Enter Filename">
+                            <span class="filename-ext">.gif</span>
+                        </div>
+
+                        <button class="btn btn-action" id="downloadGifBtn" style="margin-top: 10px;"><i class="fas fa-download"></i> Download GIF</button>
                         <button class="btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="location.reload()">Convert Another</button>
                     </div>
                 </div>
@@ -711,6 +768,7 @@
         const linkQrCodeSizeDisplay = document.getElementById('linkQrCodeSizeDisplay');
         const clearLinkInputBtn = document.getElementById('clearLinkInputBtn');
         const pasteLinkInputBtn = document.getElementById('pasteLinkInputBtn');
+        const linkQrFilename = document.getElementById('linkQrFilename');
         
         const extractorFileInput = document.getElementById('extractorFileInput');
         const extractorDropZone = document.getElementById('extractorDropZone');
@@ -734,6 +792,9 @@
         const mp3ProgressContainer = document.getElementById('mp3ProgressContainer');
         const mp3ProgressFill = document.getElementById('mp3ProgressFill');
         const mp3PercentLabel = document.getElementById('mp3PercentLabel');
+        const mp3Filename = document.getElementById('mp3Filename');
+        const fileIconMp3 = document.getElementById('fileIconMp3');
+        const uploadIconMp3 = document.getElementById('uploadIconMp3');
         let mp3SelectedFile = null;
 
         const pdfFileInput = document.getElementById('pdfFileInput');
@@ -769,6 +830,7 @@
         const gifProgressContainer = document.getElementById('gifProgressContainer');
         const gifProgressFill = document.getElementById('gifProgressFill');
         const gifPercentLabel = document.getElementById('gifPercentLabel');
+        const gifFilename = document.getElementById('gifFilename');
         let gifSelectedFile = null;
 
         const CODE_EXTENSIONS = ['html', 'css', 'js', 'java', 'py', 'python', 'sql', 'pdf', 'xml', 'txt', 'kordova', 'json', 'yml', 'md'];
@@ -838,6 +900,8 @@
                 mp3ProgressFill.style.width = '0%';
                 mp3PercentLabel.innerText = '0%';
                 mp3SelectedFile = null;
+                if(fileIconMp3) fileIconMp3.style.display = 'none';
+                if(uploadIconMp3) uploadIconMp3.style.display = 'block';
             } else if (viewId === 'pdfExtractorView') {
                 document.getElementById('pdfUploadTitle').innerHTML = 'Choose a PDF File';
                 extractPdfBtn.disabled = true;
@@ -988,7 +1052,7 @@
             if(fileIconEl) fileIconEl.style.display = 'none';
             if(removeBtn) removeBtn.style.display = 'block';
 
-            if (CODE_EXTENSIONS.includes(ext) || ext === 'zip') {
+            if (CODE_EXTENSIONS.includes(ext) || ext === 'zip' || ext === 'mp4') {
                 if(fileIconEl) {
                     fileIconEl.style.display = 'flex';
                     if(fileExtEl) fileExtEl.innerText = ext;
@@ -1139,7 +1203,8 @@
         };
         downloadLinkQRBtn.onclick = () => {
             const link = document.createElement('a');
-            link.download = 'link_qrcode.png';
+            const fname = linkQrFilename.value.trim() || 'qrcode';
+            link.download = `${fname}.png`;
             link.href = linkQrcodeDiv.querySelector('canvas').toDataURL();
             link.click();
         };
@@ -1154,27 +1219,9 @@
                     return;
                 }
                 
-                const name = mp3SelectedFile.name;
-                let displayName = name;
-                if (name.length > 20) {
-                     const extIndex = name.lastIndexOf('.');
-                     if (extIndex > 0) {
-                         const ext = name.substring(extIndex);
-                         const base = name.substring(0, extIndex);
-                         if (ext.length + 3 < 20) {
-                             displayName = base.substring(0, 20 - ext.length - 3) + '...' + ext;
-                         } else {
-                              displayName = name.substring(0, 17) + '...';
-                         }
-                     } else {
-                         displayName = name.substring(0, 17) + '...';
-                     }
-                }
-                
-                titleEl.innerHTML = `<b>${displayName}</b><br>Size: ${(mp3SelectedFile.size/1024/1024).toFixed(2)} MB`;
-                document.getElementById('uploadIconMp3').style.display = 'none';
-                document.getElementById('removeFileMp3Btn').style.display = 'block';
+                setFilePreview(mp3SelectedFile, titleEl, uploadIconMp3, null, fileIconMp3, fileIconMp3.querySelector('.file-ext'), document.getElementById('removeFileMp3Btn'));
                 convertMp3Btn.disabled = false;
+                mp3Filename.value = mp3SelectedFile.name.replace(/\.[^/.]+$/, "");
 
                 const videoURL = URL.createObjectURL(mp3SelectedFile);
                 const videoEl = document.getElementById('sourceVideo');
@@ -1231,7 +1278,8 @@
                         downloadMp3Btn.onclick = () => {
                             const a = document.createElement('a');
                             a.href = url;
-                            a.download = mp3SelectedFile.name.replace(/\.[^/.]+$/, "") + ".mp3";
+                            const fname = mp3Filename.value.trim() || 'audio';
+                            a.download = `${fname}.mp3`;
                             a.click();
                         };
                         
@@ -1254,6 +1302,15 @@
             checkbox.checked = !checkbox.checked;
             if(checkbox.checked) wrapper.classList.add('selected');
             else wrapper.classList.remove('selected');
+        }
+
+        function downloadSinglePdfPage(idx, event) {
+            event.stopPropagation();
+            const link = document.createElement('a');
+            const img = document.querySelector(`.pdf-grid-item:nth-child(${idx}) img`);
+            link.href = img.src;
+            link.download = `page-${idx}.jpg`;
+            link.click();
         }
 
         pdfDropZone.onclick = () => pdfFileInput.click();
@@ -1299,7 +1356,13 @@
                     wrapper.onclick = function() { togglePdfSelection(this); };
                     wrapper.innerHTML = `
                         <img src="${imgUrl}" style="width:100%; border-radius:8px; border:1px solid var(--border);">
-                        <input type="checkbox" class="pdf-select-check" data-page="${i}" checked style="display:none;">
+                        <div class="pdf-overlay-controls">
+                            <span class="pdf-page-num">Page ${i}</span>
+                            <div style="display:flex; gap:5px; margin-left: auto;">
+                                <button class="mini-download-btn" onclick="downloadSinglePdfPage(${i}, event)"><i class="fas fa-download"></i></button>
+                                <input type="checkbox" class="pdf-select-check" data-page="${i}" checked style="transform:scale(1.2);">
+                            </div>
+                        </div>
                     `;
                     pdfPagesGrid.appendChild(wrapper);
                     
@@ -1330,29 +1393,21 @@
             });
         };
 
-        downloadSelectedPdfBtn.onclick = () => {
+        downloadSelectedPdfBtn.onclick = async () => {
             const checkboxes = document.querySelectorAll('.pdf-select-check:checked');
             if(checkboxes.length === 0) { showToast("Select at least one page."); return; }
             
-            if(checkboxes.length === 1) {
-                const idx = checkboxes[0].getAttribute('data-page') - 1;
+            for(let i = 0; i < checkboxes.length; i++) {
+                const cb = checkboxes[i];
+                const idx = parseInt(cb.getAttribute('data-page')) - 1;
+                const src = pdfPagesGrid.children[idx].querySelector('img').src;
+                
                 const link = document.createElement('a');
-                link.href = pdfPagesGrid.children[idx].querySelector('img').src;
+                link.href = src;
                 link.download = `page-${idx+1}.jpg`;
                 link.click();
-            } else {
-                 const selectedZip = new JSZip();
-                 checkboxes.forEach(cb => {
-                     const idx = parseInt(cb.getAttribute('data-page')) - 1;
-                     const src = pdfPagesGrid.children[idx].querySelector('img').src;
-                     selectedZip.file(`page-${idx+1}.jpg`, src.split(',')[1], {base64: true});
-                 });
-                 selectedZip.generateAsync({type:"blob"}).then(function(content) {
-                     const a = document.createElement('a');
-                     a.href = URL.createObjectURL(content);
-                     a.download = "selected_pages.zip";
-                     a.click();
-                 });
+                
+                if(checkboxes.length > 1) await new Promise(r => setTimeout(r, 300));
             }
         };
 
@@ -1383,7 +1438,6 @@
                 const totalFiles = fileNames.length;
                 let processed = 0;
 
-                // Simulate progress for small zips, or track actual processing if needed
                 zipProgressFill.style.width = '50%';
                 zipPercentLabel.innerText = '50%';
 
@@ -1424,24 +1478,19 @@
 
         downloadAllZipBtn.onclick = async () => {
             if(!zipExtractedContent) return;
-            const newZip = new JSZip();
             
-            const promises = [];
-            zipExtractedContent.forEach((relativePath, file) => {
-                if(!file.dir) {
-                    promises.push(file.async('blob').then(blob => {
-                        newZip.file(relativePath, blob);
-                    }));
+            const fileNames = Object.keys(zipExtractedContent.files);
+            for(let i = 0; i < fileNames.length; i++) {
+                const filename = fileNames[i];
+                if(!zipExtractedContent.files[filename].dir) {
+                    const blob = await zipExtractedContent.files[filename].async("blob");
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = filename.split('/').pop();
+                    link.click();
+                    await new Promise(r => setTimeout(r, 300));
                 }
-            });
-
-            await Promise.all(promises);
-            newZip.generateAsync({type:"blob"}).then(function(content) {
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(content);
-                a.download = "extracted_files.zip";
-                a.click();
-            });
+            }
         };
 
         gifDropZone.onclick = () => gifFileInput.click();
@@ -1458,6 +1507,7 @@
                 const videoURL = URL.createObjectURL(gifSelectedFile);
                 const videoEl = document.getElementById('gifSourceVideo');
                 videoEl.src = videoURL;
+                gifFilename.value = gifSelectedFile.name.replace(/\.[^/.]+$/, "");
                 
                 videoEl.onloadedmetadata = () => {
                     if(videoEl.duration > 30) {
@@ -1511,7 +1561,6 @@
                 gifH = originalHeight;
             } else {
                 gifW = parseInt(resValue);
-                // Calculate height to maintain aspect ratio
                 gifH = Math.round(gifW * (originalHeight / originalWidth));
             }
             
@@ -1534,7 +1583,8 @@
                     downloadGifBtn.onclick = () => {
                         const a = document.createElement('a');
                         a.href = image;
-                        a.download = 'animation.gif';
+                        const fname = gifFilename.value.trim() || 'animation';
+                        a.download = `${fname}.gif`;
                         a.click();
                     };
                     
