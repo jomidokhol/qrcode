@@ -75,10 +75,19 @@
             padding: 15px 20px; text-align: center; font-size: 0.8rem; opacity: 0.7;
         }
 
-        #progressContainer, #linkProgressContainer { display: none; margin-top: 20px; text-align: left; }
+        #progressContainer, #linkProgressContainer, 
+        #mp3ProgressContainer, #pdfProgressContainer, 
+        #zipProgressContainer, #gifProgressContainer { display: none; margin-top: 20px; text-align: left; }
+        
         .progress-track { background: var(--border); height: 10px; border-radius: 10px; overflow: hidden; margin-top: 10px; }
-        .progress-fill { background: var(--primary); height: 100%; width: 0%; transition: width 0.1s; }
-        #percentLabel, #linkPercentLabel { font-size: 0.8rem; font-weight: 700; color: var(--primary); }
+        
+        .progress-fill, #mp3ProgressFill, #pdfProgressFill, #zipProgressFill, #gifProgressFill { 
+            background: var(--primary); height: 100%; width: 0%; transition: width 0.1s; 
+        }
+        
+        #percentLabel, #linkPercentLabel, 
+        #mp3PercentLabel, #pdfPercentLabel, 
+        #zipPercentLabel, #gifPercentLabel { font-size: 0.8rem; font-weight: 700; color: var(--primary); }
 
         .upload-box { border: 2px dashed var(--primary); border-radius: 24px; padding: 20px; text-align: center; cursor: pointer; background: rgba(99, 102, 241, 0.05); position: relative; } 
         .upload-box img { display:block; margin: 0 auto 10px; }
@@ -147,13 +156,6 @@
         }
         
         .preview-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
-        .file-list-item { 
-            background: var(--card); border: 1px solid var(--border); 
-            padding: 10px; border-radius: 8px; font-size: 0.8rem; 
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 8px;
-        }
-        .file-list-item .fname { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 70%; }
         
         .red-icon i { color: #ef4444 !important; }
 
@@ -189,6 +191,20 @@
 
         .link-url { word-break: break-all; font-size: 0.9rem; padding: 10px; background: var(--border); border-radius: 8px; margin-top: 10px; }
         
+        .pdf-quality-select, .gif-res-select {
+            padding: 8px 12px; border-radius: 12px; border: 1px solid var(--border); 
+            background: var(--bg); color: var(--text); font-size: 0.85rem; outline: none;
+            transition: 0.3s; cursor: pointer;
+        }
+        .pdf-quality-select:hover, .gif-res-select:hover { border-color: var(--primary); }
+
+        .pdf-grid-item { position: relative; cursor: pointer; transition: 0.2s; }
+        .pdf-grid-item:hover { opacity: 0.9; }
+        .pdf-grid-item.selected img { border: 3px solid var(--primary) !important; }
+        .pdf-grid-item img { transition: 0.2s; }
+        
+        .bulk-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+
         #mainOptionsView, #linkToQrView, #uploadToQrView, #uploadToLinkView, #qrExtractorView,
         #mp4ToMp3View, #pdfExtractorView, #zipExtractorView, #videoToGifView { display: none; }
     </style>
@@ -387,7 +403,7 @@
                             <h3 id="linkUploadTitle" style="margin-top:10px;">Choose a file</h3>
                             <input type="file" id="linkFileInput" hidden>
                         </div>
-                        <div id="linkProgressContainer" style="display: none; margin-top: 20px; text-align: left;">
+                        <div id="linkProgressContainer">
                             <div style="display: flex; justify-content: space-between;">
                                 <span style="font-size: 0.8rem; opacity: 0.7;">Uploading...</span>
                                 <span id="linkPercentLabel">0%</span>
@@ -477,6 +493,13 @@
                         <div id="mp3PreviewArea" style="display:none; margin-top:15px; text-align:center;">
                             <video id="sourceVideo" controls style="width:100%; max-height:200px; border-radius:12px;"></video>
                         </div>
+                        <div id="mp3ProgressContainer">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="font-size: 0.8rem; opacity: 0.7;">Converting...</span>
+                                <span id="mp3PercentLabel">0%</span>
+                            </div>
+                            <div class="progress-track"><div id="mp3ProgressFill" class="progress-fill"></div></div>
+                        </div>
                         <button class="btn btn-primary" id="convertMp3Btn" disabled>Convert to MP3</button>
                     </div>
                     <div id="mp3ResultArea" style="display: none;">
@@ -505,10 +528,18 @@
                         </div>
                         <div style="margin-top: 15px; display: flex; align-items: center; justify-content: space-between;">
                             <label style="font-size: 0.8rem; font-weight: 600;">Image Quality:</label>
-                            <select id="pdfQuality" style="padding: 5px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
-                                <option value="1.0">Standard</option>
-                                <option value="2.0">High</option>
+                            <select id="pdfQuality" class="pdf-quality-select">
+                                <option value="1.0">Standard (1x)</option>
+                                <option value="1.5">Medium (1.5x)</option>
+                                <option value="2.0">High (2x)</option>
                             </select>
+                        </div>
+                        <div id="pdfProgressContainer">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="font-size: 0.8rem; opacity: 0.7;">Extracting...</span>
+                                <span id="pdfPercentLabel">0%</span>
+                            </div>
+                            <div class="progress-track"><div id="pdfProgressFill" class="progress-fill"></div></div>
                         </div>
                         <button class="btn btn-primary" id="extractPdfBtn" disabled>Extract Images</button>
                     </div>
@@ -518,7 +549,10 @@
                             <h4 style="margin: 10px 0;">Extraction Successful!</h4>
                             <p id="pdfPageCount" style="font-size: 0.8rem;"></p>
                         </div>
-                        <button class="btn btn-action" id="downloadSelectedPdfBtn" style="margin-bottom: 15px;"><i class="fas fa-download"></i> Download Selected</button>
+                        <div class="bulk-actions">
+                            <button class="btn btn-action" id="selectAllPdfBtn"><i class="fas fa-check-double"></i> Select All</button>
+                            <button class="btn btn-action" id="downloadSelectedPdfBtn"><i class="fas fa-download"></i> Download</button>
+                        </div>
                         <div id="pdfPagesGrid" class="preview-grid"></div>
                         <button class="btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="location.reload()">New Extraction</button>
                     </div>
@@ -536,6 +570,13 @@
                             <h3 id="zipUploadTitle" style="margin-top:10px;">Choose a ZIP File</h3>
                             <input type="file" id="zipFileInput" hidden accept=".zip,application/zip,application/x-zip-compressed">
                         </div>
+                        <div id="zipProgressContainer">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="font-size: 0.8rem; opacity: 0.7;">Extracting...</span>
+                                <span id="zipPercentLabel">0%</span>
+                            </div>
+                            <div class="progress-track"><div id="zipProgressFill" class="progress-fill"></div></div>
+                        </div>
                         <button class="btn btn-primary" id="extractZipBtn" disabled>Extract Files</button>
                     </div>
                     <div id="zipResultArea" style="display: none;">
@@ -543,6 +584,7 @@
                             <i class="fas fa-check-circle" style="font-size: 2.5rem; color: var(--primary);"></i>
                             <h4 style="margin: 10px 0;">Extraction Successful!</h4>
                         </div>
+                        <button class="btn btn-action" id="downloadAllZipBtn" style="margin-bottom: 15px;"><i class="fas fa-file-zipper"></i> Download All as ZIP</button>
                         <div id="zipFileList" style="max-height: 300px; overflow-y: auto;"></div>
                         <button class="btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="location.reload()">New Extraction</button>
                     </div>
@@ -563,14 +605,22 @@
                         </div>
                         <div style="margin-top: 15px; display: flex; align-items: center; justify-content: space-between;">
                             <label style="font-size: 0.8rem; font-weight: 600;">Resolution:</label>
-                            <select id="gifResolution" style="padding: 5px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
-                                <option value="200">200px (Fast)</option>
-                                <option value="300" selected>300px (Standard)</option>
-                                <option value="400">400px (High)</option>
+                            <select id="gifResolution" class="gif-res-select">
+                                <option value="original">Original Resolution</option>
+                                <option value="200">200px Width</option>
+                                <option value="300" selected>300px Width</option>
+                                <option value="400">400px Width</option>
+                                <option value="500">500px Width</option>
                             </select>
                         </div>
+                        <div id="gifProgressContainer">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="font-size: 0.8rem; opacity: 0.7;">Converting...</span>
+                                <span id="gifPercentLabel">0%</span>
+                            </div>
+                            <div class="progress-track"><div id="gifProgressFill" class="progress-fill"></div></div>
+                        </div>
                         <button class="btn btn-primary" id="convertGifBtn" disabled>Convert to GIF</button>
-                        <p id="gifLoading" style="text-align:center; font-size:0.8rem; margin-top:10px; display:none;">Converting... This may take a moment.</p>
                     </div>
                     <div id="gifResultArea" style="display: none;">
                         <div style="text-align: center; margin-bottom: 20px;">
@@ -681,6 +731,9 @@
         const mp3ResultArea = document.getElementById('mp3ResultArea');
         const resultAudio = document.getElementById('resultAudio');
         const downloadMp3Btn = document.getElementById('downloadMp3Btn');
+        const mp3ProgressContainer = document.getElementById('mp3ProgressContainer');
+        const mp3ProgressFill = document.getElementById('mp3ProgressFill');
+        const mp3PercentLabel = document.getElementById('mp3PercentLabel');
         let mp3SelectedFile = null;
 
         const pdfFileInput = document.getElementById('pdfFileInput');
@@ -689,6 +742,10 @@
         const pdfResultArea = document.getElementById('pdfResultArea');
         const pdfPagesGrid = document.getElementById('pdfPagesGrid');
         const downloadSelectedPdfBtn = document.getElementById('downloadSelectedPdfBtn');
+        const selectAllPdfBtn = document.getElementById('selectAllPdfBtn');
+        const pdfProgressContainer = document.getElementById('pdfProgressContainer');
+        const pdfProgressFill = document.getElementById('pdfProgressFill');
+        const pdfPercentLabel = document.getElementById('pdfPercentLabel');
         let pdfSelectedFile = null;
 
         const zipFileInput = document.getElementById('zipFileInput');
@@ -696,7 +753,12 @@
         const extractZipBtn = document.getElementById('extractZipBtn');
         const zipResultArea = document.getElementById('zipResultArea');
         const zipFileList = document.getElementById('zipFileList');
+        const zipProgressContainer = document.getElementById('zipProgressContainer');
+        const zipProgressFill = document.getElementById('zipProgressFill');
+        const zipPercentLabel = document.getElementById('zipPercentLabel');
+        const downloadAllZipBtn = document.getElementById('downloadAllZipBtn');
         let zipSelectedFile = null;
+        let zipExtractedContent = null;
 
         const gifFileInput = document.getElementById('gifFileInput');
         const gifDropZone = document.getElementById('gifDropZone');
@@ -704,6 +766,9 @@
         const gifResultArea = document.getElementById('gifResultArea');
         const resultGif = document.getElementById('resultGif');
         const downloadGifBtn = document.getElementById('downloadGifBtn');
+        const gifProgressContainer = document.getElementById('gifProgressContainer');
+        const gifProgressFill = document.getElementById('gifProgressFill');
+        const gifPercentLabel = document.getElementById('gifPercentLabel');
         let gifSelectedFile = null;
 
         const CODE_EXTENSIONS = ['html', 'css', 'js', 'java', 'py', 'python', 'sql', 'pdf', 'xml', 'txt', 'kordova', 'json', 'yml', 'md'];
@@ -769,6 +834,9 @@
                 document.getElementById('mp3UploaderView').style.display = 'block';
                 mp3FileInput.value = '';
                 document.getElementById('removeFileMp3Btn').style.display = 'none';
+                mp3ProgressContainer.style.display = 'none';
+                mp3ProgressFill.style.width = '0%';
+                mp3PercentLabel.innerText = '0%';
                 mp3SelectedFile = null;
             } else if (viewId === 'pdfExtractorView') {
                 document.getElementById('pdfUploadTitle').innerHTML = 'Choose a PDF File';
@@ -777,6 +845,9 @@
                 document.getElementById('pdfUploaderView').style.display = 'block';
                 pdfFileInput.value = '';
                 document.getElementById('removeFilePdfBtn').style.display = 'none';
+                pdfProgressContainer.style.display = 'none';
+                pdfProgressFill.style.width = '0%';
+                pdfPercentLabel.innerText = '0%';
                 pdfSelectedFile = null;
                 pdfPagesGrid.innerHTML = '';
             } else if (viewId === 'zipExtractorView') {
@@ -786,7 +857,11 @@
                 document.getElementById('zipUploaderView').style.display = 'block';
                 zipFileInput.value = '';
                 document.getElementById('removeFileZipBtn').style.display = 'none';
+                zipProgressContainer.style.display = 'none';
+                zipProgressFill.style.width = '0%';
+                zipPercentLabel.innerText = '0%';
                 zipSelectedFile = null;
+                zipExtractedContent = null;
                 zipFileList.innerHTML = '';
             } else if (viewId === 'videoToGifView') {
                 document.getElementById('gifUploadTitle').innerHTML = 'Choose Video (Max 30s, 10MB)';
@@ -797,6 +872,9 @@
                 document.getElementById('gifUploaderView').style.display = 'block';
                 gifFileInput.value = '';
                 document.getElementById('removeFileGifBtn').style.display = 'none';
+                gifProgressContainer.style.display = 'none';
+                gifProgressFill.style.width = '0%';
+                gifPercentLabel.innerText = '0%';
                 gifSelectedFile = null;
             }
             else if(viewId === 'uploadToQrView') {
@@ -1109,6 +1187,9 @@
         convertMp3Btn.onclick = async () => {
             convertMp3Btn.disabled = true;
             convertMp3Btn.innerText = "Converting... (This happens locally)";
+            mp3ProgressContainer.style.display = 'block';
+            mp3ProgressFill.style.width = '0%';
+            mp3PercentLabel.innerText = '0%';
             
             try {
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -1125,35 +1206,55 @@
                     samplesInt16[i] = samples[i] < 0 ? samples[i] * 0x8000 : samples[i] * 0x7FFF;
                 }
                 
-                for (let i = 0; i < samplesInt16.length; i += sampleBlockSize) {
-                    const sampleChunk = samplesInt16.subarray(i, i + sampleBlockSize);
-                    const mp3buf = mp3Encoder.encodeBuffer(sampleChunk);
-                    if (mp3buf.length > 0) mp3Data.push(mp3buf);
+                let i = 0;
+                function encodeChunk() {
+                    if (i < samplesInt16.length) {
+                        const end = Math.min(i + sampleBlockSize * 50, samplesInt16.length); // Process 50 blocks at a time
+                        const sampleChunk = samplesInt16.subarray(i, end);
+                        const mp3buf = mp3Encoder.encodeBuffer(sampleChunk);
+                        if (mp3buf.length > 0) mp3Data.push(mp3buf);
+                        
+                        i = end;
+                        const percent = Math.round((i / samplesInt16.length) * 100);
+                        mp3ProgressFill.style.width = percent + "%";
+                        mp3PercentLabel.innerText = percent + "%";
+                        
+                        requestAnimationFrame(encodeChunk);
+                    } else {
+                        const mp3buf = mp3Encoder.flush();
+                        if (mp3buf.length > 0) mp3Data.push(mp3buf);
+                        
+                        const blob = new Blob(mp3Data, { type: 'audio/mp3' });
+                        const url = URL.createObjectURL(blob);
+                        
+                        resultAudio.src = url;
+                        downloadMp3Btn.onclick = () => {
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = mp3SelectedFile.name.replace(/\.[^/.]+$/, "") + ".mp3";
+                            a.click();
+                        };
+                        
+                        document.getElementById('mp3UploaderView').style.display = 'none';
+                        mp3ResultArea.style.display = 'block';
+                        convertMp3Btn.innerText = "Convert to MP3";
+                    }
                 }
-                
-                const mp3buf = mp3Encoder.flush();
-                if (mp3buf.length > 0) mp3Data.push(mp3buf);
-                
-                const blob = new Blob(mp3Data, { type: 'audio/mp3' });
-                const url = URL.createObjectURL(blob);
-                
-                resultAudio.src = url;
-                downloadMp3Btn.onclick = () => {
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = mp3SelectedFile.name.replace(/\.[^/.]+$/, "") + ".mp3";
-                    a.click();
-                };
-                
-                document.getElementById('mp3UploaderView').style.display = 'none';
-                mp3ResultArea.style.display = 'block';
-                convertMp3Btn.innerText = "Convert to MP3";
+                encodeChunk();
+
             } catch (error) {
                 showToast("Conversion Failed: " + error.message);
                 convertMp3Btn.disabled = false;
                 convertMp3Btn.innerText = "Convert to MP3";
             }
         };
+
+        function togglePdfSelection(wrapper) {
+            const checkbox = wrapper.querySelector('.pdf-select-check');
+            checkbox.checked = !checkbox.checked;
+            if(checkbox.checked) wrapper.classList.add('selected');
+            else wrapper.classList.remove('selected');
+        }
 
         pdfDropZone.onclick = () => pdfFileInput.click();
         pdfFileInput.onchange = (e) => {
@@ -1168,6 +1269,10 @@
         extractPdfBtn.onclick = async () => {
             extractPdfBtn.disabled = true;
             extractPdfBtn.innerText = "Extracting Images...";
+            pdfProgressContainer.style.display = 'block';
+            pdfProgressFill.style.width = '0%';
+            pdfPercentLabel.innerText = '0%';
+            
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
             try {
@@ -1178,9 +1283,6 @@
                 document.getElementById('pdfPageCount').innerText = `Total Pages: ${pdf.numPages}`;
                 pdfPagesGrid.innerHTML = '';
                 
-                const zip = new JSZip();
-                const imgFolder = zip.folder("images");
-
                 for(let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
                     const viewport = page.getViewport({ scale: scale });
@@ -1193,41 +1295,18 @@
                     
                     const imgUrl = canvas.toDataURL('image/jpeg');
                     const wrapper = document.createElement('div');
-                    wrapper.style.position = 'relative';
+                    wrapper.className = 'pdf-grid-item selected';
+                    wrapper.onclick = function() { togglePdfSelection(this); };
                     wrapper.innerHTML = `
                         <img src="${imgUrl}" style="width:100%; border-radius:8px; border:1px solid var(--border);">
-                        <input type="checkbox" class="pdf-select-check" data-page="${i}" checked style="position:absolute; top:5px; right:5px; transform:scale(1.5);">
+                        <input type="checkbox" class="pdf-select-check" data-page="${i}" checked style="display:none;">
                     `;
                     pdfPagesGrid.appendChild(wrapper);
                     
-                    imgFolder.file(`page-${i}.jpg`, imgUrl.split(',')[1], {base64: true});
+                    const percent = Math.round((i / pdf.numPages) * 100);
+                    pdfProgressFill.style.width = percent + "%";
+                    pdfPercentLabel.innerText = percent + "%";
                 }
-
-                downloadSelectedPdfBtn.onclick = () => {
-                    const checkboxes = document.querySelectorAll('.pdf-select-check:checked');
-                    if(checkboxes.length === 0) { showToast("Select at least one page."); return; }
-                    
-                    if(checkboxes.length === 1) {
-                        const idx = checkboxes[0].getAttribute('data-page') - 1;
-                        const link = document.createElement('a');
-                        link.href = pdfPagesGrid.children[idx].querySelector('img').src;
-                        link.download = `page-${idx+1}.jpg`;
-                        link.click();
-                    } else {
-                         const selectedZip = new JSZip();
-                         checkboxes.forEach(cb => {
-                             const idx = parseInt(cb.getAttribute('data-page')) - 1;
-                             const src = pdfPagesGrid.children[idx].querySelector('img').src;
-                             selectedZip.file(`page-${idx+1}.jpg`, src.split(',')[1], {base64: true});
-                         });
-                         selectedZip.generateAsync({type:"blob"}).then(function(content) {
-                             const a = document.createElement('a');
-                             a.href = URL.createObjectURL(content);
-                             a.download = "selected_pages.zip";
-                             a.click();
-                         });
-                    }
-                };
 
                 document.getElementById('pdfUploaderView').style.display = 'none';
                 pdfResultArea.style.display = 'block';
@@ -1235,6 +1314,45 @@
             } catch (error) {
                 showToast("Error reading PDF: " + error.message);
                 extractPdfBtn.disabled = false;
+                extractPdfBtn.innerText = "Extract Images";
+            }
+        };
+
+        selectAllPdfBtn.onclick = () => {
+            const wrappers = document.querySelectorAll('.pdf-grid-item');
+            let allSelected = true;
+            wrappers.forEach(w => { if(!w.querySelector('input').checked) allSelected = false; });
+            
+            wrappers.forEach(w => {
+                const cb = w.querySelector('input');
+                if(allSelected) { cb.checked = false; w.classList.remove('selected'); }
+                else { cb.checked = true; w.classList.add('selected'); }
+            });
+        };
+
+        downloadSelectedPdfBtn.onclick = () => {
+            const checkboxes = document.querySelectorAll('.pdf-select-check:checked');
+            if(checkboxes.length === 0) { showToast("Select at least one page."); return; }
+            
+            if(checkboxes.length === 1) {
+                const idx = checkboxes[0].getAttribute('data-page') - 1;
+                const link = document.createElement('a');
+                link.href = pdfPagesGrid.children[idx].querySelector('img').src;
+                link.download = `page-${idx+1}.jpg`;
+                link.click();
+            } else {
+                 const selectedZip = new JSZip();
+                 checkboxes.forEach(cb => {
+                     const idx = parseInt(cb.getAttribute('data-page')) - 1;
+                     const src = pdfPagesGrid.children[idx].querySelector('img').src;
+                     selectedZip.file(`page-${idx+1}.jpg`, src.split(',')[1], {base64: true});
+                 });
+                 selectedZip.generateAsync({type:"blob"}).then(function(content) {
+                     const a = document.createElement('a');
+                     a.href = URL.createObjectURL(content);
+                     a.download = "selected_pages.zip";
+                     a.click();
+                 });
             }
         };
 
@@ -1251,13 +1369,25 @@
         extractZipBtn.onclick = async () => {
             extractZipBtn.disabled = true;
             extractZipBtn.innerText = "Extracting...";
+            zipProgressContainer.style.display = 'block';
+            zipProgressFill.style.width = '0%';
+            zipPercentLabel.innerText = '0%';
             
             try {
                 const zip = new JSZip();
                 const contents = await zip.loadAsync(zipSelectedFile);
+                zipExtractedContent = contents;
                 zipFileList.innerHTML = '';
                 
-                Object.keys(contents.files).forEach(filename => {
+                const fileNames = Object.keys(contents.files);
+                const totalFiles = fileNames.length;
+                let processed = 0;
+
+                // Simulate progress for small zips, or track actual processing if needed
+                zipProgressFill.style.width = '50%';
+                zipPercentLabel.innerText = '50%';
+
+                fileNames.forEach(filename => {
                     if(!contents.files[filename].dir) {
                         const fileItem = document.createElement('div');
                         fileItem.className = 'file-list-item';
@@ -1276,7 +1406,11 @@
                         
                         zipFileList.appendChild(fileItem);
                     }
+                    processed++;
                 });
+                
+                zipProgressFill.style.width = '100%';
+                zipPercentLabel.innerText = '100%';
 
                 document.getElementById('zipUploaderView').style.display = 'none';
                 zipResultArea.style.display = 'block';
@@ -1284,7 +1418,30 @@
             } catch(error) {
                 showToast("Error extracting ZIP: " + error.message);
                 extractZipBtn.disabled = false;
+                extractZipBtn.innerText = "Extract Files";
             }
+        };
+
+        downloadAllZipBtn.onclick = async () => {
+            if(!zipExtractedContent) return;
+            const newZip = new JSZip();
+            
+            const promises = [];
+            zipExtractedContent.forEach((relativePath, file) => {
+                if(!file.dir) {
+                    promises.push(file.async('blob').then(blob => {
+                        newZip.file(relativePath, blob);
+                    }));
+                }
+            });
+
+            await Promise.all(promises);
+            newZip.generateAsync({type:"blob"}).then(function(content) {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(content);
+                a.download = "extracted_files.zip";
+                a.click();
+            });
         };
 
         gifDropZone.onclick = () => gifFileInput.click();
@@ -1338,16 +1495,37 @@
 
         convertGifBtn.onclick = () => {
             convertGifBtn.disabled = true;
-            document.getElementById('gifLoading').style.display = 'block';
+            gifProgressContainer.style.display = 'block';
+            gifProgressFill.style.width = '0%';
+            gifPercentLabel.innerText = '0%';
             
-            const res = parseInt(document.getElementById('gifResolution').value);
+            const videoEl = document.getElementById('gifSourceVideo');
+            const originalWidth = videoEl.videoWidth;
+            const originalHeight = videoEl.videoHeight;
+            const resValue = document.getElementById('gifResolution').value;
+            
+            let gifW, gifH;
+            
+            if (resValue === 'original') {
+                gifW = originalWidth;
+                gifH = originalHeight;
+            } else {
+                gifW = parseInt(resValue);
+                // Calculate height to maintain aspect ratio
+                gifH = Math.round(gifW * (originalHeight / originalWidth));
+            }
             
             gifshot.createGIF({
-                video: [document.getElementById('gifSourceVideo').src],
-                gifWidth: res,
-                gifHeight: res * 0.75, 
+                video: [videoEl.src],
+                gifWidth: gifW,
+                gifHeight: gifH, 
                 numFrames: 20, 
-                frameDuration: 1
+                frameDuration: 1,
+                progressCallback: function(captureProgress) {
+                    const percent = Math.round(captureProgress * 100);
+                    gifProgressFill.style.width = percent + "%";
+                    gifPercentLabel.innerText = percent + "%";
+                }
             }, function(obj) {
                 if(!obj.error) {
                     const image = obj.image;
@@ -1362,10 +1540,8 @@
                     
                     document.getElementById('gifUploaderView').style.display = 'none';
                     gifResultArea.style.display = 'block';
-                    document.getElementById('gifLoading').style.display = 'none';
                 } else {
                     showToast("GIF Conversion Failed");
-                    document.getElementById('gifLoading').style.display = 'none';
                     convertGifBtn.disabled = false;
                 }
             });
