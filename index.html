@@ -9,27 +9,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     
-    <!-- Third-party Library for QR Extraction -->
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.1.0/dist/jsQR.min.js"></script> 
     
-    <!-- NEW LIBRARIES FOR ADDED TOOLS -->
-    <!-- LameJS for MP3 Encoding -->
     <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
-    <!-- PDF.js for PDF Extraction -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
-    <!-- JSZip for ZIP Extraction -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <!-- Gifshot for Video to GIF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gifshot/0.3.2/gifshot.min.js"></script>
-    <!-- End New Libraries -->
-    
-    <!-- Firebase SDK Scripts -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <!-- End Firebase SDK Scripts -->
 
     <style>
-        /* Theme Change: Green and White */
         :root { --primary: #10b981; --bg: #ffffff; --card: #f8fafc; --text: #0f172a; --border: #e2e8f0; --shadow: rgba(0, 0, 0, 0.1); }
         .dark-mode { --bg: #000000; --card: #111111; --text: #ffffff; --border: #222222; --shadow: rgba(255, 255, 255, 0.1); }
         
@@ -52,7 +39,6 @@
             -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text;
         }
 
-        /* Sticky Header */
         header { 
             position: sticky; top: 0; z-index: 1000; width: 100%; 
             background: var(--bg); border-bottom: 1px solid var(--border); 
@@ -63,7 +49,7 @@
             width: 100%; max-width: 500px; display: flex; 
             justify-content: space-between; align-items: center; 
         }
-        .logo { font-weight: 800; font-size: 1.4rem; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        .logo { font-weight: 800; font-size: 1.4rem; color: var(--primary); display: flex; align-items: center; gap: 8px; cursor: pointer; }
         .logo img { height: 50px; }
         .header-actions { display: flex; align-items: center; gap: 10px; }
         .theme-btn, .action-btn { background: var(--border); border: none; width: 40px; height: 40px; border-radius: 12px; cursor: pointer; color: var(--text); transition: 0.3s; }
@@ -77,7 +63,6 @@
             outline: none; -webkit-tap-highlight-color: transparent; box-shadow: none;
         }
 
-        /* Main Content Area */
         .main-content { 
             flex-grow: 1; display: flex; justify-content: center; align-items: center; 
             padding: 20px; 
@@ -161,7 +146,6 @@
             padding: 2px 4px; border-radius: 4px; text-transform: uppercase;
         }
         
-        /* Styles for New Tools */
         .preview-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
         .file-list-item { 
             background: var(--card); border: 1px solid var(--border); 
@@ -171,10 +155,8 @@
         }
         .file-list-item .fname { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 70%; }
         
-        /* Red Icon Style for PDF/ZIP */
         .red-icon i { color: #ef4444 !important; }
 
-        /* Color Picker */
         .color-selector-wrapper { position: relative; }
         .color-square-btn {
             width: 38px; height: 38px; border: 1px solid var(--border);
@@ -207,7 +189,6 @@
 
         .link-url { word-break: break-all; font-size: 0.9rem; padding: 10px; background: var(--border); border-radius: 8px; margin-top: 10px; }
         
-        /* Views */
         #mainOptionsView, #linkToQrView, #uploadToQrView, #uploadToLinkView, #qrExtractorView,
         #mp4ToMp3View, #pdfExtractorView, #zipExtractorView, #videoToGifView { display: none; }
     </style>
@@ -216,13 +197,10 @@
 
     <header>
         <div class="header-content">
-            <div class="logo">
+            <div class="logo" onclick="setView('mainOptionsView')">
                 <img id="logoImage" src="https://i.ibb.co.com/GvQzP8ZK/1000043160-removebg-preview.png" alt="Logo">
             </div>
             <div class="header-actions">
-                <button class="action-btn" id="signInButton" onclick="googleSignIn()">
-                    <i class="fab fa-google"></i> Sign In
-                </button>
                 <button class="theme-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
             </div>
         </div>
@@ -231,12 +209,10 @@
     <div class="main-content">
         <div class="container">
             <div class="main-card">
-                <!-- Main Options View -->
                 <div id="mainOptionsView">
                     <h2 style="margin-bottom: 25px; text-align: center;">Choose Your Service</h2>
                     
                     <div style="display: grid; grid-template-columns: 1fr; gap: 0;">
-                        <!-- Existing Tools -->
                         <div class="option-card" onclick="setView('linkToQrView')">
                             <i class="fas fa-link"></i>
                             <div>
@@ -269,7 +245,6 @@
                             </div>
                         </div>
 
-                        <!-- NEW TOOLS ADDED HERE -->
                         <div class="option-card" onclick="setView('mp4ToMp3View')">
                             <i class="fas fa-music"></i> 
                             <div>
@@ -304,7 +279,6 @@
                     </div>
                 </div>
 
-                <!-- 1. Link to QR View -->
                 <div id="linkToQrView">
                     <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
                     <h3 style="margin-bottom: 15px;">Link to QR Generator</h3>
@@ -354,7 +328,6 @@
                     </div>
                 </div>
 
-                <!-- 2. Upload to QR View -->
                 <div id="uploadToQrView">
                     <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
                     <h3 style="margin-bottom: 15px;">Upload to QR Code</h3>
@@ -399,7 +372,6 @@
                     </div>
                 </div>
                 
-                <!-- 3. Upload to Link View -->
                 <div id="uploadToLinkView">
                     <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
                     <h3 style="margin-bottom: 15px;">Upload to Link</h3>
@@ -460,7 +432,6 @@
                     </div>
                 </div>
                 
-                <!-- 4. QR Code Extractor View -->
                 <div id="qrExtractorView" style="display: none;">
                     <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
                     <h3 style="margin-bottom: 15px;">QR Code Extractor</h3>
@@ -493,7 +464,6 @@
                     </div>
                 </div>
 
-                <!-- 5. MP4 to MP3 Converter View -->
                 <div id="mp4ToMp3View">
                     <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
                     <h3 style="margin-bottom: 15px;">MP4 to MP3 Converter</h3>
@@ -521,14 +491,12 @@
                     </div>
                 </div>
 
-                <!-- 6. PDF Extractor View -->
                 <div id="pdfExtractorView">
                     <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
                     <h3 style="margin-bottom: 15px;">PDF Extractor</h3>
                     <div id="pdfUploaderView">
                         <div class="upload-box" id="pdfDropZone">
                             <button class="remove-file-btn" id="removeFilePdfBtn" style="display: none;"><i class="fas fa-times"></i></button>
-                            <!-- Red Icon for PDF -->
                             <div class="file-icon-preview red-icon" id="fileIconPdf" style="display: block;">
                                 <i class="fas fa-file-pdf"></i>
                             </div>
@@ -556,14 +524,12 @@
                     </div>
                 </div>
 
-                <!-- 7. ZIP Extractor View -->
                 <div id="zipExtractorView">
                     <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
                     <h3 style="margin-bottom: 15px;">ZIP Extractor</h3>
                     <div id="zipUploaderView">
                         <div class="upload-box" id="zipDropZone">
                             <button class="remove-file-btn" id="removeFileZipBtn" style="display: none;"><i class="fas fa-times"></i></button>
-                            <!-- Red Icon for ZIP -->
                             <div class="file-icon-preview red-icon" id="fileIconZip" style="display: block;">
                                 <i class="fas fa-file-zipper"></i>
                             </div>
@@ -582,7 +548,6 @@
                     </div>
                 </div>
 
-                <!-- 8. Video to GIF View -->
                 <div id="videoToGifView">
                     <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
                     <h3 style="margin-bottom: 15px;">Video to GIF</h3>
@@ -624,32 +589,17 @@
         <p>&copy; 2026 Nur Share. Developed by <b>Nur</b>.</p>
     </footer>
 
-    <!-- Toast Notification -->
     <div id="toast"></div>
 
     <script>
-        // --- Firebase Configuration ---
-        const FIREBASE_CONFIG = {
-            apiKey: "AIzaSyCFNNXY4oRMg8AjhWa9PqCN8gdILmwdRk0",
-            authDomain: "autopay-api.firebaseapp.com",
-            projectId: "autopay-api",
-            storageBucket: "autopay-api.firebasestorage.app",
-            messagingSenderId: "560907178391",
-            appId: "1:560907178391:web:aa544aedc91be464cd74d2",
-            measurementId: "G-X7D91TPCWL"
-        };
-        
-        if (firebase.apps.length === 0) { firebase.initializeApp(FIREBASE_CONFIG); }
-
         const GIT = {
-            token: "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",
+            token: "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",
             owner: "jomidokhol",
             repo: "qrcode",
             branch: "main",
             domain: "https://qrcode-gen-weld.vercel.app"
         };
 
-        // --- Global State and Elements ---
         let currentView = 'mainOptionsView';
         let currentUrl = "";
         let selectedFile = null;
@@ -668,7 +618,6 @@
             videoToGifView: document.getElementById('videoToGifView')
         };
         
-        // --- Elements (Standard) ---
         const fileInput = document.getElementById('fileInput');
         const dropZone = document.getElementById('dropZone');
         const uploadBtn = document.getElementById('uploadBtn');
@@ -685,7 +634,6 @@
         const fileExtQr = document.getElementById('fileExtQr');
         const qrResultFilePreview = document.getElementById('qrResultFilePreview');
 
-        // --- Elements (Link) ---
         const linkFileInput = document.getElementById('linkFileInput');
         const linkDropZone = document.getElementById('linkDropZone');
         const linkUploadBtn = document.getElementById('linkUploadBtn');
@@ -700,7 +648,6 @@
         const fileIconLink = document.getElementById('fileIconLink');
         const fileExtLink = document.getElementById('fileExtLink');
 
-        // --- Elements (Link to QR) ---
         const linkInput = document.getElementById('linkInput');
         const linkQrcodeDiv = document.getElementById('linkQrcode');
         const linkQrSize = document.getElementById('linkQrSize');
@@ -715,9 +662,6 @@
         const clearLinkInputBtn = document.getElementById('clearLinkInputBtn');
         const pasteLinkInputBtn = document.getElementById('pasteLinkInputBtn');
         
-        const signInButton = document.getElementById('signInButton'); 
-
-        // --- Elements (Extractor) ---
         const extractorFileInput = document.getElementById('extractorFileInput');
         const extractorDropZone = document.getElementById('extractorDropZone');
         const extractBtn = document.getElementById('extractBtn');
@@ -731,8 +675,6 @@
         const extractedDataDisplay = document.getElementById('extractedDataDisplay');
         const extractorActionButtons = document.getElementById('extractorActionButtons');
 
-        // --- NEW TOOL ELEMENTS ---
-        // MP4 to MP3
         const mp3FileInput = document.getElementById('mp3FileInput');
         const mp3DropZone = document.getElementById('mp3DropZone');
         const convertMp3Btn = document.getElementById('convertMp3Btn');
@@ -741,7 +683,6 @@
         const downloadMp3Btn = document.getElementById('downloadMp3Btn');
         let mp3SelectedFile = null;
 
-        // PDF Extractor
         const pdfFileInput = document.getElementById('pdfFileInput');
         const pdfDropZone = document.getElementById('pdfDropZone');
         const extractPdfBtn = document.getElementById('extractPdfBtn');
@@ -750,7 +691,6 @@
         const downloadSelectedPdfBtn = document.getElementById('downloadSelectedPdfBtn');
         let pdfSelectedFile = null;
 
-        // ZIP Extractor
         const zipFileInput = document.getElementById('zipFileInput');
         const zipDropZone = document.getElementById('zipDropZone');
         const extractZipBtn = document.getElementById('extractZipBtn');
@@ -758,7 +698,6 @@
         const zipFileList = document.getElementById('zipFileList');
         let zipSelectedFile = null;
 
-        // Video to GIF
         const gifFileInput = document.getElementById('gifFileInput');
         const gifDropZone = document.getElementById('gifDropZone');
         const convertGifBtn = document.getElementById('convertGifBtn');
@@ -782,8 +721,6 @@
                 reader.readAsArrayBuffer(file);
             });
         }
-
-        // --- Utility Functions ---
 
         function showToast(message) {
             const toast = document.getElementById('toast');
@@ -823,7 +760,6 @@
             document.getElementById('linkOptionsDropdown').style.display = 'none';
             document.getElementById('selectedLinkFormatText').innerText = 'Viewer\'s Link';
 
-            // Common resets (simplified)
             if(viewId === 'mp4ToMp3View') {
                 document.getElementById('mp3UploadTitle').innerHTML = 'Choose an MP4 File';
                 document.getElementById('mp3PreviewArea').style.display = 'none';
@@ -863,7 +799,6 @@
                 document.getElementById('removeFileGifBtn').style.display = 'none';
                 gifSelectedFile = null;
             }
-            // ... existing resets for other views ...
             else if(viewId === 'uploadToQrView') {
                 document.getElementById('uploadTitle').innerHTML = 'Choose a file';
                 uploadBtn.disabled = true;
@@ -914,35 +849,6 @@
             }
         }
         
-        function updateSignInUI(user) {
-            if (user) {
-                signInButton.onclick = () => showToast(`Signed in as: ${user.displayName}.`);
-                signInButton.innerHTML = `<img src="${user.photoURL}" alt="${user.displayName}" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;">`;
-                signInButton.style.padding = '0';
-                signInButton.style.width = '40px';
-                signInButton.style.height = '40px';
-                signInButton.style.background = 'transparent';
-            } else {
-                signInButton.onclick = googleSignIn;
-                signInButton.innerHTML = '<i class="fab fa-google"></i> Sign In';
-                signInButton.style.padding = '0 15px';
-                signInButton.style.width = 'auto';
-                signInButton.style.height = '40px';
-                signInButton.style.background = 'var(--primary)';
-            }
-        }
-
-        function googleSignIn() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            firebase.auth().signInWithPopup(provider)
-                .then((result) => { showToast(`Signed in as: ${result.user.displayName}`); })
-                .catch((error) => { showToast(`Sign in failed: ${error.message}`); });
-        }
-        
-        function setupAuthListener() {
-            firebase.auth().onAuthStateChanged(updateSignInUI);
-        }
-        
         function updateLogoImage() {
             const logoImage = document.getElementById('logoImage');
             if (logoImage) { 
@@ -975,12 +881,29 @@
                 displaySize = `${fileSizeMB.toFixed(2)} MB`;
             }
 
-            const fileNameParts = file.name.split('.');
-            const ext = fileNameParts.length > 1 ? fileNameParts.pop().toLowerCase() : '';
-            const baseName = fileNameParts.slice(0, -1).join('.'); 
-            const displayName = baseName.length > 20 ? baseName.substring(0, 20) + '...' : baseName;
+            const name = file.name;
+            let displayName = name;
             
-            titleEl.innerHTML = `<b>${displayName}${ext ? '.' + ext : ''}</b><br>Size: ${displaySize}`; 
+            if (name.length > 20) {
+                const extIndex = name.lastIndexOf('.');
+                if (extIndex > 0) {
+                    const ext = name.substring(extIndex);
+                    const base = name.substring(0, extIndex);
+                    if (ext.length + 3 < 20) {
+                        displayName = base.substring(0, 20 - ext.length - 3) + '...' + ext;
+                    } else {
+                         displayName = name.substring(0, 17) + '...';
+                    }
+                } else {
+                    displayName = name.substring(0, 17) + '...';
+                }
+            } else {
+                displayName = name;
+            }
+            
+            titleEl.innerHTML = `<b>${displayName}</b><br>Size: ${displaySize}`; 
+
+            const ext = name.split('.').pop().toLowerCase();
 
             if(iconEl) iconEl.style.display = 'none';
             if(imgEl) imgEl.style.display = 'none';
@@ -1004,7 +927,6 @@
             } else {
                 if(fileIconEl && (ext === 'pdf' || ext === 'zip')) {
                     fileIconEl.style.display = 'flex';
-                    // Force icon specific logic for red icons in CSS
                 } else if (iconEl) {
                     iconEl.style.display = 'block';
                 }
@@ -1012,8 +934,6 @@
             return true; 
         }
         
-        // --- Initialization ---
-
         const lastView = localStorage.getItem('lastView');
         const initialView = (lastView && views[lastView]) ? lastView : 'mainOptionsView';
         setView(initialView);
@@ -1036,7 +956,6 @@
             updateLogoImage(); 
         };
 
-        // --- Link to QR Logic ---
         function toggleColorPicker(buttonId, targetInputId, otherButtonId) {
             const button = document.getElementById(buttonId);
             const otherButton = document.getElementById(otherButtonId);
@@ -1147,21 +1066,34 @@
             link.click();
         };
 
-        // --- NEW TOOLS LOGIC ---
-
-        // 1. MP4 to MP3 Logic
         mp3DropZone.onclick = () => mp3FileInput.click();
         mp3FileInput.onchange = (e) => {
             mp3SelectedFile = e.target.files[0];
             if(mp3SelectedFile) {
                 const titleEl = document.getElementById('mp3UploadTitle');
-                // Limit check (e.g. 50MB for client side processing)
                 if(mp3SelectedFile.size > 50 * 1024 * 1024) {
                     titleEl.innerHTML = `File too large (>50MB).`;
                     return;
                 }
                 
-                titleEl.innerHTML = `<b>${mp3SelectedFile.name}</b><br>Size: ${(mp3SelectedFile.size/1024/1024).toFixed(2)} MB`;
+                const name = mp3SelectedFile.name;
+                let displayName = name;
+                if (name.length > 20) {
+                     const extIndex = name.lastIndexOf('.');
+                     if (extIndex > 0) {
+                         const ext = name.substring(extIndex);
+                         const base = name.substring(0, extIndex);
+                         if (ext.length + 3 < 20) {
+                             displayName = base.substring(0, 20 - ext.length - 3) + '...' + ext;
+                         } else {
+                              displayName = name.substring(0, 17) + '...';
+                         }
+                     } else {
+                         displayName = name.substring(0, 17) + '...';
+                     }
+                }
+                
+                titleEl.innerHTML = `<b>${displayName}</b><br>Size: ${(mp3SelectedFile.size/1024/1024).toFixed(2)} MB`;
                 document.getElementById('uploadIconMp3').style.display = 'none';
                 document.getElementById('removeFileMp3Btn').style.display = 'block';
                 convertMp3Btn.disabled = false;
@@ -1183,13 +1115,11 @@
                 const arrayBuffer = await mp3SelectedFile.arrayBuffer();
                 const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
                 
-                // Use LameJS to encode
                 const mp3Encoder = new lamejs.Mp3Encoder(1, audioBuffer.sampleRate, 128);
-                const samples = audioBuffer.getChannelData(0); // Mono for simplicity or mix down
+                const samples = audioBuffer.getChannelData(0); 
                 const sampleBlockSize = 1152;
                 const mp3Data = [];
                 
-                // Convert Float32 to Int16
                 const samplesInt16 = new Int16Array(samples.length);
                 for (let i = 0; i < samples.length; i++) {
                     samplesInt16[i] = samples[i] < 0 ? samples[i] * 0x8000 : samples[i] * 0x7FFF;
@@ -1225,7 +1155,6 @@
             }
         };
 
-        // 2. PDF Extractor Logic
         pdfDropZone.onclick = () => pdfFileInput.click();
         pdfFileInput.onchange = (e) => {
             pdfSelectedFile = e.target.files[0];
@@ -1271,7 +1200,6 @@
                     `;
                     pdfPagesGrid.appendChild(wrapper);
                     
-                    // Add to zip logic preparation
                     imgFolder.file(`page-${i}.jpg`, imgUrl.split(',')[1], {base64: true});
                 }
 
@@ -1286,7 +1214,6 @@
                         link.download = `page-${idx+1}.jpg`;
                         link.click();
                     } else {
-                        // Create specific zip for selected
                          const selectedZip = new JSZip();
                          checkboxes.forEach(cb => {
                              const idx = parseInt(cb.getAttribute('data-page')) - 1;
@@ -1311,7 +1238,6 @@
             }
         };
 
-        // 3. ZIP Extractor Logic
         zipDropZone.onclick = () => zipFileInput.click();
         zipFileInput.onchange = (e) => {
             zipSelectedFile = e.target.files[0];
@@ -1361,7 +1287,6 @@
             }
         };
 
-        // 4. Video to GIF Logic
         gifDropZone.onclick = () => gifFileInput.click();
         gifFileInput.onchange = (e) => {
             gifSelectedFile = e.target.files[0];
@@ -1373,7 +1298,6 @@
                     return;
                 }
                 
-                // Load video to check duration
                 const videoURL = URL.createObjectURL(gifSelectedFile);
                 const videoEl = document.getElementById('gifSourceVideo');
                 videoEl.src = videoURL;
@@ -1384,7 +1308,25 @@
                         gifSelectedFile = null;
                         return;
                     }
-                    titleEl.innerHTML = `<b>${gifSelectedFile.name}</b><br>Size: ${(gifSelectedFile.size/1024/1024).toFixed(2)} MB`;
+                    
+                    const name = gifSelectedFile.name;
+                    let displayName = name;
+                    if (name.length > 20) {
+                         const extIndex = name.lastIndexOf('.');
+                         if (extIndex > 0) {
+                             const ext = name.substring(extIndex);
+                             const base = name.substring(0, extIndex);
+                             if (ext.length + 3 < 20) {
+                                 displayName = base.substring(0, 20 - ext.length - 3) + '...' + ext;
+                             } else {
+                                  displayName = name.substring(0, 17) + '...';
+                             }
+                         } else {
+                             displayName = name.substring(0, 17) + '...';
+                         }
+                    }
+
+                    titleEl.innerHTML = `<b>${displayName}</b><br>Size: ${(gifSelectedFile.size/1024/1024).toFixed(2)} MB`;
                     document.getElementById('uploadIconGif').style.display = 'none';
                     document.getElementById('removeFileGifBtn').style.display = 'block';
                     document.getElementById('gifPreviewArea').style.display = 'block';
@@ -1403,8 +1345,8 @@
             gifshot.createGIF({
                 video: [document.getElementById('gifSourceVideo').src],
                 gifWidth: res,
-                gifHeight: res * 0.75, // approximate aspect
-                numFrames: 20, // Simplified for performance
+                gifHeight: res * 0.75, 
+                numFrames: 20, 
                 frameDuration: 1
             }, function(obj) {
                 if(!obj.error) {
@@ -1429,7 +1371,6 @@
             });
         };
 
-        // --- Existing Upload Logic (Simplified integration) ---
         dropZone.onclick = () => fileInput.click();
         fileInput.onchange = (e) => {
             selectedFile = e.target.files[0];
@@ -1512,10 +1453,25 @@
         
         function displaySuccessPreview(file, targetEl) {
             targetEl.innerHTML = '';
-            const fileNameParts = file.name.split('.');
-            const ext = fileNameParts.length > 1 ? fileNameParts.pop().toLowerCase() : '';
-            const baseName = fileNameParts.slice(0, -1).join('.'); 
-            const displayName = baseName.length > 20 ? baseName.substring(0, 20) + '...' : baseName;
+            
+            const name = file.name;
+            let displayName = name;
+            if (name.length > 20) {
+                const extIndex = name.lastIndexOf('.');
+                if (extIndex > 0) {
+                    const ext = name.substring(extIndex);
+                    const base = name.substring(0, extIndex);
+                    if (ext.length + 3 < 20) {
+                        displayName = base.substring(0, 20 - ext.length - 3) + '...' + ext;
+                    } else {
+                         displayName = name.substring(0, 17) + '...';
+                    }
+                } else {
+                    displayName = name.substring(0, 17) + '...';
+                }
+            }
+            
+            const ext = name.split('.').pop().toLowerCase();
 
             const iconContainer = document.createElement('div');
             iconContainer.className = 'file-icon-preview';
@@ -1543,7 +1499,7 @@
             if (displayElement) {
                 targetEl.appendChild(displayElement);
                 const nameP = document.createElement('p');
-                nameP.style.fontSize = '0.9rem'; nameP.style.opacity = '0.8'; nameP.innerText = `${displayName}${ext ? '.' + ext : ''}`;
+                nameP.style.fontSize = '0.9rem'; nameP.style.opacity = '0.8'; nameP.innerText = `${displayName}`;
                 targetEl.appendChild(nameP);
             }
         }
@@ -1739,7 +1695,6 @@
             }
         };
 
-        setupAuthListener();
         updateLogoImage(); 
         updateLinkInputControls();
         linkQrColorBtn.style.backgroundColor = linkQrColor.value;
