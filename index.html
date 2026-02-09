@@ -206,16 +206,19 @@
         
         .bulk-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
 
-        .pdf-overlay-controls {
+        /* Updated PDF Control Styles */
+        .pdf-controls-right {
             position: absolute; top: 5px; right: 5px; 
             display: flex; gap: 5px; align-items: center; 
             background: rgba(255,255,255,0.9); padding: 4px; 
             border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 10;
         }
-        .pdf-page-num {
+        .pdf-page-badge {
             position: absolute; top: 5px; left: 5px;
             background: rgba(0,0,0,0.7); color: white;
-            padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;
+            padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;
+            z-index: 10; pointer-events: none;
         }
         .mini-download-btn {
             background: var(--primary); border: none; color: white;
@@ -244,6 +247,25 @@
         .file-list-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); gap: 10px; }
         .file-list-item:last-child { border-bottom: none; }
         .file-list-item .fname { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; font-size: 0.9rem; }
+
+        /* Settings Modal CSS */
+        .settings-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 1999; display: none;
+            backdrop-filter: blur(2px);
+        }
+        .settings-overlay.active { display: block; }
+        
+        #settingsModal {
+            position: fixed; bottom: -100%; left: 0; width: 100%;
+            background: var(--card); border-top-left-radius: 24px; border-top-right-radius: 24px;
+            padding: 25px; box-shadow: 0 -5px 20px var(--shadow); z-index: 2000;
+            transition: 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); border-top: 1px solid var(--border);
+        }
+        #settingsModal.active { bottom: 0; }
+        .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .settings-input-group { position: relative; display: flex; gap: 10px; margin-bottom: 20px; }
+        .settings-input-group input { flex-grow: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
     </style>
 </head>
 <body>
@@ -259,7 +281,7 @@
         </div>
     </header>
 
-    <button class="settings-btn" id="settingsBtn" onclick="showToast('Settings (Coming Soon)')"><i class="fas fa-cog"></i></button>
+    <button class="settings-btn" id="settingsBtn"><i class="fas fa-cog"></i></button>
 
     <div class="main-content">
         <div class="container">
@@ -701,6 +723,22 @@
 
     <div id="toast"></div>
 
+    <div class="settings-overlay" id="settingsOverlay" onclick="toggleSettings()"></div>
+    <div id="settingsModal">
+        <div class="settings-header">
+            <h3>Settings</h3>
+            <button class="icon-back-btn" style="margin: 0; width: 35px; height: 35px;" onclick="toggleSettings()"><i class="fas fa-times"></i></button>
+        </div>
+        
+        <label style="font-size: 0.85rem; font-weight: 700; display: block; margin-bottom: 8px;">Set API Key</label>
+        <div class="settings-input-group">
+            <input type="text" id="apiKeyInput" placeholder="Enter API Key">
+            <button class="btn btn-action" style="width: auto; margin: 0; padding: 0 20px;" onclick="pasteApiKey()"><i class="fas fa-paste"></i> Paste</button>
+        </div>
+
+        <button class="btn btn-action" style="margin-top: 10px;"><i class="fas fa-code"></i> Developer Options</button>
+    </div>
+
     <script>
         const GIT = {
             token: "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",
@@ -834,6 +872,8 @@
         const gifPercentLabel = document.getElementById('gifPercentLabel');
         const gifFilename = document.getElementById('gifFilename');
         let gifSelectedFile = null;
+        
+        const settingsBtn = document.getElementById('settingsBtn');
 
         const CODE_EXTENSIONS = ['html', 'css', 'js', 'java', 'py', 'python', 'sql', 'pdf', 'xml', 'txt', 'kordova', 'json', 'yml', 'md'];
         
@@ -1354,12 +1394,10 @@
                     wrapper.onclick = function() { togglePdfSelection(this); };
                     wrapper.innerHTML = `
                         <img src="${imgUrl}" style="width:100%; border-radius:8px; border:1px solid var(--border);">
-                        <div class="pdf-overlay-controls">
-                            <span class="pdf-page-num">Page ${i}</span>
-                            <div style="display:flex; gap:5px; margin-left: auto;">
-                                <button class="mini-download-btn" onclick="downloadSinglePdfPage(${i}, event)"><i class="fas fa-download"></i></button>
-                                <input type="checkbox" class="pdf-select-check" data-page="${i}" checked style="transform:scale(1.2);">
-                            </div>
+                        <span class="pdf-page-badge">Page ${i}</span>
+                        <div class="pdf-controls-right">
+                            <button class="mini-download-btn" onclick="downloadSinglePdfPage(${i}, event)"><i class="fas fa-download"></i></button>
+                            <input type="checkbox" class="pdf-select-check" data-page="${i}" checked style="transform:scale(1.2);">
                         </div>
                     `;
                     pdfPagesGrid.appendChild(wrapper);
@@ -1907,6 +1945,25 @@
                 extractBtn.disabled = false; 
             }
         };
+        
+        function toggleSettings() {
+            const modal = document.getElementById('settingsModal');
+            const overlay = document.getElementById('settingsOverlay');
+            modal.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+        
+        settingsBtn.onclick = toggleSettings;
+        
+        async function pasteApiKey() {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('apiKeyInput').value = text;
+                showToast("Pasted!");
+            } catch (err) {
+                showToast("Clipboard Error");
+            }
+        }
 
         updateLogoImage(); 
         updateLinkInputControls();
