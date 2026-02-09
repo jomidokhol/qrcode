@@ -240,6 +240,10 @@
 
         #mainOptionsView, #linkToQrView, #uploadToQrView, #uploadToLinkView, #qrExtractorView,
         #mp4ToMp3View, #pdfExtractorView, #zipExtractorView, #videoToGifView { display: none; }
+
+        .file-list-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); gap: 10px; }
+        .file-list-item:last-child { border-bottom: none; }
+        .file-list-item .fname { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -635,7 +639,6 @@
                             <i class="fas fa-check-circle" style="font-size: 2.5rem; color: var(--primary);"></i>
                             <h4 style="margin: 10px 0;">Extraction Successful!</h4>
                         </div>
-                        <button class="btn btn-action" id="downloadAllZipBtn" style="margin-bottom: 15px;"><i class="fas fa-file-arrow-down"></i> Download All</button>
                         <div id="zipFileList" style="max-height: 300px; overflow-y: auto;"></div>
                         <button class="btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="location.reload()">New Extraction</button>
                     </div>
@@ -817,7 +820,6 @@
         const zipProgressContainer = document.getElementById('zipProgressContainer');
         const zipProgressFill = document.getElementById('zipProgressFill');
         const zipPercentLabel = document.getElementById('zipPercentLabel');
-        const downloadAllZipBtn = document.getElementById('downloadAllZipBtn');
         let zipSelectedFile = null;
         let zipExtractedContent = null;
 
@@ -994,11 +996,7 @@
         function updateLogoImage() {
             const logoImage = document.getElementById('logoImage');
             if (logoImage) { 
-                if (document.body.classList.contains('dark-mode')) {
-                    logoImage.src = 'https://i.ibb.co.com/dqHSB7H/1000043162-removebg-preview.png';
-                } else {
-                    logoImage.src = 'https://i.ibb.co.com/GvQzP8ZK/1000043160-removebg-preview.png';
-                }
+                logoImage.src = 'img/logo.png';
             }
         }
 
@@ -1397,18 +1395,24 @@
             const checkboxes = document.querySelectorAll('.pdf-select-check:checked');
             if(checkboxes.length === 0) { showToast("Select at least one page."); return; }
             
+            alert("Images will be downloaded as a ZIP file.");
+
+            const zip = new JSZip();
+            const folder = zip.folder("extracted_images");
+            
             for(let i = 0; i < checkboxes.length; i++) {
                 const cb = checkboxes[i];
                 const idx = parseInt(cb.getAttribute('data-page')) - 1;
                 const src = pdfPagesGrid.children[idx].querySelector('img').src;
-                
-                const link = document.createElement('a');
-                link.href = src;
-                link.download = `page-${idx+1}.jpg`;
-                link.click();
-                
-                if(checkboxes.length > 1) await new Promise(r => setTimeout(r, 300));
+                const base64Data = src.split(',')[1];
+                folder.file(`page-${idx+1}.jpg`, base64Data, {base64: true});
             }
+
+            const content = await zip.generateAsync({type:"blob"});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(content);
+            link.download = "extracted_images.zip";
+            link.click();
         };
 
         zipDropZone.onclick = () => zipFileInput.click();
@@ -1446,7 +1450,7 @@
                         const fileItem = document.createElement('div');
                         fileItem.className = 'file-list-item';
                         fileItem.innerHTML = `
-                            <span class="fname"><i class="fas fa-file"></i> ${filename}</span>
+                            <span class="fname" title="${filename}"><i class="fas fa-file"></i> ${filename}</span>
                             <button class="btn-action" style="padding: 5px 10px; font-size: 0.7rem;">Download</button>
                         `;
                         
@@ -1473,23 +1477,6 @@
                 showToast("Error extracting ZIP: " + error.message);
                 extractZipBtn.disabled = false;
                 extractZipBtn.innerText = "Extract Files";
-            }
-        };
-
-        downloadAllZipBtn.onclick = async () => {
-            if(!zipExtractedContent) return;
-            
-            const fileNames = Object.keys(zipExtractedContent.files);
-            for(let i = 0; i < fileNames.length; i++) {
-                const filename = fileNames[i];
-                if(!zipExtractedContent.files[filename].dir) {
-                    const blob = await zipExtractedContent.files[filename].async("blob");
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(blob);
-                    link.download = filename.split('/').pop();
-                    link.click();
-                    await new Promise(r => setTimeout(r, 300));
-                }
             }
         };
 
