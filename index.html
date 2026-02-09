@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,7 +26,6 @@
             color: var(--bg) !important; 
         }
 
-        /* Update: Removed blue highlight on tap */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
         
         body { 
@@ -750,15 +748,15 @@
             <i class="fab fa-telegram"></i> Get API for Free
         </a>
         
-        <button class="btn" style="background: #3b82f6; color: white; margin-bottom: 15px; font-weight: 600;">How to use tools?</button>
+        <button class="btn" style="background: transparent; border: 1px solid var(--border); color: var(--text); margin-bottom: 15px; font-weight: 600;">How to use tools?</button>
 
-        <button class="btn btn-action" style="margin-top: 10px;" onclick="runFakeSecurityCheck()"><i class="fas fa-code"></i> Developer Options</button>
+        <button class="btn btn-action" style="margin-top: 10px;" onclick="checkDevAccess()"><i class="fas fa-code"></i> Developer Options</button>
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-            <a href="https://www.facebook.com/NURtheBackBencher" target="_blank" class="btn btn-action" style="text-decoration: none; justify-content: center;">
+            <a href="https://www.facebook.com/NURtheBackBencher" target="_blank" class="btn btn-action" style="text-decoration: none; justify-content: center; display: flex; align-items: center; gap: 8px;">
                 <i class="fab fa-facebook"></i> Facebook
             </a>
-            <a href="https://wa.me/8801851956615" target="_blank" class="btn btn-action" style="text-decoration: none; justify-content: center;">
+            <a href="https://wa.me/8801851956615" target="_blank" class="btn btn-action" style="text-decoration: none; justify-content: center; display: flex; align-items: center; gap: 8px;">
                 <i class="fab fa-whatsapp"></i> WhatsApp
             </a>
         </div>
@@ -774,6 +772,8 @@
             branch: "main",
             domain: "https://qrcode-gen-weld.vercel.app"
         };
+        
+        const PASSKEY = "X9#mP2$kL5@nQ8!wR3%vS7^bT4&jU6*cH1(dG0)fE9-aB8=zD7+gW5[hO4]iN2?kL";
 
         let currentView = 'mainOptionsView';
         let currentUrl = "";
@@ -904,6 +904,29 @@
 
         const CODE_EXTENSIONS = ['html', 'css', 'js', 'java', 'py', 'python', 'sql', 'pdf', 'xml', 'txt', 'kordova', 'json', 'yml', 'md'];
         
+        // Helper function for forced download (fixes APK freezing issues by using Data URLs)
+        function forceDownload(blobOrUrl, filename, isBlob = true) {
+            if (isBlob) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const link = document.createElement('a');
+                    link.href = e.target.result;
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                };
+                reader.readAsDataURL(blobOrUrl);
+            } else {
+                const link = document.createElement('a');
+                link.href = blobOrUrl;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
         function calculateFileHash(file) {
             return new Promise((resolve) => {
                 const reader = new FileReader();
@@ -1267,11 +1290,11 @@
             try { linkInput.value = await navigator.clipboard.readText(); generateLinkQr(); showToast("Pasted!"); } catch (err) { showToast("Clipboard Error"); }
         };
         downloadLinkQRBtn.onclick = () => {
-            const link = document.createElement('a');
-            const fname = linkQrFilename.value.trim() || 'qrcode';
-            link.download = `${fname}.png`;
-            link.href = linkQrcodeDiv.querySelector('canvas').toDataURL();
-            link.click();
+            const canvas = linkQrcodeDiv.querySelector('canvas');
+            if(canvas) {
+                const fname = linkQrFilename.value.trim() || 'qrcode';
+                forceDownload(canvas.toDataURL('image/png'), `${fname}.png`, false);
+            }
         };
 
         mp3DropZone.onclick = () => mp3FileInput.click();
@@ -1341,11 +1364,8 @@
                         
                         resultAudio.src = url;
                         downloadMp3Btn.onclick = () => {
-                            const a = document.createElement('a');
-                            a.href = url;
                             const fname = mp3Filename.value.trim() || 'audio';
-                            a.download = `${fname}.mp3`;
-                            a.click();
+                            forceDownload(blob, `${fname}.mp3`, true);
                         };
                         
                         document.getElementById('mp3UploaderView').style.display = 'none';
@@ -1371,13 +1391,8 @@
 
         function downloadSinglePdfPage(idx, event) {
             event.stopPropagation();
-            const link = document.createElement('a');
             const img = document.querySelector(`.pdf-grid-item:nth-child(${idx}) img`);
-            link.href = img.src;
-            link.download = `page-${idx}.jpg`;
-            document.body.appendChild(link); // Fix for multiple downloads
-            link.click();
-            document.body.removeChild(link); // Clean up
+            forceDownload(img.src, `page-${idx}.jpg`, false);
         }
 
         pdfDropZone.onclick = () => pdfFileInput.click();
@@ -1476,10 +1491,7 @@
             }
 
             const content = await zip.generateAsync({type:"blob"});
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(content);
-            link.download = "extracted_images.zip";
-            link.click();
+            forceDownload(content, "extracted_images.zip", true);
         };
 
         zipDropZone.onclick = () => zipFileInput.click();
@@ -1523,14 +1535,7 @@
                         
                         fileItem.querySelector('button').onclick = async () => {
                             const blob = await contents.files[filename].async("blob");
-                            const link = document.createElement('a');
-                            const url = URL.createObjectURL(blob);
-                            link.href = url;
-                            link.download = filename.split('/').pop();
-                            document.body.appendChild(link); // Fix for multiple downloads
-                            link.click();
-                            document.body.removeChild(link); // Clean up
-                            setTimeout(() => URL.revokeObjectURL(url), 100);
+                            forceDownload(blob, filename.split('/').pop(), true);
                         };
                         
                         zipFileList.appendChild(fileItem);
@@ -1639,11 +1644,8 @@
                     resultGif.src = image;
                     
                     downloadGifBtn.onclick = () => {
-                        const a = document.createElement('a');
-                        a.href = image;
                         const fname = gifFilename.value.trim() || 'animation';
-                        a.download = `${fname}.gif`;
-                        a.click();
+                        forceDownload(image, `${fname}.gif`, false);
                     };
                     
                     document.getElementById('gifUploaderView').style.display = 'none';
@@ -1720,7 +1722,8 @@
             generateQR(currentUrl, qrcodeDiv, size);
         };
         document.getElementById('downloadQRBtn').onclick = () => {
-            const link = document.createElement('a'); link.download = 'qrcode.png'; link.href = qrcodeDiv.querySelector('canvas').toDataURL(); link.click();
+            const canvas = qrcodeDiv.querySelector('canvas');
+            if(canvas) forceDownload(canvas.toDataURL('image/png'), 'qrcode.png', false);
         };
         document.getElementById('copyBtn').onclick = () => { navigator.clipboard.writeText(currentUrl); showToast("Copied!"); };
 
@@ -1961,10 +1964,8 @@
                 downloadTxtBtn.className = 'btn btn-action';
                 downloadTxtBtn.innerHTML = '<i class="fas fa-download"></i> Download Text';
                 downloadTxtBtn.onclick = () => {
-                    const link = document.createElement('a');
-                    link.download = 'qrcode_data.txt';
-                    link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(rawData); 
-                    link.click();
+                    const blob = new Blob([rawData], {type: "text/plain;charset=utf-8"});
+                    forceDownload(blob, 'qrcode_data.txt', true);
                 };
                 
                 extractorActionButtons.style.gridTemplateColumns = '1fr 1fr';
@@ -1995,6 +1996,15 @@
                 showToast("Pasted!");
             } catch (err) {
                 showToast("Clipboard Error");
+            }
+        }
+        
+        function checkDevAccess() {
+            const userInput = prompt("Enter Passkey:");
+            if (userInput === PASSKEY) {
+                runFakeSecurityCheck();
+            } else {
+                alert("Access Denied");
             }
         }
         
