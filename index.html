@@ -572,6 +572,14 @@
                         <div id="mp3PreviewArea" style="display:none; margin-top:15px; text-align:center;">
                             <video id="sourceVideo" controls style="width:100%; max-height:200px; border-radius:12px;"></video>
                         </div>
+                        <div style="margin-top: 15px; display: flex; align-items: center; justify-content: space-between;">
+                             <label style="font-size: 0.8rem; font-weight: 600;">Audio Quality:</label>
+                             <select id="mp3Bitrate" class="pdf-quality-select">
+                                 <option value="128" selected>Standard (128 kbps)</option>
+                                 <option value="192">High (192 kbps)</option>
+                                 <option value="320">Ultra (320 kbps)</option>
+                             </select>
+                        </div>
                         <div id="mp3ProgressContainer">
                             <div style="display: flex; justify-content: space-between;">
                                 <span style="font-size: 0.8rem; opacity: 0.7;">Converting...</span>
@@ -906,25 +914,21 @@
         
         // Helper function for forced download (fixes APK freezing issues by using Data URLs)
         function forceDownload(blobOrUrl, filename, isBlob = true) {
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            document.body.appendChild(a);
             if (isBlob) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const link = document.createElement('a');
-                    link.href = e.target.result;
-                    link.download = filename;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                };
-                reader.readAsDataURL(blobOrUrl);
+                const url = window.URL.createObjectURL(blobOrUrl);
+                a.href = url;
+                a.download = filename;
+                a.click();
+                window.URL.revokeObjectURL(url);
             } else {
-                const link = document.createElement('a');
-                link.href = blobOrUrl;
-                link.download = filename;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                a.href = blobOrUrl;
+                a.download = filename;
+                a.click();
             }
+            document.body.removeChild(a);
         }
 
         function calculateFileHash(file) {
@@ -1331,7 +1335,8 @@
                 const arrayBuffer = await mp3SelectedFile.arrayBuffer();
                 const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
                 
-                const mp3Encoder = new lamejs.Mp3Encoder(1, audioBuffer.sampleRate, 128);
+                const bitrate = parseInt(document.getElementById('mp3Bitrate').value);
+                const mp3Encoder = new lamejs.Mp3Encoder(1, audioBuffer.sampleRate, bitrate);
                 const samples = audioBuffer.getChannelData(0); 
                 const sampleBlockSize = 1152;
                 const mp3Data = [];
@@ -1641,11 +1646,22 @@
             }, function(obj) {
                 if(!obj.error) {
                     const image = obj.image;
-                    resultGif.src = image;
+
+                    // Convert Base64 to Blob to prevent UI freeze on large strings
+                    const byteCharacters = atob(image.split(',')[1]);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const blob = new Blob([byteArray], {type: 'image/gif'});
+                    const blobUrl = URL.createObjectURL(blob);
+
+                    resultGif.src = blobUrl;
                     
                     downloadGifBtn.onclick = () => {
                         const fname = gifFilename.value.trim() || 'animation';
-                        forceDownload(image, `${fname}.gif`, false);
+                        forceDownload(blob, `${fname}.gif`, true);
                     };
                     
                     document.getElementById('gifUploaderView').style.display = 'none';
