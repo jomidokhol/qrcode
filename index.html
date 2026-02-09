@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26,7 +27,9 @@
             color: var(--bg) !important; 
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        /* Update: Removed blue highlight on tap */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
         body { 
             background-color: var(--bg); color: var(--text); 
             transition: 0.4s; min-height: 100vh; display: flex; 
@@ -264,8 +267,15 @@
         }
         #settingsModal.active { bottom: 0; }
         .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .settings-input-group { position: relative; display: flex; gap: 10px; margin-bottom: 20px; }
+        .settings-input-group { position: relative; display: flex; gap: 10px; margin-bottom: 10px; }
         .settings-input-group input { flex-grow: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+        
+        .fake-terminal {
+            background: #000; color: #0f0; font-family: monospace;
+            padding: 15px; border-radius: 8px; margin-top: 15px;
+            font-size: 0.8rem; height: 150px; overflow-y: auto;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -735,8 +745,25 @@
             <input type="text" id="apiKeyInput" placeholder="Enter API Key">
             <button class="btn btn-action" style="width: auto; margin: 0; padding: 0 20px;" onclick="pasteApiKey()"><i class="fas fa-paste"></i> Paste</button>
         </div>
+        
+        <a href="https://t.me/onetoolbd" target="_blank" class="btn btn-action" style="text-decoration: none; text-align: center; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 8px;">
+            <i class="fab fa-telegram"></i> Get API for Free
+        </a>
+        
+        <button class="btn" style="background: #3b82f6; color: white; margin-bottom: 15px; font-weight: 600;">How to use tools?</button>
 
-        <button class="btn btn-action" style="margin-top: 10px;"><i class="fas fa-code"></i> Developer Options</button>
+        <button class="btn btn-action" style="margin-top: 10px;" onclick="runFakeSecurityCheck()"><i class="fas fa-code"></i> Developer Options</button>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+            <a href="https://www.facebook.com/NURtheBackBencher" target="_blank" class="btn btn-action" style="text-decoration: none; justify-content: center;">
+                <i class="fab fa-facebook"></i> Facebook
+            </a>
+            <a href="https://wa.me/8801851956615" target="_blank" class="btn btn-action" style="text-decoration: none; justify-content: center;">
+                <i class="fab fa-whatsapp"></i> WhatsApp
+            </a>
+        </div>
+        
+        <div class="fake-terminal" id="fakeTerminal"></div>
     </div>
 
     <script>
@@ -1348,7 +1375,9 @@
             const img = document.querySelector(`.pdf-grid-item:nth-child(${idx}) img`);
             link.href = img.src;
             link.download = `page-${idx}.jpg`;
+            document.body.appendChild(link); // Fix for multiple downloads
             link.click();
+            document.body.removeChild(link); // Clean up
         }
 
         pdfDropZone.onclick = () => pdfFileInput.click();
@@ -1495,9 +1524,13 @@
                         fileItem.querySelector('button').onclick = async () => {
                             const blob = await contents.files[filename].async("blob");
                             const link = document.createElement('a');
-                            link.href = URL.createObjectURL(blob);
+                            const url = URL.createObjectURL(blob);
+                            link.href = url;
                             link.download = filename.split('/').pop();
+                            document.body.appendChild(link); // Fix for multiple downloads
                             link.click();
+                            document.body.removeChild(link); // Clean up
+                            setTimeout(() => URL.revokeObjectURL(url), 100);
                         };
                         
                         zipFileList.appendChild(fileItem);
@@ -1963,6 +1996,38 @@
             } catch (err) {
                 showToast("Clipboard Error");
             }
+        }
+        
+        function runFakeSecurityCheck() {
+            const terminal = document.getElementById('fakeTerminal');
+            terminal.style.display = 'block';
+            terminal.innerHTML = '';
+            
+            const steps = [
+                "Initializing security protocols...",
+                "Connecting to secure server...",
+                "Verifying user token hash...",
+                "Bypassing firewall [PROXY: 192.168.0.1]...",
+                "Scanning for vulnerabilities...",
+                "Analyzing encrypted packets...",
+                "Security clearance: LEVEL 1...",
+                "Security clearance: LEVEL 2...",
+                "<span style='color: red; font-weight: bold;'>WARNING: UNAUTHORIZED ACCESS DETECTED</span>",
+                "<span style='color: red; font-weight: bold;'>ACCESS DENIED</span>"
+            ];
+            
+            let i = 0;
+            function printLine() {
+                if (i < steps.length) {
+                    const div = document.createElement('div');
+                    div.innerHTML = `> ${steps[i]}`;
+                    terminal.appendChild(div);
+                    terminal.scrollTop = terminal.scrollHeight;
+                    i++;
+                    setTimeout(printLine, Math.random() * 800 + 200);
+                }
+            }
+            printLine();
         }
 
         updateLogoImage(); 
