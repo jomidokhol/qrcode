@@ -1,11 +1,10 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nur Share | QR & Tools Generator</title>
+    <title>One Tool | QR & Tools Generator</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
@@ -17,6 +16,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gifshot/0.3.2/gifshot.min.js"></script>
+    <!-- Added jsPDF for PDF Maker -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         :root { --primary: #10b981; --bg: #ffffff; --card: #f8fafc; --text: #0f172a; --border: #e2e8f0; --shadow: rgba(0, 0, 0, 0.1); }
@@ -38,7 +39,8 @@
         }
         
         input, .link-url, .upload-box #uploadTitle, #linkUploadTitle, #extractorUploadTitle, 
-        #mp3UploadTitle, #pdfUploadTitle, #zipUploadTitle, #gifUploadTitle, footer p, #toast, .filename-input {
+        #mp3UploadTitle, #pdfUploadTitle, #zipUploadTitle, #gifUploadTitle, footer p, #toast, .filename-input,
+        #urlDownloaderInput, #pdfMakerTitle {
             -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text;
         }
 
@@ -81,17 +83,17 @@
 
         #progressContainer, #linkProgressContainer, 
         #mp3ProgressContainer, #pdfProgressContainer, 
-        #zipProgressContainer, #gifProgressContainer { display: none; margin-top: 20px; text-align: left; }
+        #zipProgressContainer, #gifProgressContainer, #urlDownloadProgressContainer, #pdfMakerProgressContainer { display: none; margin-top: 20px; text-align: left; }
         
         .progress-track { background: var(--border); height: 10px; border-radius: 10px; overflow: hidden; margin-top: 10px; }
         
-        .progress-fill, #mp3ProgressFill, #pdfProgressFill, #zipProgressFill, #gifProgressFill { 
+        .progress-fill, #mp3ProgressFill, #pdfProgressFill, #zipProgressFill, #gifProgressFill, #urlDownloadProgressFill, #pdfMakerProgressFill { 
             background: var(--primary); height: 100%; width: 0%; transition: width 0.1s; 
         }
         
         #percentLabel, #linkPercentLabel, 
         #mp3PercentLabel, #pdfPercentLabel, 
-        #zipPercentLabel, #gifPercentLabel { font-size: 0.8rem; font-weight: 700; color: var(--primary); }
+        #zipPercentLabel, #gifPercentLabel, #urlDownloadPercentLabel, #pdfMakerPercentLabel { font-size: 0.8rem; font-weight: 700; color: var(--primary); }
 
         .upload-box { border: 2px dashed var(--primary); border-radius: 24px; padding: 20px; text-align: center; cursor: pointer; background: rgba(99, 102, 241, 0.05); position: relative; } 
         .upload-box img { display:block; margin: 0 auto 10px; }
@@ -245,7 +247,7 @@
         .settings-btn:hover { background: var(--border); transform: rotate(45deg); }
 
         #mainOptionsView, #linkToQrView, #uploadToQrView, #uploadToLinkView, #qrExtractorView,
-        #mp4ToMp3View, #pdfExtractorView, #zipExtractorView, #videoToGifView { display: none; }
+        #mp4ToMp3View, #pdfExtractorView, #zipExtractorView, #videoToGifView, #urlDownloaderView, #pdfMakerView { display: none; }
 
         .file-list-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); gap: 10px; }
         .file-list-item:last-child { border-bottom: none; }
@@ -270,6 +272,32 @@
         .settings-input-group { position: relative; display: flex; gap: 10px; margin-bottom: 10px; }
         .settings-input-group input { flex-grow: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
         
+        /* Updated Social Icons for Settings */
+        .social-link-original {
+            text-decoration: none; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-size: 2.2rem; 
+            transition: 0.3s;
+            background: transparent;
+            border: none;
+        }
+        .social-link-original:hover { transform: scale(1.1); }
+        .social-link-fb { color: #1877F2; }
+        .social-link-wa { color: #25D366; }
+
+        /* PDF Maker Grid */
+        .pdf-maker-item { position: relative; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+        .pdf-maker-item img { width: 100%; height: 100px; object-fit: cover; display: block; }
+        .pdf-maker-remove {
+            position: absolute; top: 5px; right: 5px;
+            background: rgba(0,0,0,0.6); color: white;
+            width: 20px; height: 20px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 0.6rem;
+        }
+
         .fake-terminal {
             background: #000; color: #0f0; font-family: monospace;
             padding: 15px; border-radius: 8px; margin-top: 15px;
@@ -332,6 +360,22 @@
                             </div>
                         </div>
 
+                        <div class="option-card" onclick="setView('urlDownloaderView')">
+                            <i class="fas fa-download"></i> 
+                            <div>
+                                <h4>Url to Download</h4>
+                                <p>Download files directly from URLs with preview.</p>
+                            </div>
+                        </div>
+
+                        <div class="option-card" onclick="setView('pdfMakerView')">
+                            <i class="fas fa-file-pdf"></i> 
+                            <div>
+                                <h4>PDF Maker</h4>
+                                <p>Convert multiple images into a single PDF.</p>
+                            </div>
+                        </div>
+
                         <div class="option-card" onclick="setView('mp4ToMp3View')">
                             <i class="fas fa-music"></i> 
                             <div>
@@ -341,7 +385,7 @@
                         </div>
 
                         <div class="option-card" onclick="setView('pdfExtractorView')">
-                            <i class="fas fa-file-pdf"></i> 
+                            <i class="fas fa-images"></i> 
                             <div>
                                 <h4>PDF Extractor</h4>
                                 <p>Extract images from PDF pages.</p>
@@ -559,6 +603,72 @@
                     </div>
                 </div>
 
+                <!-- URL to Download View -->
+                <div id="urlDownloaderView">
+                    <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
+                    <h3 style="margin-bottom: 15px;">Url to Download</h3>
+                    <div class="input-wrapper">
+                        <input type="text" id="urlDownloaderInput" placeholder="Paste direct file URL here..." style="width: 100%; padding: 15px; padding-right: 50px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 1rem;">
+                        <div class="input-controls">
+                            <button class="paste-btn" id="pasteUrlBtn"><i class="fas fa-paste"></i></button>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="checkUrlBtn">Check & Preview</button>
+                    
+                    <div id="urlPreviewArea" style="display: none; margin-top: 20px;">
+                        <div style="text-align: center; margin-bottom: 15px;">
+                            <div id="urlPreviewContent" style="margin-bottom: 10px; max-height: 200px; overflow: hidden; display: flex; justify-content: center; align-items: center;"></div>
+                            <p id="urlFileInfo" style="font-size: 0.85rem; opacity: 0.8;"></p>
+                        </div>
+                        
+                        <div class="filename-wrapper">
+                            <input type="text" id="urlFilename" class="filename-input" placeholder="Filename">
+                            <span class="filename-ext" id="urlFileExt">.ext</span>
+                        </div>
+                        
+                        <div id="urlDownloadProgressContainer">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="font-size: 0.8rem; opacity: 0.7;">Downloading...</span>
+                                <span id="urlDownloadPercentLabel">0%</span>
+                            </div>
+                            <div class="progress-track"><div id="urlDownloadProgressFill" class="progress-fill"></div></div>
+                        </div>
+
+                        <button class="btn btn-action" id="downloadUrlBtn" style="margin-top: 15px; background: var(--primary); color: white;"><i class="fas fa-download"></i> Download File</button>
+                    </div>
+                </div>
+
+                <!-- PDF Maker View -->
+                <div id="pdfMakerView">
+                    <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
+                    <h3 style="margin-bottom: 15px;">PDF Maker</h3>
+                    <div class="upload-box" id="pdfMakerDropZone">
+                        <i class="fas fa-images" style="font-size: 2.5rem; color: var(--primary);"></i>
+                        <h3 id="pdfMakerTitle" style="margin-top:10px;">Select Images</h3>
+                        <p style="font-size: 0.8rem; opacity: 0.7;">(Tap to add multiple files)</p>
+                        <input type="file" id="pdfMakerInput" hidden accept="image/*" multiple>
+                    </div>
+                    
+                    <div id="pdfMakerPreviewGrid" class="preview-grid" style="margin-top: 20px;"></div>
+                    
+                    <div id="pdfMakerControls" style="display: none; margin-top: 20px;">
+                        <div class="filename-wrapper">
+                            <input type="text" id="pdfMakerFilename" class="filename-input" value="document" placeholder="Filename">
+                            <span class="filename-ext">.pdf</span>
+                        </div>
+                        
+                        <div id="pdfMakerProgressContainer">
+                             <div style="display: flex; justify-content: space-between;">
+                                <span style="font-size: 0.8rem; opacity: 0.7;">Generating PDF...</span>
+                                <span id="pdfMakerPercentLabel">0%</span>
+                            </div>
+                            <div class="progress-track"><div id="pdfMakerProgressFill" class="progress-fill"></div></div>
+                        </div>
+
+                        <button class="btn btn-primary" id="generatePdfBtn" style="margin-top: 15px;">Generate & Download PDF</button>
+                    </div>
+                </div>
+
                 <div id="mp4ToMp3View">
                     <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
                     <h3 style="margin-bottom: 15px;">MP4 to MP3 Converter</h3>
@@ -738,7 +848,7 @@
     </div>
     
     <footer>
-        <p>&copy; 2026 Nur Share. Developed by <b>Nur</b>.</p>
+        <p>&copy; 2026 One Tool. Developed by <b>Nur</b>.</p>
     </footer>
 
     <div id="toast"></div>
@@ -762,11 +872,11 @@
         
         <button class="btn btn-action" style="margin-top: 10px;" onclick="checkDevAccess()"><i class="fas fa-code"></i> Developer Options</button>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-            <a href="https://www.facebook.com/NURtheBackBencher" target="_blank" class="btn btn-action" style="text-decoration: none; justify-content: center; display: flex; align-items: center; gap: 8px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 25px;">
+            <a href="https://www.facebook.com/NURtheBackBencher" target="_blank" class="social-link-original social-link-fb">
                 <i class="fab fa-facebook"></i>
             </a>
-            <a href="https://wa.me/8801851956615" target="_blank" class="btn btn-action" style="text-decoration: none; justify-content: center; display: flex; align-items: center; gap: 8px;">
+            <a href="https://wa.me/8801851956615" target="_blank" class="social-link-original social-link-wa">
                 <i class="fab fa-whatsapp"></i>
             </a>
         </div>
@@ -790,6 +900,7 @@
         let selectedFile = null;
         let uploadedLinkFormats = null; 
         let activeColorTarget = null;
+        let pdfMakerFiles = []; // Store selected files for PDF Maker
 
         const views = {
             mainOptionsView: document.getElementById('mainOptionsView'),
@@ -800,7 +911,9 @@
             mp4ToMp3View: document.getElementById('mp4ToMp3View'),
             pdfExtractorView: document.getElementById('pdfExtractorView'),
             zipExtractorView: document.getElementById('zipExtractorView'),
-            videoToGifView: document.getElementById('videoToGifView')
+            videoToGifView: document.getElementById('videoToGifView'),
+            urlDownloaderView: document.getElementById('urlDownloaderView'),
+            pdfMakerView: document.getElementById('pdfMakerView')
         };
         
         const fileInput = document.getElementById('fileInput');
@@ -909,6 +1022,31 @@
         const gifPercentLabel = document.getElementById('gifPercentLabel');
         const gifFilename = document.getElementById('gifFilename');
         let gifSelectedFile = null;
+
+        // URL Downloader Elements
+        const urlDownloaderInput = document.getElementById('urlDownloaderInput');
+        const pasteUrlBtn = document.getElementById('pasteUrlBtn');
+        const checkUrlBtn = document.getElementById('checkUrlBtn');
+        const urlPreviewArea = document.getElementById('urlPreviewArea');
+        const urlPreviewContent = document.getElementById('urlPreviewContent');
+        const urlFileInfo = document.getElementById('urlFileInfo');
+        const urlFilename = document.getElementById('urlFilename');
+        const urlFileExt = document.getElementById('urlFileExt');
+        const downloadUrlBtn = document.getElementById('downloadUrlBtn');
+        const urlDownloadProgressContainer = document.getElementById('urlDownloadProgressContainer');
+        const urlDownloadProgressFill = document.getElementById('urlDownloadProgressFill');
+        const urlDownloadPercentLabel = document.getElementById('urlDownloadPercentLabel');
+
+        // PDF Maker Elements
+        const pdfMakerInput = document.getElementById('pdfMakerInput');
+        const pdfMakerDropZone = document.getElementById('pdfMakerDropZone');
+        const pdfMakerPreviewGrid = document.getElementById('pdfMakerPreviewGrid');
+        const pdfMakerControls = document.getElementById('pdfMakerControls');
+        const generatePdfBtn = document.getElementById('generatePdfBtn');
+        const pdfMakerFilename = document.getElementById('pdfMakerFilename');
+        const pdfMakerProgressContainer = document.getElementById('pdfMakerProgressContainer');
+        const pdfMakerProgressFill = document.getElementById('pdfMakerProgressFill');
+        const pdfMakerPercentLabel = document.getElementById('pdfMakerPercentLabel');
         
         const settingsBtn = document.getElementById('settingsBtn');
 
@@ -957,7 +1095,7 @@
         function setView(newView) {
             customColorPicker.style.display = 'none';
 
-            if (['uploadToQrView', 'uploadToLinkView', 'qrExtractorView', 'mp4ToMp3View', 'pdfExtractorView', 'zipExtractorView', 'videoToGifView'].includes(currentView)) { 
+            if (['uploadToQrView', 'uploadToLinkView', 'qrExtractorView', 'mp4ToMp3View', 'pdfExtractorView', 'zipExtractorView', 'videoToGifView', 'urlDownloaderView', 'pdfMakerView'].includes(currentView)) { 
                 resetUploadView(currentView);
             }
             
@@ -972,7 +1110,7 @@
                 generateLinkQr();
             }
 
-            history.pushState({ view: newView }, `Nur Share | ${newView}`);
+            history.pushState({ view: newView }, `One Tool | ${newView}`);
         }
 
         function copyLink(selector) {
@@ -1038,6 +1176,20 @@
                 gifProgressFill.style.width = '0%';
                 gifPercentLabel.innerText = '0%';
                 gifSelectedFile = null;
+            } else if (viewId === 'urlDownloaderView') {
+                urlDownloaderInput.value = '';
+                urlPreviewArea.style.display = 'none';
+                urlPreviewContent.innerHTML = '';
+                urlDownloadProgressContainer.style.display = 'none';
+                urlDownloadProgressFill.style.width = '0%';
+                urlDownloadPercentLabel.innerText = '0%';
+            } else if (viewId === 'pdfMakerView') {
+                pdfMakerFiles = [];
+                renderPdfMakerPreview();
+                pdfMakerInput.value = '';
+                pdfMakerProgressContainer.style.display = 'none';
+                pdfMakerProgressFill.style.width = '0%';
+                pdfMakerPercentLabel.innerText = '0%';
             }
             else if(viewId === 'uploadToQrView') {
                 document.getElementById('uploadTitle').innerHTML = 'Choose a file';
@@ -1301,6 +1453,175 @@
                 const fname = linkQrFilename.value.trim() || 'qrcode';
                 forceDownload(canvas.toDataURL('image/png'), `${fname}.png`, false);
             }
+        };
+
+        // --- URL DOWNLOADER LOGIC ---
+        pasteUrlBtn.onclick = async () => {
+            try { urlDownloaderInput.value = await navigator.clipboard.readText(); showToast("Pasted!"); } catch (err) { showToast("Clipboard Error"); }
+        };
+
+        checkUrlBtn.onclick = () => {
+            const url = urlDownloaderInput.value.trim();
+            if(!url) { showToast("Please enter a URL"); return; }
+            
+            // Try to deduce filename from URL
+            const urlParts = url.split('/');
+            let suggestedName = urlParts[urlParts.length-1].split('?')[0] || "download";
+            let ext = "";
+            if(suggestedName.includes('.')) {
+                const nameParts = suggestedName.split('.');
+                ext = '.' + nameParts.pop();
+                suggestedName = nameParts.join('.');
+            }
+            
+            urlFilename.value = suggestedName;
+            urlFileExt.innerText = ext;
+            urlFileInfo.innerText = `Source: ${url.substring(0,30)}...`;
+
+            urlPreviewArea.style.display = 'block';
+            urlPreviewContent.innerHTML = '';
+
+            // Simple preview logic based on extension
+            const lowerExt = ext.toLowerCase();
+            if(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'].includes(lowerExt)) {
+                urlPreviewContent.innerHTML = `<img src="${url}" style="max-width:100%; max-height:200px; border-radius:8px;" onerror="this.src=''; this.parentElement.innerHTML='<i class=\'fas fa-eye-slash\' style=\'font-size:3rem; opacity:0.5\'></i>'">`;
+            } else if (['.mp4', '.webm'].includes(lowerExt)) {
+                 urlPreviewContent.innerHTML = `<video src="${url}" controls style="max-width:100%; max-height:200px; border-radius:8px;"></video>`;
+            } else {
+                 urlPreviewContent.innerHTML = `<i class="fas fa-file-download" style="font-size:4rem; color:var(--primary);"></i>`;
+            }
+        };
+
+        downloadUrlBtn.onclick = () => {
+            const url = urlDownloaderInput.value.trim();
+            if(!url) return;
+            
+            urlDownloadProgressContainer.style.display = 'block';
+            urlDownloadPercentLabel.innerText = "0%";
+            urlDownloadProgressFill.style.width = "0%";
+            downloadUrlBtn.disabled = true;
+
+            // Using fetch to get blob (bypasses some browser download behaviors, but subject to CORS)
+            fetch(url)
+            .then(response => {
+                if (!response.ok) throw new Error("Network error");
+                const reader = response.body.getReader();
+                const contentLength = +response.headers.get('Content-Length');
+                let receivedLength = 0;
+                let chunks = [];
+                
+                return reader.read().then(function processText({done, value}) {
+                    if (done) {
+                        return new Blob(chunks);
+                    }
+                    chunks.push(value);
+                    receivedLength += value.length;
+                    if(contentLength) {
+                        let pct = Math.round((receivedLength/contentLength)*100);
+                        urlDownloadPercentLabel.innerText = pct + "%";
+                        urlDownloadProgressFill.style.width = pct + "%";
+                    }
+                    return reader.read().then(processText);
+                });
+            })
+            .then(blob => {
+                const fname = (urlFilename.value.trim() || 'download') + urlFileExt.innerText;
+                forceDownload(blob, fname, true);
+                urlDownloadPercentLabel.innerText = "Completed";
+                downloadUrlBtn.disabled = false;
+            })
+            .catch(err => {
+                showToast("Download failed (CORS or Network). Trying direct link.");
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = (urlFilename.value.trim() || 'download') + urlFileExt.innerText;
+                a.target = "_blank";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                downloadUrlBtn.disabled = false;
+            });
+        };
+
+        // --- PDF MAKER LOGIC ---
+        pdfMakerDropZone.onclick = () => pdfMakerInput.click();
+        pdfMakerInput.onchange = (e) => {
+            if(e.target.files && e.target.files.length > 0) {
+                Array.from(e.target.files).forEach(file => {
+                    if(file.type.startsWith('image/')) {
+                        pdfMakerFiles.push(file);
+                    }
+                });
+                renderPdfMakerPreview();
+            }
+            pdfMakerInput.value = ''; // Reset to allow adding same files again if needed
+        };
+
+        function renderPdfMakerPreview() {
+            pdfMakerPreviewGrid.innerHTML = '';
+            if(pdfMakerFiles.length > 0) {
+                pdfMakerControls.style.display = 'block';
+                pdfMakerFiles.forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const div = document.createElement('div');
+                        div.className = 'pdf-maker-item';
+                        div.innerHTML = `
+                            <img src="${e.target.result}">
+                            <div class="pdf-maker-remove" onclick="removePdfMakerFile(${index})"><i class="fas fa-times"></i></div>
+                        `;
+                        pdfMakerPreviewGrid.appendChild(div);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            } else {
+                pdfMakerControls.style.display = 'none';
+            }
+        }
+
+        function removePdfMakerFile(index) {
+            pdfMakerFiles.splice(index, 1);
+            renderPdfMakerPreview();
+        }
+
+        generatePdfBtn.onclick = async () => {
+            if(pdfMakerFiles.length === 0) return;
+            generatePdfBtn.disabled = true;
+            generatePdfBtn.innerText = "Generating...";
+            pdfMakerProgressContainer.style.display = 'block';
+            pdfMakerProgressFill.style.width = '0%';
+            pdfMakerPercentLabel.innerText = '0%';
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            for(let i=0; i<pdfMakerFiles.length; i++) {
+                if(i > 0) doc.addPage();
+                
+                // Load image to get dimensions
+                const imgData = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.readAsDataURL(pdfMakerFiles[i]);
+                });
+                
+                const imgProps = doc.getImageProperties(imgData);
+                const pdfWidth = doc.internal.pageSize.getWidth();
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                
+                doc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+                
+                const pct = Math.round(((i+1)/pdfMakerFiles.length)*100);
+                pdfMakerProgressFill.style.width = pct + "%";
+                pdfMakerPercentLabel.innerText = pct + "%";
+            }
+            
+            const fname = (pdfMakerFilename.value.trim() || 'document') + '.pdf';
+            doc.save(fname);
+            
+            generatePdfBtn.disabled = false;
+            generatePdfBtn.innerText = "Generate & Download PDF";
+            showToast("PDF Generated!");
         };
 
         mp3DropZone.onclick = () => mp3FileInput.click();
