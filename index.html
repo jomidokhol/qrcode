@@ -1,3 +1,10 @@
+নিচে সম্পূর্ণ আপডেট করা ফাইলটি দেওয়া হলো। আপনার অনুরোধ অনুযায়ী:
+
+১. **Url to Download:** এখানে **Axios** লাইব্রেরি যুক্ত করা হয়েছে। এখন এটি URL চেক করে ফাইলের সাইজ, এক্সটেনশন এবং টাইপ ডিটেক্ট করবে। ইমেজ বা ভিডিও হলে প্রিভিউ দেখাবে এবং সরাসরি Blob আকারে ডাউনলোড করবে (লিঙ্ক ওপেন না করে)। *নোট: এটি কাজ করার জন্য টার্গেট সার্ভারে CORS allow থাকতে হবে, অন্যথায় এটি ব্রাউজার সিকিউরিটির কারণে ব্লক হতে পারে।*
+
+২. **Developer Options:** ফেক এনিমেশন সরিয়ে সেখানে **Update Notification Control** প্যানেল যুক্ত করা হয়েছে। এখানে ভার্সন, মেসেজ এবং অন/অফ বাটন আছে। সেভ দিলে এটি `update.json` নামে আপনার গিটহাবে ফাইলটি আপলোড/আপডেট করার চেষ্টা করবে (যদি API Key সেট করা থাকে)।
+
+--- START OF FILE qrcode.html ---
 
 <!DOCTYPE html>
 <html lang="en">
@@ -16,8 +23,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gifshot/0.3.2/gifshot.min.js"></script>
-    <!-- Added jsPDF for PDF Maker -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Added Axios for Powerful URL Downloading -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <style>
         :root { --primary: #10b981; --bg: #ffffff; --card: #f8fafc; --text: #0f172a; --border: #e2e8f0; --shadow: rgba(0, 0, 0, 0.1); }
@@ -40,7 +48,7 @@
         
         input, .link-url, .upload-box #uploadTitle, #linkUploadTitle, #extractorUploadTitle, 
         #mp3UploadTitle, #pdfUploadTitle, #zipUploadTitle, #gifUploadTitle, footer p, #toast, .filename-input,
-        #urlDownloaderInput, #pdfMakerTitle {
+        #urlDownloaderInput, #pdfMakerTitle, #devMessage {
             -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text;
         }
 
@@ -272,7 +280,6 @@
         .settings-input-group { position: relative; display: flex; gap: 10px; margin-bottom: 10px; }
         .settings-input-group input { flex-grow: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
         
-        /* Updated Social Icons for Settings */
         .social-link-original {
             text-decoration: none; 
             display: flex; 
@@ -298,12 +305,15 @@
             cursor: pointer; font-size: 0.6rem;
         }
 
-        .fake-terminal {
-            background: #000; color: #0f0; font-family: monospace;
-            padding: 15px; border-radius: 8px; margin-top: 15px;
-            font-size: 0.8rem; height: 150px; overflow-y: auto;
-            display: none;
-        }
+        /* Dev Tools Toggle */
+        .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border); transition: .4s; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(18px); }
+        .slider.round { border-radius: 34px; }
+        .slider.round:before { border-radius: 50%; }
     </style>
 </head>
 <body>
@@ -872,6 +882,27 @@
         
         <button class="btn btn-action" style="margin-top: 10px;" onclick="checkDevAccess()"><i class="fas fa-code"></i> Developer Options</button>
         
+        <!-- Dev Options Panel -->
+        <div id="devToolsPanel" style="display:none; margin-top:20px; border-top:1px solid var(--border); padding-top:15px;">
+            <h4 style="margin-bottom:15px;">Update Notification Config</h4>
+            
+            <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Version Number</label>
+            <input type="text" id="devVersion" placeholder="e.g. 1.5" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px;">
+            
+            <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Custom Message</label>
+            <textarea id="devMessage" placeholder="What's new in this update?" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px; height: 80px; font-family: inherit; resize: none;"></textarea>
+            
+            <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 20px;">
+                <label style="font-size: 0.85rem; font-weight: 700;">Show Notification</label>
+                <label class="switch">
+                  <input type="checkbox" id="devStatus">
+                  <span class="slider round"></span>
+                </label>
+            </div>
+            
+            <button class="btn btn-primary" onclick="saveUpdateConfig()">Save Config</button>
+        </div>
+
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 25px;">
             <a href="https://www.facebook.com/NURtheBackBencher" target="_blank" class="social-link-original social-link-fb">
                 <i class="fab fa-facebook"></i>
@@ -880,8 +911,6 @@
                 <i class="fab fa-whatsapp"></i>
             </a>
         </div>
-        
-        <div class="fake-terminal" id="fakeTerminal"></div>
     </div>
 
     <script>
@@ -901,6 +930,7 @@
         let uploadedLinkFormats = null; 
         let activeColorTarget = null;
         let pdfMakerFiles = []; // Store selected files for PDF Maker
+        let urlBlob = null; // Store blob for URL downloader
 
         const views = {
             mainOptionsView: document.getElementById('mainOptionsView'),
@@ -1183,6 +1213,7 @@
                 urlDownloadProgressContainer.style.display = 'none';
                 urlDownloadProgressFill.style.width = '0%';
                 urlDownloadPercentLabel.innerText = '0%';
+                urlBlob = null;
             } else if (viewId === 'pdfMakerView') {
                 pdfMakerFiles = [];
                 renderPdfMakerPreview();
@@ -1455,7 +1486,7 @@
             }
         };
 
-        // --- URL DOWNLOADER LOGIC ---
+        // --- URL DOWNLOADER LOGIC (Updated with Axios) ---
         pasteUrlBtn.onclick = async () => {
             try { urlDownloaderInput.value = await navigator.clipboard.readText(); showToast("Pasted!"); } catch (err) { showToast("Clipboard Error"); }
         };
@@ -1464,83 +1495,103 @@
             const url = urlDownloaderInput.value.trim();
             if(!url) { showToast("Please enter a URL"); return; }
             
-            // Try to deduce filename from URL
-            const urlParts = url.split('/');
-            let suggestedName = urlParts[urlParts.length-1].split('?')[0] || "download";
-            let ext = "";
-            if(suggestedName.includes('.')) {
-                const nameParts = suggestedName.split('.');
-                ext = '.' + nameParts.pop();
-                suggestedName = nameParts.join('.');
-            }
+            checkUrlBtn.disabled = true;
+            checkUrlBtn.innerText = "Analyzing...";
+            urlPreviewArea.style.display = 'none';
             
-            urlFilename.value = suggestedName;
-            urlFileExt.innerText = ext;
-            urlFileInfo.innerText = `Source: ${url.substring(0,30)}...`;
-
-            urlPreviewArea.style.display = 'block';
-            urlPreviewContent.innerHTML = '';
-
-            // Simple preview logic based on extension
-            const lowerExt = ext.toLowerCase();
-            if(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'].includes(lowerExt)) {
-                urlPreviewContent.innerHTML = `<img src="${url}" style="max-width:100%; max-height:200px; border-radius:8px;" onerror="this.src=''; this.parentElement.innerHTML='<i class=\'fas fa-eye-slash\' style=\'font-size:3rem; opacity:0.5\'></i>'">`;
-            } else if (['.mp4', '.webm'].includes(lowerExt)) {
-                 urlPreviewContent.innerHTML = `<video src="${url}" controls style="max-width:100%; max-height:200px; border-radius:8px;"></video>`;
-            } else {
-                 urlPreviewContent.innerHTML = `<i class="fas fa-file-download" style="font-size:4rem; color:var(--primary);"></i>`;
-            }
+            // Using Axios to check file info
+            axios.get(url, { responseType: 'blob' })
+            .then(response => {
+                checkUrlBtn.disabled = false;
+                checkUrlBtn.innerText = "Check & Preview";
+                
+                urlBlob = response.data;
+                const contentType = response.headers['content-type'] || "";
+                const contentLen = response.headers['content-length'] || urlBlob.size;
+                
+                // Guess extension
+                let ext = "";
+                const mimeMap = {
+                    'image/jpeg': '.jpg', 'image/png': '.png', 'image/gif': '.gif', 'image/webp': '.webp',
+                    'video/mp4': '.mp4', 'video/webm': '.webm', 'application/pdf': '.pdf',
+                    'application/zip': '.zip', 'audio/mpeg': '.mp3'
+                };
+                
+                if(mimeMap[contentType]) ext = mimeMap[contentType];
+                else {
+                    const urlParts = url.split('/');
+                    const lastPart = urlParts[urlParts.length-1].split('?')[0];
+                    if(lastPart.includes('.')) ext = '.' + lastPart.split('.').pop();
+                }
+                
+                // Filename
+                const urlParts = url.split('/');
+                let suggestedName = urlParts[urlParts.length-1].split('?')[0] || "download";
+                if(suggestedName.includes('.')) suggestedName = suggestedName.split('.').slice(0,-1).join('.');
+                
+                urlFilename.value = suggestedName;
+                urlFileExt.innerText = ext;
+                
+                const sizeMB = (contentLen / (1024*1024)).toFixed(2);
+                urlFileInfo.innerHTML = `Type: ${contentType}<br>Size: ${sizeMB} MB`;
+                
+                urlPreviewArea.style.display = 'block';
+                urlPreviewContent.innerHTML = '';
+                
+                const blobUrl = URL.createObjectURL(urlBlob);
+                
+                if(contentType.startsWith('image/')) {
+                    const img = document.createElement('img');
+                    img.src = blobUrl;
+                    img.style.maxWidth = '100%'; img.style.maxHeight = '200px'; img.style.borderRadius = '8px';
+                    img.onload = () => {
+                        urlFileInfo.innerHTML += `<br>Res: ${img.naturalWidth}x${img.naturalHeight}`;
+                    };
+                    urlPreviewContent.appendChild(img);
+                } else if (contentType.startsWith('video/')) {
+                    const video = document.createElement('video');
+                    video.src = blobUrl;
+                    video.controls = true;
+                    video.style.maxWidth = '100%'; video.style.maxHeight = '200px'; video.style.borderRadius = '8px';
+                    urlPreviewContent.appendChild(video);
+                } else {
+                    urlPreviewContent.innerHTML = `<i class="fas fa-file-download" style="font-size:4rem; color:var(--primary);"></i>`;
+                }
+            })
+            .catch(error => {
+                checkUrlBtn.disabled = false;
+                checkUrlBtn.innerText = "Check & Preview";
+                console.error(error);
+                if(error.message && error.message.includes("Network Error")) {
+                     showToast("CORS Blocked or Network Error. Unable to fetch directly.");
+                     urlFileInfo.innerHTML = `<span style="color:red">CORS Policy restricted direct access.</span>`;
+                     urlPreviewArea.style.display = 'block';
+                     urlPreviewContent.innerHTML = `<i class="fas fa-ban" style="font-size:3rem; color:red;"></i>`;
+                     urlDownloadProgressContainer.style.display = 'none';
+                     // Setup fallback
+                     urlBlob = null;
+                     urlFilename.value = "file";
+                     urlFileExt.innerText = "";
+                } else {
+                     showToast("Error: " + error.message);
+                }
+            });
         };
 
         downloadUrlBtn.onclick = () => {
-            const url = urlDownloaderInput.value.trim();
-            if(!url) return;
-            
-            urlDownloadProgressContainer.style.display = 'block';
-            urlDownloadPercentLabel.innerText = "0%";
-            urlDownloadProgressFill.style.width = "0%";
-            downloadUrlBtn.disabled = true;
-
-            // Using fetch to get blob (bypasses some browser download behaviors, but subject to CORS)
-            fetch(url)
-            .then(response => {
-                if (!response.ok) throw new Error("Network error");
-                const reader = response.body.getReader();
-                const contentLength = +response.headers.get('Content-Length');
-                let receivedLength = 0;
-                let chunks = [];
-                
-                return reader.read().then(function processText({done, value}) {
-                    if (done) {
-                        return new Blob(chunks);
-                    }
-                    chunks.push(value);
-                    receivedLength += value.length;
-                    if(contentLength) {
-                        let pct = Math.round((receivedLength/contentLength)*100);
-                        urlDownloadPercentLabel.innerText = pct + "%";
-                        urlDownloadProgressFill.style.width = pct + "%";
-                    }
-                    return reader.read().then(processText);
-                });
-            })
-            .then(blob => {
+            if(urlBlob) {
+                // Download from cached blob
                 const fname = (urlFilename.value.trim() || 'download') + urlFileExt.innerText;
-                forceDownload(blob, fname, true);
-                urlDownloadPercentLabel.innerText = "Completed";
-                downloadUrlBtn.disabled = false;
-            })
-            .catch(err => {
-                showToast("Download failed (CORS or Network). Trying direct link.");
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = (urlFilename.value.trim() || 'download') + urlFileExt.innerText;
-                a.target = "_blank";
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                downloadUrlBtn.disabled = false;
-            });
+                forceDownload(urlBlob, fname, true);
+                showToast("Download Started");
+            } else {
+                // Fallback for CORS restricted
+                const url = urlDownloaderInput.value.trim();
+                if(url) {
+                    window.open(url, '_blank');
+                    showToast("Opening Link...");
+                }
+            }
         };
 
         // --- PDF MAKER LOGIC ---
@@ -2324,6 +2375,11 @@
             const overlay = document.getElementById('settingsOverlay');
             modal.classList.toggle('active');
             overlay.classList.toggle('active');
+            
+            // Reset Dev Panel visibility on toggle
+            if(!modal.classList.contains('active')) {
+                document.getElementById('devToolsPanel').style.display = 'none';
+            }
         }
         
         settingsBtn.onclick = toggleSettings;
@@ -2341,42 +2397,69 @@
         function checkDevAccess() {
             const userInput = prompt("Enter Passkey:");
             if (userInput === PASSKEY) {
-                runFakeSecurityCheck();
+                document.getElementById('devToolsPanel').style.display = 'block';
+                showToast("Developer Access Granted");
             } else {
                 alert("Access Denied");
             }
         }
         
-        function runFakeSecurityCheck() {
-            const terminal = document.getElementById('fakeTerminal');
-            terminal.style.display = 'block';
-            terminal.innerHTML = '';
+        function saveUpdateConfig() {
+            const version = document.getElementById('devVersion').value;
+            const message = document.getElementById('devMessage').value;
+            const status = document.getElementById('devStatus').checked;
             
-            const steps = [
-                "Initializing security protocols...",
-                "Connecting to secure server...",
-                "Verifying user token hash...",
-                "Bypassing firewall [PROXY: 192.168.0.1]...",
-                "Scanning for vulnerabilities...",
-                "Analyzing encrypted packets...",
-                "Security clearance: LEVEL 1...",
-                "Security clearance: LEVEL 2...",
-                "<span style='color: red; font-weight: bold;'>WARNING: UNAUTHORIZED ACCESS DETECTED</span>",
-                "<span style='color: red; font-weight: bold;'>ACCESS DENIED</span>"
-            ];
+            const config = {
+                version: version,
+                message: message,
+                show: status,
+                timestamp: new Date().toISOString()
+            };
             
-            let i = 0;
-            function printLine() {
-                if (i < steps.length) {
-                    const div = document.createElement('div');
-                    div.innerHTML = `> ${steps[i]}`;
-                    terminal.appendChild(div);
-                    terminal.scrollTop = terminal.scrollHeight;
-                    i++;
-                    setTimeout(printLine, Math.random() * 800 + 200);
-                }
+            const apiKey = document.getElementById('apiKeyInput').value || GIT.token; // Fallback to embedded (not rec for public)
+            
+            if(!apiKey) {
+                showToast("API Key Required to Save to Server");
+                return;
             }
-            printLine();
+            
+            // Upload to GitHub as update.json
+            const jsonString = JSON.stringify(config, null, 2);
+            const base64Content = btoa(jsonString);
+            
+            const xhr = new XMLHttpRequest();
+            xhr.open("PUT", `https://api.github.com/repos/${GIT.owner}/${GIT.repo}/contents/update.json`);
+            xhr.setRequestHeader("Authorization", `token ${apiKey}`);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            
+            // Need to get SHA first to update existing file
+            const getSha = new XMLHttpRequest();
+            getSha.open("GET", `https://api.github.com/repos/${GIT.owner}/${GIT.repo}/contents/update.json`);
+            getSha.setRequestHeader("Authorization", `token ${apiKey}`);
+            getSha.onload = () => {
+                let sha = null;
+                if(getSha.status === 200) {
+                    sha = JSON.parse(getSha.responseText).sha;
+                }
+                
+                const payload = {
+                    message: "Update config via Dev Tools",
+                    content: base64Content,
+                    branch: GIT.branch
+                };
+                if(sha) payload.sha = sha;
+                
+                xhr.send(JSON.stringify(payload));
+            };
+            getSha.send();
+            
+            xhr.onload = () => {
+                if(xhr.status === 200 || xhr.status === 201) {
+                    showToast("Config Saved to Server!");
+                } else {
+                    showToast("Error Saving: " + xhr.status);
+                }
+            };
         }
 
         updateLogoImage(); 
