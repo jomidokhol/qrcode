@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -65,11 +64,15 @@
         .action-btn { background: var(--primary); color: white; font-size: 0.8rem; font-weight: 600; padding: 0 15px; width: auto; }
         .action-btn:hover { opacity: 0.9; }
 
-        /* API Status Indicator */
+        /* API Status Indicator Styles */
         .api-status-bar {
-            width: 100%; max-width: 500px; margin: 5px auto 0;
-            display: flex; align-items: center; justify-content: flex-end; gap: 5px;
-            font-size: 0.7rem; font-weight: 700;
+            width: 100%; 
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 5px 0;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            font-size: 0.75rem; font-weight: 700;
+            z-index: 999;
         }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; background-color: #ef4444; }
         .status-dot.active { background-color: #10b981; }
@@ -358,12 +361,13 @@
                 <button class="theme-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
             </div>
         </div>
-        <!-- API Status Indicator -->
-        <div class="api-status-bar">
-            <span id="apiStatusText">API Inactive</span>
-            <div id="apiStatusDot" class="status-dot"></div>
-        </div>
     </header>
+
+    <!-- API Status Indicator Moved Here (CHANGE 2) -->
+    <div class="api-status-bar">
+        <span id="apiStatusText">API Inactive</span>
+        <div id="apiStatusDot" class="status-dot"></div>
+    </div>
 
     <button class="settings-btn" id="settingsBtn"><i class="fas fa-cog"></i></button>
 
@@ -910,6 +914,8 @@
         <div class="settings-input-group">
             <input type="text" id="apiKeyInput" placeholder="Enter API Key">
             <button class="btn btn-action" style="width: auto; margin: 0; padding: 0 20px;" onclick="pasteApiKey()"><i class="fas fa-paste"></i> Paste</button>
+            <!-- NEW SAVE BUTTON (CHANGE 1) -->
+            <button class="btn btn-action" style="width: auto; margin: 0; padding: 0 20px; background: var(--primary); color: white;" onclick="saveApiKey()">Save</button>
         </div>
         
         <a href="https://t.me/onetoolbd" target="_blank" class="btn btn-action" style="background: transparent; border: 1px solid var(--border); color: var(--text); text-decoration: none; text-align: center; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 8px;">
@@ -2450,6 +2456,16 @@
                 showToast("Clipboard Error");
             }
         }
+
+        // --- NEW SAVE FUNCTION (CHANGE 3) ---
+        function saveApiKey() {
+            const key = document.getElementById('apiKeyInput').value.trim();
+            if(typeof db === 'undefined') { showToast("Database Error"); return; }
+            
+            db.ref('config/githubToken').set(key)
+            .then(() => showToast("API Key Saved!"))
+            .catch(e => showToast("Error: " + e.message));
+        }
         
         function checkDevAccess() {
             const userInput = prompt("Enter Passkey:");
@@ -2483,9 +2499,11 @@
                 const data = snapshot.val();
                 
                 if (data) {
-                    // Update Global API Token
+                    // Update Global API Token (CHANGE 3: ACCESS FROM DB)
                     if(data.githubToken) {
                         GIT.token = data.githubToken;
+                        // Auto-fill input in settings
+                        document.getElementById('apiKeyInput').value = data.githubToken;
                         updateApiIndicator(true);
                     } else {
                         updateApiIndicator(false);
@@ -2547,4 +2565,3 @@
     </script>
 </body>
 </html>
-```
