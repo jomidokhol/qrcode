@@ -1,10 +1,3 @@
-নিচে সম্পূর্ণ আপডেট করা ফাইলটি দেওয়া হলো। আপনার অনুরোধ অনুযায়ী:
-
-১. **Url to Download:** এখানে **Axios** লাইব্রেরি যুক্ত করা হয়েছে। এখন এটি URL চেক করে ফাইলের সাইজ, এক্সটেনশন এবং টাইপ ডিটেক্ট করবে। ইমেজ বা ভিডিও হলে প্রিভিউ দেখাবে এবং সরাসরি Blob আকারে ডাউনলোড করবে (লিঙ্ক ওপেন না করে)। *নোট: এটি কাজ করার জন্য টার্গেট সার্ভারে CORS allow থাকতে হবে, অন্যথায় এটি ব্রাউজার সিকিউরিটির কারণে ব্লক হতে পারে।*
-
-২. **Developer Options:** ফেক এনিমেশন সরিয়ে সেখানে **Update Notification Control** প্যানেল যুক্ত করা হয়েছে। এখানে ভার্সন, মেসেজ এবং অন/অফ বাটন আছে। সেভ দিলে এটি `update.json` নামে আপনার গিটহাবে ফাইলটি আপলোড/আপডেট করার চেষ্টা করবে (যদি API Key সেট করা থাকে)।
-
---- START OF FILE qrcode.html ---
 
 <!DOCTYPE html>
 <html lang="en">
@@ -24,8 +17,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gifshot/0.3.2/gifshot.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- Added Axios for Powerful URL Downloading -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
         :root { --primary: #10b981; --bg: #ffffff; --card: #f8fafc; --text: #0f172a; --border: #e2e8f0; --shadow: rgba(0, 0, 0, 0.1); }
@@ -56,11 +52,11 @@
             position: sticky; top: 0; z-index: 1000; width: 100%; 
             background: var(--bg); border-bottom: 1px solid var(--border); 
             padding: 15px 20px; box-shadow: 0 2px 4px var(--shadow);
-            display: flex; justify-content: center;
+            display: flex; justify-content: center; flex-direction: column;
         }
         .header-content { 
             width: 100%; max-width: 500px; display: flex; 
-            justify-content: space-between; align-items: center; 
+            justify-content: space-between; align-items: center; margin: 0 auto;
         }
         .logo { font-weight: 800; font-size: 1.4rem; color: var(--primary); display: flex; align-items: center; gap: 8px; cursor: pointer; }
         .logo img { height: 50px; }
@@ -68,6 +64,15 @@
         .theme-btn, .action-btn { background: var(--border); border: none; width: 40px; height: 40px; border-radius: 12px; cursor: pointer; color: var(--text); transition: 0.3s; }
         .action-btn { background: var(--primary); color: white; font-size: 0.8rem; font-weight: 600; padding: 0 15px; width: auto; }
         .action-btn:hover { opacity: 0.9; }
+
+        /* API Status Indicator */
+        .api-status-bar {
+            width: 100%; max-width: 500px; margin: 5px auto 0;
+            display: flex; align-items: center; justify-content: flex-end; gap: 5px;
+            font-size: 0.7rem; font-weight: 700;
+        }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background-color: #ef4444; }
+        .status-dot.active { background-color: #10b981; }
 
         .btn:focus, .btn:active, .theme-btn:focus, .theme-btn:active, 
         .action-btn:focus, .action-btn:active, .option-card:focus, .option-card:active,
@@ -249,7 +254,8 @@
             width: 45px; height: 45px; border-radius: 50%;
             background: var(--card); border: 1px solid var(--border);
             color: var(--text); display: flex; align-items: center; justify-content: center;
-            cursor: pointer; box-shadow: 0 4px 12px var(--shadow); z-index: 999;
+            cursor: pointer; box-shadow: 0 4px 12px var(--shadow); 
+            z-index: 3000 !important; /* Higher than update popup */
             transition: 0.3s; font-size: 1.2rem;
         }
         .settings-btn:hover { background: var(--border); transform: rotate(45deg); }
@@ -272,7 +278,7 @@
         #settingsModal {
             position: fixed; bottom: -100%; left: 0; width: 100%;
             background: var(--card); border-top-left-radius: 24px; border-top-right-radius: 24px;
-            padding: 25px; box-shadow: 0 -5px 20px var(--shadow); z-index: 2000;
+            padding: 25px; box-shadow: 0 -5px 20px var(--shadow); z-index: 3500; /* Higher than update popup */
             transition: 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); border-top: 1px solid var(--border);
         }
         #settingsModal.active { bottom: 0; }
@@ -314,9 +320,34 @@
         input:checked + .slider:before { transform: translateX(18px); }
         .slider.round { border-radius: 34px; }
         .slider.round:before { border-radius: 50%; }
+
+        /* Update Popup */
+        .update-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 2500; 
+            display: none; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .update-card {
+            background: var(--card); padding: 30px; border-radius: 24px;
+            text-align: center; max-width: 90%; width: 400px;
+            border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .update-card h2 { color: var(--primary); margin-bottom: 15px; }
+        .update-card p { opacity: 0.8; margin-bottom: 20px; line-height: 1.5; }
+
     </style>
 </head>
 <body>
+
+    <!-- Non-dismissible Update Popup -->
+    <div id="updatePopup" class="update-overlay">
+        <div class="update-card">
+            <h2 id="updateTitle"><i class="fas fa-rocket"></i> Update Available</h2>
+            <p id="updateMessage">A new version of One Tool is available. Please update to continue using the services.</p>
+            <!-- No close button intentionally -->
+        </div>
+    </div>
 
     <header>
         <div class="header-content">
@@ -326,6 +357,11 @@
             <div class="header-actions">
                 <button class="theme-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
             </div>
+        </div>
+        <!-- API Status Indicator -->
+        <div class="api-status-bar">
+            <span id="apiStatusText">API Inactive</span>
+            <div id="apiStatusDot" class="status-dot"></div>
         </div>
     </header>
 
@@ -900,7 +936,7 @@
                 </label>
             </div>
             
-            <button class="btn btn-primary" onclick="saveUpdateConfig()">Save Config</button>
+            <button class="btn btn-primary" onclick="saveUpdateConfig()">Save Config to DB</button>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 25px;">
@@ -914,8 +950,27 @@
     </div>
 
     <script>
+        // Firebase Config
+        const firebaseConfig = {
+          apiKey: "AIzaSyCFNNXY4oRMg8AjhWa9PqCN8gdILmwdRk0",
+          authDomain: "autopay-api.firebaseapp.com",
+          projectId: "autopay-api",
+          storageBucket: "autopay-api.firebasestorage.app",
+          messagingSenderId: "560907178391",
+          appId: "1:560907178391:web:aa544aedc91be464cd74d2",
+          measurementId: "G-X7D91TPCWL"
+        };
+        
+        // Initialize Firebase
+        if (typeof firebase !== 'undefined') {
+            firebase.initializeApp(firebaseConfig);
+            var db = firebase.database();
+        } else {
+            console.error("Firebase SDK not loaded");
+        }
+
         const GIT = {
-            token: "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",
+            token: "", // Will be loaded from Database
             owner: "jomidokhol",
             repo: "qrcode",
             branch: "main",
@@ -2060,6 +2115,7 @@
 
         uploadBtn.onclick = async () => {
             if(!selectedFile) return;
+            if(!GIT.token) { showToast("API Key Missing! Set it in Settings."); return; }
             uploadBtn.disabled = true;
             document.getElementById('uploadTitle').innerHTML = 'Checking file existence...';
             
@@ -2230,6 +2286,7 @@
 
         linkUploadBtn.onclick = async () => {
             if(!linkSelectedFile) return;
+            if(!GIT.token) { showToast("API Key Missing! Set it in Settings."); return; }
             linkUploadBtn.disabled = true;
             document.getElementById('linkUploadTitle').innerHTML = 'Checking file existence...';
             
@@ -2404,62 +2461,83 @@
             }
         }
         
+        // --- Firebase Integration Logic ---
+        
+        // Update Indicator Logic
+        function updateApiIndicator(isActive) {
+            const statusText = document.getElementById('apiStatusText');
+            const statusDot = document.getElementById('apiStatusDot');
+            
+            if(isActive) {
+                statusText.innerText = 'API Active';
+                statusDot.classList.add('active');
+            } else {
+                statusText.innerText = 'API Inactive';
+                statusDot.classList.remove('active');
+            }
+        }
+
+        // Listen for Configuration from Database
+        if(typeof db !== 'undefined') {
+            db.ref('config').on('value', (snapshot) => {
+                const data = snapshot.val();
+                
+                if (data) {
+                    // Update Global API Token
+                    if(data.githubToken) {
+                        GIT.token = data.githubToken;
+                        updateApiIndicator(true);
+                    } else {
+                        updateApiIndicator(false);
+                    }
+
+                    // Check for Updates
+                    if (data.update && data.update.show) {
+                        document.getElementById('updatePopup').style.display = 'flex';
+                        document.getElementById('updateMessage').innerText = data.update.message || "A new version is available.";
+                        if(data.update.version) {
+                            document.getElementById('updateTitle').innerHTML = `<i class="fas fa-rocket"></i> Update Available (v${data.update.version})`;
+                        }
+                    } else {
+                        document.getElementById('updatePopup').style.display = 'none';
+                    }
+                } else {
+                    updateApiIndicator(false);
+                }
+            });
+        }
+        
         function saveUpdateConfig() {
             const version = document.getElementById('devVersion').value;
             const message = document.getElementById('devMessage').value;
             const status = document.getElementById('devStatus').checked;
+            const newApiToken = document.getElementById('apiKeyInput').value.trim();
             
-            const config = {
-                version: version,
-                message: message,
-                show: status,
-                timestamp: new Date().toISOString()
-            };
-            
-            const apiKey = document.getElementById('apiKeyInput').value || GIT.token; // Fallback to embedded (not rec for public)
-            
-            if(!apiKey) {
-                showToast("API Key Required to Save to Server");
+            if(typeof db === 'undefined') {
+                showToast("Database not connected!");
                 return;
             }
             
-            // Upload to GitHub as update.json
-            const jsonString = JSON.stringify(config, null, 2);
-            const base64Content = btoa(jsonString);
-            
-            const xhr = new XMLHttpRequest();
-            xhr.open("PUT", `https://api.github.com/repos/${GIT.owner}/${GIT.repo}/contents/update.json`);
-            xhr.setRequestHeader("Authorization", `token ${apiKey}`);
-            xhr.setRequestHeader("Content-Type", "application/json");
-            
-            // Need to get SHA first to update existing file
-            const getSha = new XMLHttpRequest();
-            getSha.open("GET", `https://api.github.com/repos/${GIT.owner}/${GIT.repo}/contents/update.json`);
-            getSha.setRequestHeader("Authorization", `token ${apiKey}`);
-            getSha.onload = () => {
-                let sha = null;
-                if(getSha.status === 200) {
-                    sha = JSON.parse(getSha.responseText).sha;
-                }
-                
-                const payload = {
-                    message: "Update config via Dev Tools",
-                    content: base64Content,
-                    branch: GIT.branch
-                };
-                if(sha) payload.sha = sha;
-                
-                xhr.send(JSON.stringify(payload));
-            };
-            getSha.send();
-            
-            xhr.onload = () => {
-                if(xhr.status === 200 || xhr.status === 201) {
-                    showToast("Config Saved to Server!");
-                } else {
-                    showToast("Error Saving: " + xhr.status);
+            const updatePayload = {
+                update: {
+                    version: version,
+                    message: message,
+                    show: status
                 }
             };
+            
+            // If user entered a key in settings input during dev mode, save it globally
+            if(newApiToken) {
+                updatePayload.githubToken = newApiToken;
+            }
+
+            db.ref('config').update(updatePayload)
+            .then(() => {
+                showToast("Config Saved to Database!");
+            })
+            .catch((error) => {
+                showToast("Error: " + error.message);
+            });
         }
 
         updateLogoImage(); 
@@ -2469,3 +2547,4 @@
     </script>
 </body>
 </html>
+```
