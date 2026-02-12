@@ -1,3 +1,10 @@
+নিচে সম্পূর্ণ আপডেট করা `qrcode.html` ফাইলটি দেওয়া হলো। আপনার নির্দেশনা অনুযায়ী দুটি ফিচার যুক্ত করা হয়েছে:
+
+১. **সেটিংস লোডিং অ্যানিমেশন:** সেটিংসে সেভ বাটনে চাপ দিলে সাইটের লোগো সহ একটি লোডিং স্ক্রিন আসবে।
+২. **গুগল সাইন-ইন:** হেডারে লগইন বাটন যুক্ত করা হয়েছে। লগইন না করা পর্যন্ত সেটিংসের অপশনগুলো লক (Blocked) থাকবে।
+
+```html
+--- START OF FILE qrcode.html ---
 
 <!DOCTYPE html>
 <html lang="en">
@@ -19,8 +26,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDKs (Added Auth) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
@@ -205,7 +213,7 @@
         #linkFormatToggle:hover { border-color: var(--primary); }
         #linkOptionsDropdown { position: absolute; z-index: 10; width: 100%; max-width: 500px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 4px 12px var(--shadow); padding: 15px; margin-top: 5px; display: none; left: 50%; transform: translateX(-50%); }
 
-        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 1; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 0.9rem; }
+        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 4001; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 0.9rem; }
         #toast.show { visibility: visible; -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @-webkit-keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
         @keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
@@ -284,6 +292,8 @@
             background: var(--card); border-top-left-radius: 24px; border-top-right-radius: 24px;
             padding: 25px; box-shadow: 0 -5px 20px var(--shadow); z-index: 3500; /* Higher than update popup */
             transition: 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); border-top: 1px solid var(--border);
+            /* To handle loading overlay correctly */
+            overflow: hidden; 
         }
         #settingsModal.active { bottom: 0; }
         .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -340,6 +350,28 @@
         .update-card h2 { color: var(--primary); margin-bottom: 15px; }
         .update-card p { opacity: 0.8; margin-bottom: 20px; line-height: 1.5; }
 
+        /* Loading Overlay for Settings */
+        .settings-loading-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.9); z-index: 4000;
+            display: none; justify-content: center; align-items: center; flex-direction: column;
+            border-top-left-radius: 24px; border-top-right-radius: 24px;
+        }
+        .dark-mode .settings-loading-overlay { background: rgba(17, 17, 17, 0.9); }
+        .settings-loading-logo { width: 60px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
+
+        /* Auth Blocking and Header Styles */
+        .settings-content-blocked { opacity: 0.4; pointer-events: none; filter: blur(2px); transition: 0.3s; }
+        .login-prompt-overlay {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 3600; text-align: center; width: 100%; display: none;
+        }
+        .user-profile-btn { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; border: 2px solid var(--primary); cursor: pointer; display: none; }
+        .user-profile-btn img { width: 100%; height: 100%; object-fit: cover; }
+        .login-btn-header { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer; display: none; }
+        .login-btn-header:hover { opacity: 0.9; }
+
     </style>
 </head>
 <body>
@@ -359,12 +391,16 @@
                 <img id="logoImage" src="img/logo.png" alt="Logo">
             </div>
             <div class="header-actions">
+                <button class="login-btn-header" id="headerLoginBtn" onclick="googleSignIn()">Sign In</button>
+                <div class="user-profile-btn" id="headerUserProfile" onclick="googleSignOut()">
+                    <img id="userAvatar" src="" alt="User">
+                </div>
                 <button class="theme-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
             </div>
         </div>
     </header>
 
-    <!-- API Status Indicator Moved Here (CHANGE 2) -->
+    <!-- API Status Indicator Moved Here -->
     <div class="api-status-bar">
         <span id="apiStatusText">API Inactive</span>
         <div id="apiStatusDot" class="status-dot"></div>
@@ -906,53 +942,65 @@
 
     <div class="settings-overlay" id="settingsOverlay" onclick="toggleSettings()"></div>
     <div id="settingsModal">
+        <!-- Loading Overlay for Settings -->
+        <div id="settingsLoadingOverlay" class="settings-loading-overlay">
+            <img src="img/logo.png" class="settings-loading-logo" alt="Loading...">
+        </div>
+
         <div class="settings-header">
             <h3>Settings</h3>
             <button class="icon-back-btn" style="margin: 0; width: 35px; height: 35px;" onclick="toggleSettings()"><i class="fas fa-times"></i></button>
         </div>
         
-        <label style="font-size: 0.85rem; font-weight: 700; display: block; margin-bottom: 8px;">Set API Key</label>
-        <div class="settings-input-group">
-            <input type="text" id="apiKeyInput" placeholder="Enter API Key">
-            <button class="btn btn-action" style="width: auto; margin: 0; padding: 0 20px;" onclick="pasteApiKey()"><i class="fas fa-paste"></i> Paste</button>
-            <!-- NEW SAVE BUTTON (CHANGE 1) -->
-            <button class="btn btn-action" style="width: auto; margin: 0; padding: 0 20px; background: var(--primary); color: white;" onclick="saveApiKey()">Save</button>
-        </div>
-        
-        <a href="https://t.me/onetoolbd" target="_blank" class="btn btn-action" style="background: transparent; border: 1px solid var(--border); color: var(--text); text-decoration: none; text-align: center; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 8px;">
-            <i class="fab fa-telegram"></i> Get API for Free
-        </a>
-        
-        <button class="btn btn-action" style="margin-top: 10px;" onclick="checkDevAccess()"><i class="fas fa-code"></i> Developer Options</button>
-        
-        <!-- Dev Options Panel -->
-        <div id="devToolsPanel" style="display:none; margin-top:20px; border-top:1px solid var(--border); padding-top:15px;">
-            <h4 style="margin-bottom:15px;">Update Notification Config</h4>
-            
-            <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Version Number</label>
-            <input type="text" id="devVersion" placeholder="e.g. 1.5" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px;">
-            
-            <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Custom Message</label>
-            <textarea id="devMessage" placeholder="What's new in this update?" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px; height: 80px; font-family: inherit; resize: none;"></textarea>
-            
-            <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 20px;">
-                <label style="font-size: 0.85rem; font-weight: 700;">Show Notification</label>
-                <label class="switch">
-                  <input type="checkbox" id="devStatus">
-                  <span class="slider round"></span>
-                </label>
+        <div id="settingsContentWrapper">
+            <div id="loginPromptOverlay" class="login-prompt-overlay">
+                <i class="fas fa-lock" style="font-size: 2rem; color: var(--text); opacity: 0.5; margin-bottom: 10px;"></i>
+                <p style="font-size: 0.9rem; font-weight: 700; margin-bottom: 15px;">Sign in required to change settings</p>
+                <button class="btn btn-primary" onclick="googleSignIn()" style="width: auto; display: inline-flex; padding: 10px 20px;">Sign In with Google</button>
+            </div>
+
+            <label style="font-size: 0.85rem; font-weight: 700; display: block; margin-bottom: 8px;">Set API Key</label>
+            <div class="settings-input-group">
+                <input type="text" id="apiKeyInput" placeholder="Enter API Key">
+                <button class="btn btn-action" style="width: auto; margin: 0; padding: 0 20px;" onclick="pasteApiKey()"><i class="fas fa-paste"></i> Paste</button>
+                <button class="btn btn-action" style="width: auto; margin: 0; padding: 0 20px; background: var(--primary); color: white;" onclick="saveApiKey()">Save</button>
             </div>
             
-            <button class="btn btn-primary" onclick="saveUpdateConfig()">Save Config to DB</button>
-        </div>
+            <a href="https://t.me/onetoolbd" target="_blank" class="btn btn-action" style="background: transparent; border: 1px solid var(--border); color: var(--text); text-decoration: none; text-align: center; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 8px;">
+                <i class="fab fa-telegram"></i> Get API for Free
+            </a>
+            
+            <button class="btn btn-action" style="margin-top: 10px;" onclick="checkDevAccess()"><i class="fas fa-code"></i> Developer Options</button>
+            
+            <!-- Dev Options Panel -->
+            <div id="devToolsPanel" style="display:none; margin-top:20px; border-top:1px solid var(--border); padding-top:15px;">
+                <h4 style="margin-bottom:15px;">Update Notification Config</h4>
+                
+                <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Version Number</label>
+                <input type="text" id="devVersion" placeholder="e.g. 1.5" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px;">
+                
+                <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Custom Message</label>
+                <textarea id="devMessage" placeholder="What's new in this update?" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px; height: 80px; font-family: inherit; resize: none;"></textarea>
+                
+                <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 20px;">
+                    <label style="font-size: 0.85rem; font-weight: 700;">Show Notification</label>
+                    <label class="switch">
+                    <input type="checkbox" id="devStatus">
+                    <span class="slider round"></span>
+                    </label>
+                </div>
+                
+                <button class="btn btn-primary" onclick="saveUpdateConfig()">Save Config to DB</button>
+            </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 25px;">
-            <a href="https://www.facebook.com/NURtheBackBencher" target="_blank" class="social-link-original social-link-fb">
-                <i class="fab fa-facebook"></i>
-            </a>
-            <a href="https://wa.me/8801851956615" target="_blank" class="social-link-original social-link-wa">
-                <i class="fab fa-whatsapp"></i>
-            </a>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 25px;">
+                <a href="https://www.facebook.com/NURtheBackBencher" target="_blank" class="social-link-original social-link-fb">
+                    <i class="fab fa-facebook"></i>
+                </a>
+                <a href="https://wa.me/8801851956615" target="_blank" class="social-link-original social-link-wa">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+            </div>
         </div>
     </div>
 
@@ -972,6 +1020,7 @@
         if (typeof firebase !== 'undefined') {
             firebase.initializeApp(firebaseConfig);
             var db = firebase.database();
+            var auth = firebase.auth();
         } else {
             console.error("Firebase SDK not loaded");
         }
@@ -993,6 +1042,7 @@
         let activeColorTarget = null;
         let pdfMakerFiles = []; // Store selected files for PDF Maker
         let urlBlob = null; // Store blob for URL downloader
+        let currentUser = null; // Track auth user
 
         const views = {
             mainOptionsView: document.getElementById('mainOptionsView'),
@@ -2458,17 +2508,31 @@
             }
         }
 
-        // --- NEW SAVE FUNCTION (CHANGE 3) ---
+        // --- NEW SAVE FUNCTION WITH LOADING SCREEN & AUTH CHECK ---
         function saveApiKey() {
+            // Auth Check
+            if(!currentUser) {
+                showToast("Please Sign In First");
+                return;
+            }
+
             const key = document.getElementById('apiKeyInput').value.trim();
             if(typeof db === 'undefined') { showToast("Database Error"); return; }
             
+            // Show Loading Overlay
+            document.getElementById('settingsLoadingOverlay').style.display = 'flex';
+
             db.ref('config/githubToken').set(key)
             .then(() => {
                 showToast("API Key Saved! Reloading...");
-                setTimeout(() => location.reload(), 1000);
+                // Keep overlay, wait, then reload
+                setTimeout(() => location.reload(), 1500);
             })
-            .catch(e => showToast("Error: " + e.message));
+            .catch(e => {
+                // Hide Overlay on Error
+                document.getElementById('settingsLoadingOverlay').style.display = 'none';
+                showToast("Error: " + e.message);
+            });
         }
         
         function checkDevAccess() {
@@ -2481,7 +2545,61 @@
             }
         }
         
-        // --- Firebase Integration Logic ---
+        // --- Firebase Integration & Auth Logic ---
+
+        // Google Sign In
+        function googleSignIn() {
+            var provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).then((result) => {
+                showToast("Signed In Successfully");
+            }).catch((error) => {
+                showToast("Login Failed: " + error.message);
+            });
+        }
+
+        // Google Sign Out
+        function googleSignOut() {
+            if(confirm("Are you sure you want to sign out?")) {
+                auth.signOut().then(() => {
+                    showToast("Signed Out");
+                }).catch((error) => {
+                    showToast("Error: " + error.message);
+                });
+            }
+        }
+
+        // Auth State Monitor
+        if (typeof firebase !== 'undefined') {
+            auth.onAuthStateChanged((user) => {
+                const loginBtn = document.getElementById('headerLoginBtn');
+                const profileBtn = document.getElementById('headerUserProfile');
+                const userAvatar = document.getElementById('userAvatar');
+                const settingsContent = document.getElementById('settingsContentWrapper');
+                const loginPrompt = document.getElementById('loginPromptOverlay');
+
+                if (user) {
+                    // Signed In
+                    currentUser = user;
+                    loginBtn.style.display = 'none';
+                    profileBtn.style.display = 'block';
+                    userAvatar.src = user.photoURL;
+
+                    // Unblock Settings
+                    settingsContent.classList.remove('settings-content-blocked');
+                    loginPrompt.style.display = 'none';
+                } else {
+                    // Signed Out
+                    currentUser = null;
+                    loginBtn.style.display = 'block';
+                    profileBtn.style.display = 'none';
+                    userAvatar.src = '';
+
+                    // Block Settings
+                    settingsContent.classList.add('settings-content-blocked');
+                    loginPrompt.style.display = 'block';
+                }
+            });
+        }
         
         // Update Indicator Logic
         function updateApiIndicator(isActive) {
@@ -2529,7 +2647,14 @@
             });
         }
         
+        // UPDATE CONFIG SAVE WITH LOADING
         function saveUpdateConfig() {
+            // Auth Check
+            if(!currentUser) {
+                showToast("Please Sign In First");
+                return;
+            }
+
             const version = document.getElementById('devVersion').value;
             const message = document.getElementById('devMessage').value;
             const status = document.getElementById('devStatus').checked;
@@ -2540,6 +2665,9 @@
                 return;
             }
             
+            // Show Loading
+            document.getElementById('settingsLoadingOverlay').style.display = 'flex';
+
             const updatePayload = {
                 update: {
                     version: version,
@@ -2556,9 +2684,11 @@
             db.ref('config').update(updatePayload)
             .then(() => {
                 showToast("Config Saved! Reloading...");
-                setTimeout(() => location.reload(), 1000);
+                setTimeout(() => location.reload(), 1500);
             })
             .catch((error) => {
+                 // Hide Overlay on Error
+                document.getElementById('settingsLoadingOverlay').style.display = 'none';
                 showToast("Error: " + error.message);
             });
         }
@@ -2570,3 +2700,4 @@
     </script>
 </body>
 </html>
+```
