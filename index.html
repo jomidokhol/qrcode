@@ -19,10 +19,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
-    <!-- Firebase SDKs (Added Auth) -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- Firebase SDKs (UPDATED to v12 Modular via Module Script below) -->
+    <!-- Old script tags removed to prevent conflict -->
 
     <style>
         :root { --primary: #10b981; --bg: #ffffff; --card: #f8fafc; --text: #0f172a; --border: #e2e8f0; --shadow: rgba(0, 0, 0, 0.1); }
@@ -998,27 +996,6 @@
     </div>
 
     <script>
-        // Firebase Config
-        const firebaseConfig = {
-          apiKey: "AIzaSyAEBrWDMiEGuqQGvA4197ljLcvtQk_i43Y",
-          authDomain: "one-tool01.firebaseapp.com",
-          databaseURL: "https://one-tool01-default-rtdb.firebaseio.com",
-          projectId: "one-tool01",
-          storageBucket: "one-tool01.firebasestorage.app",
-          messagingSenderId: "546992530595",
-          appId: "1:546992530595:web:77bf6c3fe2438b3c980b16",
-          measurementId: "G-GMNCXBV0J1"
-        };
-        
-        // Initialize Firebase
-        if (typeof firebase !== 'undefined') {
-            firebase.initializeApp(firebaseConfig);
-            var db = firebase.database();
-            var auth = firebase.auth();
-        } else {
-            console.error("Firebase SDK not loaded");
-        }
-
         const GIT = {
             token: "", // Will be loaded from Database
             owner: "jomidokhol",
@@ -2501,33 +2478,6 @@
                 showToast("Clipboard Error");
             }
         }
-
-        // --- NEW SAVE FUNCTION WITH LOADING SCREEN & AUTH CHECK ---
-        function saveApiKey() {
-            // Auth Check
-            if(!currentUser) {
-                showToast("Please Sign In First");
-                return;
-            }
-
-            const key = document.getElementById('apiKeyInput').value.trim();
-            if(typeof db === 'undefined') { showToast("Database Error"); return; }
-            
-            // Show Loading Overlay
-            document.getElementById('settingsLoadingOverlay').style.display = 'flex';
-
-            db.ref('config/githubToken').set(key)
-            .then(() => {
-                showToast("API Key Saved! Reloading...");
-                // Keep overlay, wait, then reload
-                setTimeout(() => location.reload(), 1500);
-            })
-            .catch(e => {
-                // Hide Overlay on Error
-                document.getElementById('settingsLoadingOverlay').style.display = 'none';
-                showToast("Error: " + e.message);
-            });
-        }
         
         function checkDevAccess() {
             const userInput = prompt("Enter Passkey:");
@@ -2537,62 +2487,6 @@
             } else {
                 alert("Access Denied");
             }
-        }
-        
-        // --- Firebase Integration & Auth Logic ---
-
-        // Google Sign In
-        function googleSignIn() {
-            var provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).then((result) => {
-                showToast("Signed In Successfully");
-            }).catch((error) => {
-                showToast("Login Failed: " + error.message);
-            });
-        }
-
-        // Google Sign Out
-        function googleSignOut() {
-            if(confirm("Are you sure you want to sign out?")) {
-                auth.signOut().then(() => {
-                    showToast("Signed Out");
-                }).catch((error) => {
-                    showToast("Error: " + error.message);
-                });
-            }
-        }
-
-        // Auth State Monitor
-        if (typeof firebase !== 'undefined') {
-            auth.onAuthStateChanged((user) => {
-                const loginBtn = document.getElementById('headerLoginBtn');
-                const profileBtn = document.getElementById('headerUserProfile');
-                const userAvatar = document.getElementById('userAvatar');
-                const settingsContent = document.getElementById('settingsContentWrapper');
-                const loginPrompt = document.getElementById('loginPromptOverlay');
-
-                if (user) {
-                    // Signed In
-                    currentUser = user;
-                    loginBtn.style.display = 'none';
-                    profileBtn.style.display = 'block';
-                    userAvatar.src = user.photoURL;
-
-                    // Unblock Settings
-                    settingsContent.classList.remove('settings-content-blocked');
-                    loginPrompt.style.display = 'none';
-                } else {
-                    // Signed Out
-                    currentUser = null;
-                    loginBtn.style.display = 'block';
-                    profileBtn.style.display = 'none';
-                    userAvatar.src = '';
-
-                    // Block Settings
-                    settingsContent.classList.add('settings-content-blocked');
-                    loginPrompt.style.display = 'block';
-                }
-            });
         }
         
         // Update Indicator Logic
@@ -2609,88 +2503,183 @@
             }
         }
 
-        // Listen for Configuration from Database
-        if(typeof db !== 'undefined') {
-            db.ref('config').on('value', (snapshot) => {
-                const data = snapshot.val();
-                
-                if (data) {
-                    // Update Global API Token (CHANGE 3: ACCESS FROM DB)
-                    if(data.githubToken) {
-                        GIT.token = data.githubToken;
-                        // Auto-fill input in settings
-                        document.getElementById('apiKeyInput').value = data.githubToken;
-                        updateApiIndicator(true);
-                    } else {
-                        updateApiIndicator(false);
-                    }
-
-                    // Check for Updates
-                    if (data.update && data.update.show) {
-                        document.getElementById('updatePopup').style.display = 'flex';
-                        document.getElementById('updateMessage').innerText = data.update.message || "A new version is available.";
-                        if(data.update.version) {
-                            document.getElementById('updateTitle').innerHTML = `<i class="fas fa-rocket"></i> Update Available (v${data.update.version})`;
-                        }
-                    } else {
-                        document.getElementById('updatePopup').style.display = 'none';
-                    }
-                } else {
-                    updateApiIndicator(false);
-                }
-            });
-        }
-        
-        // UPDATE CONFIG SAVE WITH LOADING
-        function saveUpdateConfig() {
-            // Auth Check
-            if(!currentUser) {
-                showToast("Please Sign In First");
-                return;
-            }
-
-            const version = document.getElementById('devVersion').value;
-            const message = document.getElementById('devMessage').value;
-            const status = document.getElementById('devStatus').checked;
-            const newApiToken = document.getElementById('apiKeyInput').value.trim();
-            
-            if(typeof db === 'undefined') {
-                showToast("Database not connected!");
-                return;
-            }
-            
-            // Show Loading
-            document.getElementById('settingsLoadingOverlay').style.display = 'flex';
-
-            const updatePayload = {
-                update: {
-                    version: version,
-                    message: message,
-                    show: status
-                }
-            };
-            
-            // If user entered a key in settings input during dev mode, save it globally
-            if(newApiToken) {
-                updatePayload.githubToken = newApiToken;
-            }
-
-            db.ref('config').update(updatePayload)
-            .then(() => {
-                showToast("Config Saved! Reloading...");
-                setTimeout(() => location.reload(), 1500);
-            })
-            .catch((error) => {
-                 // Hide Overlay on Error
-                document.getElementById('settingsLoadingOverlay').style.display = 'none';
-                showToast("Error: " + error.message);
-            });
-        }
-
         updateLogoImage(); 
         updateLinkInputControls();
         linkQrColorBtn.style.backgroundColor = linkQrColor.value;
         linkQrBackgroundBtn.style.backgroundColor = linkQrBackground.value;
+    </script>
+
+    <!-- NEW MODULAR FIREBASE IMPLEMENTATION -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
+      import { getDatabase, ref, set, update, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+      import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAEBrWDMiEGuqQGvA4197ljLcvtQk_i43Y",
+        authDomain: "one-tool01.firebaseapp.com",
+        projectId: "one-tool01",
+        storageBucket: "one-tool01.firebasestorage.app",
+        messagingSenderId: "546992530595",
+        appId: "1:546992530595:web:77bf6c3fe2438b3c980b16",
+        measurementId: "G-GMNCXBV0J1"
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const db = getDatabase(app);
+      const auth = getAuth(app);
+
+      // EXPOSE FUNCTIONS TO WINDOW FOR GLOBAL ACCESS
+
+      window.googleSignIn = () => {
+          const provider = new GoogleAuthProvider();
+          signInWithPopup(auth, provider).then((result) => {
+              showToast("Signed In Successfully");
+          }).catch((error) => {
+              showToast("Login Failed: " + error.message);
+          });
+      };
+
+      window.googleSignOut = () => {
+          if(confirm("Are you sure you want to sign out?")) {
+              signOut(auth).then(() => {
+                  showToast("Signed Out");
+              }).catch((error) => {
+                  showToast("Error: " + error.message);
+              });
+          }
+      };
+
+      window.saveApiKey = () => {
+          // Auth Check
+          if(!currentUser) {
+              showToast("Please Sign In First");
+              return;
+          }
+
+          const key = document.getElementById('apiKeyInput').value.trim();
+          
+          // Show Loading Overlay
+          document.getElementById('settingsLoadingOverlay').style.display = 'flex';
+
+          // Use Modular Set
+          set(ref(db, 'config/githubToken'), key)
+          .then(() => {
+              showToast("API Key Saved! Reloading...");
+              // Keep overlay, wait, then reload
+              setTimeout(() => location.reload(), 1500);
+          })
+          .catch(e => {
+              // Hide Overlay on Error
+              document.getElementById('settingsLoadingOverlay').style.display = 'none';
+              showToast("Error: " + e.message);
+          });
+      };
+
+      window.saveUpdateConfig = () => {
+          // Auth Check
+          if(!currentUser) {
+              showToast("Please Sign In First");
+              return;
+          }
+
+          const version = document.getElementById('devVersion').value;
+          const message = document.getElementById('devMessage').value;
+          const status = document.getElementById('devStatus').checked;
+          const newApiToken = document.getElementById('apiKeyInput').value.trim();
+          
+          // Show Loading
+          document.getElementById('settingsLoadingOverlay').style.display = 'flex';
+
+          const updatePayload = {
+              update: {
+                  version: version,
+                  message: message,
+                  show: status
+              }
+          };
+          
+          // If user entered a key in settings input during dev mode, save it globally
+          if(newApiToken) {
+              updatePayload.githubToken = newApiToken;
+          }
+
+          update(ref(db, 'config'), updatePayload)
+          .then(() => {
+              showToast("Config Saved! Reloading...");
+              setTimeout(() => location.reload(), 1500);
+          })
+          .catch((error) => {
+               // Hide Overlay on Error
+              document.getElementById('settingsLoadingOverlay').style.display = 'none';
+              showToast("Error: " + error.message);
+          });
+      };
+
+      // AUTH LISTENER
+      onAuthStateChanged(auth, (user) => {
+          const loginBtn = document.getElementById('headerLoginBtn');
+          const profileBtn = document.getElementById('headerUserProfile');
+          const userAvatar = document.getElementById('userAvatar');
+          const settingsContent = document.getElementById('settingsContentWrapper');
+          const loginPrompt = document.getElementById('loginPromptOverlay');
+
+          if (user) {
+              // Signed In
+              currentUser = user; // Set global var
+              loginBtn.style.display = 'none';
+              profileBtn.style.display = 'block';
+              userAvatar.src = user.photoURL;
+
+              // Unblock Settings
+              settingsContent.classList.remove('settings-content-blocked');
+              loginPrompt.style.display = 'none';
+          } else {
+              // Signed Out
+              currentUser = null;
+              loginBtn.style.display = 'block';
+              profileBtn.style.display = 'none';
+              userAvatar.src = '';
+
+              // Block Settings
+              settingsContent.classList.add('settings-content-blocked');
+              loginPrompt.style.display = 'block';
+          }
+      });
+
+      // DATABASE LISTENER
+      onValue(ref(db, 'config'), (snapshot) => {
+          const data = snapshot.val();
+          
+          if (data) {
+              // Update Global API Token
+              if(data.githubToken) {
+                  GIT.token = data.githubToken; // Set global GIT object
+                  // Auto-fill input in settings
+                  const apiKeyInput = document.getElementById('apiKeyInput');
+                  if(apiKeyInput) apiKeyInput.value = data.githubToken;
+                  updateApiIndicator(true);
+              } else {
+                  updateApiIndicator(false);
+              }
+
+              // Check for Updates
+              if (data.update && data.update.show) {
+                  document.getElementById('updatePopup').style.display = 'flex';
+                  document.getElementById('updateMessage').innerText = data.update.message || "A new version is available.";
+                  if(data.update.version) {
+                      document.getElementById('updateTitle').innerHTML = `<i class="fas fa-rocket"></i> Update Available (v${data.update.version})`;
+                  }
+              } else {
+                  document.getElementById('updatePopup').style.display = 'none';
+              }
+          } else {
+              updateApiIndicator(false);
+          }
+      });
     </script>
 </body>
 </html>
