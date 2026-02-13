@@ -6,10 +6,8 @@
     <title>One Tool | QR & Tools Generator</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Font for Android Style Popup -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <!-- Google Fonts for Update Popup -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0,1" />
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     
@@ -46,9 +44,9 @@
             -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
         }
         
-        input, textarea, .link-url, .upload-box #uploadTitle, #linkUploadTitle, #extractorUploadTitle, 
+        input, .link-url, .upload-box #uploadTitle, #linkUploadTitle, #extractorUploadTitle, 
         #mp3UploadTitle, #pdfUploadTitle, #zipUploadTitle, #gifUploadTitle, footer p, #toast, .filename-input,
-        #urlDownloaderInput, #pdfMakerTitle, #devMessage, #updateDesc, .update-desc {
+        #urlDownloaderInput, #pdfMakerTitle, #devMessage, #devTitle, #devSize, #devLink {
             -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text;
         }
 
@@ -69,6 +67,7 @@
         .action-btn { background: var(--primary); color: white; font-size: 0.8rem; font-weight: 600; padding: 0 15px; width: auto; }
         .action-btn:hover { opacity: 0.9; }
 
+        /* API Status Indicator Styles */
         .api-status-bar {
             width: 100%; 
             background: var(--card);
@@ -231,6 +230,7 @@
         
         .bulk-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
 
+        /* Updated PDF Control Styles */
         .pdf-controls-right {
             position: absolute; top: 5px; right: 5px; 
             display: flex; gap: 5px; align-items: center; 
@@ -261,7 +261,7 @@
             background: var(--card); border: 1px solid var(--border);
             color: var(--text); display: flex; align-items: center; justify-content: center;
             cursor: pointer; box-shadow: 0 4px 12px var(--shadow); 
-            z-index: 3000 !important;
+            z-index: 3000 !important; /* Higher than update popup */
             transition: 0.3s; font-size: 1.2rem;
         }
         .settings-btn:hover { background: var(--border); transform: rotate(45deg); }
@@ -284,28 +284,36 @@
         #settingsModal {
             position: fixed; bottom: -100%; left: 0; width: 100%;
             background: var(--card); border-top-left-radius: 24px; border-top-right-radius: 24px;
-            padding: 25px; box-shadow: 0 -5px 20px var(--shadow); z-index: 3500;
+            padding: 25px; box-shadow: 0 -5px 20px var(--shadow); z-index: 3500; /* Higher than update popup */
             transition: 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); border-top: 1px solid var(--border);
+            /* To handle loading overlay correctly */
             overflow: hidden; 
         }
         #settingsModal.active { bottom: 0; }
         .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         
-        /* Updated API Key Input Style */
+        /* TASK 3: API KEY INPUT STYLES - Modified */
         .settings-input-group { position: relative; display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
         .api-input-wrapper { position: relative; flex-grow: 1; }
         .api-input-wrapper input { width: 100%; padding: 12px; padding-right: 40px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
-        .paste-btn-inner { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--primary); cursor: pointer; font-size: 1rem; }
-        .save-icon-btn { width: 45px; height: 45px; border-radius: 12px; background: var(--primary); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .paste-icon-btn { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: var(--primary); cursor: pointer; padding: 5px; }
+        .save-icon-btn { width: 45px; height: 45px; border-radius: 12px; background: var(--primary); color: white; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; flex-shrink: 0; }
         
         .social-link-original {
-            text-decoration: none; display: flex; justify-content: center; align-items: center; 
-            font-size: 2.2rem; transition: 0.3s; background: transparent; border: none;
+            text-decoration: none; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-size: 2.2rem; 
+            transition: 0.3s;
+            background: transparent;
+            border: none;
         }
         .social-link-original:hover { transform: scale(1.1); }
         .social-link-fb { color: #1877F2; }
         .social-link-wa { color: #25D366; }
 
+        /* PDF Maker Grid */
         .pdf-maker-item { position: relative; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
         .pdf-maker-item img { width: 100%; height: 100px; object-fit: cover; display: block; }
         .pdf-maker-remove {
@@ -316,6 +324,7 @@
             cursor: pointer; font-size: 0.6rem;
         }
 
+        /* Dev Tools Toggle */
         .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border); transition: .4s; }
@@ -325,54 +334,68 @@
         .slider.round { border-radius: 34px; }
         .slider.round:before { border-radius: 50%; }
 
-        /* Update Popup CSS - Android 15 Style */
+        /* TASK 2: UPDATE POPUP CSS (Adapted from update-popup.html) */
         .update-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% 30%, rgba(30, 144, 255, 0.08), rgba(0,0,0,0.85) 100%);
-            z-index: 2500; display: none; justify-content: center; align-items: center;
-            backdrop-filter: blur(5px); padding: 20px;
+            background: radial-gradient(circle at 50% 30%, rgba(30, 144, 255, 0.08), rgba(0,0,0,0.8) 70%); /* Adjusted backdrop */
+            z-index: 2500; 
+            display: none; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px);
         }
-
         .update-card {
-            max-width: 400px; width: 100%; background: rgba(30, 35, 42, 0.95);
-            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 36px;
+            max-width: 400px;
+            width: 90%;
+            background: rgba(30, 35, 42, 0.92);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 36px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
-            padding: 24px; color: #fff; text-align: left;
+            padding: 24px;
+            color: #fff;
+            transition: all 0.2s ease;
             animation: appear 0.35s cubic-bezier(0.2, 0.9, 0.4, 1);
+            text-align: left; /* Reset from original center */
         }
-        @keyframes appear { 0% { opacity: 0; transform: scale(0.92) translateY(8px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
-
+        @keyframes appear {
+            0% { opacity: 0; transform: scale(0.92) translateY(8px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
         .pop-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .brand { display: flex; align-items: center; gap: 12px; }
         .android-icon { display: flex; align-items: center; justify-content: center; background: rgba(52, 199, 123, 0.2); border-radius: 16px; padding: 6px; }
-        .android-icon .material-symbols-rounded { font-size: 32px; color: #34c759; }
+        .android-icon .material-symbols-rounded { font-size: 32px; color: #34c759; font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 40; }
         .title-section { display: flex; flex-direction: column; }
-        .app-name { font-weight: 600; font-size: 18px; color: #fff; line-height: 1.3; }
+        .app-name { font-weight: 600; font-size: 18px; letter-spacing: -0.2px; color: #fff; line-height: 1.3; }
         .build-tag { font-size: 13px; color: rgba(255, 255, 255, 0.55); font-weight: 500; display: flex; align-items: center; gap: 6px; }
         .build-tag span { background: rgba(255, 255, 255, 0.08); padding: 2px 8px; border-radius: 50px; font-size: 11px; font-weight: 600; color: rgba(255, 255, 255, 0.8); }
-
+        
         .update-content { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 8px 8px 16px; }
         .animation-badge { background: rgba(0, 102, 204, 0.2); border-radius: 50px; padding: 16px; margin-bottom: 20px; position: relative; display: flex; flex-direction: column; align-items: center; }
         .circle-glow { background: conic-gradient(from 180deg at 50% 50%, #34c759 0deg, #0a84ff 180deg, #34c759 360deg); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; animation: rotate 8s linear infinite; }
         .inner-icon { background: #1e1e24; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 16px rgba(0,0,0,0.4); }
-        .inner-icon .material-symbols-rounded { font-size: 48px; color: #a6ffb2; }
+        .inner-icon .material-symbols-rounded { font-size: 48px; color: #a6ffb2; font-variation-settings: 'FILL' 1, 'wght' 300; }
         @keyframes rotate { to { transform: rotate(360deg); } }
-
-        .update-card h2 { font-size: 24px; font-weight: 650; margin: 16px 0 8px; background: linear-gradient(180deg, #fff 70%, rgba(255,255,255,0.85)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .update-desc { font-size: 15px; line-height: 1.5; color: rgba(255, 255, 255, 0.75); max-width: 280px; margin: 0 auto; font-weight: 400; font-family: 'Inter', sans-serif; }
+        
+        .update-card h2 { font-size: 24px; font-weight: 650; letter-spacing: -0.5px; margin: 16px 0 8px; background: linear-gradient(180deg, #fff 70%, rgba(255,255,255,0.85)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center; }
+        .update-desc { font-size: 15px; line-height: 1.5; color: rgba(255, 255, 255, 0.75); max-width: 280px; margin: 0 auto; font-weight: 400; }
         
         .chip-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 24px 0 16px; }
         .chip { background: rgba(118, 118, 128, 0.2); backdrop-filter: blur(10px); padding: 6px 16px; border-radius: 50px; font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; color: rgba(255, 255, 255, 0.9); border: 0.5px solid rgba(255, 255, 255, 0.08); }
-        .chip .material-symbols-rounded { font-size: 18px; }
-
+        .chip .material-symbols-rounded { font-size: 18px; font-variation-settings: 'FILL' 0, 'wght' 400; }
+        
         .update-size { display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 14px; background: rgba(0, 0, 0, 0.3); border-radius: 50px; padding: 10px 24px; margin: 8px 0 28px; border: 0.3px solid rgba(255, 255, 255, 0.06); color: rgba(255,255,255,0.8); font-weight: 500; width: fit-content; align-self: center; }
         .update-size .material-symbols-rounded { font-size: 20px; color: #64b5f6; }
-
-        .popup-actions { display: flex; gap: 12px; margin-top: 8px; width: 100%; }
-        .popup-btn { flex: 1; padding: 14px 0; border-radius: 40px; border: none; font-weight: 600; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; background: #0a84ff; box-shadow: 0 6px 18px rgba(10, 132, 255, 0.35); color: white; cursor: pointer; transition: 0.15s ease; font-family: 'Inter', sans-serif; }
-        .popup-btn:active { transform: scale(0.98); }
-        .footnote { display: flex; justify-content: center; margin-top: 18px; color: rgba(235, 235, 245, 0.5); font-size: 12px; font-weight: 450; gap: 8px; align-items: center; font-family: 'Inter', sans-serif; }
+        
+        .up-actions { display: flex; gap: 12px; margin-top: 8px; width: 100%; }
+        .up-btn { flex: 1; padding: 14px 0; border-radius: 40px; border: none; font-weight: 600; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); color: white; border: 0.5px solid rgba(255, 255, 255, 0.08); transition: 0.15s ease; cursor: pointer; }
+        .up-btn-primary { background: #0a84ff; border: none; box-shadow: 0 6px 18px rgba(10, 132, 255, 0.35); color: white; font-weight: 650; }
+        .up-btn-primary .material-symbols-rounded { font-variation-settings: 'FILL' 1, 'wght' 400; }
+        .up-btn .material-symbols-rounded { font-size: 20px; }
+        
+        .footnote { display: flex; justify-content: center; margin-top: 18px; color: rgba(235, 235, 245, 0.5); font-size: 12px; font-weight: 450; gap: 8px; align-items: center; }
+        .footnote .material-symbols-rounded { font-size: 14px; }
+        .update-card hr { border: none; border-top: 0.33px solid rgba(255, 255, 255, 0.1); margin: 20px 0 10px; }
 
         /* Loading Overlay for Settings */
         .settings-loading-overlay {
@@ -388,10 +411,11 @@
         /* Auth Blocking and Header Styles */
         .settings-content-blocked { opacity: 0.4; pointer-events: none; filter: blur(2px); transition: 0.3s; }
         
-        /* Fixed Login Prompt Style - Now outside blurred area */
+        /* TASK 1: Moved Login Overlay z-index/position handled in HTML structure now, keeping style */
         .login-prompt-overlay {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             z-index: 3600; text-align: center; width: 100%; display: none;
+            /* Ensure it catches clicks even if parent has pointer-events: none? No, it's outside parent now. */
         }
         
         .user-profile-btn { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; border: 2px solid var(--primary); cursor: pointer; display: none; }
@@ -403,9 +427,10 @@
 </head>
 <body>
 
-    <!-- Android 15 Style Update Popup -->
+    <!-- TASK 2: UPDATED POPUP HTML -->
     <div id="updatePopup" class="update-overlay">
         <div class="update-card">
+            <!-- header: Android branding + version -->
             <div class="pop-header">
                 <div class="brand">
                     <div class="android-icon">
@@ -414,13 +439,15 @@
                     <div class="title-section">
                         <span class="app-name">System Update</span>
                         <div class="build-tag">
-                            <span id="updateVersionDisplay">v1.0</span>
-                            <span style="background: rgba(52,199,123,0.15); color: #90e0a0;">LATEST</span>
+                            <span id="upVersion">v1.0</span>
+                            <span style="background: rgba(52,199,123,0.15); color: #90e0a0;">Latest</span>
                         </div>
                     </div>
                 </div>
+                <!-- No Close Button as per previous behavior (non-dismissible) -->
             </div>
-
+    
+            <!-- main body: animated icon, headline, details -->
             <div class="update-content">
                 <div class="animation-badge">
                     <div class="circle-glow">
@@ -429,36 +456,39 @@
                         </div>
                     </div>
                 </div>
-                <h2 id="updateTitleDisplay">Update ready</h2>
-                <div class="update-desc" id="updateMessage">
+                <h2 id="upTitle">Update ready</h2>
+                <div class="update-desc" id="upDesc">
                     New features and improvements are available.
                 </div>
                 
+                <!-- feature chips -->
                 <div class="chip-row">
                     <div class="chip">
-                        <span class="material-symbols-rounded">security</span> Secure
+                        <span class="material-symbols-rounded">security</span> Security
                     </div>
                     <div class="chip">
-                        <span class="material-symbols-rounded">rocket_launch</span> Faster
+                        <span class="material-symbols-rounded">rocket_launch</span> Performance
                     </div>
                     <div class="chip">
                         <span class="material-symbols-rounded">bug_report</span> Fixes
                     </div>
                 </div>
-
+    
+                <!-- size & install info -->
                 <div class="update-size">
                     <span class="material-symbols-rounded">database</span>
-                    <span id="updateSizeDisplay">-- MB</span>
+                    <span id="upSize">0 MB</span>
                 </div>
             </div>
-
-            <div class="popup-actions">
-                <button class="popup-btn" id="updateDownloadBtn">
+    
+            <!-- dual actions -->
+            <div class="up-actions">
+                <button class="up-btn up-btn-primary" id="upBtn">
                     <span class="material-symbols-rounded">system_update</span> Update now
                 </button>
             </div>
-
-            <hr style="border: none; border-top: 0.33px solid rgba(255, 255, 255, 0.1); margin: 20px 0 10px;">
+    
+            <hr>
             <div class="footnote">
                 <span class="material-symbols-rounded">verified</span>
                 <span>Developed by NUR</span>
@@ -481,6 +511,7 @@
         </div>
     </header>
 
+    <!-- API Status Indicator Moved Here -->
     <div class="api-status-bar">
         <span id="apiStatusText">API Inactive</span>
         <div id="apiStatusDot" class="status-dot"></div>
@@ -579,8 +610,7 @@
                     <button class="btn" style="background: transparent; border: 1px solid var(--border); color: var(--text); margin-top: 20px; font-weight: 600;">How to use tools?</button>
                 </div>
 
-                <!-- (Other Views Remain Unchanged) -->
-                <!-- Skipped internal views code for brevity as requested, only changed specific areas -->
+                <!-- ... [Other Views remain unchanged] ... -->
                 <div id="linkToQrView">
                     <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
                     <h3 style="margin-bottom: 15px;">Link to QR Generator</h3>
@@ -772,6 +802,7 @@
                     </div>
                 </div>
 
+                <!-- URL to Download View -->
                 <div id="urlDownloaderView">
                     <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
                     <h3 style="margin-bottom: 15px;">Url to Download</h3>
@@ -806,6 +837,7 @@
                     </div>
                 </div>
 
+                <!-- PDF Maker View -->
                 <div id="pdfMakerView">
                     <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
                     <h3 style="margin-bottom: 15px;">PDF Maker</h3>
@@ -1032,21 +1064,21 @@
             <button class="icon-back-btn" style="margin: 0; width: 35px; height: 35px;" onclick="toggleSettings()"><i class="fas fa-times"></i></button>
         </div>
         
-        <!-- Change 1: Move Login Prompt Outside the blurred wrapper -->
+        <!-- TASK 1: Moved loginPromptOverlay OUTSIDE the content wrapper -->
         <div id="loginPromptOverlay" class="login-prompt-overlay">
             <i class="fas fa-lock" style="font-size: 2rem; color: var(--text); opacity: 0.5; margin-bottom: 10px;"></i>
             <p style="font-size: 0.9rem; font-weight: 700; margin-bottom: 15px;">Sign in required to change settings</p>
             <button class="btn btn-primary" onclick="googleSignIn()" style="width: auto; display: inline-flex; padding: 10px 20px;">Sign In with Google</button>
         </div>
-        
+
         <div id="settingsContentWrapper">
             <label style="font-size: 0.85rem; font-weight: 700; display: block; margin-bottom: 8px;">Set API Key</label>
             
-            <!-- Change 3: API Key Input with Paste Button Inside and Save Icon -->
+            <!-- TASK 3: API INPUT MODIFIED -->
             <div class="settings-input-group">
                 <div class="api-input-wrapper">
                     <input type="text" id="apiKeyInput" placeholder="Enter API Key">
-                    <button class="paste-btn-inner" onclick="pasteApiKey()"><i class="fas fa-paste"></i></button>
+                    <button class="paste-icon-btn" onclick="pasteApiKey()"><i class="fas fa-paste"></i></button>
                 </div>
                 <button class="save-icon-btn" onclick="saveApiKey()"><i class="fas fa-save"></i></button>
             </div>
@@ -1061,24 +1093,22 @@
             <div id="devToolsPanel" style="display:none; margin-top:20px; border-top:1px solid var(--border); padding-top:15px;">
                 <h4 style="margin-bottom:15px;">Update Notification Config</h4>
                 
-                <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Update Title</label>
-                <input type="text" id="devTitle" placeholder="e.g. Update ready" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 10px;">
-
                 <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Version Number</label>
-                <input type="text" id="devVersion" placeholder="e.g. 1.5" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 10px;">
+                <input type="text" id="devVersion" placeholder="e.g. 1.5" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px;">
                 
-                <!-- Change 2: Description Box (Textarea) -->
-                <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Update Description</label>
-                <textarea id="devMessage" placeholder="What's new in this update?" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 10px; height: 80px; font-family: inherit; resize: none;"></textarea>
-                
-                <!-- Change 2: Package Size Input -->
-                <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Package Size</label>
-                <input type="text" id="devSize" placeholder="e.g. 45 MB" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 10px;">
+                <!-- TASK 2: NEW FIELDS ADDED -->
+                <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Update Title</label>
+                <input type="text" id="devTitle" placeholder="e.g. Update ready" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px;">
 
-                <!-- Change 2: Download Link Input -->
+                <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Update Message</label>
+                <textarea id="devMessage" placeholder="What's new in this update?" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px; height: 80px; font-family: inherit; resize: none;"></textarea>
+                
+                <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Package Size</label>
+                <input type="text" id="devSize" placeholder="e.g. 45 MB" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px;">
+
                 <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Download Link</label>
                 <input type="text" id="devLink" placeholder="https://..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px;">
-                
+
                 <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 20px;">
                     <label style="font-size: 0.85rem; font-weight: 700;">Show Notification</label>
                     <label class="switch">
@@ -1132,17 +1162,15 @@
         
         const PASSKEY = "X9#mP2$kL5@nQ8!wR3%vS7^bT4&jU6*cH1(dG0)fE9-aB8=zD7+gW5[hO4]iN2?kL";
 
-        // ... (Variables and Standard Functions remain unchanged) ...
         let currentView = 'mainOptionsView';
         let currentUrl = "";
         let selectedFile = null;
         let uploadedLinkFormats = null; 
         let activeColorTarget = null;
-        let pdfMakerFiles = []; 
-        let urlBlob = null; 
-        let currentUser = null; 
+        let pdfMakerFiles = []; // Store selected files for PDF Maker
+        let urlBlob = null; // Store blob for URL downloader
+        let currentUser = null; // Track auth user
 
-        // ... (Views Object and Elements selection remain unchanged) ...
         const views = {
             mainOptionsView: document.getElementById('mainOptionsView'),
             linkToQrView: document.getElementById('linkToQrView'),
@@ -1157,7 +1185,6 @@
             pdfMakerView: document.getElementById('pdfMakerView')
         };
         
-        // ... (Element References remain unchanged) ...
         const fileInput = document.getElementById('fileInput');
         const dropZone = document.getElementById('dropZone');
         const uploadBtn = document.getElementById('uploadBtn');
@@ -1265,6 +1292,7 @@
         const gifFilename = document.getElementById('gifFilename');
         let gifSelectedFile = null;
 
+        // URL Downloader Elements
         const urlDownloaderInput = document.getElementById('urlDownloaderInput');
         const pasteUrlBtn = document.getElementById('pasteUrlBtn');
         const checkUrlBtn = document.getElementById('checkUrlBtn');
@@ -1278,6 +1306,7 @@
         const urlDownloadProgressFill = document.getElementById('urlDownloadProgressFill');
         const urlDownloadPercentLabel = document.getElementById('urlDownloadPercentLabel');
 
+        // PDF Maker Elements
         const pdfMakerInput = document.getElementById('pdfMakerInput');
         const pdfMakerDropZone = document.getElementById('pdfMakerDropZone');
         const pdfMakerPreviewGrid = document.getElementById('pdfMakerPreviewGrid');
@@ -1292,7 +1321,7 @@
 
         const CODE_EXTENSIONS = ['html', 'css', 'js', 'java', 'py', 'python', 'sql', 'pdf', 'xml', 'txt', 'kordova', 'json', 'yml', 'md'];
         
-        // ... (Utility functions remain unchanged) ...
+        // Helper function for forced download (fixes APK freezing issues by using Data URLs)
         function forceDownload(blobOrUrl, filename, isBlob = true) {
             const a = document.createElement('a');
             a.style.display = 'none';
@@ -1359,9 +1388,7 @@
             showToast("URL Copied!");
         }
 
-        // ... (Reset View Function - Skipped large block as no changes requested in logic here) ...
         function resetUploadView(viewId) {
-             // Standard reset logic from original file
             document.getElementById('linkOptionsDropdown').style.display = 'none';
             document.getElementById('selectedLinkFormatText').innerText = 'Viewer\'s Link';
 
@@ -1491,9 +1518,9 @@
             }
         }
 
-        // ... (File Preview, SetView, etc logic remains unchanged) ...
         function setFilePreview(file, titleEl, iconEl, imgEl, fileIconEl, fileExtEl, removeBtn) {
             const fileSizeMB = file.size / (1024 * 1024);
+            
             if (fileSizeMB > 20) {
                 const fileSizeDisplay = fileSizeMB.toFixed(2) + ' MB';
                 titleEl.innerHTML = `<b>${file.name}</b><br><span style="color: red;">Size (${fileSizeDisplay}) exceeds 20 MB limit.</span>`;
@@ -1503,6 +1530,7 @@
                 if(removeBtn) removeBtn.style.display = 'none';
                 return false; 
             }
+            
             let displaySize;
             if (fileSizeMB < 0.01) {
                 const fileSizeKB = (file.size / 1024).toFixed(2);
@@ -1510,8 +1538,10 @@
             } else {
                 displaySize = `${fileSizeMB.toFixed(2)} MB`;
             }
+
             const name = file.name;
             let displayName = name;
+            
             if (name.length > 20) {
                 const extIndex = name.lastIndexOf('.');
                 if (extIndex > 0) {
@@ -1528,12 +1558,16 @@
             } else {
                 displayName = name;
             }
+            
             titleEl.innerHTML = `<b>${displayName}</b><br>Size: ${displaySize}`; 
+
             const ext = name.split('.').pop().toLowerCase();
+
             if(iconEl) iconEl.style.display = 'none';
             if(imgEl) imgEl.style.display = 'none';
             if(fileIconEl) fileIconEl.style.display = 'none';
             if(removeBtn) removeBtn.style.display = 'block';
+
             if (CODE_EXTENSIONS.includes(ext) || ext === 'zip' || ext === 'mp4') {
                 if(fileIconEl) {
                     fileIconEl.style.display = 'flex';
@@ -1580,18 +1614,20 @@
             updateLogoImage(); 
         };
 
-        // ... (Color Picker functions remain unchanged) ...
         function toggleColorPicker(buttonId, targetInputId, otherButtonId) {
             const button = document.getElementById(buttonId);
             const otherButton = document.getElementById(otherButtonId);
+            
             if (customColorPicker.style.display === 'block' && activeColorTarget === targetInputId) {
                 customColorPicker.style.display = 'none';
                 activeColorTarget = null;
                 return;
             }
+
             activeColorTarget = targetInputId;
             const rect = button.getBoundingClientRect();
             const containerRect = document.querySelector('.main-card').getBoundingClientRect();
+            
             customColorPicker.style.top = (rect.bottom - containerRect.top + 5) + 'px';
             customColorPicker.style.left = (rect.left - containerRect.left) + 'px';
             hexInput.value = document.getElementById(targetInputId).value;
@@ -1639,19 +1675,21 @@
             clearLinkInputBtn.style.display = linkInput.value.trim() ? 'block' : 'none';
         }
 
-        // ... (QR Generation, URL Downloader, PDF Maker, MP3 Logic - No changes requested, logic kept same) ...
         function generateLinkQr() {
             const text = linkInput.value.trim();
             const size = linkQrSize.value;
             const darkColor = linkQrColor.value;
             const lightColor = linkQrBackground.value; 
+
             updateLinkInputControls();
+
             if (!text) {
                 linkQrcodeDiv.innerHTML = '';
                 linkQrcodeDiv.parentElement.style.opacity = 0.3; 
                 if (linkQrCodeSizeDisplay) linkQrCodeSizeDisplay.innerText = `${size}px | Size: N/A`;
                 return;
             }
+
             linkQrcodeDiv.parentElement.style.opacity = 1;
             linkQrcodeDiv.innerHTML = '';
             QRCode.toCanvas(text, {
@@ -1687,45 +1725,60 @@
             }
         };
 
-        // --- URL DOWNLOADER LOGIC ---
+        // --- URL DOWNLOADER LOGIC (Updated with Axios) ---
         pasteUrlBtn.onclick = async () => {
             try { urlDownloaderInput.value = await navigator.clipboard.readText(); showToast("Pasted!"); } catch (err) { showToast("Clipboard Error"); }
         };
+
         checkUrlBtn.onclick = () => {
             const url = urlDownloaderInput.value.trim();
             if(!url) { showToast("Please enter a URL"); return; }
+            
             checkUrlBtn.disabled = true;
             checkUrlBtn.innerText = "Analyzing...";
             urlPreviewArea.style.display = 'none';
+            
+            // Using Axios to check file info
             axios.get(url, { responseType: 'blob' })
             .then(response => {
                 checkUrlBtn.disabled = false;
                 checkUrlBtn.innerText = "Check & Preview";
+                
                 urlBlob = response.data;
                 const contentType = response.headers['content-type'] || "";
                 const contentLen = response.headers['content-length'] || urlBlob.size;
+                
+                // Guess extension
                 let ext = "";
                 const mimeMap = {
                     'image/jpeg': '.jpg', 'image/png': '.png', 'image/gif': '.gif', 'image/webp': '.webp',
                     'video/mp4': '.mp4', 'video/webm': '.webm', 'application/pdf': '.pdf',
                     'application/zip': '.zip', 'audio/mpeg': '.mp3'
                 };
+                
                 if(mimeMap[contentType]) ext = mimeMap[contentType];
                 else {
                     const urlParts = url.split('/');
                     const lastPart = urlParts[urlParts.length-1].split('?')[0];
                     if(lastPart.includes('.')) ext = '.' + lastPart.split('.').pop();
                 }
+                
+                // Filename
                 const urlParts = url.split('/');
                 let suggestedName = urlParts[urlParts.length-1].split('?')[0] || "download";
                 if(suggestedName.includes('.')) suggestedName = suggestedName.split('.').slice(0,-1).join('.');
+                
                 urlFilename.value = suggestedName;
                 urlFileExt.innerText = ext;
+                
                 const sizeMB = (contentLen / (1024*1024)).toFixed(2);
                 urlFileInfo.innerHTML = `Type: ${contentType}<br>Size: ${sizeMB} MB`;
+                
                 urlPreviewArea.style.display = 'block';
                 urlPreviewContent.innerHTML = '';
+                
                 const blobUrl = URL.createObjectURL(urlBlob);
+                
                 if(contentType.startsWith('image/')) {
                     const img = document.createElement('img');
                     img.src = blobUrl;
@@ -1754,6 +1807,7 @@
                      urlPreviewArea.style.display = 'block';
                      urlPreviewContent.innerHTML = `<i class="fas fa-ban" style="font-size:3rem; color:red;"></i>`;
                      urlDownloadProgressContainer.style.display = 'none';
+                     // Setup fallback
                      urlBlob = null;
                      urlFilename.value = "file";
                      urlFileExt.innerText = "";
@@ -1762,12 +1816,15 @@
                 }
             });
         };
+
         downloadUrlBtn.onclick = () => {
             if(urlBlob) {
+                // Download from cached blob
                 const fname = (urlFilename.value.trim() || 'download') + urlFileExt.innerText;
                 forceDownload(urlBlob, fname, true);
                 showToast("Download Started");
             } else {
+                // Fallback for CORS restricted
                 const url = urlDownloaderInput.value.trim();
                 if(url) {
                     window.open(url, '_blank');
@@ -1787,8 +1844,9 @@
                 });
                 renderPdfMakerPreview();
             }
-            pdfMakerInput.value = '';
+            pdfMakerInput.value = ''; // Reset to allow adding same files again if needed
         };
+
         function renderPdfMakerPreview() {
             pdfMakerPreviewGrid.innerHTML = '';
             if(pdfMakerFiles.length > 0) {
@@ -1810,10 +1868,12 @@
                 pdfMakerControls.style.display = 'none';
             }
         }
+
         function removePdfMakerFile(index) {
             pdfMakerFiles.splice(index, 1);
             renderPdfMakerPreview();
         }
+
         generatePdfBtn.onclick = async () => {
             if(pdfMakerFiles.length === 0) return;
             generatePdfBtn.disabled = true;
@@ -1821,31 +1881,39 @@
             pdfMakerProgressContainer.style.display = 'block';
             pdfMakerProgressFill.style.width = '0%';
             pdfMakerPercentLabel.innerText = '0%';
+
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
+            
             for(let i=0; i<pdfMakerFiles.length; i++) {
                 if(i > 0) doc.addPage();
+                
+                // Load image to get dimensions
                 const imgData = await new Promise((resolve) => {
                     const reader = new FileReader();
                     reader.onload = (e) => resolve(e.target.result);
                     reader.readAsDataURL(pdfMakerFiles[i]);
                 });
+                
                 const imgProps = doc.getImageProperties(imgData);
                 const pdfWidth = doc.internal.pageSize.getWidth();
                 const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                
                 doc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+                
                 const pct = Math.round(((i+1)/pdfMakerFiles.length)*100);
                 pdfMakerProgressFill.style.width = pct + "%";
                 pdfMakerPercentLabel.innerText = pct + "%";
             }
+            
             const fname = (pdfMakerFilename.value.trim() || 'document') + '.pdf';
             doc.save(fname);
+            
             generatePdfBtn.disabled = false;
             generatePdfBtn.innerText = "Generate & Download PDF";
             showToast("PDF Generated!");
         };
 
-        // --- MP3 CONVERTER LOGIC ---
         mp3DropZone.onclick = () => mp3FileInput.click();
         mp3FileInput.onchange = (e) => {
             mp3SelectedFile = e.target.files[0];
@@ -1855,9 +1923,11 @@
                     titleEl.innerHTML = `File too large (>50MB).`;
                     return;
                 }
+                
                 setFilePreview(mp3SelectedFile, titleEl, uploadIconMp3, null, fileIconMp3, fileIconMp3.querySelector('.file-ext'), document.getElementById('removeFileMp3Btn'));
                 convertMp3Btn.disabled = false;
                 mp3Filename.value = mp3SelectedFile.name.replace(/\.[^/.]+$/, "");
+
                 const videoURL = URL.createObjectURL(mp3SelectedFile);
                 const videoEl = document.getElementById('sourceVideo');
                 videoEl.src = videoURL;
@@ -1865,53 +1935,64 @@
             }
         };
         document.getElementById('removeFileMp3Btn').onclick = (e) => { e.stopPropagation(); resetUploadView('mp4ToMp3View'); };
+
         convertMp3Btn.onclick = async () => {
             convertMp3Btn.disabled = true;
             convertMp3Btn.innerText = "Converting... (This happens locally)";
             mp3ProgressContainer.style.display = 'block';
             mp3ProgressFill.style.width = '0%';
             mp3PercentLabel.innerText = '0%';
+            
             try {
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const arrayBuffer = await mp3SelectedFile.arrayBuffer();
                 const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                
                 const bitrate = parseInt(document.getElementById('mp3Bitrate').value);
                 const mp3Encoder = new lamejs.Mp3Encoder(1, audioBuffer.sampleRate, bitrate);
                 const samples = audioBuffer.getChannelData(0); 
                 const sampleBlockSize = 1152;
                 const mp3Data = [];
+                
                 const samplesInt16 = new Int16Array(samples.length);
                 for (let i = 0; i < samples.length; i++) {
                     samplesInt16[i] = samples[i] < 0 ? samples[i] * 0x8000 : samples[i] * 0x7FFF;
                 }
+                
                 let i = 0;
                 function encodeChunk() {
                     if (i < samplesInt16.length) {
-                        const end = Math.min(i + sampleBlockSize * 50, samplesInt16.length); 
+                        const end = Math.min(i + sampleBlockSize * 50, samplesInt16.length); // Process 50 blocks at a time
                         const sampleChunk = samplesInt16.subarray(i, end);
                         const mp3buf = mp3Encoder.encodeBuffer(sampleChunk);
                         if (mp3buf.length > 0) mp3Data.push(mp3buf);
+                        
                         i = end;
                         const percent = Math.round((i / samplesInt16.length) * 100);
                         mp3ProgressFill.style.width = percent + "%";
                         mp3PercentLabel.innerText = percent + "%";
+                        
                         requestAnimationFrame(encodeChunk);
                     } else {
                         const mp3buf = mp3Encoder.flush();
                         if (mp3buf.length > 0) mp3Data.push(mp3buf);
+                        
                         const blob = new Blob(mp3Data, { type: 'audio/mp3' });
                         const url = URL.createObjectURL(blob);
+                        
                         resultAudio.src = url;
                         downloadMp3Btn.onclick = () => {
                             const fname = mp3Filename.value.trim() || 'audio';
                             forceDownload(blob, `${fname}.mp3`, true);
                         };
+                        
                         document.getElementById('mp3UploaderView').style.display = 'none';
                         mp3ResultArea.style.display = 'block';
                         convertMp3Btn.innerText = "Convert to MP3";
                     }
                 }
                 encodeChunk();
+
             } catch (error) {
                 showToast("Conversion Failed: " + error.message);
                 convertMp3Btn.disabled = false;
@@ -1919,18 +2000,19 @@
             }
         };
 
-        // ... (PDF Extractor logic) ...
         function togglePdfSelection(wrapper) {
             const checkbox = wrapper.querySelector('.pdf-select-check');
             checkbox.checked = !checkbox.checked;
             if(checkbox.checked) wrapper.classList.add('selected');
             else wrapper.classList.remove('selected');
         }
+
         function downloadSinglePdfPage(idx, event) {
             event.stopPropagation();
             const img = document.querySelector(`.pdf-grid-item:nth-child(${idx}) img`);
             forceDownload(img.src, `page-${idx}.jpg`, false);
         }
+
         pdfDropZone.onclick = () => pdfFileInput.click();
         pdfFileInput.onchange = (e) => {
             pdfSelectedFile = e.target.files[0];
@@ -1940,19 +2022,24 @@
             }
         };
         document.getElementById('removeFilePdfBtn').onclick = (e) => { e.stopPropagation(); resetUploadView('pdfExtractorView'); };
+
         extractPdfBtn.onclick = async () => {
             extractPdfBtn.disabled = true;
             extractPdfBtn.innerText = "Extracting Images...";
             pdfProgressContainer.style.display = 'block';
             pdfProgressFill.style.width = '0%';
             pdfPercentLabel.innerText = '0%';
+            
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
             try {
                 const arrayBuffer = await pdfSelectedFile.arrayBuffer();
                 const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                
                 const scale = parseFloat(document.getElementById('pdfQuality').value);
                 document.getElementById('pdfPageCount').innerText = `Total Pages: ${pdf.numPages}`;
                 pdfPagesGrid.innerHTML = '';
+                
                 for(let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
                     const viewport = page.getViewport({ scale: scale });
@@ -1960,7 +2047,9 @@
                     const context = canvas.getContext('2d');
                     canvas.height = viewport.height;
                     canvas.width = viewport.width;
+
                     await page.render({ canvasContext: context, viewport: viewport }).promise;
+                    
                     const imgUrl = canvas.toDataURL('image/jpeg');
                     const wrapper = document.createElement('div');
                     wrapper.className = 'pdf-grid-item selected';
@@ -1974,10 +2063,12 @@
                         </div>
                     `;
                     pdfPagesGrid.appendChild(wrapper);
+                    
                     const percent = Math.round((i / pdf.numPages) * 100);
                     pdfProgressFill.style.width = percent + "%";
                     pdfPercentLabel.innerText = percent + "%";
                 }
+
                 document.getElementById('pdfUploaderView').style.display = 'none';
                 pdfResultArea.style.display = 'block';
                 extractPdfBtn.innerText = "Extract Images";
@@ -1987,22 +2078,28 @@
                 extractPdfBtn.innerText = "Extract Images";
             }
         };
+
         selectAllPdfBtn.onclick = () => {
             const wrappers = document.querySelectorAll('.pdf-grid-item');
             let allSelected = true;
             wrappers.forEach(w => { if(!w.querySelector('input').checked) allSelected = false; });
+            
             wrappers.forEach(w => {
                 const cb = w.querySelector('input');
                 if(allSelected) { cb.checked = false; w.classList.remove('selected'); }
                 else { cb.checked = true; w.classList.add('selected'); }
             });
         };
+
         downloadSelectedPdfBtn.onclick = async () => {
             const checkboxes = document.querySelectorAll('.pdf-select-check:checked');
             if(checkboxes.length === 0) { showToast("Select at least one page."); return; }
+            
             alert("Images will be downloaded as a ZIP file.");
+
             const zip = new JSZip();
             const folder = zip.folder("extracted_images");
+            
             for(let i = 0; i < checkboxes.length; i++) {
                 const cb = checkboxes[i];
                 const idx = parseInt(cb.getAttribute('data-page')) - 1;
@@ -2010,11 +2107,11 @@
                 const base64Data = src.split(',')[1];
                 folder.file(`page-${idx+1}.jpg`, base64Data, {base64: true});
             }
+
             const content = await zip.generateAsync({type:"blob"});
             forceDownload(content, "extracted_images.zip", true);
         };
 
-        // ... (ZIP Extractor logic) ...
         zipDropZone.onclick = () => zipFileInput.click();
         zipFileInput.onchange = (e) => {
             zipSelectedFile = e.target.files[0];
@@ -2024,22 +2121,27 @@
             }
         };
         document.getElementById('removeFileZipBtn').onclick = (e) => { e.stopPropagation(); resetUploadView('zipExtractorView'); };
+
         extractZipBtn.onclick = async () => {
             extractZipBtn.disabled = true;
             extractZipBtn.innerText = "Extracting...";
             zipProgressContainer.style.display = 'block';
             zipProgressFill.style.width = '0%';
             zipPercentLabel.innerText = '0%';
+            
             try {
                 const zip = new JSZip();
                 const contents = await zip.loadAsync(zipSelectedFile);
                 zipExtractedContent = contents;
                 zipFileList.innerHTML = '';
+                
                 const fileNames = Object.keys(contents.files);
                 const totalFiles = fileNames.length;
                 let processed = 0;
+
                 zipProgressFill.style.width = '50%';
                 zipPercentLabel.innerText = '50%';
+
                 fileNames.forEach(filename => {
                     if(!contents.files[filename].dir) {
                         const fileItem = document.createElement('div');
@@ -2048,16 +2150,20 @@
                             <span class="fname" title="${filename}"><i class="fas fa-file"></i> ${filename}</span>
                             <button class="btn-action" style="padding: 5px 10px; font-size: 0.7rem;">Download</button>
                         `;
+                        
                         fileItem.querySelector('button').onclick = async () => {
                             const blob = await contents.files[filename].async("blob");
                             forceDownload(blob, filename.split('/').pop(), true);
                         };
+                        
                         zipFileList.appendChild(fileItem);
                     }
                     processed++;
                 });
+                
                 zipProgressFill.style.width = '100%';
                 zipPercentLabel.innerText = '100%';
+
                 document.getElementById('zipUploaderView').style.display = 'none';
                 zipResultArea.style.display = 'block';
                 extractZipBtn.innerText = "Extract Files";
@@ -2068,26 +2174,29 @@
             }
         };
 
-        // ... (GIF logic) ...
         gifDropZone.onclick = () => gifFileInput.click();
         gifFileInput.onchange = (e) => {
             gifSelectedFile = e.target.files[0];
             const titleEl = document.getElementById('gifUploadTitle');
+            
             if(gifSelectedFile) {
                 if(gifSelectedFile.size > 10 * 1024 * 1024) {
                     titleEl.innerHTML = `<span style="color:red;">File too large (>10MB)</span>`;
                     return;
                 }
+                
                 const videoURL = URL.createObjectURL(gifSelectedFile);
                 const videoEl = document.getElementById('gifSourceVideo');
                 videoEl.src = videoURL;
                 gifFilename.value = gifSelectedFile.name.replace(/\.[^/.]+$/, "");
+                
                 videoEl.onloadedmetadata = () => {
                     if(videoEl.duration > 30) {
                         titleEl.innerHTML = `<span style="color:red;">Video too long (>30s)</span>`;
                         gifSelectedFile = null;
                         return;
                     }
+                    
                     const name = gifSelectedFile.name;
                     let displayName = name;
                     if (name.length > 20) {
@@ -2104,6 +2213,7 @@
                              displayName = name.substring(0, 17) + '...';
                          }
                     }
+
                     titleEl.innerHTML = `<b>${displayName}</b><br>Size: ${(gifSelectedFile.size/1024/1024).toFixed(2)} MB`;
                     document.getElementById('uploadIconGif').style.display = 'none';
                     document.getElementById('removeFileGifBtn').style.display = 'block';
@@ -2113,16 +2223,20 @@
             }
         };
         document.getElementById('removeFileGifBtn').onclick = (e) => { e.stopPropagation(); resetUploadView('videoToGifView'); };
+
         convertGifBtn.onclick = () => {
             convertGifBtn.disabled = true;
             gifProgressContainer.style.display = 'block';
             gifProgressFill.style.width = '0%';
             gifPercentLabel.innerText = '0%';
+            
             const videoEl = document.getElementById('gifSourceVideo');
             const originalWidth = videoEl.videoWidth;
             const originalHeight = videoEl.videoHeight;
             const resValue = document.getElementById('gifResolution').value;
+            
             let gifW, gifH;
+            
             if (resValue === 'original') {
                 gifW = originalWidth;
                 gifH = originalHeight;
@@ -2130,6 +2244,7 @@
                 gifW = parseInt(resValue);
                 gifH = Math.round(gifW * (originalHeight / originalWidth));
             }
+            
             gifshot.createGIF({
                 video: [videoEl.src],
                 gifWidth: gifW,
@@ -2144,6 +2259,8 @@
             }, function(obj) {
                 if(!obj.error) {
                     const image = obj.image;
+
+                    // Convert Base64 to Blob to prevent UI freeze on large strings
                     const byteCharacters = atob(image.split(',')[1]);
                     const byteNumbers = new Array(byteCharacters.length);
                     for (let i = 0; i < byteCharacters.length; i++) {
@@ -2152,11 +2269,14 @@
                     const byteArray = new Uint8Array(byteNumbers);
                     const blob = new Blob([byteArray], {type: 'image/gif'});
                     const blobUrl = URL.createObjectURL(blob);
+
                     resultGif.src = blobUrl;
+                    
                     downloadGifBtn.onclick = () => {
                         const fname = gifFilename.value.trim() || 'animation';
                         forceDownload(blob, `${fname}.gif`, true);
                     };
+                    
                     document.getElementById('gifUploaderView').style.display = 'none';
                     gifResultArea.style.display = 'block';
                 } else {
@@ -2166,7 +2286,6 @@
             });
         };
 
-        // ... (Upload to QR/Link, Extractor logic remains unchanged) ...
         dropZone.onclick = () => fileInput.click();
         fileInput.onchange = (e) => {
             selectedFile = e.target.files[0];
@@ -2177,20 +2296,28 @@
             }
         };
         removeFileQrBtn.onclick = (e) => { e.stopPropagation(); resetUploadView('uploadToQrView'); };
+
         uploadBtn.onclick = async () => {
             if(!selectedFile) return;
             if(!GIT.token) { showToast("API Key Missing! Set it in Settings."); return; }
             uploadBtn.disabled = true;
             document.getElementById('uploadTitle').innerHTML = 'Checking file existence...';
+            
             const fileHash = await calculateFileHash(selectedFile);
             const fileExt = selectedFile.name.split('.').pop().toLowerCase();
             const expectedPath = `uploads/${fileHash}.${fileExt}`;
             const cachedUrl = await checkFileExistenceOnGithub(expectedPath);
-            if (cachedUrl) { handleCachedQr(cachedUrl); return; }
+
+            if (cachedUrl) {
+                handleCachedQr(cachedUrl);
+                return;
+            }
+            
             document.getElementById('uploadTitle').innerHTML = 'File not found. Ready to upload.';
             progressContainer.style.display = 'block';
             uploadBtn.style.display = 'none';
             removeFileQrBtn.style.display = 'none';
+
             uploadFileToGithub(selectedFile, fileHash, (uploadedUrl) => {
                 currentUrl = uploadedUrl;
                 document.getElementById('uploaderView').style.display = 'none';
@@ -2202,6 +2329,7 @@
                 percentLabel.innerText = percent + "%";
             }, 'qr'); 
         };
+
         function generateQR(url, targetDiv, size) {
             targetDiv.innerHTML = '';
             QRCode.toCanvas(url, {
@@ -2242,6 +2370,7 @@
         
         function displaySuccessPreview(file, targetEl) {
             targetEl.innerHTML = '';
+            
             const name = file.name;
             let displayName = name;
             if (name.length > 20) {
@@ -2258,11 +2387,15 @@
                     displayName = name.substring(0, 17) + '...';
                 }
             }
+            
             const ext = name.split('.').pop().toLowerCase();
+
             const iconContainer = document.createElement('div');
             iconContainer.className = 'file-icon-preview';
             iconContainer.style.margin = '15px auto 10px'; 
+            
             let displayElement = null;
+
             if (CODE_EXTENSIONS.includes(ext) || ext === 'zip' || ext === 'pdf') {
                 const iconClass = (ext === 'pdf' || ext === 'zip') ? 'red-icon' : '';
                 const iconFa = ext === 'pdf' ? 'fa-file-pdf' : (ext === 'zip' ? 'fa-file-zipper' : 'fa-folder');
@@ -2287,6 +2420,7 @@
                 targetEl.appendChild(nameP);
             }
         }
+        
         function handleCachedQr(uploadedUrl) {
             currentUrl = uploadedUrl;
             document.getElementById('uploaderView').style.display = 'none';
@@ -2294,28 +2428,33 @@
             if (selectedFile) displaySuccessPreview(selectedFile, qrResultFilePreview);
             generateQR(currentUrl, qrcodeDiv, document.getElementById('qrSize').value);
         }
+
         function handleCachedLink(uploadedUrl, file) {
             const base64Data = uploadedUrl.split('?f=')[1];
             const fileData = JSON.parse(atob(base64Data));
             const directLink = `https://raw.githubusercontent.com/${GIT.owner}/${GIT.repo}/${GIT.branch}/${fileData.p}`;
             const viewerLink = uploadedUrl; 
             const fileNameWithoutExt = fileData.n.split('.').slice(0, -1).join('.');
+
             uploadedLinkFormats = {
                 direct: directLink, viewer: viewerLink, 
                 html_full: `<a href="${viewerLink}"><img src="${directLink}" alt="${fileNameWithoutExt}" border="0"></a>`,
                 html_image: `<img src="${directLink}" alt="${fileNameWithoutExt}" border="0">`, 
                 bbcode: `[img]${directLink}[/img]`, bbcode_full: `[url=${viewerLink}][img]${directLink}[/img][/url]`
             };
+            
             document.getElementById('directLink').innerText = directLink;
             displaySuccessPreview(file, document.getElementById('resultFilePreview'));
             selectLinkFormat('viewer', 'Viewer\'s Link'); 
             document.getElementById('linkUploaderView').style.display = 'none';
             linkResultArea.style.display = 'block';
         }
+        
         function toggleLinkOptions() {
             const dropdown = document.getElementById('linkOptionsDropdown');
             dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
         }
+
         function selectLinkFormat(formatKey, formatName) {
             const displayArea = document.getElementById('linkFormatDisplay');
             if (!uploadedLinkFormats) { displayArea.innerText = 'Error'; return; }
@@ -2323,24 +2462,30 @@
             document.getElementById('selectedLinkFormatText').innerText = formatName;
             document.getElementById('linkOptionsDropdown').style.display = 'none';
         }
+
         function copySelectedLink() {
             const text = document.getElementById('linkFormatDisplay').innerText;
             if (text && !text.startsWith('Error')) { navigator.clipboard.writeText(text); showToast("Copied!"); }
         }
+
         linkUploadBtn.onclick = async () => {
             if(!linkSelectedFile) return;
             if(!GIT.token) { showToast("API Key Missing! Set it in Settings."); return; }
             linkUploadBtn.disabled = true;
             document.getElementById('linkUploadTitle').innerHTML = 'Checking file existence...';
+            
             const fileHash = await calculateFileHash(linkSelectedFile);
             const fileExt = linkSelectedFile.name.split('.').pop().toLowerCase();
             const expectedPath = `uploads/${fileHash}.${fileExt}`;
             const cachedUrl = await checkFileExistenceOnGithub(expectedPath);
+
             if (cachedUrl) { handleCachedLink(cachedUrl, linkSelectedFile); return; }
+            
             document.getElementById('linkUploadTitle').innerHTML = 'Ready to upload.';
             linkProgressContainer.style.display = 'block';
             linkUploadBtn.style.display = 'none';
             removeFileLinkBtn.style.display = 'none';
+
             uploadFileToGithub(linkSelectedFile, fileHash, (uploadedUrl) => {
                 handleCachedLink(uploadedUrl, linkSelectedFile);
             }, (percent) => {
@@ -2348,6 +2493,7 @@
                 linkPercentLabel.innerText = percent + "%";
             }, 'link'); 
         };
+        
         function checkFileExistenceOnGithub(path) {
             return new Promise((resolve) => {
                 const xhr = new XMLHttpRequest();
@@ -2363,6 +2509,7 @@
                 xhr.send();
             });
         }
+
         function uploadFileToGithub(file, fileHash, onSuccess, onProgress, viewType = 'qr') {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -2397,6 +2544,7 @@
                 xhr.send(JSON.stringify({ message: "upload", content: base64, branch: GIT.branch }));
             };
         }
+
         extractorDropZone.onclick = () => extractorFileInput.click();
         extractorFileInput.onchange = (e) => {
             extractorSelectedFile = e.target.files[0];
@@ -2410,6 +2558,7 @@
             }
         };
         removeFileExtractorBtn.onclick = (e) => { e.stopPropagation(); resetUploadView('qrExtractorView'); };
+
         extractBtn.onclick = async () => {
             if (!extractorSelectedFile) return;
             extractBtn.disabled = true;
@@ -2432,13 +2581,16 @@
                     };
                     reader.readAsDataURL(extractorSelectedFile);
                 });
+
                 displaySuccessPreview(extractorSelectedFile, document.getElementById('extractorResultFilePreview'));
                 extractedDataDisplay.innerText = rawData;
                 extractorActionButtons.innerHTML = ''; 
+                
                 const copyBtn = document.createElement('button');
                 copyBtn.className = 'btn btn-action';
                 copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
                 copyBtn.onclick = () => { navigator.clipboard.writeText(rawData); showToast("Copied!"); }; 
+                
                 const downloadTxtBtn = document.createElement('button');
                 downloadTxtBtn.className = 'btn btn-action';
                 downloadTxtBtn.innerHTML = '<i class="fas fa-download"></i> Download Text';
@@ -2446,9 +2598,11 @@
                     const blob = new Blob([rawData], {type: "text/plain;charset=utf-8"});
                     forceDownload(blob, 'qrcode_data.txt', true);
                 };
+                
                 extractorActionButtons.style.gridTemplateColumns = '1fr 1fr';
                 extractorActionButtons.appendChild(copyBtn);
                 extractorActionButtons.appendChild(downloadTxtBtn);
+
                 document.getElementById('extractorUploaderView').style.display = 'none';
                 extractorResultArea.style.display = 'block';
             } catch (error) {
@@ -2483,19 +2637,26 @@
 
         // --- NEW SAVE FUNCTION WITH LOADING SCREEN & AUTH CHECK ---
         function saveApiKey() {
+            // Auth Check
             if(!currentUser) {
                 showToast("Please Sign In First");
                 return;
             }
+
             const key = document.getElementById('apiKeyInput').value.trim();
             if(typeof db === 'undefined') { showToast("Database Error"); return; }
+            
+            // Show Loading Overlay
             document.getElementById('settingsLoadingOverlay').style.display = 'flex';
+
             db.ref('config/githubToken').set(key)
             .then(() => {
                 showToast("API Key Saved! Reloading...");
+                // Keep overlay, wait, then reload
                 setTimeout(() => location.reload(), 1500);
             })
             .catch(e => {
+                // Hide Overlay on Error
                 document.getElementById('settingsLoadingOverlay').style.display = 'none';
                 showToast("Error: " + e.message);
             });
@@ -2512,6 +2673,8 @@
         }
         
         // --- Firebase Integration & Auth Logic ---
+
+        // Google Sign In
         function googleSignIn() {
             var provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider).then((result) => {
@@ -2520,6 +2683,8 @@
                 showToast("Login Failed: " + error.message);
             });
         }
+
+        // Google Sign Out
         function googleSignOut() {
             if(confirm("Are you sure you want to sign out?")) {
                 auth.signOut().then(() => {
@@ -2529,6 +2694,8 @@
                 });
             }
         }
+
+        // Auth State Monitor
         if (typeof firebase !== 'undefined') {
             auth.onAuthStateChanged((user) => {
                 const loginBtn = document.getElementById('headerLoginBtn');
@@ -2538,26 +2705,34 @@
                 const loginPrompt = document.getElementById('loginPromptOverlay');
 
                 if (user) {
+                    // Signed In
                     currentUser = user;
                     loginBtn.style.display = 'none';
                     profileBtn.style.display = 'block';
                     userAvatar.src = user.photoURL;
+
+                    // Unblock Settings
                     settingsContent.classList.remove('settings-content-blocked');
                     loginPrompt.style.display = 'none';
                 } else {
+                    // Signed Out
                     currentUser = null;
                     loginBtn.style.display = 'block';
                     profileBtn.style.display = 'none';
                     userAvatar.src = '';
+
+                    // Block Settings
                     settingsContent.classList.add('settings-content-blocked');
-                    loginPrompt.style.display = 'block';
+                    loginPrompt.style.display = 'block'; // TASK 1: Handled via JS toggle now
                 }
             });
         }
         
+        // Update Indicator Logic
         function updateApiIndicator(isActive) {
             const statusText = document.getElementById('apiStatusText');
             const statusDot = document.getElementById('apiStatusDot');
+            
             if(isActive) {
                 statusText.innerText = 'API Active';
                 statusDot.classList.add('active');
@@ -2567,35 +2742,38 @@
             }
         }
 
-        // Change 2: Update Listener to populate the new Popup fields
+        // Listen for Configuration from Database
         if(typeof db !== 'undefined') {
             db.ref('config').on('value', (snapshot) => {
                 const data = snapshot.val();
                 
                 if (data) {
+                    // Update Global API Token (CHANGE 3: ACCESS FROM DB)
                     if(data.githubToken) {
                         GIT.token = data.githubToken;
+                        // Auto-fill input in settings
                         document.getElementById('apiKeyInput').value = data.githubToken;
                         updateApiIndicator(true);
                     } else {
                         updateApiIndicator(false);
                     }
 
-                    // Check for Updates and Populate Popup
+                    // Check for Updates (TASK 2: UPDATED POPUP BINDING)
                     if (data.update && data.update.show) {
                         document.getElementById('updatePopup').style.display = 'flex';
                         
-                        document.getElementById('updateVersionDisplay').innerText = data.update.version ? `v${data.update.version}` : 'New';
-                        document.getElementById('updateTitleDisplay').innerText = data.update.title || "Update ready";
-                        document.getElementById('updateMessage').innerText = data.update.message || "New features and improvements are available.";
-                        document.getElementById('updateSizeDisplay').innerText = data.update.size || "Unknown Size";
+                        // Populate new popup fields
+                        if(data.update.version) document.getElementById('upVersion').innerText = `v${data.update.version}`;
+                        if(data.update.title) document.getElementById('upTitle').innerText = data.update.title;
+                        if(data.update.message) document.getElementById('upDesc').innerText = data.update.message;
+                        if(data.update.size) document.getElementById('upSize').innerText = data.update.size;
                         
-                        const downloadBtn = document.getElementById('updateDownloadBtn');
+                        // Set Download Link
+                        const updateBtn = document.getElementById('upBtn');
                         if(data.update.link) {
-                            downloadBtn.onclick = () => window.open(data.update.link, '_blank');
-                        } else {
-                            downloadBtn.onclick = () => showToast("Download link not available");
+                            updateBtn.onclick = () => window.location.href = data.update.link;
                         }
+
                     } else {
                         document.getElementById('updatePopup').style.display = 'none';
                     }
@@ -2605,19 +2783,23 @@
             });
         }
         
-        // Change 2: Update Save Config Function to capture new fields
+        // UPDATE CONFIG SAVE WITH LOADING
         function saveUpdateConfig() {
+            // Auth Check
             if(!currentUser) {
                 showToast("Please Sign In First");
                 return;
             }
 
             const version = document.getElementById('devVersion').value;
-            const title = document.getElementById('devTitle').value;
             const message = document.getElementById('devMessage').value;
+            const status = document.getElementById('devStatus').checked;
+            
+            // TASK 2: New Dev Fields
+            const title = document.getElementById('devTitle').value;
             const size = document.getElementById('devSize').value;
             const link = document.getElementById('devLink').value;
-            const status = document.getElementById('devStatus').checked;
+            
             const newApiToken = document.getElementById('apiKeyInput').value.trim();
             
             if(typeof db === 'undefined') {
@@ -2625,19 +2807,21 @@
                 return;
             }
             
+            // Show Loading
             document.getElementById('settingsLoadingOverlay').style.display = 'flex';
 
             const updatePayload = {
                 update: {
                     version: version,
-                    title: title,
                     message: message,
-                    size: size,
-                    link: link,
-                    show: status
+                    show: status,
+                    title: title,  // New
+                    size: size,    // New
+                    link: link     // New
                 }
             };
             
+            // If user entered a key in settings input during dev mode, save it globally
             if(newApiToken) {
                 updatePayload.githubToken = newApiToken;
             }
@@ -2648,6 +2832,7 @@
                 setTimeout(() => location.reload(), 1500);
             })
             .catch((error) => {
+                 // Hide Overlay on Error
                 document.getElementById('settingsLoadingOverlay').style.display = 'none';
                 showToast("Error: " + error.message);
             });
