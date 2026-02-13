@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +6,10 @@
     <title>One Tool | QR & Tools Generator</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for Update Popup -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0,1" />
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     
@@ -18,9 +21,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gifshot/0.3.2/gifshot.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
-    <!-- Firebase SDKs (UPDATED to v12 Modular via Module Script below) -->
-    <!-- Old script tags removed to prevent conflict -->
 
     <style>
         :root { --primary: #10b981; --bg: #ffffff; --card: #f8fafc; --text: #0f172a; --border: #e2e8f0; --shadow: rgba(0, 0, 0, 0.1); }
@@ -288,8 +288,45 @@
         }
         #settingsModal.active { bottom: 0; }
         .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .settings-input-group { position: relative; display: flex; gap: 10px; margin-bottom: 10px; }
-        .settings-input-group input { flex-grow: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+        
+        /* UPDATED SETTINGS API INPUT STYLES */
+        .api-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .api-input-wrapper input {
+            padding: 12px;
+            padding-right: 80px; /* Space for buttons */
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            width: 100%;
+        }
+        .api-input-actions {
+            position: absolute;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+        .api-icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text);
+            opacity: 0.7;
+            padding: 5px;
+            font-size: 1.1rem;
+            transition: 0.3s;
+        }
+        .api-icon-btn:hover {
+            opacity: 1;
+            color: var(--primary);
+        }
         
         .social-link-original {
             text-decoration: none; 
@@ -326,20 +363,126 @@
         .slider.round { border-radius: 34px; }
         .slider.round:before { border-radius: 50%; }
 
-        /* Update Popup */
+        /* Modern Android Update Popup Styles */
         .update-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 2500; 
+            background: radial-gradient(circle at 50% 30%, rgba(30, 144, 255, 0.08), rgba(0,0,0,0.8) 70%); /* Darker for overlay effect */
+            z-index: 2500; 
             display: none; justify-content: center; align-items: center;
             backdrop-filter: blur(5px);
+            padding: 20px;
         }
-        .update-card {
-            background: var(--card); padding: 30px; border-radius: 24px;
-            text-align: center; max-width: 90%; width: 400px;
-            border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+
+        .update-card-modern {
+            max-width: 400px;
+            width: 100%;
+            background: #1e232a; /* Fallback */
+            background: rgba(30, 35, 42, 0.95);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 36px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+            padding: 24px;
+            color: #fff;
+            transition: all 0.2s ease;
+            animation: appear 0.35s cubic-bezier(0.2, 0.9, 0.4, 1);
+            font-family: 'Inter', sans-serif;
+            text-align: left; /* Reset alignment */
         }
-        .update-card h2 { color: var(--primary); margin-bottom: 15px; }
-        .update-card p { opacity: 0.8; margin-bottom: 20px; line-height: 1.5; }
+
+        @keyframes appear {
+            0% { opacity: 0; transform: scale(0.92) translateY(8px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .pop-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .brand { display: flex; align-items: center; gap: 12px; }
+        
+        .android-icon {
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(52, 199, 123, 0.2); border-radius: 16px; padding: 6px;
+        }
+        .android-icon .material-symbols-rounded { font-size: 32px; color: #34c759; }
+
+        .title-section { display: flex; flex-direction: column; }
+        .app-name { font-weight: 600; font-size: 18px; letter-spacing: -0.2px; color: #fff; line-height: 1.3; }
+        
+        .build-tag { font-size: 13px; color: rgba(255, 255, 255, 0.55); font-weight: 500; display: flex; align-items: center; gap: 6px; }
+        .build-tag span { background: rgba(255, 255, 255, 0.08); padding: 2px 8px; border-radius: 50px; font-size: 11px; font-weight: 600; color: rgba(255, 255, 255, 0.8); }
+
+        /* Close button visually hidden/disabled based on original request "Non-dismissible" but kept in DOM for style match */
+        .close-btn {
+            background: rgba(255, 255, 255, 0.06); border: none; border-radius: 50%;
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            color: rgba(255, 255, 255, 0.7); cursor: default; transition: 0.1s; opacity: 0.5;
+        }
+        .close-btn .material-symbols-rounded { font-size: 24px; }
+
+        .update-content { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 8px 8px 16px; }
+
+        .animation-badge {
+            background: rgba(0, 102, 204, 0.2); border-radius: 50px; padding: 16px;
+            margin-bottom: 20px; position: relative; display: flex; flex-direction: column; align-items: center;
+        }
+        .circle-glow {
+            background: conic-gradient(from 180deg at 50% 50%, #34c759 0deg, #0a84ff 180deg, #34c759 360deg);
+            width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            animation: rotate 8s linear infinite;
+        }
+        .inner-icon {
+            background: #1e1e24; width: 70px; height: 70px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+        }
+        .inner-icon .material-symbols-rounded { font-size: 48px; color: #a6ffb2; }
+
+        @keyframes rotate { to { transform: rotate(360deg); } }
+
+        .update-card-modern h2 {
+            font-size: 24px; font-weight: 650; letter-spacing: -0.5px; margin: 16px 0 8px;
+            background: linear-gradient(180deg, #fff 70%, rgba(255,255,255,0.85));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .update-desc {
+            font-size: 15px; line-height: 1.5; color: rgba(255, 255, 255, 0.75);
+            max-width: 280px; margin: 0 auto; font-weight: 400;
+        }
+
+        .chip-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 24px 0 16px; }
+        .chip {
+            background: rgba(118, 118, 128, 0.2); backdrop-filter: blur(10px);
+            padding: 6px 16px; border-radius: 50px; font-size: 13px; font-weight: 500;
+            display: inline-flex; align-items: center; gap: 6px; color: rgba(255, 255, 255, 0.9);
+            border: 0.5px solid rgba(255, 255, 255, 0.08);
+        }
+        .chip .material-symbols-rounded { font-size: 18px; }
+
+        .update-size {
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            font-size: 14px; background: rgba(0, 0, 0, 0.3); border-radius: 50px;
+            padding: 10px 24px; margin: 8px 0 28px; border: 0.3px solid rgba(255, 255, 255, 0.06);
+            color: rgba(255,255,255,0.8); font-weight: 500; width: fit-content; align-self: center;
+        }
+        .update-size .material-symbols-rounded { font-size: 20px; color: #64b5f6; }
+
+        .actions { display: flex; gap: 12px; margin-top: 8px; width: 100%; }
+        .btn-update-primary {
+            flex: 1; padding: 14px 0; border-radius: 40px; border: none;
+            font-weight: 600; font-size: 15px; display: flex; align-items: center; justify-content: center;
+            gap: 8px; background: #0a84ff; box-shadow: 0 6px 18px rgba(10, 132, 255, 0.35);
+            color: white; cursor: pointer; transition: 0.15s ease;
+        }
+        .btn-update-primary:hover { opacity: 0.9; }
+        .btn-update-primary .material-symbols-rounded { font-size: 20px; }
+
+        .footnote {
+            display: flex; justify-content: center; margin-top: 18px;
+            color: rgba(235, 235, 245, 0.5); font-size: 12px; font-weight: 450; gap: 8px; align-items: center;
+        }
+        .footnote .material-symbols-rounded { font-size: 14px; }
+        .update-card-modern hr { border: none; border-top: 0.33px solid rgba(255, 255, 255, 0.1); margin: 20px 0 10px; }
+
 
         /* Loading Overlay for Settings */
         .settings-loading-overlay {
@@ -356,7 +499,8 @@
         .settings-content-blocked { opacity: 0.4; pointer-events: none; filter: blur(2px); transition: 0.3s; }
         .login-prompt-overlay {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            z-index: 3600; text-align: center; width: 100%; display: none;
+            z-index: 3800; /* Increased Z-Index to be above blur */
+            text-align: center; width: 100%; display: none;
         }
         .user-profile-btn { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; border: 2px solid var(--primary); cursor: pointer; display: none; }
         .user-profile-btn img { width: 100%; height: 100%; object-fit: cover; }
@@ -367,12 +511,69 @@
 </head>
 <body>
 
-    <!-- Non-dismissible Update Popup -->
+    <!-- Modern Android Style Update Popup -->
     <div id="updatePopup" class="update-overlay">
-        <div class="update-card">
-            <h2 id="updateTitle"><i class="fas fa-rocket"></i> Update Available</h2>
-            <p id="updateMessage">A new version of One Tool is available. Please update to continue using the services.</p>
-            <!-- No close button intentionally -->
+        <div class="update-card-modern">
+            <div class="pop-header">
+                <div class="brand">
+                    <div class="android-icon">
+                        <span class="material-symbols-rounded">android</span>
+                    </div>
+                    <div class="title-section">
+                        <span class="app-name">System Update</span>
+                        <div class="build-tag">
+                            <span id="updateVersion">1.0</span>
+                            <span style="background: rgba(52,199,123,0.15); color: #90e0a0;">LATEST</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="close-btn">
+                    <span class="material-symbols-rounded">close</span>
+                </div>
+            </div>
+
+            <div class="update-content">
+                <div class="animation-badge">
+                    <div class="circle-glow">
+                        <div class="inner-icon">
+                            <span class="material-symbols-rounded">update</span>
+                        </div>
+                    </div>
+                </div>
+                <h2 id="updateTitleDisplay">Update ready</h2>
+                <div class="update-desc" id="updateMessage">
+                    New features and improvements are available.
+                </div>
+                
+                <div class="chip-row">
+                    <div class="chip">
+                        <span class="material-symbols-rounded">security</span> Security
+                    </div>
+                    <div class="chip">
+                        <span class="material-symbols-rounded">bolt</span> Performance
+                    </div>
+                    <div class="chip">
+                        <span class="material-symbols-rounded">bug_report</span> Fixes
+                    </div>
+                </div>
+
+                <div class="update-size">
+                    <span class="material-symbols-rounded">database</span>
+                    <span id="updateSize">-- MB</span>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn-update-primary" id="updateDownloadBtn">
+                    <span class="material-symbols-rounded">system_update</span> Update now
+                </button>
+            </div>
+
+            <hr>
+            <div class="footnote">
+                <span class="material-symbols-rounded">verified</span>
+                <span>Developed by NUR</span>
+            </div>
         </div>
     </div>
 
@@ -951,10 +1152,12 @@
             </div>
 
             <label style="font-size: 0.85rem; font-weight: 700; display: block; margin-bottom: 8px;">Set API Key</label>
-            <div class="settings-input-group">
+            <div class="api-input-wrapper">
                 <input type="text" id="apiKeyInput" placeholder="Enter API Key">
-                <button class="btn btn-action" style="width: auto; margin: 0; padding: 0 20px;" onclick="pasteApiKey()"><i class="fas fa-paste"></i> Paste</button>
-                <button class="btn btn-action" style="width: auto; margin: 0; padding: 0 20px; background: var(--primary); color: white;" onclick="saveApiKey()">Save</button>
+                <div class="api-input-actions">
+                     <button class="api-icon-btn" onclick="pasteApiKey()" title="Paste"><i class="fas fa-paste"></i></button>
+                     <button class="api-icon-btn" onclick="saveApiKey()" title="Save"><i class="fas fa-save"></i></button>
+                </div>
             </div>
             
             <a href="https://t.me/onetoolbd" target="_blank" class="btn btn-action" style="background: transparent; border: 1px solid var(--border); color: var(--text); text-decoration: none; text-align: center; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 8px;">
@@ -970,9 +1173,18 @@
                 <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Version Number</label>
                 <input type="text" id="devVersion" placeholder="e.g. 1.5" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px;">
                 
+                <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Update Title</label>
+                <input type="text" id="devTitle" placeholder="e.g. Update Ready" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px;">
+
                 <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Custom Message</label>
                 <textarea id="devMessage" placeholder="What's new in this update?" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px; height: 80px; font-family: inherit; resize: none;"></textarea>
                 
+                <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Package Size</label>
+                <input type="text" id="devSize" placeholder="e.g. 45 MB" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px;">
+
+                <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Download Link</label>
+                <input type="text" id="devLink" placeholder="https://..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px;">
+
                 <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 20px;">
                     <label style="font-size: 0.85rem; font-weight: 700;">Show Notification</label>
                     <label class="switch">
@@ -2588,9 +2800,11 @@
           }
 
           const version = document.getElementById('devVersion').value;
+          const title = document.getElementById('devTitle').value;
           const message = document.getElementById('devMessage').value;
+          const size = document.getElementById('devSize').value;
+          const link = document.getElementById('devLink').value;
           const status = document.getElementById('devStatus').checked;
-          const newApiToken = document.getElementById('apiKeyInput').value.trim();
           
           // Show Loading
           document.getElementById('settingsLoadingOverlay').style.display = 'flex';
@@ -2598,15 +2812,13 @@
           const updatePayload = {
               update: {
                   version: version,
+                  title: title,
                   message: message,
+                  size: size,
+                  link: link,
                   show: status
               }
           };
-          
-          // If user entered a key in settings input during dev mode, save it globally
-          if(newApiToken) {
-              updatePayload.githubToken = newApiToken;
-          }
 
           update(ref(db, 'config'), updatePayload)
           .then(() => {
@@ -2670,9 +2882,16 @@
               // Check for Updates
               if (data.update && data.update.show) {
                   document.getElementById('updatePopup').style.display = 'flex';
-                  document.getElementById('updateMessage').innerText = data.update.message || "A new version is available.";
-                  if(data.update.version) {
-                      document.getElementById('updateTitle').innerHTML = `<i class="fas fa-rocket"></i> Update Available (v${data.update.version})`;
+                  
+                  // Map Data to New Popup Structure
+                  if(data.update.version) document.getElementById('updateVersion').innerText = data.update.version;
+                  if(data.update.title) document.getElementById('updateTitleDisplay').innerText = data.update.title;
+                  if(data.update.message) document.getElementById('updateMessage').innerText = data.update.message;
+                  if(data.update.size) document.getElementById('updateSize').innerText = data.update.size;
+                  
+                  // Setup Download Button
+                  if(data.update.link) {
+                      document.getElementById('updateDownloadBtn').onclick = () => window.open(data.update.link, '_blank');
                   }
               } else {
                   document.getElementById('updatePopup').style.display = 'none';
