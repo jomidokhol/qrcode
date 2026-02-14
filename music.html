@@ -1,0 +1,854 @@
+<!-- START OF FILE audio-editor.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA.DSP | Slowed + Reverb + Visuals</title>
+    <!-- 3. MP3 Encoder Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --bg-panel: rgba(20, 20, 25, 0.6);
+            --primary: #7000ff;
+            --secondary: #00d2ff;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --neon-glow: 0 0 20px rgba(112, 0, 255, 0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(112, 0, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 210, 255, 0.1) 0%, transparent 40%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* --- Loader --- */
+        #loader {
+            position: fixed; inset: 0; background: #000; z-index: 999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.4s;
+        }
+        .loader-ring {
+            width: 50px; height: 50px; border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid var(--secondary); border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 20px;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* --- Layout --- */
+        .app-shell {
+            width: 100%; max-width: 900px;
+            display: grid; grid-template-columns: 1fr; gap: 20px;
+        }
+
+        /* --- Top Section: Banner & Visualizer --- */
+        .stage-area {
+            background: var(--bg-panel);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 30px;
+            display: flex; flex-direction: column; align-items: center;
+            position: relative; overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        /* Audio Banner */
+        .album-art-wrapper {
+            width: 160px; height: 160px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.05);
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: 0.3s;
+            cursor: pointer;
+            group: hover;
+        }
+        .album-art-wrapper:hover .art-overlay { opacity: 1; }
+        .album-art-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .art-overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.6);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: 0.3s; font-size: 0.8rem; text-align: center; padding: 10px;
+        }
+
+        /* 4. New Song Input Style */
+        .song-meta {
+            text-align: center; margin-bottom: 20px; width: 100%;
+        }
+        .song-input {
+            background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.2);
+            color: var(--text-main); font-size: 1.2rem; text-align: center; width: 60%;
+            padding: 5px; margin-bottom: 5px; outline: none; transition: 0.3s;
+        }
+        .song-input:focus { border-color: var(--secondary); width: 80%; }
+        .banner-hint { font-size: 0.75rem; color: var(--text-muted); }
+
+        /* Visualizer */
+        canvas {
+            width: 100%; height: 140px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            /* Update 1: Removed mask for clearer visuals */
+            /* mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); */
+            background: rgba(0,0,0,0.2);
+        }
+
+        /* --- Player Controls (Icons) --- */
+        .player-controls {
+            display: flex; gap: 30px; align-items: center; justify-content: center;
+            margin-bottom: 10px; opacity: 0.5; pointer-events: none; transition: 0.3s;
+        }
+        .player-controls.active { opacity: 1; pointer-events: all; }
+
+        .icon-btn {
+            background: rgba(255,255,255,0.05); border: none;
+            width: 50px; height: 50px; border-radius: 50%;
+            color: var(--text-main); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .icon-btn:hover { background: rgba(255,255,255,0.15); transform: scale(1.1); color: var(--secondary); }
+        .icon-btn svg { width: 22px; height: 22px; fill: currentColor; }
+        
+        .icon-btn.big {
+            width: 70px; height: 70px;
+            background: linear-gradient(135deg, var(--primary), #4a00e0);
+            box-shadow: var(--neon-glow);
+        }
+        .icon-btn.big:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(112, 0, 255, 0.6); }
+
+        /* Progress Bar */
+        .progress-container { width: 100%; margin-top: 10px; }
+        .time-display { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; }
+
+        /* --- Settings Panel --- */
+        .settings-panel {
+            background: var(--bg-panel);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 30px;
+        }
+
+        .upload-section {
+            display: flex; justify-content: space-between; align-items: center;
+            padding-bottom: 20px; border-bottom: 1px solid var(--glass-border); margin-bottom: 25px;
+        }
+        .file-btn {
+            background: transparent; border: 1px solid var(--secondary); color: var(--secondary);
+            padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; transition: 0.3s;
+        }
+        .file-btn:hover { background: var(--secondary); color: #000; box-shadow: 0 0 15px rgba(0, 210, 255, 0.3); }
+
+        /* Sliders Grid */
+        .controls-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 25px;
+        }
+
+        .control-item h4 {
+            font-size: 0.85rem; font-weight: 500; color: var(--text-muted); margin-bottom: 10px;
+            display: flex; justify-content: space-between;
+        }
+        .control-item h4 span { color: var(--secondary); }
+
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%;
+            background: #fff; cursor: pointer; margin-top: -5px; box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; cursor: pointer; background: rgba(255,255,255,0.1); border-radius: 2px;
+        }
+
+        /* Checkbox */
+        .toggle-row { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: var(--text-muted); cursor: pointer; }
+        .toggle-box {
+            width: 18px; height: 18px; border: 2px solid var(--glass-border); border-radius: 4px;
+            display: flex; align-items: center; justify-content: center; transition: 0.2s;
+        }
+        input[type="checkbox"]:checked + .toggle-box { background: var(--secondary); border-color: var(--secondary); }
+        input[type="checkbox"]:checked + .toggle-box::after { content: ''; width: 8px; height: 8px; background: #000; clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%); }
+
+        .hidden { display: none !important; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Loader -->
+    <div id="loader" class="hidden">
+        <div class="loader-ring"></div>
+        <p id="loaderText" style="letter-spacing: 2px; font-size: 0.8rem;">PROCESSING AUDIO...</p>
+    </div>
+
+    <div class="app-shell">
+        
+        <!-- Stage: Banner, Visuals, Player -->
+        <div class="stage-area">
+            
+            <!-- Banner & Name Section (Updated) -->
+            <label class="album-art-wrapper" title="Upload Cover Art">
+                <img id="bannerImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' style='background:%231a1a20'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23333' font-family='sans-serif' font-size='24'%3ECOVER ART%3C/text%3E%3C/svg%3E">
+                <div class="art-overlay">Click to Change</div>
+                <input type="file" id="bannerInput" accept="image/*" style="display: none;">
+            </label>
+            
+            <div class="song-meta">
+                <input type="text" id="songName" class="song-input" placeholder="Enter Song Name">
+                <div class="banner-hint">Add Banner & Name</div>
+            </div>
+
+            <!-- Visualizer -->
+            <canvas id="visualizer"></canvas>
+
+            <!-- Player Icons -->
+            <div class="player-controls" id="playerControls">
+                
+                <!-- Reset -->
+                <button class="icon-btn" id="resetBtn" title="Reset Settings">
+                    <svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+                </button>
+
+                <!-- Play/Pause -->
+                <button class="icon-btn big" id="playBtn" title="Play / Pause">
+                    <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <svg id="pauseIcon" class="hidden" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
+
+                <!-- Download (Updated Icon for MP3) -->
+                <button class="icon-btn" id="downloadBtn" title="Download MP3">
+                    <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                </button>
+            </div>
+
+            <div class="progress-container">
+                <input type="range" id="progressBar" value="0" min="0" max="100" step="0.1">
+                <div class="time-display">
+                    <span id="currentTime">00:00</span>
+                    <span id="totalTime">00:00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Panel -->
+        <div class="settings-panel">
+            <div class="upload-section">
+                <div>
+                    <h3 style="font-weight: 500;">Audio Settings</h3>
+                    <p id="fileInfo" style="font-size: 0.8rem; color: var(--text-muted);">No audio loaded</p>
+                </div>
+                <label class="file-btn">
+                    Upload Audio
+                    <input type="file" id="audioInput" accept="audio/*" style="display: none;">
+                </label>
+            </div>
+
+            <div class="controls-grid">
+                <!-- Speed -->
+                <div class="control-item">
+                    <h4>Speed <span id="val-speed">85%</span></h4>
+                    <input type="range" id="speed" min="0.5" max="1.2" step="0.01" value="0.85">
+                </div>
+
+                <!-- Pitch -->
+                <div class="control-item">
+                    <h4>Pitch (Tone) <span id="val-pitch">-2</span></h4>
+                    <input type="range" id="pitch" min="-12" max="12" step="1" value="-2">
+                </div>
+
+                <!-- Reverb -->
+                <div class="control-item">
+                    <h4>Reverb <span id="val-reverb">40%</span></h4>
+                    <input type="range" id="reverb" min="0" max="1" step="0.05" value="0.4">
+                </div>
+
+                <!-- Bass -->
+                <div class="control-item">
+                    <h4>Bass Boost <span id="val-bass">5dB</span></h4>
+                    <input type="range" id="bass" min="0" max="20" step="1" value="5">
+                </div>
+
+                <!-- 3D -->
+                <div class="control-item">
+                    <h4>3D Audio <span id="val-3d">0%</span></h4>
+                    <input type="range" id="spatial" min="0" max="1" step="0.1" value="0">
+                </div>
+
+                <!-- Lo-Fi -->
+                <div class="control-item">
+                    <h4>Lo-Fi <span id="val-lofi">0%</span></h4>
+                    <input type="range" id="lofi" min="0" max="50" step="1" value="0">
+                </div>
+            </div>
+
+            <div style="margin-top: 25px;">
+                <label class="toggle-row">
+                    <input type="checkbox" id="reverse" style="display:none;">
+                    <span class="toggle-box"></span>
+                    Reverse Audio
+                </label>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- 2. Independent Pitch Shifter (Granular Synthesis) ---
+        // This decouples pitch from speed.
+        class PitchShifter {
+            constructor(context) {
+                this.context = context;
+                this.pitchRatio = 1.0;
+                this.bufferSize = 4096;
+                this.fadeLength = 400; // Granular fade
+            }
+
+            setPitch(semitones) {
+                // Formula: 2^(semitones/12)
+                this.pitchRatio = Math.pow(2, semitones / 12);
+            }
+
+            createNode() {
+                // Using ScriptProcessor as simple workaround for lack of AudioWorklet in single file
+                const scriptNode = this.context.createScriptProcessor(this.bufferSize, 2, 2);
+                const bufferDuration = this.bufferSize / this.context.sampleRate;
+                
+                // Delay buffers
+                const delayTime = 0.1; // 100ms buffer
+                const delaySamples = Math.floor(delayTime * this.context.sampleRate);
+                const bufferL = new Float32Array(delaySamples);
+                const bufferR = new Float32Array(delaySamples);
+                
+                let writePos = 0;
+                let readPos = 0;
+
+                scriptNode.onaudioprocess = (audioProcessingEvent) => {
+                    const inputBuffer = audioProcessingEvent.inputBuffer;
+                    const outputBuffer = audioProcessingEvent.outputBuffer;
+                    const inputDataL = inputBuffer.getChannelData(0);
+                    const inputDataR = inputBuffer.getChannelData(1);
+                    const outputDataL = outputBuffer.getChannelData(0);
+                    const outputDataR = outputBuffer.getChannelData(1);
+
+                    for (let i = 0; i < inputBuffer.length; i++) {
+                        // Write input to delay buffer
+                        bufferL[writePos] = inputDataL[i];
+                        bufferR[writePos] = inputDataR[i];
+
+                        // Read from delay buffer with pitch ratio
+                        const rIndex = Math.floor(readPos);
+                        const rNext = (rIndex + 1) % delaySamples;
+                        const frac = readPos - rIndex;
+
+                        // Linear Interpolation
+                        outputDataL[i] = bufferL[rIndex] * (1 - frac) + bufferL[rNext] * frac;
+                        outputDataR[i] = bufferR[rIndex] * (1 - frac) + bufferR[rNext] * frac;
+
+                        // Increment pointers
+                        writePos = (writePos + 1) % delaySamples;
+                        readPos = (readPos + this.pitchRatio) % delaySamples;
+
+                        // Granular overlap safety: if read chases write
+                        const diff = (writePos - readPos + delaySamples) % delaySamples;
+                        if (diff < this.fadeLength) {
+                            readPos = (writePos - delaySamples/2 + delaySamples) % delaySamples; // jump back half
+                        }
+                    }
+                };
+                return scriptNode;
+            }
+        }
+
+        // --- Variables ---
+        let audioContext;
+        let sourceNode;
+        let originalBuffer = null;
+        let isPlaying = false;
+        let startTime = 0;
+        let pausedAt = 0;
+        let animationId;
+        let pitchShifterInstance = null;
+
+        // Nodes
+        let gainNode, bassNode, dryNode, wetNode, pannerNode, distortionNode, masterGain, pitchNode;
+
+        // UI Refs
+        const loader = document.getElementById('loader');
+        const loaderText = document.getElementById('loaderText');
+        const playBtn = document.getElementById('playBtn');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const playerControls = document.getElementById('playerControls');
+        const visualizerCanvas = document.getElementById('visualizer');
+        const canvasCtx = visualizerCanvas.getContext('2d');
+        const bannerInput = document.getElementById('bannerInput');
+        const bannerImg = document.getElementById('bannerImg');
+        const songNameInput = document.getElementById('songName');
+
+        // Inputs
+        const inputs = {
+            speed: document.getElementById('speed'),
+            pitch: document.getElementById('pitch'),
+            reverb: document.getElementById('reverb'),
+            bass: document.getElementById('bass'),
+            spatial: document.getElementById('spatial'),
+            lofi: document.getElementById('lofi'),
+            reverse: document.getElementById('reverse'),
+            progress: document.getElementById('progressBar')
+        };
+
+        const displays = {
+            speed: document.getElementById('val-speed'),
+            pitch: document.getElementById('val-pitch'),
+            reverb: document.getElementById('val-reverb'),
+            bass: document.getElementById('val-bass'),
+            spatial: document.getElementById('val-3d'),
+            lofi: document.getElementById('val-lofi')
+        };
+
+        // --- Init ---
+        window.addEventListener('load', () => {
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            document.body.addEventListener('click', initAudio, { once: true });
+        });
+
+        function initAudio() {
+            if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function resizeCanvas() {
+            visualizerCanvas.width = visualizerCanvas.offsetWidth;
+            visualizerCanvas.height = visualizerCanvas.offsetHeight;
+        }
+
+        bannerInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (evt) => { bannerImg.src = evt.target.result; };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('audioInput').addEventListener('change', handleFileSelect);
+
+        async function handleFileSelect(e) {
+            if(!e.target.files[0]) return;
+            const file = e.target.files[0];
+            initAudio();
+            toggleLoader(true);
+
+            // Set song name automatically if empty
+            if(songNameInput.value === "") {
+                songNameInput.value = file.name.replace(/\.[^/.]+$/, "");
+            }
+
+            const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+            document.getElementById('fileInfo').innerHTML = `<strong>${file.name}</strong> (${sizeMB} MB)`;
+
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                originalBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                resetPlayer();
+                playerControls.classList.add('active'); 
+            } catch (err) {
+                alert("Error decoding audio.");
+            }
+            toggleLoader(false);
+        }
+
+        // --- Core Audio Logic ---
+
+        function buildImpulse(duration, decay) {
+            const length = audioContext.sampleRate * duration;
+            const impulse = audioContext.createBuffer(2, length, audioContext.sampleRate);
+            const L = impulse.getChannelData(0), R = impulse.getChannelData(1);
+            for (let i = 0; i < length; i++) {
+                const n = i < length ? Math.pow(1 - i / length, decay) : 0;
+                L[i] = (Math.random() * 2 - 1) * n;
+                R[i] = (Math.random() * 2 - 1) * n;
+            }
+            return impulse;
+        }
+
+        function makeDistortionCurve(amount) {
+            const k = typeof amount === 'number' ? amount : 50;
+            const n_samples = 44100;
+            const curve = new Float32Array(n_samples);
+            for (let i = 0; i < n_samples; ++i) {
+                let x = i * 2 / n_samples - 1;
+                curve[i] = (3 + k) * x * 20 * (Math.PI / 180) / (Math.PI + k * Math.abs(x));
+            }
+            return curve;
+        }
+
+        function playAudio() {
+            if (!originalBuffer) return;
+            if (isPlaying) stopAudio();
+
+            let bufferToPlay = originalBuffer;
+            if (inputs.reverse.checked) {
+                bufferToPlay = cloneAudioBuffer(originalBuffer);
+                for (let i = 0; i < 2; i++) Array.prototype.reverse.call(bufferToPlay.getChannelData(i));
+            }
+
+            sourceNode = audioContext.createBufferSource();
+            sourceNode.buffer = bufferToPlay;
+            
+            // 2. Change: PlaybackRate ONLY controls speed now.
+            sourceNode.playbackRate.value = parseFloat(inputs.speed.value);
+            // We do NOT set sourceNode.detune here anymore to keep them separate.
+
+            // FX Chain
+            pitchShifterInstance = new PitchShifter(audioContext);
+            pitchShifterInstance.setPitch(parseInt(inputs.pitch.value));
+            pitchNode = pitchShifterInstance.createNode();
+
+            bassNode = audioContext.createBiquadFilter();
+            bassNode.type = 'lowshelf';
+            bassNode.frequency.value = 200;
+            bassNode.gain.value = parseFloat(inputs.bass.value);
+
+            const conv = audioContext.createConvolver();
+            conv.buffer = buildImpulse(3, 2);
+
+            dryNode = audioContext.createGain();
+            wetNode = audioContext.createGain();
+            const rVal = parseFloat(inputs.reverb.value);
+            dryNode.gain.value = 1 - (rVal * 0.4);
+            wetNode.gain.value = rVal;
+
+            distortionNode = audioContext.createWaveShaper();
+            distortionNode.curve = makeDistortionCurve(parseFloat(inputs.lofi.value));
+            distortionNode.oversample = '4x';
+
+            pannerNode = audioContext.createStereoPanner();
+            pannerNode.pan.value = 0; 
+
+            masterGain = audioContext.createGain();
+            const analyser = audioContext.createAnalyser();
+            analyser.fftSize = 256; // Optimized for visualizer
+
+            // Connection Graph: Source -> Pitch -> Dist -> Bass -> [Rev/Dry] -> Pan -> Master
+            sourceNode.connect(pitchNode);
+            pitchNode.connect(distortionNode);
+            distortionNode.connect(bassNode);
+            bassNode.connect(dryNode);
+            bassNode.connect(conv);
+            conv.connect(wetNode);
+            dryNode.connect(pannerNode);
+            wetNode.connect(pannerNode);
+            pannerNode.connect(masterGain);
+            masterGain.connect(analyser);
+            masterGain.connect(audioContext.destination);
+
+            const offset = pausedAt;
+            sourceNode.start(0, offset);
+            startTime = audioContext.currentTime - (offset / parseFloat(inputs.speed.value));
+
+            isPlaying = true;
+            updatePlayIcon(true);
+            visualize(analyser);
+            updateProgress();
+
+            sourceNode.onended = () => {
+                if(isPlaying && inputs.progress.value >= 100) stopAudio(true);
+            };
+        }
+
+        function stopAudio(reset = false) {
+            if (sourceNode) {
+                try { sourceNode.stop(); } catch(e){}
+                sourceNode.disconnect();
+                // Clean up script node
+                if(pitchNode) { pitchNode.disconnect(); pitchNode = null; }
+            }
+            isPlaying = false;
+            updatePlayIcon(false);
+            cancelAnimationFrame(animationId);
+            
+            if (reset) {
+                pausedAt = 0;
+                inputs.progress.value = 0;
+            } else {
+                pausedAt = (audioContext.currentTime - startTime) * parseFloat(inputs.speed.value);
+            }
+        }
+
+        function updatePlayIcon(playing) {
+            if(playing) {
+                playIcon.classList.add('hidden');
+                pauseIcon.classList.remove('hidden');
+            } else {
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+            }
+        }
+
+        function cloneAudioBuffer(from) {
+            const other = audioContext.createBuffer(from.numberOfChannels, from.length, from.sampleRate);
+            for (let i = 0; i < from.numberOfChannels; i++) other.copyToChannel(from.getChannelData(i), i);
+            return other;
+        }
+
+        // --- Controls ---
+        inputs.speed.addEventListener('input', e => {
+            displays.speed.innerText = Math.round(e.target.value * 100) + "%";
+            if(isPlaying && sourceNode) sourceNode.playbackRate.setValueAtTime(e.target.value, audioContext.currentTime);
+        });
+
+        // 2. Updated Pitch Listener (Calls shifter)
+        inputs.pitch.addEventListener('input', e => {
+            const val = parseInt(e.target.value);
+            displays.pitch.innerText = val > 0 ? `+${val}` : val;
+            if(isPlaying && pitchShifterInstance) {
+                pitchShifterInstance.setPitch(val);
+            }
+        });
+
+        inputs.reverb.addEventListener('input', e => {
+            displays.reverb.innerText = Math.round(e.target.value * 100) + "%";
+            if(wetNode) {
+                wetNode.gain.setTargetAtTime(parseFloat(e.target.value), audioContext.currentTime, 0.1);
+                dryNode.gain.setTargetAtTime(1 - (parseFloat(e.target.value)*0.4), audioContext.currentTime, 0.1);
+            }
+        });
+
+        inputs.bass.addEventListener('input', e => displays.bass.innerText = e.target.value + "dB");
+        inputs.lofi.addEventListener('input', e => displays.lofi.innerText = e.target.value + "%");
+        inputs.spatial.addEventListener('input', e => displays.spatial.innerText = Math.round(e.target.value * 100) + "%");
+        
+        // 4. Reverse with Loader
+        inputs.reverse.addEventListener('change', async () => { 
+            if(isPlaying) {
+                stopAudio();
+                toggleLoader(true, "REVERSING AUDIO...");
+                // Allow UI to update
+                await new Promise(r => setTimeout(r, 100));
+                playAudio();
+                toggleLoader(false);
+            }
+        });
+
+        playBtn.addEventListener('click', () => {
+            if(!originalBuffer) return;
+            isPlaying ? stopAudio() : playAudio();
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            inputs.speed.value = 0.85; displays.speed.innerText = "85%";
+            inputs.pitch.value = -2; displays.pitch.innerText = "-2";
+            inputs.reverb.value = 0.4; displays.reverb.innerText = "40%";
+            inputs.bass.value = 5; displays.bass.innerText = "5dB";
+            inputs.lofi.value = 0; displays.lofi.innerText = "0%";
+            inputs.spatial.value = 0; displays.spatial.innerText = "0%";
+            inputs.reverse.checked = false;
+            if(isPlaying) { stopAudio(); playAudio(); }
+        });
+
+        inputs.progress.addEventListener('input', (e) => {
+            if(!originalBuffer) return;
+            pausedAt = (e.target.value / 100) * originalBuffer.duration;
+            if(isPlaying) { stopAudio(); playAudio(); } else formatTime(pausedAt);
+        });
+
+        function resetPlayer() {
+            stopAudio(true);
+            document.getElementById('totalTime').innerText = formatSeconds(originalBuffer.duration);
+        }
+
+        function updateProgress() {
+            if(!isPlaying) return;
+            const speed = parseFloat(inputs.speed.value);
+            const elapsed = (audioContext.currentTime - startTime) * speed;
+            inputs.progress.value = (elapsed / originalBuffer.duration) * 100;
+            formatTime(elapsed);
+            if(inputs.progress.value < 100) animationId = requestAnimationFrame(updateProgress);
+        }
+
+        function formatTime(s) {
+            document.getElementById('currentTime').innerText = formatSeconds(s);
+        }
+        function formatSeconds(s) {
+            const m = Math.floor(s / 60);
+            const sec = Math.floor(s % 60);
+            return `${m}:${sec < 10 ? '0'+sec : sec}`;
+        }
+
+        // --- 1. Visualizer (Updated: Dual Mirror Bars) ---
+        function visualize(analyser) {
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            const draw = () => {
+                if(!isPlaying) return;
+                requestAnimationFrame(draw);
+                analyser.getByteFrequencyData(dataArray);
+
+                const width = visualizerCanvas.width;
+                const height = visualizerCanvas.height;
+                const barWidth = (width / bufferLength) * 2.5;
+                let barHeight;
+                let x = 0;
+
+                canvasCtx.clearRect(0, 0, width, height);
+                
+                // Gradient
+                let gradient = canvasCtx.createLinearGradient(0, height, 0, 0);
+                gradient.addColorStop(0, '#7000ff');
+                gradient.addColorStop(1, '#00d2ff');
+                canvasCtx.fillStyle = gradient;
+
+                // Mirror Effect
+                // Left side
+                for(let i = 0; i < bufferLength; i++) {
+                    barHeight = (dataArray[i] / 255) * height;
+                    // Draw from center out
+                    canvasCtx.fillRect(width/2 + x, height - barHeight, barWidth, barHeight);
+                    canvasCtx.fillRect(width/2 - x - barWidth, height - barHeight, barWidth, barHeight);
+                    x += barWidth + 1;
+                }
+            };
+            draw();
+        }
+
+        // --- 3. Download (MP3 Conversion with LAME) ---
+        document.getElementById('downloadBtn').addEventListener('click', async () => {
+            if(!originalBuffer) return;
+            toggleLoader(true, "ENCODING MP3...");
+            
+            // Allow loader to render
+            await new Promise(r => setTimeout(r, 100));
+
+            let renderBuffer = originalBuffer;
+            if(inputs.reverse.checked) {
+                renderBuffer = cloneAudioBuffer(originalBuffer);
+                for (let i=0; i<renderBuffer.numberOfChannels; i++) Array.prototype.reverse.call(renderBuffer.getChannelData(i));
+            }
+
+            const speed = parseFloat(inputs.speed.value);
+            // Render length estimate
+            const offlineCtx = new OfflineAudioContext(2, (renderBuffer.length/speed) + (3*44100), renderBuffer.sampleRate);
+            
+            const source = offlineCtx.createBufferSource();
+            source.buffer = renderBuffer;
+            source.playbackRate.value = speed;
+            
+            // Apply granular pitch logic to offline context
+            const shifter = new PitchShifter(offlineCtx);
+            shifter.setPitch(parseInt(inputs.pitch.value));
+            const pNode = shifter.createNode();
+
+            const bass = offlineCtx.createBiquadFilter();
+            bass.type = 'lowshelf';
+            bass.frequency.value = 200;
+            bass.gain.value = parseFloat(inputs.bass.value);
+
+            const conv = offlineCtx.createConvolver();
+            const impLen = offlineCtx.sampleRate * 3;
+            const impBuf = offlineCtx.createBuffer(2, impLen, offlineCtx.sampleRate);
+            for(let c=0; c<2; c++){
+                const ch = impBuf.getChannelData(c);
+                for(let i=0; i<impLen; i++) ch[i] = (Math.random()*2-1)*Math.pow(1-i/impLen,2);
+            }
+            conv.buffer = impBuf;
+
+            const dry = offlineCtx.createGain();
+            const wet = offlineCtx.createGain();
+            const rVal = parseFloat(inputs.reverb.value);
+            dry.gain.value = 1 - (rVal * 0.4);
+            wet.gain.value = rVal;
+
+            const dist = offlineCtx.createWaveShaper();
+            dist.curve = makeDistortionCurve(parseFloat(inputs.lofi.value));
+
+            source.connect(pNode);
+            pNode.connect(dist);
+            dist.connect(bass);
+            bass.connect(dry);
+            bass.connect(conv);
+            conv.connect(wet);
+            dry.connect(offlineCtx.destination);
+            wet.connect(offlineCtx.destination);
+
+            source.start(0);
+
+            try {
+                const rendered = await offlineCtx.startRendering();
+                
+                // Convert to MP3 using LAMEJS
+                const mp3Data = encodeMP3(rendered.getChannelData(0), rendered.getChannelData(1), rendered.sampleRate);
+                const blob = new Blob(mp3Data, { type: 'audio/mp3' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                const name = songNameInput.value || "AURA_REMIX";
+                a.download = `${name}_Slowed.mp3`;
+                a.click();
+            } catch(e) { 
+                console.error(e);
+                alert("Render Failed: " + e.message); 
+            }
+            toggleLoader(false);
+        });
+
+        // LAME JS Encoding Helper
+        function encodeMP3(left, right, sampleRate) {
+            const channels = 2;
+            const kbps = 192;
+            const mp3encoder = new lamejs.Mp3Encoder(channels, sampleRate, kbps);
+            const mp3Data = [];
+            
+            // Convert Float32 to Int16
+            const sampleBlockSize = 1152;
+            const samplesL = new Int16Array(left.length);
+            const samplesR = new Int16Array(right.length);
+            
+            for (let i = 0; i < left.length; i++) {
+                samplesL[i] = Math.max(-1, Math.min(1, left[i])) * 32767;
+                samplesR[i] = Math.max(-1, Math.min(1, right[i])) * 32767;
+            }
+
+            for (let i = 0; i < samplesL.length; i += sampleBlockSize) {
+                const chunkL = samplesL.subarray(i, i + sampleBlockSize);
+                const chunkR = samplesR.subarray(i, i + sampleBlockSize);
+                const mp3buf = mp3encoder.encodeBuffer(chunkL, chunkR);
+                if (mp3buf.length > 0) mp3Data.push(mp3buf);
+            }
+            
+            const mp3buf = mp3encoder.flush();
+            if (mp3buf.length > 0) mp3Data.push(mp3buf);
+            return mp3Data;
+        }
+
+        function toggleLoader(show, text) {
+            if(show) { 
+                loader.classList.remove('hidden'); 
+                loaderText.innerText = text || "PROCESSING..."; 
+            } else { 
+                loader.classList.add('hidden'); 
+            }
+        }
+    </script>
+</body>
+</html>
