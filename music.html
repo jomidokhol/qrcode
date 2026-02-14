@@ -58,14 +58,20 @@
             padding: 40px; border-radius: 20px; text-align: center;
             box-shadow: 0 0 50px rgba(112, 0, 255, 0.2);
             max-width: 400px; width: 90%;
+            display: flex; flex-direction: column; align-items: center;
         }
+        /* Icon Button for Modal */
         .upload-big-btn {
             background: linear-gradient(135deg, var(--primary), #4a00e0);
-            color: white; border: none; padding: 15px 30px; font-size: 1.1rem;
-            border-radius: 50px; cursor: pointer; margin-top: 20px;
+            color: white; border: none; 
+            width: 80px; height: 80px; 
+            border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; margin-top: 40px; 
             box-shadow: var(--neon-glow); transition: 0.3s;
         }
-        .upload-big-btn:hover { transform: scale(1.05); }
+        .upload-big-btn svg { width: 32px; height: 32px; fill: white; }
+        .upload-big-btn:hover { transform: scale(1.1); box-shadow: 0 0 30px var(--primary); }
 
         /* --- Layout --- */
         .app-shell {
@@ -85,20 +91,18 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
 
-        /* 1. New Button (Top Right) */
+        /* New Project Icon Button */
         .new-btn {
             position: absolute; top: 20px; right: 20px;
             background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border);
-            color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem;
+            color: white; 
+            width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: 0.3s; z-index: 10;
         }
-        .new-btn:hover { background: var(--secondary); color: black; }
-
-        /* Audio Banner Input (Hidden but used for logic) */
-        .album-art-wrapper {
-            /* Now handled inside visualizer, keeping structure for input */
-            width: 0px; height: 0px; opacity: 0; position: absolute; pointer-events: none;
-        }
+        .new-btn svg { width: 20px; height: 20px; fill: white; }
+        .new-btn:hover { background: var(--secondary); transform: rotate(90deg); }
+        .new-btn:hover svg { fill: black; }
 
         /* Song Input Style */
         .song-meta {
@@ -112,9 +116,9 @@
         .song-input:focus { border-color: var(--secondary); width: 80%; }
         .banner-hint { font-size: 0.75rem; color: var(--text-muted); cursor: pointer; text-decoration: underline; }
 
-        /* 2. Visualizer (CG/Circular) */
+        /* Visualizer Canvas */
         canvas {
-            width: 100%; height: 350px; /* Increased height for circular visual */
+            width: 100%; height: 350px; 
             border-radius: 12px;
             margin-bottom: 20px;
         }
@@ -157,7 +161,7 @@
         }
 
         .upload-section {
-            display: none; /* Hidden, using popup instead */
+            display: none; 
         }
         
         /* Sliders Grid */
@@ -201,17 +205,17 @@
     <!-- Loader -->
     <div id="loader" class="hidden">
         <div class="loader-ring"></div>
-        <!-- 4. Updated Loader Text -->
-        <p id="loaderText" style="letter-spacing: 2px; font-size: 0.8rem;">PROCESSING AUDIO...</p>
+        <p id="loaderText" style="letter-spacing: 2px; font-size: 0.8rem;">PROCESSING...</p>
     </div>
 
-    <!-- 1. Upload Popup -->
+    <!-- Upload Popup -->
     <div id="uploadModal">
         <div class="modal-content">
             <h2 style="margin-bottom: 10px;">Load Audio</h2>
             <p style="color: var(--text-muted); font-size: 0.9rem;">Select an audio file to start mixing.</p>
-            <label class="upload-big-btn">
-                Select File
+            <!-- Icon Button -->
+            <label class="upload-big-btn" title="Select File">
+                <svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
                 <input type="file" id="modalAudioInput" accept="audio/*" style="display: none;">
             </label>
         </div>
@@ -222,12 +226,13 @@
         <!-- Stage: Banner, Visuals, Player -->
         <div class="stage-area">
             
-            <!-- 1. New Button -->
-            <button id="newProjectBtn" class="new-btn">NEW</button>
+            <!-- New Project Icon Button -->
+            <button id="newProjectBtn" class="new-btn" title="New Project">
+                <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            </button>
 
             <div class="song-meta">
                 <input type="text" id="songName" class="song-input" placeholder="Enter Song Name">
-                <!-- Trigger banner upload on click -->
                 <div class="banner-hint" onclick="document.getElementById('bannerInput').click()">Click here to Change Banner</div>
             </div>
 
@@ -235,7 +240,7 @@
             <input type="file" id="bannerInput" accept="image/*" style="display: none;">
             <img id="bannerImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' style='background:%231a1a20'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23333' font-family='sans-serif' font-size='24'%3ECOVER%3C/text%3E%3C/svg%3E" style="display: none;">
 
-            <!-- 2. Visualizer (Circular/CG) -->
+            <!-- Visualizer -->
             <canvas id="visualizer"></canvas>
 
             <!-- Player Icons -->
@@ -269,7 +274,6 @@
 
         <!-- Settings Panel -->
         <div class="settings-panel">
-            <!-- Hidden original upload section -->
             <div class="upload-section">
                 <div>
                     <h3 style="font-weight: 500;">Audio Settings</h3>
@@ -328,48 +332,90 @@
     </div>
 
     <script>
-        // Independent Pitch Shifter Class
+        // --- 1. FIXED: Advanced Pitch Shifter (Rotating Crossfade / Delay Line) ---
+        // eliminates cuts and latency artifacts by using a windowed dual-tap delay
         class PitchShifter {
             constructor(context) {
                 this.context = context;
                 this.pitchRatio = 1.0;
-                this.bufferSize = 4096;
-                this.fadeLength = 400; 
+                this.bufferSize = 4096; // Large buffer for safety
+                this.fadeLength = 0.05; // 50ms overlap
             }
+
             setPitch(semitones) {
+                // Determine pitch ratio. 
                 this.pitchRatio = Math.pow(2, semitones / 12);
             }
+
             createNode() {
                 const scriptNode = this.context.createScriptProcessor(this.bufferSize, 2, 2);
-                const bufferDuration = this.bufferSize / this.context.sampleRate;
-                const delayTime = 0.1;
+                
+                const delayTime = 0.200; // 200ms buffer
                 const delaySamples = Math.floor(delayTime * this.context.sampleRate);
                 const bufferL = new Float32Array(delaySamples);
                 const bufferR = new Float32Array(delaySamples);
-                let writePos = 0; let readPos = 0;
+                
+                let writePos = 0;
+                let phase = 0; // Phasor 0.0 to 1.0
+                
+                // Optimized grain window
+                const windowSize = delaySamples / 2; 
 
-                scriptNode.onaudioprocess = (audioProcessingEvent) => {
-                    const inputBuffer = audioProcessingEvent.inputBuffer;
-                    const outputBuffer = audioProcessingEvent.outputBuffer;
-                    const inputDataL = inputBuffer.getChannelData(0);
-                    const inputDataR = inputBuffer.getChannelData(1);
-                    const outputDataL = outputBuffer.getChannelData(0);
-                    const outputDataR = outputBuffer.getChannelData(1);
+                scriptNode.onaudioprocess = (e) => {
+                    const inputL = e.inputBuffer.getChannelData(0);
+                    const inputR = e.inputBuffer.getChannelData(1);
+                    const outputL = e.outputBuffer.getChannelData(0);
+                    const outputR = e.outputBuffer.getChannelData(1);
+                    
+                    for (let i = 0; i < inputL.length; i++) {
+                        // 1. Write to Ring Buffer
+                        bufferL[writePos] = inputL[i];
+                        bufferR[writePos] = inputR[i];
 
-                    for (let i = 0; i < inputBuffer.length; i++) {
-                        bufferL[writePos] = inputDataL[i];
-                        bufferR[writePos] = inputDataR[i];
-                        const rIndex = Math.floor(readPos);
-                        const rNext = (rIndex + 1) % delaySamples;
-                        const frac = readPos - rIndex;
-                        outputDataL[i] = bufferL[rIndex] * (1 - frac) + bufferL[rNext] * frac;
-                        outputDataR[i] = bufferR[rIndex] * (1 - frac) + bufferR[rNext] * frac;
+                        // 2. Calculate Pitch Phase
+                        // Relative speed difference (1.0 = normal, 0.5 = half speed)
+                        // If pitchRatio is 1, phase increment is 0.
+                        const phaseStep = (1.0 - this.pitchRatio) / windowSize;
+                        phase = (phase + phaseStep);
+                        if(phase >= 1.0) phase -= 1.0;
+                        if(phase < 0.0) phase += 1.0;
+
+                        // 3. Dual Tap Calculation (Overlap-Add)
+                        // Tap A follows phase
+                        // Tap B follows phase + 0.5 (180 deg out of phase)
+                        let offsetA = phase * windowSize;
+                        let offsetB = ((phase + 0.5) % 1.0) * windowSize;
+
+                        let readPosA = (writePos - offsetA + delaySamples) % delaySamples;
+                        let readPosB = (writePos - offsetB + delaySamples) % delaySamples;
+
+                        // Linear Interpolation for Tap A
+                        let idxA = Math.floor(readPosA);
+                        let fracA = readPosA - idxA;
+                        let nextA = (idxA + 1) % delaySamples;
+                        let valLA = bufferL[idxA] * (1-fracA) + bufferL[nextA] * fracA;
+                        let valRA = bufferR[idxA] * (1-fracA) + bufferR[nextA] * fracA;
+
+                        // Linear Interpolation for Tap B
+                        let idxB = Math.floor(readPosB);
+                        let fracB = readPosB - idxB;
+                        let nextB = (idxB + 1) % delaySamples;
+                        let valLB = bufferL[idxB] * (1-fracB) + bufferL[nextB] * fracB;
+                        let valRB = bufferR[idxB] * (1-fracB) + bufferR[nextB] * fracB;
+
+                        // 4. Triangle Window (Crossfade)
+                        // Gain is 1 when phase is 0.5, 0 when phase is 0 or 1
+                        let gainA = 0.5 * (1.0 - Math.cos(2 * Math.PI * phase)); 
+                        // Simplified triangle/cosine window for smoother overlap
+                        
+                        // Inverse for B? No, B is offset by 0.5, so we use same function on (phase+0.5)
+                        let gainB = 0.5 * (1.0 - Math.cos(2 * Math.PI * ((phase + 0.5)%1.0)));
+
+                        // Combine
+                        outputL[i] = (valLA * gainA) + (valLB * gainB);
+                        outputR[i] = (valRA * gainA) + (valRB * gainB);
+
                         writePos = (writePos + 1) % delaySamples;
-                        readPos = (readPos + this.pitchRatio) % delaySamples;
-                        const diff = (writePos - readPos + delaySamples) % delaySamples;
-                        if (diff < this.fadeLength) {
-                            readPos = (writePos - delaySamples/2 + delaySamples) % delaySamples;
-                        }
                     }
                 };
                 return scriptNode;
@@ -385,7 +431,7 @@
         let pausedAt = 0;
         let animationId;
         let pitchShifterInstance = null;
-        let loaderInterval; // For text cycling
+        // removed global loaderInterval
 
         // Nodes
         let gainNode, bassNode, dryNode, wetNode, pannerNode, distortionNode, masterGain, pitchNode;
@@ -443,14 +489,13 @@
 
         // --- 1. New Project & Modal Logic ---
         document.getElementById('newProjectBtn').addEventListener('click', () => {
-             // Stop current audio and show modal
             stopAudio(true);
             uploadModal.style.display = 'flex';
         });
 
         document.getElementById('modalAudioInput').addEventListener('change', (e) => {
             handleFileSelect(e);
-            uploadModal.style.display = 'none'; // Hide modal on selection
+            uploadModal.style.display = 'none'; 
         });
 
         bannerInput.addEventListener('change', (e) => {
@@ -462,7 +507,6 @@
             }
         });
 
-        // Also keep standard input listening just in case
         document.getElementById('audioInput').addEventListener('change', handleFileSelect);
 
         async function handleFileSelect(e) {
@@ -555,7 +599,7 @@
 
             masterGain = audioContext.createGain();
             const analyser = audioContext.createAnalyser();
-            analyser.fftSize = 512; // Higher FFT for detailed circle
+            analyser.fftSize = 256; 
 
             sourceNode.connect(pitchNode);
             pitchNode.connect(distortionNode);
@@ -645,8 +689,8 @@
         inputs.reverse.addEventListener('change', async () => { 
             if(isPlaying) {
                 stopAudio();
-                toggleLoader(true); // Uses default text array
-                await new Promise(r => setTimeout(r, 800)); // Delay to show loader
+                toggleLoader(true, "REVERSING AUDIO..."); 
+                await new Promise(r => setTimeout(r, 800)); 
                 playAudio();
                 toggleLoader(false);
             }
@@ -697,8 +741,7 @@
             return `${m}:${sec < 10 ? '0'+sec : sec}`;
         }
 
-        // --- 2. Visualizer (CG Rotation & Banner Integration) ---
-        let rotationAngle = 0;
+        // --- 2. Visualizer (Line Wave at Bottom) ---
         function visualize(analyser) {
             const bufferLength = analyser.frequencyBinCount;
             const dataArray = new Uint8Array(bufferLength);
@@ -710,75 +753,64 @@
 
                 const width = visualizerCanvas.width;
                 const height = visualizerCanvas.height;
-                const centerX = width / 2;
-                const centerY = height / 2;
-                const radius = 60; // Inner radius for image
-
-                canvasCtx.clearRect(0, 0, width, height);
                 
-                // Rotation increment
-                rotationAngle += 0.005;
+                canvasCtx.clearRect(0, 0, width, height);
 
-                canvasCtx.save();
-                canvasCtx.translate(centerX, centerY);
-                canvasCtx.rotate(rotationAngle);
-
-                // Draw Bars Radiating Outwards
-                const barWidth = (2 * Math.PI * radius) / (bufferLength / 1.5);
-                for (let i = 0; i < bufferLength; i++) {
-                    // Normalize value
-                    const value = dataArray[i];
-                    const percent = value / 255;
-                    const barHeight = radius + (percent * 80); // Max extension
-
-                    const hue = i + (performance.now() * 0.05);
-                    canvasCtx.fillStyle = `hsl(${hue % 360}, 100%, 60%)`;
-
+                // Draw Banner Image in Center (Static Rectangle)
+                if (bannerImg && bannerImg.src) {
+                    const imgSize = 200;
+                    const x = (width - imgSize) / 2;
+                    const y = (height - imgSize) / 2 - 20;
+                    
                     canvasCtx.save();
-                    // Distribute bars around circle
-                    const angle = (i * 2 * Math.PI) / bufferLength;
-                    canvasCtx.rotate(angle);
+                    canvasCtx.shadowBlur = 20;
+                    canvasCtx.shadowColor = "rgba(0,0,0,0.5)";
                     
-                    // Draw bar
-                    canvasCtx.fillRect(0, radius, 3, barHeight - radius); // Simple line/bar
+                    canvasCtx.beginPath();
+                    canvasCtx.roundRect(x, y, imgSize, imgSize, 10);
+                    canvasCtx.clip();
                     
-                    // Add "CG" particle effect at tip
-                    if(percent > 0.5) {
-                        canvasCtx.beginPath();
-                        canvasCtx.arc(0, barHeight + 5, 2, 0, 2*Math.PI);
-                        canvasCtx.fillStyle = '#fff';
-                        canvasCtx.fill();
-                    }
-
+                    canvasCtx.drawImage(bannerImg, x, y, imgSize, imgSize);
                     canvasCtx.restore();
                 }
 
-                // Draw Banner Image in Center (Static relative to rotation, or rotating if we want)
-                // Let's make the image rotate WITH the canvas for full effect, or counter-rotate to stay still.
-                // Here we let it rotate.
-                canvasCtx.beginPath();
-                canvasCtx.arc(0, 0, radius - 5, 0, Math.PI * 2);
-                canvasCtx.closePath();
-                canvasCtx.clip();
+                // Draw Waveform Line at Bottom
+                canvasCtx.lineWidth = 3;
+                canvasCtx.strokeStyle = 'rgba(0, 210, 255, 0.8)';
+                canvasCtx.shadowBlur = 10;
+                canvasCtx.shadowColor = 'var(--secondary)';
                 
-                if (bannerImg && bannerImg.src) {
-                   canvasCtx.drawImage(bannerImg, -radius, -radius, radius*2, radius*2);
-                } else {
-                   canvasCtx.fillStyle = '#111';
-                   canvasCtx.fill();
+                canvasCtx.beginPath();
+
+                const sliceWidth = width * 1.0 / bufferLength;
+                let x = 0;
+                
+                canvasCtx.moveTo(0, height);
+
+                for(let i = 0; i < bufferLength; i++) {
+                    const v = dataArray[i] / 255.0; 
+                    const y = height - (v * 80); 
+                    if(i === 0) {
+                        canvasCtx.moveTo(x, y);
+                    } else {
+                        canvasCtx.lineTo(x, y);
+                    }
+                    x += sliceWidth;
                 }
 
-                canvasCtx.restore();
+                canvasCtx.lineTo(width, height);
+                canvasCtx.stroke();
             };
             draw();
         }
 
-        // --- 3. Download Logic ---
+        // --- 3. FIXED: Download Logic with Real-time Status ---
         document.getElementById('downloadBtn').addEventListener('click', async () => {
             if(!originalBuffer) return;
-            toggleLoader(true); // Triggers dynamic text
             
-            await new Promise(r => setTimeout(r, 100));
+            // 2. Status: Preparing
+            toggleLoader(true, "PREPARING AUDIO..."); 
+            await new Promise(r => setTimeout(r, 50));
 
             let renderBuffer = originalBuffer;
             if(inputs.reverse.checked) {
@@ -832,15 +864,26 @@
             source.start(0);
 
             try {
+                // 2. Status: Rendering
+                toggleLoader(true, "RENDERING EFFECTS...");
                 const rendered = await offlineCtx.startRendering();
-                const mp3Data = encodeMP3(rendered.getChannelData(0), rendered.getChannelData(1), rendered.sampleRate);
+                
+                // 2. Status: Encoding
+                toggleLoader(true, "ENCODING MP3...");
+                // Allow UI to repaint
+                await new Promise(r => setTimeout(r, 50));
+                
+                const mp3Data = await encodeMP3Async(rendered.getChannelData(0), rendered.getChannelData(1), rendered.sampleRate);
+                
+                // 2. Status: Finalizing
+                toggleLoader(true, "FINALIZING...");
+                
                 const blob = new Blob(mp3Data, { type: 'audio/mp3' });
                 const url = URL.createObjectURL(blob);
                 
                 const a = document.createElement('a');
                 a.href = url;
                 const name = songNameInput.value || "AURA_REMIX";
-                // 3. Updated Filename Suffix
                 a.download = `${name}_slowed-reverb_onetool.mp3`;
                 a.click();
             } catch(e) { 
@@ -850,7 +893,8 @@
             toggleLoader(false);
         });
 
-        function encodeMP3(left, right, sampleRate) {
+        // Async Encoding to allow UI updates (prevents freeze)
+        async function encodeMP3Async(left, right, sampleRate) {
             const channels = 2;
             const kbps = 192;
             const mp3encoder = new lamejs.Mp3Encoder(channels, sampleRate, kbps);
@@ -860,16 +904,23 @@
             const samplesL = new Int16Array(left.length);
             const samplesR = new Int16Array(right.length);
             
+            // Normalize
             for (let i = 0; i < left.length; i++) {
                 samplesL[i] = Math.max(-1, Math.min(1, left[i])) * 32767;
                 samplesR[i] = Math.max(-1, Math.min(1, right[i])) * 32767;
             }
 
+            // Encode in chunks to keep UI alive
             for (let i = 0; i < samplesL.length; i += sampleBlockSize) {
                 const chunkL = samplesL.subarray(i, i + sampleBlockSize);
                 const chunkR = samplesR.subarray(i, i + sampleBlockSize);
                 const mp3buf = mp3encoder.encodeBuffer(chunkL, chunkR);
                 if (mp3buf.length > 0) mp3Data.push(mp3buf);
+                
+                // Yield to main thread every ~500 blocks to update text/animation
+                if(i % (sampleBlockSize * 500) === 0) {
+                     await new Promise(r => setTimeout(r, 0));
+                }
             }
             
             const mp3buf = mp3encoder.flush();
@@ -877,26 +928,12 @@
             return mp3Data;
         }
 
-        // 4. Dynamic Loader Text
+        // 2. FIXED: Loader only shows actual text, no randomization
         function toggleLoader(show, text) {
-            const messages = ["PROCESSING...", "ALMOST DONE...", "FINISHING...", "JUST A MOMENT..."];
-            let idx = 0;
-
             if(show) { 
                 loader.classList.remove('hidden'); 
-                loaderText.innerText = text || messages[0];
-                
-                // Clear existing interval
-                if(loaderInterval) clearInterval(loaderInterval);
-                
-                // Start text cycle
-                loaderInterval = setInterval(() => {
-                    idx = (idx + 1) % messages.length;
-                    loaderText.innerText = messages[idx];
-                }, 800);
-
+                if(text) loaderText.innerText = text;
             } else { 
-                if(loaderInterval) clearInterval(loaderInterval);
                 loader.classList.add('hidden'); 
             }
         }
