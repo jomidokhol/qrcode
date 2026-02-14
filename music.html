@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AURA.DSP | Slowed + Reverb + Visuals</title>
-    <!-- 3. MP3 Encoder Library -->
+    <!-- MP3 Encoder Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
     <style>
         :root {
@@ -47,6 +47,26 @@
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
+        /* --- Upload Modal (Popup) --- */
+        #uploadModal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 800;
+            backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: #111; border: 1px solid var(--glass-border);
+            padding: 40px; border-radius: 20px; text-align: center;
+            box-shadow: 0 0 50px rgba(112, 0, 255, 0.2);
+            max-width: 400px; width: 90%;
+        }
+        .upload-big-btn {
+            background: linear-gradient(135deg, var(--primary), #4a00e0);
+            color: white; border: none; padding: 15px 30px; font-size: 1.1rem;
+            border-radius: 50px; cursor: pointer; margin-top: 20px;
+            box-shadow: var(--neon-glow); transition: 0.3s;
+        }
+        .upload-big-btn:hover { transform: scale(1.05); }
+
         /* --- Layout --- */
         .app-shell {
             width: 100%; max-width: 900px;
@@ -65,30 +85,24 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
 
-        /* Audio Banner */
-        .album-art-wrapper {
-            width: 160px; height: 160px;
-            border-radius: 20px;
-            background: rgba(255,255,255,0.05);
-            overflow: hidden;
-            position: relative;
-            margin-bottom: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            transition: 0.3s;
-            cursor: pointer;
-            group: hover;
+        /* 1. New Button (Top Right) */
+        .new-btn {
+            position: absolute; top: 20px; right: 20px;
+            background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border);
+            color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem;
+            cursor: pointer; transition: 0.3s; z-index: 10;
         }
-        .album-art-wrapper:hover .art-overlay { opacity: 1; }
-        .album-art-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-        .art-overlay {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.6);
-            display: flex; align-items: center; justify-content: center;
-            opacity: 0; transition: 0.3s; font-size: 0.8rem; text-align: center; padding: 10px;
+        .new-btn:hover { background: var(--secondary); color: black; }
+
+        /* Audio Banner Input (Hidden but used for logic) */
+        .album-art-wrapper {
+            /* Now handled inside visualizer, keeping structure for input */
+            width: 0px; height: 0px; opacity: 0; position: absolute; pointer-events: none;
         }
 
-        /* 4. New Song Input Style */
+        /* Song Input Style */
         .song-meta {
-            text-align: center; margin-bottom: 20px; width: 100%;
+            text-align: center; margin-bottom: 20px; width: 100%; z-index: 5;
         }
         .song-input {
             background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.2);
@@ -96,22 +110,19 @@
             padding: 5px; margin-bottom: 5px; outline: none; transition: 0.3s;
         }
         .song-input:focus { border-color: var(--secondary); width: 80%; }
-        .banner-hint { font-size: 0.75rem; color: var(--text-muted); }
+        .banner-hint { font-size: 0.75rem; color: var(--text-muted); cursor: pointer; text-decoration: underline; }
 
-        /* Visualizer */
+        /* 2. Visualizer (CG/Circular) */
         canvas {
-            width: 100%; height: 140px;
+            width: 100%; height: 350px; /* Increased height for circular visual */
             border-radius: 12px;
             margin-bottom: 20px;
-            /* Update 1: Removed mask for clearer visuals */
-            /* mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); */
-            background: rgba(0,0,0,0.2);
         }
 
         /* --- Player Controls (Icons) --- */
         .player-controls {
             display: flex; gap: 30px; align-items: center; justify-content: center;
-            margin-bottom: 10px; opacity: 0.5; pointer-events: none; transition: 0.3s;
+            margin-bottom: 10px; opacity: 0.5; pointer-events: none; transition: 0.3s; z-index: 5;
         }
         .player-controls.active { opacity: 1; pointer-events: all; }
 
@@ -133,7 +144,7 @@
         .icon-btn.big:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(112, 0, 255, 0.6); }
 
         /* Progress Bar */
-        .progress-container { width: 100%; margin-top: 10px; }
+        .progress-container { width: 100%; margin-top: 10px; z-index: 5; position: relative; }
         .time-display { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; }
 
         /* --- Settings Panel --- */
@@ -146,15 +157,9 @@
         }
 
         .upload-section {
-            display: flex; justify-content: space-between; align-items: center;
-            padding-bottom: 20px; border-bottom: 1px solid var(--glass-border); margin-bottom: 25px;
+            display: none; /* Hidden, using popup instead */
         }
-        .file-btn {
-            background: transparent; border: 1px solid var(--secondary); color: var(--secondary);
-            padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; transition: 0.3s;
-        }
-        .file-btn:hover { background: var(--secondary); color: #000; box-shadow: 0 0 15px rgba(0, 210, 255, 0.3); }
-
+        
         /* Sliders Grid */
         .controls-grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 25px;
@@ -196,7 +201,20 @@
     <!-- Loader -->
     <div id="loader" class="hidden">
         <div class="loader-ring"></div>
+        <!-- 4. Updated Loader Text -->
         <p id="loaderText" style="letter-spacing: 2px; font-size: 0.8rem;">PROCESSING AUDIO...</p>
+    </div>
+
+    <!-- 1. Upload Popup -->
+    <div id="uploadModal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 10px;">Load Audio</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Select an audio file to start mixing.</p>
+            <label class="upload-big-btn">
+                Select File
+                <input type="file" id="modalAudioInput" accept="audio/*" style="display: none;">
+            </label>
+        </div>
     </div>
 
     <div class="app-shell">
@@ -204,19 +222,20 @@
         <!-- Stage: Banner, Visuals, Player -->
         <div class="stage-area">
             
-            <!-- Banner & Name Section (Updated) -->
-            <label class="album-art-wrapper" title="Upload Cover Art">
-                <img id="bannerImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' style='background:%231a1a20'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23333' font-family='sans-serif' font-size='24'%3ECOVER ART%3C/text%3E%3C/svg%3E">
-                <div class="art-overlay">Click to Change</div>
-                <input type="file" id="bannerInput" accept="image/*" style="display: none;">
-            </label>
-            
+            <!-- 1. New Button -->
+            <button id="newProjectBtn" class="new-btn">NEW</button>
+
             <div class="song-meta">
                 <input type="text" id="songName" class="song-input" placeholder="Enter Song Name">
-                <div class="banner-hint">Add Banner & Name</div>
+                <!-- Trigger banner upload on click -->
+                <div class="banner-hint" onclick="document.getElementById('bannerInput').click()">Click here to Change Banner</div>
             </div>
 
-            <!-- Visualizer -->
+            <!-- Hidden Banner Input & Image Source for Canvas -->
+            <input type="file" id="bannerInput" accept="image/*" style="display: none;">
+            <img id="bannerImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' style='background:%231a1a20'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23333' font-family='sans-serif' font-size='24'%3ECOVER%3C/text%3E%3C/svg%3E" style="display: none;">
+
+            <!-- 2. Visualizer (Circular/CG) -->
             <canvas id="visualizer"></canvas>
 
             <!-- Player Icons -->
@@ -233,7 +252,7 @@
                     <svg id="pauseIcon" class="hidden" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                 </button>
 
-                <!-- Download (Updated Icon for MP3) -->
+                <!-- Download -->
                 <button class="icon-btn" id="downloadBtn" title="Download MP3">
                     <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                 </button>
@@ -250,15 +269,13 @@
 
         <!-- Settings Panel -->
         <div class="settings-panel">
+            <!-- Hidden original upload section -->
             <div class="upload-section">
                 <div>
                     <h3 style="font-weight: 500;">Audio Settings</h3>
                     <p id="fileInfo" style="font-size: 0.8rem; color: var(--text-muted);">No audio loaded</p>
                 </div>
-                <label class="file-btn">
-                    Upload Audio
-                    <input type="file" id="audioInput" accept="audio/*" style="display: none;">
-                </label>
+                <input type="file" id="audioInput" accept="audio/*" style="display: none;">
             </div>
 
             <div class="controls-grid">
@@ -311,34 +328,25 @@
     </div>
 
     <script>
-        // --- 2. Independent Pitch Shifter (Granular Synthesis) ---
-        // This decouples pitch from speed.
+        // Independent Pitch Shifter Class
         class PitchShifter {
             constructor(context) {
                 this.context = context;
                 this.pitchRatio = 1.0;
                 this.bufferSize = 4096;
-                this.fadeLength = 400; // Granular fade
+                this.fadeLength = 400; 
             }
-
             setPitch(semitones) {
-                // Formula: 2^(semitones/12)
                 this.pitchRatio = Math.pow(2, semitones / 12);
             }
-
             createNode() {
-                // Using ScriptProcessor as simple workaround for lack of AudioWorklet in single file
                 const scriptNode = this.context.createScriptProcessor(this.bufferSize, 2, 2);
                 const bufferDuration = this.bufferSize / this.context.sampleRate;
-                
-                // Delay buffers
-                const delayTime = 0.1; // 100ms buffer
+                const delayTime = 0.1;
                 const delaySamples = Math.floor(delayTime * this.context.sampleRate);
                 const bufferL = new Float32Array(delaySamples);
                 const bufferR = new Float32Array(delaySamples);
-                
-                let writePos = 0;
-                let readPos = 0;
+                let writePos = 0; let readPos = 0;
 
                 scriptNode.onaudioprocess = (audioProcessingEvent) => {
                     const inputBuffer = audioProcessingEvent.inputBuffer;
@@ -349,27 +357,18 @@
                     const outputDataR = outputBuffer.getChannelData(1);
 
                     for (let i = 0; i < inputBuffer.length; i++) {
-                        // Write input to delay buffer
                         bufferL[writePos] = inputDataL[i];
                         bufferR[writePos] = inputDataR[i];
-
-                        // Read from delay buffer with pitch ratio
                         const rIndex = Math.floor(readPos);
                         const rNext = (rIndex + 1) % delaySamples;
                         const frac = readPos - rIndex;
-
-                        // Linear Interpolation
                         outputDataL[i] = bufferL[rIndex] * (1 - frac) + bufferL[rNext] * frac;
                         outputDataR[i] = bufferR[rIndex] * (1 - frac) + bufferR[rNext] * frac;
-
-                        // Increment pointers
                         writePos = (writePos + 1) % delaySamples;
                         readPos = (readPos + this.pitchRatio) % delaySamples;
-
-                        // Granular overlap safety: if read chases write
                         const diff = (writePos - readPos + delaySamples) % delaySamples;
                         if (diff < this.fadeLength) {
-                            readPos = (writePos - delaySamples/2 + delaySamples) % delaySamples; // jump back half
+                            readPos = (writePos - delaySamples/2 + delaySamples) % delaySamples;
                         }
                     }
                 };
@@ -386,6 +385,7 @@
         let pausedAt = 0;
         let animationId;
         let pitchShifterInstance = null;
+        let loaderInterval; // For text cycling
 
         // Nodes
         let gainNode, bassNode, dryNode, wetNode, pannerNode, distortionNode, masterGain, pitchNode;
@@ -393,6 +393,7 @@
         // UI Refs
         const loader = document.getElementById('loader');
         const loaderText = document.getElementById('loaderText');
+        const uploadModal = document.getElementById('uploadModal');
         const playBtn = document.getElementById('playBtn');
         const playIcon = document.getElementById('playIcon');
         const pauseIcon = document.getElementById('pauseIcon');
@@ -440,6 +441,18 @@
             visualizerCanvas.height = visualizerCanvas.offsetHeight;
         }
 
+        // --- 1. New Project & Modal Logic ---
+        document.getElementById('newProjectBtn').addEventListener('click', () => {
+             // Stop current audio and show modal
+            stopAudio(true);
+            uploadModal.style.display = 'flex';
+        });
+
+        document.getElementById('modalAudioInput').addEventListener('change', (e) => {
+            handleFileSelect(e);
+            uploadModal.style.display = 'none'; // Hide modal on selection
+        });
+
         bannerInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -449,15 +462,15 @@
             }
         });
 
+        // Also keep standard input listening just in case
         document.getElementById('audioInput').addEventListener('change', handleFileSelect);
 
         async function handleFileSelect(e) {
             if(!e.target.files[0]) return;
             const file = e.target.files[0];
             initAudio();
-            toggleLoader(true);
+            toggleLoader(true, "ANALYZING FILE...");
 
-            // Set song name automatically if empty
             if(songNameInput.value === "") {
                 songNameInput.value = file.name.replace(/\.[^/.]+$/, "");
             }
@@ -513,12 +526,8 @@
 
             sourceNode = audioContext.createBufferSource();
             sourceNode.buffer = bufferToPlay;
-            
-            // 2. Change: PlaybackRate ONLY controls speed now.
             sourceNode.playbackRate.value = parseFloat(inputs.speed.value);
-            // We do NOT set sourceNode.detune here anymore to keep them separate.
 
-            // FX Chain
             pitchShifterInstance = new PitchShifter(audioContext);
             pitchShifterInstance.setPitch(parseInt(inputs.pitch.value));
             pitchNode = pitchShifterInstance.createNode();
@@ -546,9 +555,8 @@
 
             masterGain = audioContext.createGain();
             const analyser = audioContext.createAnalyser();
-            analyser.fftSize = 256; // Optimized for visualizer
+            analyser.fftSize = 512; // Higher FFT for detailed circle
 
-            // Connection Graph: Source -> Pitch -> Dist -> Bass -> [Rev/Dry] -> Pan -> Master
             sourceNode.connect(pitchNode);
             pitchNode.connect(distortionNode);
             distortionNode.connect(bassNode);
@@ -579,7 +587,6 @@
             if (sourceNode) {
                 try { sourceNode.stop(); } catch(e){}
                 sourceNode.disconnect();
-                // Clean up script node
                 if(pitchNode) { pitchNode.disconnect(); pitchNode = null; }
             }
             isPlaying = false;
@@ -610,13 +617,11 @@
             return other;
         }
 
-        // --- Controls ---
         inputs.speed.addEventListener('input', e => {
             displays.speed.innerText = Math.round(e.target.value * 100) + "%";
             if(isPlaying && sourceNode) sourceNode.playbackRate.setValueAtTime(e.target.value, audioContext.currentTime);
         });
 
-        // 2. Updated Pitch Listener (Calls shifter)
         inputs.pitch.addEventListener('input', e => {
             const val = parseInt(e.target.value);
             displays.pitch.innerText = val > 0 ? `+${val}` : val;
@@ -637,13 +642,11 @@
         inputs.lofi.addEventListener('input', e => displays.lofi.innerText = e.target.value + "%");
         inputs.spatial.addEventListener('input', e => displays.spatial.innerText = Math.round(e.target.value * 100) + "%");
         
-        // 4. Reverse with Loader
         inputs.reverse.addEventListener('change', async () => { 
             if(isPlaying) {
                 stopAudio();
-                toggleLoader(true, "REVERSING AUDIO...");
-                // Allow UI to update
-                await new Promise(r => setTimeout(r, 100));
+                toggleLoader(true); // Uses default text array
+                await new Promise(r => setTimeout(r, 800)); // Delay to show loader
                 playAudio();
                 toggleLoader(false);
             }
@@ -694,7 +697,8 @@
             return `${m}:${sec < 10 ? '0'+sec : sec}`;
         }
 
-        // --- 1. Visualizer (Updated: Dual Mirror Bars) ---
+        // --- 2. Visualizer (CG Rotation & Banner Integration) ---
+        let rotationAngle = 0;
         function visualize(analyser) {
             const bufferLength = analyser.frequencyBinCount;
             const dataArray = new Uint8Array(bufferLength);
@@ -706,37 +710,74 @@
 
                 const width = visualizerCanvas.width;
                 const height = visualizerCanvas.height;
-                const barWidth = (width / bufferLength) * 2.5;
-                let barHeight;
-                let x = 0;
+                const centerX = width / 2;
+                const centerY = height / 2;
+                const radius = 60; // Inner radius for image
 
                 canvasCtx.clearRect(0, 0, width, height);
                 
-                // Gradient
-                let gradient = canvasCtx.createLinearGradient(0, height, 0, 0);
-                gradient.addColorStop(0, '#7000ff');
-                gradient.addColorStop(1, '#00d2ff');
-                canvasCtx.fillStyle = gradient;
+                // Rotation increment
+                rotationAngle += 0.005;
 
-                // Mirror Effect
-                // Left side
-                for(let i = 0; i < bufferLength; i++) {
-                    barHeight = (dataArray[i] / 255) * height;
-                    // Draw from center out
-                    canvasCtx.fillRect(width/2 + x, height - barHeight, barWidth, barHeight);
-                    canvasCtx.fillRect(width/2 - x - barWidth, height - barHeight, barWidth, barHeight);
-                    x += barWidth + 1;
+                canvasCtx.save();
+                canvasCtx.translate(centerX, centerY);
+                canvasCtx.rotate(rotationAngle);
+
+                // Draw Bars Radiating Outwards
+                const barWidth = (2 * Math.PI * radius) / (bufferLength / 1.5);
+                for (let i = 0; i < bufferLength; i++) {
+                    // Normalize value
+                    const value = dataArray[i];
+                    const percent = value / 255;
+                    const barHeight = radius + (percent * 80); // Max extension
+
+                    const hue = i + (performance.now() * 0.05);
+                    canvasCtx.fillStyle = `hsl(${hue % 360}, 100%, 60%)`;
+
+                    canvasCtx.save();
+                    // Distribute bars around circle
+                    const angle = (i * 2 * Math.PI) / bufferLength;
+                    canvasCtx.rotate(angle);
+                    
+                    // Draw bar
+                    canvasCtx.fillRect(0, radius, 3, barHeight - radius); // Simple line/bar
+                    
+                    // Add "CG" particle effect at tip
+                    if(percent > 0.5) {
+                        canvasCtx.beginPath();
+                        canvasCtx.arc(0, barHeight + 5, 2, 0, 2*Math.PI);
+                        canvasCtx.fillStyle = '#fff';
+                        canvasCtx.fill();
+                    }
+
+                    canvasCtx.restore();
                 }
+
+                // Draw Banner Image in Center (Static relative to rotation, or rotating if we want)
+                // Let's make the image rotate WITH the canvas for full effect, or counter-rotate to stay still.
+                // Here we let it rotate.
+                canvasCtx.beginPath();
+                canvasCtx.arc(0, 0, radius - 5, 0, Math.PI * 2);
+                canvasCtx.closePath();
+                canvasCtx.clip();
+                
+                if (bannerImg && bannerImg.src) {
+                   canvasCtx.drawImage(bannerImg, -radius, -radius, radius*2, radius*2);
+                } else {
+                   canvasCtx.fillStyle = '#111';
+                   canvasCtx.fill();
+                }
+
+                canvasCtx.restore();
             };
             draw();
         }
 
-        // --- 3. Download (MP3 Conversion with LAME) ---
+        // --- 3. Download Logic ---
         document.getElementById('downloadBtn').addEventListener('click', async () => {
             if(!originalBuffer) return;
-            toggleLoader(true, "ENCODING MP3...");
+            toggleLoader(true); // Triggers dynamic text
             
-            // Allow loader to render
             await new Promise(r => setTimeout(r, 100));
 
             let renderBuffer = originalBuffer;
@@ -746,14 +787,12 @@
             }
 
             const speed = parseFloat(inputs.speed.value);
-            // Render length estimate
             const offlineCtx = new OfflineAudioContext(2, (renderBuffer.length/speed) + (3*44100), renderBuffer.sampleRate);
             
             const source = offlineCtx.createBufferSource();
             source.buffer = renderBuffer;
             source.playbackRate.value = speed;
             
-            // Apply granular pitch logic to offline context
             const shifter = new PitchShifter(offlineCtx);
             shifter.setPitch(parseInt(inputs.pitch.value));
             const pNode = shifter.createNode();
@@ -794,8 +833,6 @@
 
             try {
                 const rendered = await offlineCtx.startRendering();
-                
-                // Convert to MP3 using LAMEJS
                 const mp3Data = encodeMP3(rendered.getChannelData(0), rendered.getChannelData(1), rendered.sampleRate);
                 const blob = new Blob(mp3Data, { type: 'audio/mp3' });
                 const url = URL.createObjectURL(blob);
@@ -803,7 +840,8 @@
                 const a = document.createElement('a');
                 a.href = url;
                 const name = songNameInput.value || "AURA_REMIX";
-                a.download = `${name}_Slowed.mp3`;
+                // 3. Updated Filename Suffix
+                a.download = `${name}_slowed-reverb_onetool.mp3`;
                 a.click();
             } catch(e) { 
                 console.error(e);
@@ -812,14 +850,12 @@
             toggleLoader(false);
         });
 
-        // LAME JS Encoding Helper
         function encodeMP3(left, right, sampleRate) {
             const channels = 2;
             const kbps = 192;
             const mp3encoder = new lamejs.Mp3Encoder(channels, sampleRate, kbps);
             const mp3Data = [];
             
-            // Convert Float32 to Int16
             const sampleBlockSize = 1152;
             const samplesL = new Int16Array(left.length);
             const samplesR = new Int16Array(right.length);
@@ -841,11 +877,26 @@
             return mp3Data;
         }
 
+        // 4. Dynamic Loader Text
         function toggleLoader(show, text) {
+            const messages = ["PROCESSING...", "ALMOST DONE...", "FINISHING...", "JUST A MOMENT..."];
+            let idx = 0;
+
             if(show) { 
                 loader.classList.remove('hidden'); 
-                loaderText.innerText = text || "PROCESSING..."; 
+                loaderText.innerText = text || messages[0];
+                
+                // Clear existing interval
+                if(loaderInterval) clearInterval(loaderInterval);
+                
+                // Start text cycle
+                loaderInterval = setInterval(() => {
+                    idx = (idx + 1) % messages.length;
+                    loaderText.innerText = messages[idx];
+                }, 800);
+
             } else { 
+                if(loaderInterval) clearInterval(loaderInterval);
                 loader.classList.add('hidden'); 
             }
         }
