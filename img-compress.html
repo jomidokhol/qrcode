@@ -1,3 +1,5 @@
+<!-- img-com.html -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,7 +45,7 @@
             align-items: center;
         }
 
-        /* --- HEADER (COPIED & ADAPTED FROM INDEX.HTML) --- */
+        /* --- HEADER (UPDATED TO MATCH INDEX.HTML) --- */
         header { 
             position: sticky; top: 0; z-index: 1000; width: 100%; 
             background: var(--bg-body); border-bottom: 1px solid var(--border); 
@@ -55,7 +57,7 @@
             justify-content: space-between; align-items: center; margin: 0 auto;
         }
         .logo { font-weight: 800; font-size: 1.4rem; color: var(--primary); display: flex; align-items: center; gap: 8px; cursor: pointer; text-decoration: none; }
-        .logo img { height: 40px; } /* Adjusted height */
+        .logo img { height: 50px; } /* Updated height to match index.html */
         .header-actions { display: flex; align-items: center; gap: 10px; }
         .theme-btn, .action-btn { background: var(--bg-card); border: 1px solid var(--border); width: 40px; height: 40px; border-radius: 12px; cursor: pointer; color: var(--text-main); transition: 0.3s; display: flex; justify-content: center; align-items: center;}
         .theme-btn:hover { border-color: var(--primary); color: var(--primary); }
@@ -167,7 +169,8 @@
         }
         select:focus, input:focus { border-color: var(--primary); }
 
-        .dimensions-group { display: flex; gap: 10px; }
+        /* Updated dimensions group to include unit selector */
+        .dimensions-group { display: flex; gap: 10px; align-items: flex-end; }
         
         .download-options {
             display: grid;
@@ -246,15 +249,13 @@
 </head>
 <body class="">
 
-    <!-- COPIED HEADER STRUCTURE FROM INDEX.HTML -->
+    <!-- HEADER (UPDATED to use Logo Image) -->
     <header>
         <div class="header-content">
             <a class="logo" href="index.html">
-                <!-- Fallback text logo if image missing, or use same image path -->
-                <span>GreenPress</span>
+                <img src="img/logo.png" alt="Logo">
             </a>
             <div class="header-actions">
-                <!-- Cleaned up logic-dependent buttons for display only -->
                 <button class="theme-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
             </div>
         </div>
@@ -314,14 +315,23 @@
                     </select>
                 </div>
 
-                <div class="control-group dimensions-group" id="customDims">
-                    <div>
-                        <label>Width</label>
-                        <input type="number" id="widthIn">
-                    </div>
-                    <div>
-                        <label>Height</label>
-                        <input type="number" id="heightIn">
+                <!-- Custom Dimensions + Unit Selector -->
+                <div class="control-group" id="customDims">
+                    <label>Dimensions</label>
+                    <div class="dimensions-group">
+                        <div style="flex: 2;">
+                            <input type="number" id="widthIn" placeholder="Width" step="0.01">
+                        </div>
+                        <div style="flex: 2;">
+                            <input type="number" id="heightIn" placeholder="Height" step="0.01">
+                        </div>
+                        <div style="flex: 1;">
+                            <select id="unitSelect" style="padding: 10px 5px; text-align: center;">
+                                <option value="px">px</option>
+                                <option value="in">in</option>
+                                <option value="cm">cm</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -362,6 +372,7 @@
         const customDims = document.getElementById('customDims');
         const widthIn = document.getElementById('widthIn');
         const heightIn = document.getElementById('heightIn');
+        const unitSelect = document.getElementById('unitSelect'); // New Unit Selector
         const filenameIn = document.getElementById('filenameIn');
         const formatIn = document.getElementById('formatIn');
         const loader = document.getElementById('loader');
@@ -377,6 +388,14 @@
         let originalImageObject = null; // The actual Image element for canvas drawing
         let currentBlob = null;
         let isDarkMode = false;
+        let currentUnit = 'px';
+
+        // Conversion Factors (Approximate for web)
+        const UNIT_FACTORS = {
+            px: 1,
+            in: 96,      // Standard CSS inch
+            cm: 37.795   // 96 / 2.54
+        };
 
         // --- THEME TOGGLE ---
         themeToggle.addEventListener('click', () => {
@@ -433,7 +452,6 @@
             filenameIn.value = nameParts.join('.');
             
             // Set default Format logic
-            // FIX: Default to JPG for PNG uploads so Quality slider works (Canvas PNG doesn't support quality)
             if(file.type === 'image/webp') {
                 formatIn.value = 'image/webp';
             } else {
@@ -445,17 +463,16 @@
                 originalImageObject = new Image();
                 originalImageObject.src = e.target.result;
                 originalImageObject.onload = () => {
-                    // Init inputs
-                    widthIn.value = originalImageObject.width;
-                    heightIn.value = originalImageObject.height;
-                    
-                    // Set Max Limits (Update 1)
-                    widthIn.max = originalImageObject.width;
-                    heightIn.max = originalImageObject.height;
+                    // Reset Unit to px on new file
+                    unitSelect.value = 'px';
+                    currentUnit = 'px';
 
-                    // Set Default Preset to Custom (Update 2)
+                    // Init inputs
+                    updateInputValues(originalImageObject.width, originalImageObject.height);
+                    
+                    // Set Default Preset to Custom
                     presetSelect.value = 'custom';
-                    customDims.style.display = 'flex';
+                    customDims.style.display = 'block';
                     
                     // Show Editor, Hide Dropzone
                     dropZone.style.display = 'none';
@@ -466,6 +483,26 @@
                 };
             };
             reader.readAsDataURL(file);
+        }
+
+        // Helper: Convert Pixels to Current Unit
+        function fromPx(px) {
+            return (px / UNIT_FACTORS[currentUnit]);
+        }
+
+        // Helper: Convert Current Unit Value to Pixels
+        function toPx(val) {
+            return (val * UNIT_FACTORS[currentUnit]);
+        }
+
+        // Update input fields based on pixel values
+        function updateInputValues(pxWidth, pxHeight) {
+            const w = fromPx(pxWidth);
+            const h = fromPx(pxHeight);
+            
+            // Show decimals for cm/in, integer for px
+            widthIn.value = currentUnit === 'px' ? Math.round(w) : w.toFixed(2);
+            heightIn.value = currentUnit === 'px' ? Math.round(h) : h.toFixed(2);
         }
 
         // --- COMPRESSION LOGIC ---
@@ -480,45 +517,53 @@
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
 
-                let targetWidth = originalImageObject.width;
-                let targetHeight = originalImageObject.height;
+                let targetWidthPx = originalImageObject.width;
+                let targetHeightPx = originalImageObject.height;
 
                 // Handle Resizing
                 const preset = presetSelect.value;
                 if (preset === 'custom') {
-                    // Max Size Validation logic moved to input listeners, but safety check here
-                    let w = parseInt(widthIn.value) || targetWidth;
-                    let h = parseInt(heightIn.value) || targetHeight;
-                    
-                    if(w > originalImageObject.width) w = originalImageObject.width;
-                    if(h > originalImageObject.height) h = originalImageObject.height;
-                    
-                    targetWidth = w;
-                    targetHeight = h;
+                    // Read Inputs (which might be in px, cm, or in)
+                    let inputW = parseFloat(widthIn.value) || 0;
+                    let inputH = parseFloat(heightIn.value) || 0;
+
+                    // Convert inputs to Pixels for Canvas
+                    targetWidthPx = toPx(inputW);
+                    targetHeightPx = toPx(inputH);
+
+                    // Safety fallback if invalid
+                    if(targetWidthPx <= 0) targetWidthPx = originalImageObject.width;
+                    if(targetHeightPx <= 0) targetHeightPx = originalImageObject.height;
+
                 } else if (preset !== 'original') {
-                    const maxWidth = parseInt(preset);
+                    // Presets (e.g., 1920) are always based on WIDTH in PIXELS
+                    const maxPx = parseInt(preset);
                     const ratio = originalImageObject.height / originalImageObject.width;
                     
-                    // Ensure preset doesn't upscale
-                    if(maxWidth < targetWidth) {
-                        targetWidth = maxWidth;
-                        targetHeight = maxWidth * ratio;
+                    // Ensure preset doesn't upscale (logic based on Pixels)
+                    if(maxPx < originalImageObject.width) {
+                        targetWidthPx = maxPx;
+                        targetHeightPx = maxPx * ratio;
+                    } else {
+                        targetWidthPx = originalImageObject.width;
+                        targetHeightPx = originalImageObject.height;
                     }
                     
-                    // Update custom inputs for visual feedback
-                    widthIn.value = Math.round(targetWidth);
-                    heightIn.value = Math.round(targetHeight);
+                    // Update custom inputs to show calculated values in current unit
+                    updateInputValues(targetWidthPx, targetHeightPx);
                 } else {
-                    // Reset inputs to original
-                    widthIn.value = originalImageObject.width;
-                    heightIn.value = originalImageObject.height;
+                    // Original
+                    targetWidthPx = originalImageObject.width;
+                    targetHeightPx = originalImageObject.height;
+                    updateInputValues(targetWidthPx, targetHeightPx);
                 }
 
-                canvas.width = targetWidth;
-                canvas.height = targetHeight;
+                // Apply to Canvas (Needs Integers)
+                canvas.width = Math.round(targetWidthPx);
+                canvas.height = Math.round(targetHeightPx);
 
                 // Draw image to canvas
-                ctx.drawImage(originalImageObject, 0, 0, targetWidth, targetHeight);
+                ctx.drawImage(originalImageObject, 0, 0, canvas.width, canvas.height);
 
                 // Compress
                 const quality = parseInt(qualityInput.value) / 100;
@@ -536,9 +581,6 @@
                     // Update Stats
                     compressedSizeDisplay.innerText = formatBytes(blob.size);
                     
-                    // Calculate savings
-                    const saved = ((originalFile.size - blob.size) / originalFile.size) * 100;
-                    
                     loader.style.display = 'none';
                 }, mimeType, quality);
             }, 50);
@@ -550,41 +592,42 @@
         qualityInput.addEventListener('input', (e) => {
             qualityVal.innerText = e.target.value;
         });
-        // Debounce the slider release to process
         qualityInput.addEventListener('change', processImage);
+
+        // Unit Change Handler
+        unitSelect.addEventListener('change', () => {
+            // 1. Get current values in Pixels before switching
+            let currentW_Px = toPx(parseFloat(widthIn.value) || 0);
+            let currentH_Px = toPx(parseFloat(heightIn.value) || 0);
+
+            // 2. Change Unit
+            currentUnit = unitSelect.value;
+
+            // 3. Update Inputs to new unit values
+            updateInputValues(currentW_Px, currentH_Px);
+        });
 
         // Preset Change
         presetSelect.addEventListener('change', () => {
             if (presetSelect.value === 'custom') {
-                customDims.style.display = 'flex';
-                widthIn.value = originalImageObject.width;
-                heightIn.value = originalImageObject.height;
+                customDims.style.display = 'block';
+                // Reset inputs to original size in current unit
+                updateInputValues(originalImageObject.width, originalImageObject.height);
             } else if (presetSelect.value === 'original') {
-                customDims.style.display = 'none'; // Optional: hide or keep showing values
-            } else {
-                customDims.style.display = 'flex'; // Keep showing to see calculated values
+                // Same as above essentially, but logical separation
+                updateInputValues(originalImageObject.width, originalImageObject.height);
             }
             processImage();
         });
 
-        // Custom Dimensions inputs (with Limits)
-        function enforceLimit(e) {
-            const max = parseInt(e.target.max);
-            let val = parseInt(e.target.value);
-            if (val > max) {
-                e.target.value = max;
-                // Alert visual feedback could go here
-            }
-            processImage();
-        }
-
-        widthIn.addEventListener('change', enforceLimit);
-        heightIn.addEventListener('change', enforceLimit);
+        // Custom Dimensions inputs
+        widthIn.addEventListener('change', processImage);
+        heightIn.addEventListener('change', processImage);
         
-        // Format Change - Reprocess to show correct preview
+        // Format Change
         formatIn.addEventListener('change', processImage);
 
-        // Download (Update 3: Use custom name and format)
+        // Download
         downloadBtn.addEventListener('click', () => {
             if (!currentBlob) return;
             const a = document.createElement('a');
@@ -611,8 +654,9 @@
             dropZone.style.display = 'block';
             qualityInput.value = 80;
             qualityVal.innerText = 80;
-            // Reset dropdowns
             presetSelect.value = 'custom';
+            unitSelect.value = 'px';
+            currentUnit = 'px';
         });
 
         // --- HELPER FUNCTIONS ---
