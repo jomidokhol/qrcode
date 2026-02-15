@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenPress | Image Compressor</title>
+    <!-- Added FontAwesome for the new Header icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- CSS VARIABLES & THEME CONFIGURATION --- */
+        :root {
+            --primary: #10b981; /* Green */
+            --primary-hover: #059669;
+            --bg-body: #ffffff;
+            --bg-card: #f3f4f6;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+            --transition: 0.3s ease;
+        }
+
+        /* Dark Mode Overrides */
+        body.dark-mode {
+            --bg-body: #111111;
+            --bg-card: #1f1f1f;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --border: #374151;
+        }
+
+        /* --- GLOBAL STYLES --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            transition: background-color var(--transition), color var(--transition);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- HEADER (COPIED & ADAPTED FROM INDEX.HTML) --- */
+        header { 
+            position: sticky; top: 0; z-index: 1000; width: 100%; 
+            background: var(--bg-body); border-bottom: 1px solid var(--border); 
+            padding: 15px 20px; box-shadow: 0 2px 4px var(--shadow);
+            display: flex; justify-content: center; flex-direction: column;
+        }
+        .header-content { 
+            width: 100%; max-width: 1000px; display: flex; 
+            justify-content: space-between; align-items: center; margin: 0 auto;
+        }
+        .logo { font-weight: 800; font-size: 1.4rem; color: var(--primary); display: flex; align-items: center; gap: 8px; cursor: pointer; text-decoration: none; }
+        .logo img { height: 40px; } /* Adjusted height */
+        .header-actions { display: flex; align-items: center; gap: 10px; }
+        .theme-btn, .action-btn { background: var(--bg-card); border: 1px solid var(--border); width: 40px; height: 40px; border-radius: 12px; cursor: pointer; color: var(--text-main); transition: 0.3s; display: flex; justify-content: center; align-items: center;}
+        .theme-btn:hover { border-color: var(--primary); color: var(--primary); }
+        
+        /* Stub styles for items from index.html that might not be used but are in the HTML */
+        .login-btn-header { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer; display: none; } /* Hidden as per context */
+        .user-profile-btn { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; border: 2px solid var(--primary); cursor: pointer; display: none; }
+
+        /* --- MAIN CONTAINER --- */
+        main {
+            width: 100%;
+            max-width: 1000px;
+            padding: 40px 20px;
+            flex: 1;
+        }
+
+        /* --- UPLOAD ZONE --- */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 60px;
+            text-align: center;
+            background: var(--bg-card);
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--primary);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 15px;
+            animation: bounce 2s infinite;
+        }
+
+        input[type="file"] { display: none; }
+
+        /* --- EDITOR SECTION (Hidden by default) --- */
+        .editor-container {
+            display: none; /* Hidden initially */
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+            animation: slideUp 0.5s ease;
+        }
+
+        @media (max-width: 768px) {
+            .editor-container { grid-template-columns: 1fr; }
+        }
+
+        /* Preview Area */
+        .preview-area {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            min-height: 400px;
+        }
+
+        .image-wrapper {
+            max-width: 100%;
+            max-height: 500px;
+            position: relative;
+            box-shadow: var(--shadow);
+        }
+
+        .image-wrapper img {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 8px;
+            display: block;
+        }
+
+        /* Controls Area */
+        .controls-area {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            height: fit-content;
+        }
+
+        .control-group { margin-bottom: 25px; }
+        .control-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; }
+        
+        .range-wrap { display: flex; align-items: center; gap: 10px; }
+        input[type="range"] {
+            flex: 1;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        select, input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-body);
+            color: var(--text-main);
+            outline: none;
+        }
+        select:focus, input:focus { border-color: var(--primary); }
+
+        .dimensions-group { display: flex; gap: 10px; }
+        
+        .download-options {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        /* Stats Badge */
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+        .stat-item strong { color: var(--primary); display: block; font-size: 1.1rem; }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            margin-top: 10px;
+        }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* --- ANIMATIONS & LOADING --- */
+        .loader-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            border-radius: var(--radius);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            z-index: 10;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+</head>
+<body class="">
+
+    <!-- COPIED HEADER STRUCTURE FROM INDEX.HTML -->
+    <header>
+        <div class="header-content">
+            <a class="logo" href="index.html">
+                <!-- Fallback text logo if image missing, or use same image path -->
+                <span>GreenPress</span>
+            </a>
+            <div class="header-actions">
+                <!-- Cleaned up logic-dependent buttons for display only -->
+                <button class="theme-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- UPLOAD SECTION -->
+        <div class="upload-zone" id="dropZone">
+            <div class="upload-icon">⇩</div>
+            <h2>Drag & Drop your image here</h2>
+            <p style="color: var(--text-muted); margin-top: 10px;">or click to browse files</p>
+            <input type="file" id="fileInput" accept="image/png, image/jpeg, image/webp">
+        </div>
+
+        <!-- EDITOR SECTION -->
+        <div class="editor-container" id="editor">
+            <!-- Left: Preview -->
+            <div class="preview-area">
+                <div class="loader-overlay" id="loader">
+                    <div class="spinner"></div>
+                    <span>Compressing...</span>
+                </div>
+                <div class="image-wrapper">
+                    <img id="previewImg" src="" alt="Preview">
+                </div>
+            </div>
+
+            <!-- Right: Controls -->
+            <div class="controls-area">
+                <div class="stats">
+                    <div class="stat-item">
+                        <span>Original</span>
+                        <strong id="originalSize">0 KB</strong>
+                    </div>
+                    <div class="stat-item" style="text-align: right;">
+                        <span>Compressed</span>
+                        <strong id="compressedSize" style="color: var(--primary);">0 KB</strong>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Quality: <span id="qualityVal">80</span>%</label>
+                    <div class="range-wrap">
+                        <input type="range" id="quality" min="1" max="100" value="80">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Resize Preset</label>
+                    <select id="preset">
+                        <!-- Custom is now default -->
+                        <option value="custom" selected>Custom Size (Default)</option>
+                        <option value="original">Original Dimensions</option>
+                        <option value="1920">Full HD (1920px width)</option>
+                        <option value="1080">Instagram/Web (1080px width)</option>
+                        <option value="500">Thumbnail (500px width)</option>
+                    </select>
+                </div>
+
+                <div class="control-group dimensions-group" id="customDims">
+                    <div>
+                        <label>Width</label>
+                        <input type="number" id="widthIn">
+                    </div>
+                    <div>
+                        <label>Height</label>
+                        <input type="number" id="heightIn">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Export Options</label>
+                    <div class="download-options">
+                        <input type="text" id="filenameIn" placeholder="Filename">
+                        <select id="formatIn">
+                            <option value="image/jpeg">JPG</option>
+                            <option value="image/png">PNG</option>
+                            <option value="image/webp">WEBP</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" id="downloadBtn">
+                    <span>⬇ Download Image</span>
+                </button>
+                <button class="btn btn-outline" id="newImageBtn">
+                    <span>↺ Compress Another</span>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- VARIABLES ---
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const editor = document.getElementById('editor');
+        const previewImg = document.getElementById('previewImg');
+        const themeToggle = document.getElementById('themeToggle');
+        
+        // Controls
+        const qualityInput = document.getElementById('quality');
+        const qualityVal = document.getElementById('qualityVal');
+        const presetSelect = document.getElementById('preset');
+        const customDims = document.getElementById('customDims');
+        const widthIn = document.getElementById('widthIn');
+        const heightIn = document.getElementById('heightIn');
+        const filenameIn = document.getElementById('filenameIn');
+        const formatIn = document.getElementById('formatIn');
+        const loader = document.getElementById('loader');
+        
+        // Stats & Buttons
+        const originalSizeDisplay = document.getElementById('originalSize');
+        const compressedSizeDisplay = document.getElementById('compressedSize');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const newImageBtn = document.getElementById('newImageBtn');
+
+        // State
+        let originalFile = null;
+        let originalImageObject = null; // The actual Image element for canvas drawing
+        let currentBlob = null;
+        let isDarkMode = false;
+
+        // --- THEME TOGGLE ---
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const icon = themeToggle.querySelector('i');
+            if(document.body.classList.contains('dark-mode')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+            isDarkMode = !isDarkMode;
+        });
+
+        // --- UPLOAD HANDLING ---
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            if (!file.type.match(/image.*/)) {
+                alert("Please upload an image file (JPG, PNG, WebP).");
+                return;
+            }
+
+            originalFile = file;
+            originalSizeDisplay.innerText = formatBytes(file.size);
+
+            // Set default Filename (without extension)
+            const nameParts = file.name.split('.');
+            nameParts.pop(); // remove extension
+            filenameIn.value = nameParts.join('.');
+            
+            // Set default Format logic
+            // FIX: Default to JPG for PNG uploads so Quality slider works (Canvas PNG doesn't support quality)
+            if(file.type === 'image/webp') {
+                formatIn.value = 'image/webp';
+            } else {
+                formatIn.value = 'image/jpeg';
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                originalImageObject = new Image();
+                originalImageObject.src = e.target.result;
+                originalImageObject.onload = () => {
+                    // Init inputs
+                    widthIn.value = originalImageObject.width;
+                    heightIn.value = originalImageObject.height;
+                    
+                    // Set Max Limits (Update 1)
+                    widthIn.max = originalImageObject.width;
+                    heightIn.max = originalImageObject.height;
+
+                    // Set Default Preset to Custom (Update 2)
+                    presetSelect.value = 'custom';
+                    customDims.style.display = 'flex';
+                    
+                    // Show Editor, Hide Dropzone
+                    dropZone.style.display = 'none';
+                    editor.style.display = 'grid';
+                    
+                    // Trigger first compression
+                    processImage();
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // --- COMPRESSION LOGIC ---
+        function processImage() {
+            if (!originalImageObject) return;
+
+            // Show Loader
+            loader.style.display = 'flex';
+
+            // Small timeout to allow loader to render
+            setTimeout(() => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                let targetWidth = originalImageObject.width;
+                let targetHeight = originalImageObject.height;
+
+                // Handle Resizing
+                const preset = presetSelect.value;
+                if (preset === 'custom') {
+                    // Max Size Validation logic moved to input listeners, but safety check here
+                    let w = parseInt(widthIn.value) || targetWidth;
+                    let h = parseInt(heightIn.value) || targetHeight;
+                    
+                    if(w > originalImageObject.width) w = originalImageObject.width;
+                    if(h > originalImageObject.height) h = originalImageObject.height;
+                    
+                    targetWidth = w;
+                    targetHeight = h;
+                } else if (preset !== 'original') {
+                    const maxWidth = parseInt(preset);
+                    const ratio = originalImageObject.height / originalImageObject.width;
+                    
+                    // Ensure preset doesn't upscale
+                    if(maxWidth < targetWidth) {
+                        targetWidth = maxWidth;
+                        targetHeight = maxWidth * ratio;
+                    }
+                    
+                    // Update custom inputs for visual feedback
+                    widthIn.value = Math.round(targetWidth);
+                    heightIn.value = Math.round(targetHeight);
+                } else {
+                    // Reset inputs to original
+                    widthIn.value = originalImageObject.width;
+                    heightIn.value = originalImageObject.height;
+                }
+
+                canvas.width = targetWidth;
+                canvas.height = targetHeight;
+
+                // Draw image to canvas
+                ctx.drawImage(originalImageObject, 0, 0, targetWidth, targetHeight);
+
+                // Compress
+                const quality = parseInt(qualityInput.value) / 100;
+                
+                // Determine output type from User Selection
+                let mimeType = formatIn.value;
+                
+                canvas.toBlob((blob) => {
+                    currentBlob = blob;
+                    const url = URL.createObjectURL(blob);
+                    
+                    // Update Preview
+                    previewImg.src = url;
+                    
+                    // Update Stats
+                    compressedSizeDisplay.innerText = formatBytes(blob.size);
+                    
+                    // Calculate savings
+                    const saved = ((originalFile.size - blob.size) / originalFile.size) * 100;
+                    
+                    loader.style.display = 'none';
+                }, mimeType, quality);
+            }, 50);
+        }
+
+        // --- EVENT LISTENERS FOR CONTROLS ---
+        
+        // Quality Slider
+        qualityInput.addEventListener('input', (e) => {
+            qualityVal.innerText = e.target.value;
+        });
+        // Debounce the slider release to process
+        qualityInput.addEventListener('change', processImage);
+
+        // Preset Change
+        presetSelect.addEventListener('change', () => {
+            if (presetSelect.value === 'custom') {
+                customDims.style.display = 'flex';
+                widthIn.value = originalImageObject.width;
+                heightIn.value = originalImageObject.height;
+            } else if (presetSelect.value === 'original') {
+                customDims.style.display = 'none'; // Optional: hide or keep showing values
+            } else {
+                customDims.style.display = 'flex'; // Keep showing to see calculated values
+            }
+            processImage();
+        });
+
+        // Custom Dimensions inputs (with Limits)
+        function enforceLimit(e) {
+            const max = parseInt(e.target.max);
+            let val = parseInt(e.target.value);
+            if (val > max) {
+                e.target.value = max;
+                // Alert visual feedback could go here
+            }
+            processImage();
+        }
+
+        widthIn.addEventListener('change', enforceLimit);
+        heightIn.addEventListener('change', enforceLimit);
+        
+        // Format Change - Reprocess to show correct preview
+        formatIn.addEventListener('change', processImage);
+
+        // Download (Update 3: Use custom name and format)
+        downloadBtn.addEventListener('click', () => {
+            if (!currentBlob) return;
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(currentBlob);
+            
+            const name = filenameIn.value || 'compressed_image';
+            const mime = formatIn.value;
+            let ext = 'jpg';
+            if(mime === 'image/png') ext = 'png';
+            if(mime === 'image/webp') ext = 'webp';
+
+            a.download = `${name}.${ext}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+
+        // Reset
+        newImageBtn.addEventListener('click', () => {
+            originalFile = null;
+            originalImageObject = null;
+            fileInput.value = '';
+            editor.style.display = 'none';
+            dropZone.style.display = 'block';
+            qualityInput.value = 80;
+            qualityVal.innerText = 80;
+            // Reset dropdowns
+            presetSelect.value = 'custom';
+        });
+
+        // --- HELPER FUNCTIONS ---
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+    </script>
+</body>
+</html>
