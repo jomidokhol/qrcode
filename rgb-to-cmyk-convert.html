@@ -41,7 +41,7 @@
             padding: 20px; 
         }
         .container { width: 100%; max-width: 900px; }
-        .main-card { background: var(--card); border: 1px solid var(--border); border-radius: 32px; padding: 30px; box-shadow: 0 25px 50px -12px var(--shadow); }
+        .main-card { background: var(--card); border: 1px solid var(--border); border-radius: 32px; padding: 30px; box-shadow: 0 25px 50px -12px var(--shadow); margin-bottom: 20px; }
 
         .upload-box { 
             border: 2px dashed var(--primary); border-radius: 24px; padding: 30px; 
@@ -72,7 +72,7 @@
 
         label { font-size: 0.8rem; font-weight: 700; margin-bottom: 5px; display: block; opacity: 0.9; }
         
-        select, input[type="range"] {
+        select, input[type="range"], input[type="number"], input[type="text"] {
             width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--border); 
             background: var(--card); color: var(--text); outline: none; cursor: pointer;
         }
@@ -88,7 +88,6 @@
             background: var(--bg); border: 1px solid var(--border); border-radius: 16px;
             overflow: hidden; position: relative; 
             display: flex; justify-content: center; align-items: center;
-            /* Responsive height for display, but canvas keeps real pixels */
             aspect-ratio: 16/9; 
         }
         .canvas-label {
@@ -97,7 +96,6 @@
             padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700;
             pointer-events: none; z-index: 5;
         }
-        /* Canvas Styling for Responsive Display Only */
         canvas { 
             width: 100%; height: 100%; object-fit: contain; 
         }
@@ -121,14 +119,47 @@
             text-align: center; padding: 20px; font-size: 0.8rem; opacity: 0.7; 
             border-top: 1px solid var(--border); margin-top: auto;
         }
+
+        /* --- NEW STYLES FOR OPTIONS --- */
+        .mode-selection-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+        }
+        @media (max-width: 600px) { .mode-selection-grid { grid-template-columns: 1fr; } }
+        
+        .mode-card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 24px;
+            padding: 40px 20px; text-align: center; cursor: pointer; transition: 0.3s;
+            box-shadow: 0 10px 30px -5px var(--shadow);
+        }
+        .mode-card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .mode-icon { font-size: 3rem; color: var(--primary); margin-bottom: 20px; }
+        
+        .view-section { display: none; animation: fadeIn 0.5s; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .manual-tool { border-bottom: 2px dashed var(--border); padding-bottom: 25px; margin-bottom: 25px; }
+        .manual-tool:last-child { border-bottom: none; }
+        .input-group-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .input-group-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        
+        .copy-icon { cursor: pointer; color: var(--primary); margin-left: 5px; }
+        .btn-small { padding: 8px 12px; font-size: 0.8rem; width: auto; display: inline-flex; margin-top: 0; }
+        
+        .back-btn { margin-bottom: 20px; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; font-weight: 600; opacity: 0.7; }
+        .back-btn:hover { opacity: 1; color: var(--primary); }
+        
+        .tool-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+
     </style>
 </head>
 <body>
 
     <header>
         <div class="header-content">
-            <div class="logo" onclick="setView('mainOptionsView')">
-            <img id="logoImage" src="img/logo.png" alt="Logo">
+            <div class="logo" onclick="location.reload()">
+                <img id="logoImage" src="img/logo.png" alt="Logo">
+                <span>Converter Pro</span>
             </div>
             <button class="theme-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
         </div>
@@ -136,103 +167,220 @@
 
     <div class="main-content">
         <div class="container">
-            <div class="main-card">
-                <h2 style="text-align: center; margin-bottom: 10px;">RGB to CMYK Converter</h2>
-                <p style="text-align: center; font-size: 0.9rem; opacity: 0.7; margin-bottom: 25px;">
-                    High-Resolution Processing without Quality Loss
-                </p>
 
-                <!-- Configuration -->
-                <div class="settings-section">
-                    <h4 style="margin-bottom: 15px; color: var(--primary);"><i class="fas fa-sliders-h"></i> Conversion Settings</h4>
-                    <div class="settings-grid">
-                        <div>
-                            <label>Color Profile (Simulation)</label>
-                            <select id="profileSelect">
-                                <option value="coated">US Web Coated (SWOP) v2</option>
-                                <option value="fogra39" selected>Coated FOGRA39 (ISO 12647)</option>
-                                <option value="japancolor">Japan Color 2001 Coated</option>
-                                <option value="uncoated">Uncoated (Matte Paper)</option>
-                                <option value="grayscale">Grayscale (K Only)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label>Rendering Intent</label>
-                            <select id="intentSelect">
-                                <option value="perceptual" selected>Perceptual (Photographic)</option>
-                                <option value="relative">Relative Colorimetric</option>
-                                <option value="absolute">Absolute Colorimetric</option>
-                            </select>
-                        </div>
+            <!-- VIEW 1: MODE SELECTION -->
+            <div id="selectionView" class="view-section active">
+                <h2 style="text-align: center; margin-bottom: 30px;">Select Conversion Mode</h2>
+                <div class="mode-selection-grid">
+                    <div class="mode-card" onclick="setView('manualView')">
+                        <i class="fas fa-calculator mode-icon"></i>
+                        <h3>Manual Convert</h3>
+                        <p style="opacity: 0.7; font-size: 0.9rem; margin-top: 10px;">RGB Cracker, Calculator & Custom Filter</p>
+                    </div>
+                    <div class="mode-card" onclick="setView('automaticView')">
+                        <i class="fas fa-magic mode-icon"></i>
+                        <h3>Automatic Convert</h3>
+                        <p style="opacity: 0.7; font-size: 0.9rem; margin-top: 10px;">Full Image Processing & Profile Conversion</p>
                     </div>
                 </div>
+            </div>
 
-                <!-- Upload Area -->
-                <div class="upload-box" id="dropZone">
-                    <div id="loading" class="loading-overlay">
-                        <div class="spinner"></div>
-                        <span style="font-weight: 700; font-size: 1rem;" id="loadingText">Processing High-Res Image...</span>
+            <!-- VIEW 2: MANUAL CONVERT -->
+            <div id="manualView" class="view-section">
+                <div class="back-btn" onclick="setView('selectionView')"><i class="fas fa-arrow-left"></i> Back to Menu</div>
+                
+                <div class="main-card">
+                    <h2 style="text-align: center; margin-bottom: 25px;">Manual RGB Tools</h2>
+
+                    <!-- 1. RGB Cracker -->
+                    <div class="manual-tool">
+                        <h4 style="color: var(--primary); margin-bottom: 15px;"><i class="fas fa-eye-dropper"></i> 1. RGB Cracker</h4>
+                        <p style="font-size: 0.8rem; margin-bottom: 10px;">Upload image and click on any pixel to get RGB%.</p>
+                        
+                        <!-- Step 1: Image Upload -->
+                        <div class="upload-box" id="manualDropZone" style="padding: 15px; margin-bottom: 15px;">
+                            <i class="fas fa-image" style="font-size: 1.5rem; color: var(--primary);"></i>
+                            <p style="font-size: 0.8rem;">Click to Upload Image for Analysis</p>
+                            <input type="file" id="manualFileInput" hidden accept="image/*">
+                        </div>
+                        
+                        <div class="canvas-wrapper" id="crackerCanvasWrap" style="display:none; margin-bottom: 15px; aspect-ratio: auto; min-height: 200px;">
+                            <canvas id="manualCrackerCanvas" style="cursor: crosshair;"></canvas>
+                        </div>
+
+                        <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 15px;">
+                            <div id="colorPreviewBox" style="height: 40px; width: 60px; border-radius: 8px; border: 1px solid var(--border); background: #000;"></div>
+                            <span id="crackerHexText" style="font-weight: bold; font-family: monospace;">#000000</span>
+                        </div>
+                        
+                        <label>RGB Percentage (Result)</label>
+                        <div class="input-group-3">
+                            <input type="text" id="crackerR" readonly placeholder="R%">
+                            <input type="text" id="crackerG" readonly placeholder="G%">
+                            <input type="text" id="crackerB" readonly placeholder="B%">
+                        </div>
+                        <button class="btn btn-outline" onclick="copyRGBGroup()">Copy All RGB Values <i class="fas fa-copy"></i></button>
                     </div>
 
-                    <i class="fas fa-cloud-arrow-up" style="font-size: 3rem; color: var(--primary); margin-bottom: 15px;"></i>
-                    <h3 id="uploadTitle">Click to Upload Image</h3>
-                    <p style="font-size: 0.8rem; opacity: 0.7; margin-top: 5px;">Supports JPG, PNG, WEBP, TIFF (Max 50MB)</p>
-                    <input type="file" id="fileInput" hidden accept="image/*">
+                    <!-- 2. RGB to CMYK Calculator -->
+                    <div class="manual-tool">
+                        <div class="tool-header">
+                            <h4 style="color: var(--primary);"><i class="fas fa-calculator"></i> 2. RGB to CMYK Calculator</h4>
+                        </div>
+                        <p style="font-size: 0.8rem; margin-bottom: 10px;">Input or Paste RGB(%) to Calculate CMYK(%).</p>
+                        
+                        <div style="display:flex; justify-content: space-between; align-items:flex-end; margin-bottom:5px;">
+                            <label>Input RGB (%)</label>
+                            <button class="btn btn-outline btn-small" onclick="pasteRGBGroup()"><i class="fas fa-paste"></i> Paste RGB</button>
+                        </div>
+                        <div class="input-group-3">
+                            <input type="number" id="calcR" placeholder="R %" min="0" max="100">
+                            <input type="number" id="calcG" placeholder="G %" min="0" max="100">
+                            <input type="number" id="calcB" placeholder="B %" min="0" max="100">
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="calculateCMYK()" style="margin-bottom: 15px;">Calculate</button>
+
+                        <label>Result CMYK (%)</label>
+                        <div class="input-group-4">
+                            <input type="text" id="resC" readonly placeholder="C%">
+                            <input type="text" id="resM" readonly placeholder="M%">
+                            <input type="text" id="resY" readonly placeholder="Y%">
+                            <input type="text" id="resK" readonly placeholder="K%">
+                        </div>
+                        <button class="btn btn-outline" onclick="copyCMYKGroup()">Copy All CMYK Values <i class="fas fa-copy"></i></button>
+                    </div>
+
+                    <!-- 3. CMYK Converter (Image Tint) -->
+                    <div class="manual-tool" style="border-bottom: none; padding-bottom: 0;">
+                        <h4 style="color: var(--primary); margin-bottom: 15px;"><i class="fas fa-paint-brush"></i> 3. CMYK Converter (Image)</h4>
+                        <p style="font-size: 0.8rem; margin-bottom: 10px;">Paste CMYK(%) values. Applies to the image uploaded in Step 1.</p>
+
+                        <div style="display:flex; justify-content: space-between; align-items:flex-end; margin-bottom:5px;">
+                            <label>Input CMYK (%)</label>
+                            <button class="btn btn-outline btn-small" onclick="pasteCMYKGroup()"><i class="fas fa-paste"></i> Paste CMYK</button>
+                        </div>
+                        <div class="input-group-4">
+                            <input type="number" id="inC" placeholder="C %">
+                            <input type="number" id="inM" placeholder="M %">
+                            <input type="number" id="inY" placeholder="Y %">
+                            <input type="number" id="inK" placeholder="K %">
+                        </div>
+
+                        <!-- Canvas for final output (using the image from step 1) -->
+                        <div style="margin-top: 15px;">
+                            <canvas id="manualResultCanvas" style="width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--border); display: none;"></canvas>
+                        </div>
+                        
+                        <button class="btn btn-primary" id="manualProcessBtn">Convert Step 1 Image</button>
+                        <button class="btn btn-outline" id="manualDownloadBtn" style="display: none;">Download Result</button>
+                    </div>
                 </div>
+            </div>
 
-                <!-- Main Action -->
-                <button class="btn btn-primary" id="processBtn" disabled>
-                    <i class="fas fa-cogs"></i> Convert Image
-                </button>
+            <!-- VIEW 3: AUTOMATIC CONVERT (Original Code) -->
+            <div id="automaticView" class="view-section">
+                <div class="back-btn" onclick="setView('selectionView')"><i class="fas fa-arrow-left"></i> Back to Menu</div>
 
-                <!-- Results -->
-                <div class="result-area" id="resultArea">
-                    <div class="settings-section" style="border-color: var(--primary);">
-                        <h4 style="margin-bottom: 15px;"><i class="fas fa-file-export"></i> Export Options</h4>
+                <div class="main-card">
+                    <h2 style="text-align: center; margin-bottom: 10px;">RGB to CMYK Converter</h2>
+                    <p style="text-align: center; font-size: 0.9rem; opacity: 0.7; margin-bottom: 25px;">
+                        High-Resolution Processing without Quality Loss
+                    </p>
+
+                    <!-- Configuration -->
+                    <div class="settings-section">
+                        <h4 style="margin-bottom: 15px; color: var(--primary);"><i class="fas fa-sliders-h"></i> Conversion Settings</h4>
                         <div class="settings-grid">
                             <div>
-                                <label>Output Format</label>
-                                <select id="formatSelect">
-                                    <option value="image/jpeg" selected>JPEG (High Compatibility)</option>
-                                    <option value="image/png">PNG (Lossless)</option>
-                                    <option value="image/webp">WEBP (Modern)</option>
+                                <label>Color Profile (Simulation)</label>
+                                <select id="profileSelect">
+                                    <option value="coated">US Web Coated (SWOP) v2</option>
+                                    <option value="fogra39" selected>Coated FOGRA39 (ISO 12647)</option>
+                                    <option value="japancolor">Japan Color 2001 Coated</option>
+                                    <option value="uncoated">Uncoated (Matte Paper)</option>
+                                    <option value="grayscale">Grayscale (K Only)</option>
                                 </select>
                             </div>
                             <div>
-                                <label>Quality: <span id="qualityVal">100%</span></label>
-                                <input type="range" id="qualityRange" min="10" max="100" value="100">
+                                <label>Rendering Intent</label>
+                                <select id="intentSelect">
+                                    <option value="perceptual" selected>Perceptual (Photographic)</option>
+                                    <option value="relative">Relative Colorimetric</option>
+                                    <option value="absolute">Absolute Colorimetric</option>
+                                </select>
                             </div>
                         </div>
                     </div>
 
-                    <div class="preview-grid">
-                        <div>
-                            <div class="canvas-wrapper">
-                                <span class="canvas-label">Original (RGB)</span>
-                                <canvas id="canvasOriginal"></canvas>
-                            </div>
-                            <div class="image-info" id="originalInfo"></div>
+                    <!-- Upload Area -->
+                    <div class="upload-box" id="dropZone">
+                        <div id="loading" class="loading-overlay">
+                            <div class="spinner"></div>
+                            <span style="font-weight: 700; font-size: 1rem;" id="loadingText">Processing High-Res Image...</span>
                         </div>
-                        <div>
-                            <div class="canvas-wrapper">
-                                <span class="canvas-label">CMYK Proof</span>
-                                <canvas id="canvasCMYK"></canvas>
+
+                        <i class="fas fa-cloud-arrow-up" style="font-size: 3rem; color: var(--primary); margin-bottom: 15px;"></i>
+                        <h3 id="uploadTitle">Click to Upload Image</h3>
+                        <p style="font-size: 0.8rem; opacity: 0.7; margin-top: 5px;">Supports JPG, PNG, WEBP, TIFF (Max 50MB)</p>
+                        <input type="file" id="fileInput" hidden accept="image/*">
+                    </div>
+
+                    <!-- Main Action -->
+                    <button class="btn btn-primary" id="processBtn" disabled>
+                        <i class="fas fa-cogs"></i> Convert Image
+                    </button>
+
+                    <!-- Results -->
+                    <div class="result-area" id="resultArea">
+                        <div class="settings-section" style="border-color: var(--primary);">
+                            <h4 style="margin-bottom: 15px;"><i class="fas fa-file-export"></i> Export Options</h4>
+                            <div class="settings-grid">
+                                <div>
+                                    <label>Output Format</label>
+                                    <select id="formatSelect">
+                                        <option value="image/jpeg" selected>JPEG (High Compatibility)</option>
+                                        <option value="image/png">PNG (Lossless)</option>
+                                        <option value="image/webp">WEBP (Modern)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label>Quality: <span id="qualityVal">100%</span></label>
+                                    <input type="range" id="qualityRange" min="10" max="100" value="100">
+                                </div>
                             </div>
-                            <div class="image-info" id="cmykInfo"></div>
+                        </div>
+
+                        <div class="preview-grid">
+                            <div>
+                                <div class="canvas-wrapper">
+                                    <span class="canvas-label">Original (RGB)</span>
+                                    <canvas id="canvasOriginal"></canvas>
+                                </div>
+                                <div class="image-info" id="originalInfo"></div>
+                            </div>
+                            <div>
+                                <div class="canvas-wrapper">
+                                    <span class="canvas-label">CMYK Proof</span>
+                                    <canvas id="canvasCMYK"></canvas>
+                                </div>
+                                <div class="image-info" id="cmykInfo"></div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <button class="btn btn-outline" onclick="location.reload()">
+                                <i class="fas fa-redo"></i> New Image
+                            </button>
+                            <button class="btn btn-primary" id="downloadBtn" style="margin-top: 0;">
+                                <i class="fas fa-download"></i> Download High-Res
+                            </button>
                         </div>
                     </div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <button class="btn btn-outline" onclick="location.reload()">
-                            <i class="fas fa-redo"></i> New Image
-                        </button>
-                        <button class="btn btn-primary" id="downloadBtn" style="margin-top: 0;">
-                            <i class="fas fa-download"></i> Download High-Res
-                        </button>
-                    </div>
+
                 </div>
-
             </div>
+
         </div>
     </div>
 
@@ -241,6 +389,12 @@
     </footer>
 
     <script>
+        // --- VIEW SWITCHING LOGIC ---
+        function setView(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+
         // --- THEME LOGIC ---
         const themeToggle = document.getElementById('themeToggle');
         themeToggle.onclick = () => {
@@ -250,7 +404,225 @@
             icon.classList.toggle('fa-sun');
         };
 
-        // --- ELEMENTS ---
+        /* =========================================
+           MANUAL MODE LOGIC
+           ========================================= */
+        
+        let manualImgSource = null; // Stores the image from Step 1
+
+        // 1. RGB CRACKER (Now with Image Input)
+        const manualFileInput = document.getElementById('manualFileInput');
+        const manualDropZone = document.getElementById('manualDropZone');
+        const crackerCanvas = document.getElementById('manualCrackerCanvas');
+        const crackerCtx = crackerCanvas.getContext('2d');
+        const crackR = document.getElementById('crackerR');
+        const crackG = document.getElementById('crackerG');
+        const crackB = document.getElementById('crackerB');
+        const colorPreviewBox = document.getElementById('colorPreviewBox');
+        const crackerHexText = document.getElementById('crackerHexText');
+
+        manualDropZone.onclick = () => manualFileInput.click();
+        
+        manualFileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    manualImgSource = new Image();
+                    manualImgSource.onload = () => {
+                        // Display Image in Step 1 Canvas
+                        document.getElementById('crackerCanvasWrap').style.display = 'flex';
+                        manualDropZone.style.display = 'none'; // Hide upload box to save space or just change text
+                        
+                        crackerCanvas.width = manualImgSource.naturalWidth;
+                        crackerCanvas.height = manualImgSource.naturalHeight;
+                        crackerCtx.drawImage(manualImgSource, 0, 0);
+                    };
+                    manualImgSource.src = evt.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        // Pick Color Logic
+        crackerCanvas.onclick = (e) => {
+            const rect = crackerCanvas.getBoundingClientRect();
+            // Calculate scale in case displayed size != natural size
+            const scaleX = crackerCanvas.width / rect.width;
+            const scaleY = crackerCanvas.height / rect.height;
+            
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+            
+            const pixel = crackerCtx.getImageData(x, y, 1, 1).data;
+            const r = pixel[0];
+            const g = pixel[1];
+            const b = pixel[2];
+
+            // Update UI
+            colorPreviewBox.style.backgroundColor = `rgb(${r},${g},${b})`;
+            
+            // Hex
+            const toHex = (c) => { const hex = c.toString(16); return hex.length == 1 ? "0" + hex : hex; };
+            crackerHexText.innerText = "#" + toHex(r) + toHex(g) + toHex(b);
+
+            // Percentages
+            crackR.value = ((r / 255) * 100).toFixed(1);
+            crackG.value = ((g / 255) * 100).toFixed(1);
+            crackB.value = ((b / 255) * 100).toFixed(1);
+        };
+
+        // Copy RGB Group
+        function copyRGBGroup() {
+            const txt = `${crackR.value} ${crackG.value} ${crackB.value}`;
+            navigator.clipboard.writeText(txt).then(() => {
+                const btn = document.activeElement;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = 'Copied! <i class="fas fa-check"></i>';
+                setTimeout(() => btn.innerHTML = originalText, 1500);
+            });
+        }
+
+        // 2. RGB TO CMYK CALCULATOR
+        // Paste RGB Group
+        async function pasteRGBGroup() {
+            try {
+                const text = await navigator.clipboard.readText();
+                // Regex to find all numbers (float or int)
+                const matches = text.match(/[+-]?([0-9]*[.])?[0-9]+/g);
+                if (matches && matches.length >= 3) {
+                    document.getElementById('calcR').value = parseFloat(matches[0]);
+                    document.getElementById('calcG').value = parseFloat(matches[1]);
+                    document.getElementById('calcB').value = parseFloat(matches[2]);
+                } else {
+                    alert("Clipboard format not recognized. Please copy RGB values.");
+                }
+            } catch (err) {
+                alert("Failed to read clipboard.");
+            }
+        }
+
+        function calculateCMYK() {
+            let r = parseFloat(document.getElementById('calcR').value) || 0;
+            let g = parseFloat(document.getElementById('calcG').value) || 0;
+            let b = parseFloat(document.getElementById('calcB').value) || 0;
+
+            // Normalize to 0-1
+            let c = 1 - (r / 100);
+            let m = 1 - (g / 100);
+            let y = 1 - (b / 100);
+            let k = Math.min(c, m, y);
+
+            if (k === 1) {
+                c = 0; m = 0; y = 0;
+            } else {
+                c = (c - k) / (1 - k);
+                m = (m - k) / (1 - k);
+                y = (y - k) / (1 - k);
+            }
+
+            document.getElementById('resC').value = (c * 100).toFixed(1);
+            document.getElementById('resM').value = (m * 100).toFixed(1);
+            document.getElementById('resY').value = (y * 100).toFixed(1);
+            document.getElementById('resK').value = (k * 100).toFixed(1);
+        }
+
+        function copyCMYKGroup() {
+            const c = document.getElementById('resC').value;
+            const m = document.getElementById('resM').value;
+            const y = document.getElementById('resY').value;
+            const k = document.getElementById('resK').value;
+            const txt = `${c} ${m} ${y} ${k}`;
+            navigator.clipboard.writeText(txt).then(() => {
+                const btn = document.activeElement;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = 'Copied! <i class="fas fa-check"></i>';
+                setTimeout(() => btn.innerHTML = originalText, 1500);
+            });
+        }
+
+        // 3. CMYK CONVERTER (Uses Image from Step 1)
+        
+        // Paste CMYK Group
+        async function pasteCMYKGroup() {
+            try {
+                const text = await navigator.clipboard.readText();
+                const matches = text.match(/[+-]?([0-9]*[.])?[0-9]+/g);
+                if (matches && matches.length >= 4) {
+                    document.getElementById('inC').value = parseFloat(matches[0]);
+                    document.getElementById('inM').value = parseFloat(matches[1]);
+                    document.getElementById('inY').value = parseFloat(matches[2]);
+                    document.getElementById('inK').value = parseFloat(matches[3]);
+                } else {
+                    alert("Clipboard format not recognized. Please copy CMYK values.");
+                }
+            } catch (err) {
+                alert("Failed to read clipboard.");
+            }
+        }
+
+        const manualResultCanvas = document.getElementById('manualResultCanvas');
+        const manualCtx = manualResultCanvas.getContext('2d');
+        const manualProcessBtn = document.getElementById('manualProcessBtn');
+        const manualDownloadBtn = document.getElementById('manualDownloadBtn');
+
+        manualProcessBtn.onclick = () => {
+            if(!manualImgSource) { 
+                alert("Please upload an image in Step 1 (RGB Cracker) first."); 
+                // Scroll to top
+                document.getElementById('manualView').scrollTo({top:0, behavior:'smooth'});
+                return; 
+            }
+            
+            // Get CMYK percentages
+            const cP = parseFloat(document.getElementById('inC').value) || 0;
+            const mP = parseFloat(document.getElementById('inM').value) || 0;
+            const yP = parseFloat(document.getElementById('inY').value) || 0;
+            const kP = parseFloat(document.getElementById('inK').value) || 0;
+
+            // Convert desired CMYK to RGB (Simulated Ink Color)
+            let c = cP / 100;
+            let m = mP / 100;
+            let y = yP / 100;
+            let k = kP / 100;
+
+            let rInk = (1 - c) * (1 - k);
+            let gInk = (1 - m) * (1 - k);
+            let bInk = (1 - y) * (1 - k);
+            
+            // Set canvas
+            manualResultCanvas.width = manualImgSource.naturalWidth;
+            manualResultCanvas.height = manualImgSource.naturalHeight;
+            manualResultCanvas.style.display = "block";
+            manualDownloadBtn.style.display = "inline-flex";
+            
+            manualCtx.drawImage(manualImgSource, 0, 0);
+            
+            const imgData = manualCtx.getImageData(0, 0, manualResultCanvas.width, manualResultCanvas.height);
+            const data = imgData.data;
+
+            // Apply Ink Tint Logic (Grayscale base * Ink Color)
+            for(let i=0; i < data.length; i+=4) {
+                const gray = 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2];
+                // Multiply blend mode simulation for "Colorize"
+                data[i] = (gray / 255) * (rInk * 255);     // R
+                data[i+1] = (gray / 255) * (gInk * 255);   // G
+                data[i+2] = (gray / 255) * (bInk * 255);   // B
+            }
+            manualCtx.putImageData(imgData, 0, 0);
+        };
+
+        manualDownloadBtn.onclick = () => {
+            const a = document.createElement('a');
+            a.download = 'manual_cmyk_convert.jpg';
+            a.href = manualResultCanvas.toDataURL('image/jpeg', 0.9);
+            a.click();
+        };
+
+
+        /* =========================================
+           AUTOMATIC MODE LOGIC (EXISTING)
+           ========================================= */
         const fileInput = document.getElementById('fileInput');
         const dropZone = document.getElementById('dropZone');
         const processBtn = document.getElementById('processBtn');
@@ -259,7 +631,7 @@
         const loading = document.getElementById('loading');
         
         const canvasOriginal = document.getElementById('canvasOriginal');
-        const ctxOriginal = canvasOriginal.getContext('2d'); // Will initialize with alpha: false for standard images
+        const ctxOriginal = canvasOriginal.getContext('2d'); 
         const canvasCMYK = document.getElementById('canvasCMYK');
         const ctxCMYK = canvasCMYK.getContext('2d');
 
