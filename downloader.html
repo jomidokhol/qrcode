@@ -4,29 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Universal Media Downloader</title>
-    <!-- Firebase SDKs -->
+    <!-- FontAwesome -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <style>
         :root {
             --primary: #00e676;
             --primary-dark: #00c853;
-            --bg-color: #ffffff;
+            --accent: #2979ff;
+            --bg-color: #f0f2f5;
             --text-color: #333333;
-            --card-bg: #f5f5f5;
-            --input-bg: #e0e0e0;
-            --shadow: 0 4px 15px rgba(0,0,0,0.1);
-            --transition: all 0.3s ease;
+            --card-bg: #ffffff;
+            --input-bg: #f1f3f4;
+            --shadow: 0 8px 30px rgba(0,0,0,0.12);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --radius: 16px;
         }
 
         [data-theme="dark"] {
-            --bg-color: #000000;
-            --text-color: #ffffff;
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
             --card-bg: #1e1e1e;
-            --input-bg: #333333;
-            --shadow: 0 4px 15px rgba(0, 230, 118, 0.2);
+            --input-bg: #2c2c2c;
+            --shadow: 0 8px 30px rgba(0, 230, 118, 0.15);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', 'Roboto', sans-serif; }
         
         body {
             background-color: var(--bg-color);
@@ -35,39 +37,52 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow-x: hidden;
         }
 
         /* Header */
         header {
-            padding: 20px;
+            padding: 20px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid var(--primary);
+            background: var(--card-bg);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .logo {
             font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--primary);
+            font-weight: 800;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
+        .logo i { color: var(--primary); -webkit-text-fill-color: initial; }
+
         .controls { display: flex; gap: 15px; }
         
         .icon-btn {
-            background: none;
+            background: var(--input-bg);
             border: none;
             color: var(--text-color);
-            font-size: 1.2rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             cursor: pointer;
             transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
         }
         
-        .icon-btn:hover { color: var(--primary); transform: scale(1.1); }
+        .icon-btn:hover { background: var(--primary); color: #000; transform: rotate(15deg); }
 
         /* Main Content */
         main {
@@ -75,220 +90,281 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 40px 20px;
-            max-width: 800px;
+            padding: 50px 20px;
+            max-width: 900px;
             margin: 0 auto;
             width: 100%;
         }
 
+        /* Input Section */
         .input-group {
             width: 100%;
             position: relative;
             display: flex;
             gap: 10px;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            background: var(--card-bg);
+            padding: 10px;
+            border-radius: 50px;
+            box-shadow: var(--shadow);
+            border: 1px solid transparent;
+            transition: var(--transition);
+        }
+
+        .input-group:focus-within {
+            border-color: var(--primary);
+            transform: scale(1.02);
         }
 
         input[type="text"] {
             flex: 1;
             padding: 15px 20px;
-            border-radius: 30px;
-            border: 2px solid var(--primary);
-            background: var(--input-bg);
+            border: none;
+            background: transparent;
             color: var(--text-color);
             outline: none;
-            font-size: 1rem;
-            transition: var(--transition);
+            font-size: 1.1rem;
         }
 
         .action-btn {
-            padding: 15px 30px;
-            border-radius: 30px;
+            padding: 12px 35px;
+            border-radius: 40px;
             border: none;
-            background: var(--primary);
+            background: linear-gradient(45deg, var(--primary-dark), var(--primary));
             color: #000;
-            font-weight: bold;
+            font-weight: 700;
             cursor: pointer;
             transition: var(--transition);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            font-size: 1rem;
+            box-shadow: 0 4px 15px rgba(0, 230, 118, 0.4);
         }
 
-        .action-btn:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .action-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0, 230, 118, 0.6); }
 
         /* Preview Card */
         .preview-card {
             background: var(--card-bg);
-            border-radius: 20px;
-            padding: 20px;
+            border-radius: var(--radius);
+            padding: 30px;
             width: 100%;
             box-shadow: var(--shadow);
-            display: none; /* Hidden by default */
-            animation: slideUp 0.5s ease;
-            position: relative;
+            display: none;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(40px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         .media-info {
             display: flex;
-            gap: 20px;
+            gap: 30px;
             flex-wrap: wrap;
         }
 
         .thumbnail-container {
-            flex: 1 1 200px;
-            border-radius: 15px;
+            flex: 1 1 300px;
+            border-radius: 12px;
             overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             position: relative;
         }
 
         .thumbnail-container img {
             width: 100%;
-            height: auto;
+            height: 100%;
+            object-fit: cover;
             display: block;
+            transition: transform 0.5s;
         }
 
+        .thumbnail-container:hover img { transform: scale(1.05); }
+
         .details {
-            flex: 2 1 300px;
+            flex: 1 1 350px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 20px;
         }
 
         .editable-title {
             background: transparent;
             border: none;
-            border-bottom: 1px solid var(--primary);
+            border-bottom: 2px solid var(--primary);
             color: var(--text-color);
-            font-size: 1.2rem;
+            font-size: 1.4rem;
+            font-weight: 600;
             padding: 5px;
             width: 100%;
+            transition: var(--transition);
         }
+
+        .editable-title:focus { border-bottom-color: var(--accent); }
 
         .options-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 15px;
+            background: var(--input-bg);
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         select {
-            padding: 10px;
+            width: 100%;
+            padding: 12px;
             border-radius: 8px;
-            background: var(--input-bg);
+            background: var(--card-bg);
             color: var(--text-color);
-            border: 1px solid var(--primary);
+            border: 1px solid transparent;
+            outline: none;
+            font-weight: 500;
+            cursor: pointer;
         }
+        
+        select:focus { border-color: var(--primary); }
 
         /* Progress Bar */
         .progress-container {
             width: 100%;
             background: var(--input-bg);
-            height: 10px;
-            border-radius: 5px;
-            margin-top: 20px;
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 25px;
             overflow: hidden;
             display: none;
         }
 
         .progress-bar {
             height: 100%;
-            background: var(--primary);
+            background: linear-gradient(90deg, var(--primary), var(--accent));
             width: 0%;
-            transition: width 0.2s;
+            transition: width 0.3s ease-out;
+            border-radius: 4px;
         }
 
         /* Loader */
         .loader {
-            border: 4px solid var(--card-bg);
-            border-top: 4px solid var(--primary);
+            width: 48px;
+            height: 48px;
+            border: 5px solid var(--input-bg);
+            border-bottom-color: var(--primary);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
             display: none;
+            margin: 30px auto;
+            animation: rotation 1s linear infinite;
         }
 
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* Settings Modal */
         .modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
+
+        .modal.active { opacity: 1; }
 
         .modal-content {
             background: var(--card-bg);
-            padding: 30px;
-            border-radius: 20px;
+            padding: 40px;
+            border-radius: 24px;
             width: 90%;
             max-width: 600px;
-            max-height: 90vh;
+            max-height: 85vh;
             overflow-y: auto;
             position: relative;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255,255,255,0.1);
         }
+
+        .modal-content h2 { margin-bottom: 20px; color: var(--primary); }
 
         .close-modal {
             position: absolute;
-            top: 15px; right: 15px;
-            background: none;
+            top: 20px; right: 20px;
+            background: var(--input-bg);
             border: none;
+            width: 32px; height: 32px;
+            border-radius: 50%;
             color: var(--text-color);
-            font-size: 1.5rem;
             cursor: pointer;
+            transition: 0.2s;
         }
+        .close-modal:hover { background: #ff5252; color: white; }
 
         .api-list-item {
             background: var(--input-bg);
             padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 10px;
+            border-radius: 12px;
+            margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-left: 4px solid var(--primary);
         }
 
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; }
-        .form-group input, .form-group select { width: 100%; }
-
-        .tag {
-            background: var(--primary);
-            color: black;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
+        /* Forms in Modal */
+        .modal input[type="text"], .modal input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--input-bg);
+            background: var(--input-bg);
+            color: var(--text-color);
+            margin-bottom: 15px;
         }
+        .modal input:focus { border-color: var(--primary); outline: none; }
 
-        /* Notification */
+        /* Toast */
         .toast {
             position: fixed;
-            bottom: 20px;
+            bottom: 30px;
             left: 50%;
-            transform: translateX(-50%);
-            background: var(--primary);
-            color: black;
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-weight: bold;
+            transform: translateX(-50%) translateY(20px);
+            background: #333;
+            color: #fff;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: 600;
             opacity: 0;
-            transition: opacity 0.3s;
+            transition: all 0.3s;
             pointer-events: none;
             z-index: 2000;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast i { color: var(--primary); }
 
-        @media (max-width: 600px) {
-            .input-group { flex-direction: column; }
+        @media (max-width: 768px) {
+            .input-group { flex-direction: column; border-radius: 20px; gap: 0; }
+            .action-btn { width: 100%; justify-content: center; border-radius: 20px; margin-top: 10px; }
+            .media-info { flex-direction: column; }
             .options-grid { grid-template-columns: 1fr; }
         }
     </style>
@@ -296,22 +372,22 @@
 <body>
 
     <!-- Notification Toast -->
-    <div id="toast" class="toast">Message</div>
+    <div id="toast" class="toast"><i class="fas fa-info-circle"></i> <span>Message</span></div>
 
     <header>
         <div class="logo">
             <i class="fas fa-bolt"></i> MediaDownloader
         </div>
         <div class="controls">
-            <button class="icon-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
-            <button class="icon-btn" id="settingsBtn"><i class="fas fa-cog"></i></button>
+            <button class="icon-btn" id="themeToggle" title="Toggle Theme"><i class="fas fa-moon"></i></button>
+            <button class="icon-btn" id="settingsBtn" title="Settings"><i class="fas fa-cog"></i></button>
         </div>
     </header>
 
     <main>
         <div class="input-group">
-            <input type="text" id="urlInput" placeholder="Paste video URL (YouTube, TikTok, Instagram...)">
-            <button class="action-btn" id="fetchBtn"><i class="fas fa-search"></i> Fetch</button>
+            <input type="text" id="urlInput" placeholder="Paste video URL (YouTube, TikTok, FB...)">
+            <button class="action-btn" id="fetchBtn"><i class="fas fa-search"></i> Fetch Video</button>
         </div>
 
         <div class="loader" id="mainLoader"></div>
@@ -325,29 +401,29 @@
                     <input type="text" id="fileTitle" class="editable-title" value="Video Title">
                     <div class="options-grid">
                         <div class="form-group">
-                            <label>Format</label>
+                            <label><i class="fas fa-file-video"></i> Format</label>
                             <select id="formatSelect">
-                                <option value="video">Video (MP4)</option>
-                                <option value="audio">Audio (MP3)</option>
+                                <option value="video">MP4 (Video)</option>
+                                <option value="audio">MP3 (Audio Only)</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Quality / Resolution</label>
+                            <label><i class="fas fa-sliders-h"></i> Quality</label>
                             <select id="qualitySelect">
-                                <option value="best">Best Available</option>
-                                <option value="low">Data Saver (Low)</option>
+                                <option value="best">Best Quality (HD/4K)</option>
+                                <option value="low">Data Saver (360p)</option>
                             </select>
                         </div>
                     </div>
-                    <button class="action-btn" id="downloadBtn" style="width: 100%; justify-content: center;">
-                        <i class="fas fa-download"></i> Download
+                    <button class="action-btn" id="downloadBtn" style="width: 100%; justify-content: center; margin-top: auto;">
+                        <i class="fas fa-download"></i> Start Download
                     </button>
                 </div>
             </div>
             <div class="progress-container" id="progressContainer">
                 <div class="progress-bar" id="progressBar"></div>
             </div>
-            <p id="statusText" style="text-align: center; margin-top: 10px; font-size: 0.9rem; opacity: 0.8;"></p>
+            <p id="statusText" style="text-align: center; margin-top: 15px; font-weight: 500; font-size: 0.9rem; color: var(--primary);"></p>
         </div>
     </main>
 
@@ -355,59 +431,64 @@
     <div class="modal" id="settingsModal">
         <div class="modal-content">
             <button class="close-modal" id="closeSettings">&times;</button>
-            <h2>Settings</h2>
+            <h2><i class="fas fa-cogs"></i> Settings</h2>
             
             <div id="authSection">
-                <p>Enter passcode to access API configurations.</p>
-                <div class="input-group" style="margin-top: 15px;">
-                    <input type="password" id="passcodeInput" placeholder="Passcode">
-                    <button class="action-btn" id="authBtn">Unlock</button>
+                <p style="margin-bottom: 10px; opacity: 0.8;">Security Passcode Required</p>
+                <div style="display: flex; gap: 10px;">
+                    <input type="password" id="passcodeInput" placeholder="Enter Passcode">
+                    <button class="action-btn" id="authBtn" style="padding: 10px 20px;">Unlock</button>
                 </div>
             </div>
 
             <div id="configSection" style="display: none;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3>API Configurations</h3>
-                    <button class="action-btn" id="addApiBtn" style="padding: 8px 15px; font-size: 0.9rem;">+ Add API</button>
+                    <h3>Managed APIs</h3>
+                    <button class="action-btn" id="addApiBtn" style="padding: 8px 15px; font-size: 0.85rem;">+ Add New</button>
                 </div>
                 
-                <div id="apiList">
+                <div id="apiList" style="max-height: 200px; overflow-y: auto; margin-bottom: 20px;">
                     <!-- API items injected here -->
                 </div>
 
                 <!-- Add/Edit Form -->
-                <div id="apiForm" style="display: none; border-top: 1px solid var(--primary); margin-top: 20px; padding-top: 20px;">
-                    <h4>Add New API</h4>
+                <div id="apiForm" style="display: none; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 20px; animation: slideUp 0.3s;">
+                    <h4 style="margin-bottom: 15px; color: var(--primary);">New API Config</h4>
                     <div class="form-group">
-                        <label>Name</label>
+                        <label>API Name</label>
                         <input type="text" id="apiName" placeholder="e.g. RapidAPI YouTube">
                     </div>
                     <div class="form-group">
                         <label>Endpoint URL</label>
-                        <input type="text" id="apiUrl" placeholder="https://api.example.com/v1/download">
+                        <input type="text" id="apiUrl" placeholder="https://api.example.com/v1/details">
                     </div>
                     <div class="form-group">
                         <label>Header: x-rapidapi-key</label>
-                        <input type="text" id="apiKey" placeholder="Your API Key">
+                        <input type="text" id="apiKey" placeholder="Key">
                     </div>
                     <div class="form-group">
                         <label>Header: x-rapidapi-host</label>
-                        <input type="text" id="apiHost" placeholder="api.host.com">
+                        <input type="text" id="apiHost" placeholder="Host">
                     </div>
                     <div class="form-group">
-                        <label>URL Parameter Key</label>
-                        <input type="text" id="apiParamKey" placeholder="The param name for video link (e.g. 'url' or 'q')">
-                        <small>Other params can be added as comma separated: lang=en,type=video</small>
-                        <input type="text" id="apiExtraParams" placeholder="lang=en, country=us" style="margin-top: 5px;">
+                        <label>Input Parameter Key (e.g. 'url', 'videoId')</label>
+                        <input type="text" id="apiParamKey" placeholder="Parameter Name">
+                        <small style="display:block; margin-top:5px; opacity:0.7;">For YouTube links with 'videoId' param, ID is extracted automatically.</small>
                     </div>
-                    <button class="action-btn" id="saveApiBtn">Save API</button>
-                    <button class="icon-btn" id="cancelApiBtn" style="font-size: 1rem; margin-left: 10px;">Cancel</button>
+                    <div class="form-group">
+                        <label>Extra Params (comma separated)</label>
+                        <input type="text" id="apiExtraParams" placeholder="lang=en, type=video">
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button class="action-btn" id="saveApiBtn" style="flex:1">Save</button>
+                        <button class="icon-btn" id="cancelApiBtn" style="border-radius: 8px; width: auto; padding: 0 15px;">Cancel</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Firebase Logic -->
+    <!-- Firebase & Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getDatabase, ref, set, onValue, push, remove } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
@@ -427,7 +508,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const DB_COLLECTION = 'down-api';
-        const PASSCODE = '1234'; // Default passcode
+        const PASSCODE = '1234';
 
         // --- State ---
         let apiConfigs = [];
@@ -438,6 +519,8 @@
         const themeToggle = document.getElementById('themeToggle');
         const body = document.body;
         const toast = document.getElementById('toast');
+        const loader = document.getElementById('mainLoader');
+        const previewCard = document.getElementById('previewCard');
         
         // --- Theme Logic ---
         let isDark = localStorage.getItem('theme') === 'dark';
@@ -454,11 +537,17 @@
             themeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
         }
 
-        // --- Helper: Notification ---
         function showToast(msg) {
-            toast.textContent = msg;
-            toast.style.opacity = '1';
-            setTimeout(() => toast.style.opacity = '0', 3000);
+            toast.querySelector('span').textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // --- Helper: YouTube ID Extractor ---
+        function getYouTubeID(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
         }
 
         // --- Settings Logic ---
@@ -472,10 +561,14 @@
 
         settingsBtn.addEventListener('click', () => {
             settingsModal.style.display = 'flex';
+            setTimeout(() => settingsModal.classList.add('active'), 10);
             loadApis();
         });
         
-        closeSettings.addEventListener('click', () => settingsModal.style.display = 'none');
+        closeSettings.addEventListener('click', () => {
+            settingsModal.classList.remove('active');
+            setTimeout(() => settingsModal.style.display = 'none', 300);
+        });
 
         authBtn.addEventListener('click', () => {
             if(passcodeInput.value === PASSCODE) {
@@ -505,28 +598,24 @@
                         div.className = 'api-list-item';
                         div.innerHTML = `
                             <div>
-                                <strong>${api.name}</strong><br>
+                                <strong style="color:var(--primary)">${api.name}</strong><br>
                                 <span style="font-size:0.8rem; opacity:0.7">${api.url}</span>
                             </div>
-                            <button class="icon-btn delete-api" data-id="${key}"><i class="fas fa-trash"></i></button>
+                            <button class="icon-btn delete-api" data-id="${key}" style="width:30px; height:30px; background:#ff5252; color:white;"><i class="fas fa-trash"></i></button>
                         `;
                         listContainer.appendChild(div);
                     });
                 }
                 
-                // Attach delete listeners
                 document.querySelectorAll('.delete-api').forEach(btn => {
                     btn.addEventListener('click', (e) => {
-                        const id = e.currentTarget.dataset.id;
-                        if(confirm('Delete this API?')) {
-                            remove(ref(db, `${DB_COLLECTION}/${id}`));
-                        }
+                        if(confirm('Remove this API?')) remove(ref(db, `${DB_COLLECTION}/${e.currentTarget.dataset.id}`));
                     });
                 });
             });
         }
 
-        // Add New API Logic
+        // Add API Logic
         const addApiBtn = document.getElementById('addApiBtn');
         const apiForm = document.getElementById('apiForm');
         const saveApiBtn = document.getElementById('saveApiBtn');
@@ -544,37 +633,33 @@
             const extra = document.getElementById('apiExtraParams').value;
 
             if(!name || !url || !paramKey) {
-                showToast("Name, URL and Param Key are required");
+                showToast("Name, URL & Param Key required");
                 return;
             }
 
-            const newApi = {
-                name, url, key, host, paramKey, extra
-            };
-
-            push(ref(db, DB_COLLECTION), newApi).then(() => {
-                showToast("API Added");
+            push(ref(db, DB_COLLECTION), { name, url, key, host, paramKey, extra }).then(() => {
+                showToast("API Added Successfully");
                 apiForm.style.display = 'none';
-                // Clear form
-                document.getElementById('apiName').value = '';
-                document.getElementById('apiUrl').value = '';
+                // Reset form
+                document.querySelectorAll('#apiForm input').forEach(i => i.value = '');
             });
         });
 
-        // --- Main Downloader Logic ---
+        // --- Fetch Logic (UPDATED) ---
         const fetchBtn = document.getElementById('fetchBtn');
         const urlInput = document.getElementById('urlInput');
-        const loader = document.getElementById('mainLoader');
-        const previewCard = document.getElementById('previewCard');
         const thumbImg = document.getElementById('thumbImg');
         const fileTitle = document.getElementById('fileTitle');
 
         fetchBtn.addEventListener('click', async () => {
             const inputUrl = urlInput.value.trim();
-            if(!inputUrl) return;
+            if(!inputUrl) {
+                showToast("Please paste a URL first!");
+                return;
+            }
 
             if(apiConfigs.length === 0) {
-                showToast("No APIs configured. Go to settings.");
+                showToast("Setup APIs in Settings first.");
                 return;
             }
 
@@ -582,16 +667,20 @@
             previewCard.style.display = 'none';
             currentDownloadUrl = null;
 
-            // Strategy: Loop through APIs until one succeeds
             let found = false;
 
             for (const api of apiConfigs) {
                 try {
-                    // Construct URL with params
+                    let paramValue = inputUrl;
+                    // SMART CHECK: Extract ID if needed
+                    if (api.paramKey === 'videoId' && (inputUrl.includes('youtube') || inputUrl.includes('youtu.be'))) {
+                        const id = getYouTubeID(inputUrl);
+                        if(id) paramValue = id;
+                    }
+
                     const urlObj = new URL(api.url);
-                    urlObj.searchParams.append(api.paramKey, inputUrl);
+                    urlObj.searchParams.append(api.paramKey, paramValue);
                     
-                    // Add extra params
                     if(api.extra) {
                         api.extra.split(',').forEach(p => {
                             const [k, v] = p.split('=');
@@ -599,72 +688,62 @@
                         });
                     }
 
-                    // Headers
                     const headers = {};
                     if(api.key) headers['x-rapidapi-key'] = api.key;
                     if(api.host) headers['x-rapidapi-host'] = api.host;
 
-                    const response = await fetch(urlObj.toString(), {
-                        method: 'GET',
-                        headers: headers
-                    });
+                    const response = await fetch(urlObj.toString(), { method: 'GET', headers: headers });
 
                     if(response.ok) {
                         const data = await response.json();
-                        // Basic validation: check if data has meaningful fields
-                        // This part depends heavily on the specific API structure.
-                        // We attempt to find standard fields.
+                        console.log(`Response from ${api.name}:`, data);
                         
-                        console.log("API Response:", data); // Debug
-
-                        // Heuristics to find data
                         const info = parseApiResponse(data);
                         
                         if(info.url) {
                             renderPreview(info);
-                            activeApiUsed = api;
                             found = true;
-                            break; // Stop at first working API
+                            showToast(`Fetched using ${api.name}`);
+                            break;
                         }
                     }
                 } catch (err) {
-                    console.error("API failed", api.name, err);
+                    console.error("API Error:", err);
                 }
             }
 
             loader.style.display = 'none';
-            if(!found) {
-                showToast("Failed to fetch video. Check API settings or URL.");
-            }
+            if(!found) showToast("Could not fetch video. Check link or API.");
         });
 
-        // Helper to extract data from varying JSON structures
         function parseApiResponse(json) {
-            // Recursive search or flat checking for common keys
-            // This is a simplified parser
-            let result = { title: 'Unknown Video', thumb: 'https://via.placeholder.com/300x200?text=No+Thumbnail', url: null };
-
-            // Flatten JSON to find keys easily
+            let result = { title: 'Media File', thumb: 'https://via.placeholder.com/300x200?text=No+Preview', url: null };
             const flat = flatten(json);
             
-            // Find Title
-            const titleKey = Object.keys(flat).find(k => k.toLowerCase().includes('title') || k.toLowerCase().includes('caption'));
+            // Smarter Parsing
+            const titleKey = Object.keys(flat).find(k => /title|caption|text/i.test(k));
             if(titleKey) result.title = flat[titleKey];
 
-            // Find Thumbnail
-            const thumbKey = Object.keys(flat).find(k => (k.toLowerCase().includes('thumb') || k.toLowerCase().includes('image')) && typeof flat[k] === 'string' && flat[k].startsWith('http'));
+            const thumbKey = Object.keys(flat).find(k => /thumb|image|poster/i.test(k) && typeof flat[k] === 'string' && flat[k].startsWith('http'));
             if(thumbKey) result.thumb = flat[thumbKey];
 
-            // Find Video URL
-            // Prioritize mp4 or keys containing 'video', 'link', 'url'
-            const urlKey = Object.keys(flat).find(k => 
-                (k.toLowerCase().includes('url') || k.toLowerCase().includes('link')) 
-                && typeof flat[k] === 'string' 
-                && flat[k].startsWith('http')
-                && !k.toLowerCase().includes('thumb')
-                && !k.toLowerCase().includes('avatar')
+            // Prioritize mp4/video urls
+            const urlKeys = Object.keys(flat).filter(k => 
+                (/url|link|src/i.test(k)) && 
+                typeof flat[k] === 'string' && 
+                flat[k].startsWith('http') && 
+                !/thumb|avatar|image/i.test(k)
             );
-            if(urlKey) result.url = flat[urlKey];
+            
+            // Sort to find "mp4" or "video" containing links first
+            urlKeys.sort((a,b) => {
+                const valA = flat[a].toLowerCase();
+                const valB = flat[b].toLowerCase();
+                if (valA.includes('mp4') && !valB.includes('mp4')) return -1;
+                return 0;
+            });
+
+            if(urlKeys.length > 0) result.url = flat[urlKeys[0]];
 
             return result;
         }
@@ -683,9 +762,12 @@
 
         function renderPreview(info) {
             thumbImg.src = info.thumb;
-            fileTitle.value = info.title;
+            fileTitle.value = info.title || "Unknown Title";
             currentDownloadUrl = info.url;
             previewCard.style.display = 'block';
+            
+            // Scroll to preview
+            previewCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
         // --- Download Logic ---
@@ -694,105 +776,84 @@
         const progressContainer = document.getElementById('progressContainer');
         const statusText = document.getElementById('statusText');
         const formatSelect = document.getElementById('formatSelect');
-        const qualitySelect = document.getElementById('qualitySelect');
 
         downloadBtn.addEventListener('click', () => {
             if(!currentDownloadUrl) return;
-
-            const format = formatSelect.value;
-            // Note: Real client-side transcoding requires ffmpeg.wasm which is too heavy for this snippet.
-            // We will simulate the "Audio" request by checking if the API provided an audio url (mock) 
-            // or simply changing the extension/MIME type hint for the download.
-            
-            startFakeDownload(currentDownloadUrl, fileTitle.value, format);
+            startDownload(currentDownloadUrl, fileTitle.value, formatSelect.value);
         });
 
-        function startFakeDownload(url, filename, format) {
+        function startDownload(url, filename, format) {
             progressContainer.style.display = 'block';
-            statusText.textContent = "Connecting to server...";
-            progressBar.style.width = '0%';
-
-            // Simulate progress since we can't track cross-origin fetch progress easily without headers
-            let width = 0;
-            const interval = setInterval(() => {
-                if (width >= 90) clearInterval(interval);
-                width += 5;
-                progressBar.style.width = width + '%';
-            }, 100);
-
-            // Attempt to download
-            // Note: Cross-Origin downloads are restricted by browsers.
-            // We use fetch -> blob -> objectUrl to try and bypass simple blocks, 
-            // but strict CORS policies on the video server might still block this.
+            statusText.textContent = "Initiating Download...";
+            progressBar.style.width = '10%';
             
+            const ext = format === 'audio' ? 'mp3' : 'mp4';
+            const safeName = filename.replace(/[^a-z0-9]/gi, '_').substring(0, 50);
+            const fullName = `${safeName}.${ext}`;
+
+            // Try Fetch Blob Method first
             fetch(url)
                 .then(response => {
-                    if(!response.ok) throw new Error("Network response was not ok");
+                    if(!response.ok) throw new Error("Network error");
                     
-                    // If file is huge, this buffer approach might crash. 
-                    // But for a single file app, it's the standard way.
+                    const contentLength = response.headers.get('Content-Length');
                     const reader = response.body.getReader();
-                    const contentLength = +response.headers.get('Content-Length');
                     let receivedLength = 0;
+                    let chunks = [];
                     
-                    return new ReadableStream({
-                        start(controller) {
-                            function push() {
-                                reader.read().then(({done, value}) => {
-                                    if (done) {
-                                        controller.close();
-                                        return;
-                                    }
-                                    receivedLength += value.length;
-                                    // Calculate real progress if content-length exists
-                                    if(contentLength) {
-                                        width = (receivedLength / contentLength) * 100;
-                                        progressBar.style.width = width + '%';
-                                        statusText.textContent = `Downloading... ${Math.round(width)}%`;
-                                    }
-                                    controller.enqueue(value);
-                                    push();
-                                })
+                    // Progress Loop
+                    function read() {
+                        return reader.read().then(({done, value}) => {
+                            if (done) {
+                                let blob = new Blob(chunks);
+                                processBlob(blob, fullName);
+                                return;
                             }
-                            push();
-                        }
-                    });
+                            chunks.push(value);
+                            receivedLength += value.length;
+                            if(contentLength) {
+                                let pct = (receivedLength / contentLength) * 100;
+                                progressBar.style.width = pct + '%';
+                                statusText.textContent = `Downloading... ${Math.round(pct)}%`;
+                            } else {
+                                // Fake progress if no content-length
+                                let curr = parseFloat(progressBar.style.width) || 0;
+                                if(curr < 90) progressBar.style.width = (curr + 1) + '%';
+                            }
+                            return read();
+                        });
+                    }
+                    return read();
                 })
-                .then(stream => new Response(stream))
-                .then(response => response.blob())
-                .then(blob => {
-                    clearInterval(interval);
-                    progressBar.style.width = '100%';
-                    statusText.textContent = "Processing...";
-
-                    // "Convert" Logic (Simulated for client-side)
-                    // If user wanted Audio, we save as .mp3 (browsers are smart enough to play audio from mp4 containers often, but true conversion needs backend)
-                    const ext = format === 'audio' ? 'mp3' : 'mp4';
-                    const finalFilename = `${filename.replace(/[^a-z0-9]/gi, '_')}.${ext}`;
-
-                    const link = document.createElement('a');
-                    link.href = window.URL.createObjectURL(blob);
-                    link.download = finalFilename;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    
-                    statusText.textContent = "Download Complete!";
-                    setTimeout(() => {
-                        progressContainer.style.display = 'none';
-                        statusText.textContent = "";
-                    }, 3000);
-                })
-                .catch(error => {
-                    clearInterval(interval);
-                    console.error("Download failed:", error);
-                    statusText.textContent = "Download failed (CORS restricted). Opening in new tab...";
-                    
-                    // Fallback: Open in new tab
+                .catch(err => {
+                    console.error("Direct Download Failed (CORS)", err);
+                    progressBar.style.background = "#ff5252";
+                    statusText.textContent = "Direct download blocked. Opening in new tab...";
                     setTimeout(() => {
                         window.open(url, '_blank');
-                    }, 1000);
+                        progressContainer.style.display = 'none';
+                        progressBar.style.background = "var(--primary)";
+                    }, 1500);
                 });
+        }
+
+        function processBlob(blob, name) {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = name;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            progressBar.style.width = '100%';
+            statusText.textContent = "Download Complete!";
+            setTimeout(() => {
+                progressContainer.style.display = 'none';
+                statusText.textContent = "";
+                progressBar.style.width = '0%';
+            }, 3000);
         }
     </script>
 </body>
