@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Media Downloader</title>
+    <!-- Firebase SDKs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        :root {
+            --primary: #00e676;
+            --primary-dark: #00c853;
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --card-bg: #f5f5f5;
+            --input-bg: #e0e0e0;
+            --shadow: 0 4px 15px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #000000;
+            --text-color: #ffffff;
+            --card-bg: #1e1e1e;
+            --input-bg: #333333;
+            --shadow: 0 4px 15px rgba(0, 230, 118, 0.2);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: var(--transition);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--primary);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .controls { display: flex; gap: 15px; }
+        
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .icon-btn:hover { color: var(--primary); transform: scale(1.1); }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .input-group {
+            width: 100%;
+            position: relative;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 15px 20px;
+            border-radius: 30px;
+            border: 2px solid var(--primary);
+            background: var(--input-bg);
+            color: var(--text-color);
+            outline: none;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .action-btn {
+            padding: 15px 30px;
+            border-radius: 30px;
+            border: none;
+            background: var(--primary);
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover { background: var(--primary-dark); transform: translateY(-2px); }
+
+        /* Preview Card */
+        .preview-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px;
+            width: 100%;
+            box-shadow: var(--shadow);
+            display: none; /* Hidden by default */
+            animation: slideUp 0.5s ease;
+            position: relative;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .media-info {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .thumbnail-container {
+            flex: 1 1 200px;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .thumbnail-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .details {
+            flex: 2 1 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .editable-title {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--primary);
+            color: var(--text-color);
+            font-size: 1.2rem;
+            padding: 5px;
+            width: 100%;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        select {
+            padding: 10px;
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            border: 1px solid var(--primary);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            background: var(--input-bg);
+            height: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.2s;
+        }
+
+        /* Loader */
+        .loader {
+            border: 4px solid var(--card-bg);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Settings Modal */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px; right: 15px;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .api-list-item {
+            background: var(--input-bg);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; }
+        .form-group input, .form-group select { width: 100%; }
+
+        .tag {
+            background: var(--primary);
+            color: black;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        /* Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: black;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 2000;
+        }
+
+        @media (max-width: 600px) {
+            .input-group { flex-direction: column; }
+            .options-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast">Message</div>
+
+    <header>
+        <div class="logo">
+            <i class="fas fa-bolt"></i> MediaDownloader
+        </div>
+        <div class="controls">
+            <button class="icon-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
+            <button class="icon-btn" id="settingsBtn"><i class="fas fa-cog"></i></button>
+        </div>
+    </header>
+
+    <main>
+        <div class="input-group">
+            <input type="text" id="urlInput" placeholder="Paste video URL (YouTube, TikTok, Instagram...)">
+            <button class="action-btn" id="fetchBtn"><i class="fas fa-search"></i> Fetch</button>
+        </div>
+
+        <div class="loader" id="mainLoader"></div>
+
+        <div class="preview-card" id="previewCard">
+            <div class="media-info">
+                <div class="thumbnail-container">
+                    <img id="thumbImg" src="" alt="Thumbnail">
+                </div>
+                <div class="details">
+                    <input type="text" id="fileTitle" class="editable-title" value="Video Title">
+                    <div class="options-grid">
+                        <div class="form-group">
+                            <label>Format</label>
+                            <select id="formatSelect">
+                                <option value="video">Video (MP4)</option>
+                                <option value="audio">Audio (MP3)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Quality / Resolution</label>
+                            <select id="qualitySelect">
+                                <option value="best">Best Available</option>
+                                <option value="low">Data Saver (Low)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="action-btn" id="downloadBtn" style="width: 100%; justify-content: center;">
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                </div>
+            </div>
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <p id="statusText" style="text-align: center; margin-top: 10px; font-size: 0.9rem; opacity: 0.8;"></p>
+        </div>
+    </main>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeSettings">&times;</button>
+            <h2>Settings</h2>
+            
+            <div id="authSection">
+                <p>Enter passcode to access API configurations.</p>
+                <div class="input-group" style="margin-top: 15px;">
+                    <input type="password" id="passcodeInput" placeholder="Passcode">
+                    <button class="action-btn" id="authBtn">Unlock</button>
+                </div>
+            </div>
+
+            <div id="configSection" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>API Configurations</h3>
+                    <button class="action-btn" id="addApiBtn" style="padding: 8px 15px; font-size: 0.9rem;">+ Add API</button>
+                </div>
+                
+                <div id="apiList">
+                    <!-- API items injected here -->
+                </div>
+
+                <!-- Add/Edit Form -->
+                <div id="apiForm" style="display: none; border-top: 1px solid var(--primary); margin-top: 20px; padding-top: 20px;">
+                    <h4>Add New API</h4>
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" id="apiName" placeholder="e.g. RapidAPI YouTube">
+                    </div>
+                    <div class="form-group">
+                        <label>Endpoint URL</label>
+                        <input type="text" id="apiUrl" placeholder="https://api.example.com/v1/download">
+                    </div>
+                    <div class="form-group">
+                        <label>Header: x-rapidapi-key</label>
+                        <input type="text" id="apiKey" placeholder="Your API Key">
+                    </div>
+                    <div class="form-group">
+                        <label>Header: x-rapidapi-host</label>
+                        <input type="text" id="apiHost" placeholder="api.host.com">
+                    </div>
+                    <div class="form-group">
+                        <label>URL Parameter Key</label>
+                        <input type="text" id="apiParamKey" placeholder="The param name for video link (e.g. 'url' or 'q')">
+                        <small>Other params can be added as comma separated: lang=en,type=video</small>
+                        <input type="text" id="apiExtraParams" placeholder="lang=en, country=us" style="margin-top: 5px;">
+                    </div>
+                    <button class="action-btn" id="saveApiBtn">Save API</button>
+                    <button class="icon-btn" id="cancelApiBtn" style="font-size: 1rem; margin-left: 10px;">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue, push, remove } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+
+        // --- Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyAEBrWDMiEGuqQGvA4197ljLcvtQk_i43Y",
+            authDomain: "one-tool01.firebaseapp.com",
+            databaseURL: "https://one-tool01-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "one-tool01",
+            storageBucket: "one-tool01.firebasestorage.app",
+            messagingSenderId: "546992530595",
+            appId: "1:546992530595:web:77bf6c3fe2438b3c980b16",
+            measurementId: "G-GMNCXBV0J1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const DB_COLLECTION = 'down-api';
+        const PASSCODE = '1234'; // Default passcode
+
+        // --- State ---
+        let apiConfigs = [];
+        let currentDownloadUrl = null;
+        let activeApiUsed = null;
+
+        // --- UI Elements ---
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        const toast = document.getElementById('toast');
+        
+        // --- Theme Logic ---
+        let isDark = localStorage.getItem('theme') === 'dark';
+        applyTheme();
+
+        themeToggle.addEventListener('click', () => {
+            isDark = !isDark;
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            applyTheme();
+        });
+
+        function applyTheme() {
+            body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+            themeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        }
+
+        // --- Helper: Notification ---
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.style.opacity = '1';
+            setTimeout(() => toast.style.opacity = '0', 3000);
+        }
+
+        // --- Settings Logic ---
+        const settingsModal = document.getElementById('settingsModal');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const closeSettings = document.getElementById('closeSettings');
+        const authSection = document.getElementById('authSection');
+        const configSection = document.getElementById('configSection');
+        const authBtn = document.getElementById('authBtn');
+        const passcodeInput = document.getElementById('passcodeInput');
+
+        settingsBtn.addEventListener('click', () => {
+            settingsModal.style.display = 'flex';
+            loadApis();
+        });
+        
+        closeSettings.addEventListener('click', () => settingsModal.style.display = 'none');
+
+        authBtn.addEventListener('click', () => {
+            if(passcodeInput.value === PASSCODE) {
+                authSection.style.display = 'none';
+                configSection.style.display = 'block';
+            } else {
+                showToast("Incorrect Passcode");
+            }
+        });
+
+        // --- Database Logic ---
+        function loadApis() {
+            const apiRef = ref(db, DB_COLLECTION);
+            onValue(apiRef, (snapshot) => {
+                const data = snapshot.val();
+                apiConfigs = [];
+                const listContainer = document.getElementById('apiList');
+                listContainer.innerHTML = '';
+
+                if (data) {
+                    Object.keys(data).forEach(key => {
+                        const api = data[key];
+                        api.id = key;
+                        apiConfigs.push(api);
+
+                        const div = document.createElement('div');
+                        div.className = 'api-list-item';
+                        div.innerHTML = `
+                            <div>
+                                <strong>${api.name}</strong><br>
+                                <span style="font-size:0.8rem; opacity:0.7">${api.url}</span>
+                            </div>
+                            <button class="icon-btn delete-api" data-id="${key}"><i class="fas fa-trash"></i></button>
+                        `;
+                        listContainer.appendChild(div);
+                    });
+                }
+                
+                // Attach delete listeners
+                document.querySelectorAll('.delete-api').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const id = e.currentTarget.dataset.id;
+                        if(confirm('Delete this API?')) {
+                            remove(ref(db, `${DB_COLLECTION}/${id}`));
+                        }
+                    });
+                });
+            });
+        }
+
+        // Add New API Logic
+        const addApiBtn = document.getElementById('addApiBtn');
+        const apiForm = document.getElementById('apiForm');
+        const saveApiBtn = document.getElementById('saveApiBtn');
+        const cancelApiBtn = document.getElementById('cancelApiBtn');
+
+        addApiBtn.addEventListener('click', () => apiForm.style.display = 'block');
+        cancelApiBtn.addEventListener('click', () => apiForm.style.display = 'none');
+
+        saveApiBtn.addEventListener('click', () => {
+            const name = document.getElementById('apiName').value;
+            const url = document.getElementById('apiUrl').value;
+            const key = document.getElementById('apiKey').value;
+            const host = document.getElementById('apiHost').value;
+            const paramKey = document.getElementById('apiParamKey').value;
+            const extra = document.getElementById('apiExtraParams').value;
+
+            if(!name || !url || !paramKey) {
+                showToast("Name, URL and Param Key are required");
+                return;
+            }
+
+            const newApi = {
+                name, url, key, host, paramKey, extra
+            };
+
+            push(ref(db, DB_COLLECTION), newApi).then(() => {
+                showToast("API Added");
+                apiForm.style.display = 'none';
+                // Clear form
+                document.getElementById('apiName').value = '';
+                document.getElementById('apiUrl').value = '';
+            });
+        });
+
+        // --- Main Downloader Logic ---
+        const fetchBtn = document.getElementById('fetchBtn');
+        const urlInput = document.getElementById('urlInput');
+        const loader = document.getElementById('mainLoader');
+        const previewCard = document.getElementById('previewCard');
+        const thumbImg = document.getElementById('thumbImg');
+        const fileTitle = document.getElementById('fileTitle');
+
+        fetchBtn.addEventListener('click', async () => {
+            const inputUrl = urlInput.value.trim();
+            if(!inputUrl) return;
+
+            if(apiConfigs.length === 0) {
+                showToast("No APIs configured. Go to settings.");
+                return;
+            }
+
+            loader.style.display = 'block';
+            previewCard.style.display = 'none';
+            currentDownloadUrl = null;
+
+            // Strategy: Loop through APIs until one succeeds
+            let found = false;
+
+            for (const api of apiConfigs) {
+                try {
+                    // Construct URL with params
+                    const urlObj = new URL(api.url);
+                    urlObj.searchParams.append(api.paramKey, inputUrl);
+                    
+                    // Add extra params
+                    if(api.extra) {
+                        api.extra.split(',').forEach(p => {
+                            const [k, v] = p.split('=');
+                            if(k && v) urlObj.searchParams.append(k.trim(), v.trim());
+                        });
+                    }
+
+                    // Headers
+                    const headers = {};
+                    if(api.key) headers['x-rapidapi-key'] = api.key;
+                    if(api.host) headers['x-rapidapi-host'] = api.host;
+
+                    const response = await fetch(urlObj.toString(), {
+                        method: 'GET',
+                        headers: headers
+                    });
+
+                    if(response.ok) {
+                        const data = await response.json();
+                        // Basic validation: check if data has meaningful fields
+                        // This part depends heavily on the specific API structure.
+                        // We attempt to find standard fields.
+                        
+                        console.log("API Response:", data); // Debug
+
+                        // Heuristics to find data
+                        const info = parseApiResponse(data);
+                        
+                        if(info.url) {
+                            renderPreview(info);
+                            activeApiUsed = api;
+                            found = true;
+                            break; // Stop at first working API
+                        }
+                    }
+                } catch (err) {
+                    console.error("API failed", api.name, err);
+                }
+            }
+
+            loader.style.display = 'none';
+            if(!found) {
+                showToast("Failed to fetch video. Check API settings or URL.");
+            }
+        });
+
+        // Helper to extract data from varying JSON structures
+        function parseApiResponse(json) {
+            // Recursive search or flat checking for common keys
+            // This is a simplified parser
+            let result = { title: 'Unknown Video', thumb: 'https://via.placeholder.com/300x200?text=No+Thumbnail', url: null };
+
+            // Flatten JSON to find keys easily
+            const flat = flatten(json);
+            
+            // Find Title
+            const titleKey = Object.keys(flat).find(k => k.toLowerCase().includes('title') || k.toLowerCase().includes('caption'));
+            if(titleKey) result.title = flat[titleKey];
+
+            // Find Thumbnail
+            const thumbKey = Object.keys(flat).find(k => (k.toLowerCase().includes('thumb') || k.toLowerCase().includes('image')) && typeof flat[k] === 'string' && flat[k].startsWith('http'));
+            if(thumbKey) result.thumb = flat[thumbKey];
+
+            // Find Video URL
+            // Prioritize mp4 or keys containing 'video', 'link', 'url'
+            const urlKey = Object.keys(flat).find(k => 
+                (k.toLowerCase().includes('url') || k.toLowerCase().includes('link')) 
+                && typeof flat[k] === 'string' 
+                && flat[k].startsWith('http')
+                && !k.toLowerCase().includes('thumb')
+                && !k.toLowerCase().includes('avatar')
+            );
+            if(urlKey) result.url = flat[urlKey];
+
+            return result;
+        }
+
+        function flatten(obj, prefix = '', res = {}) {
+            for (let key in obj) {
+                let propName = prefix ? prefix + '.' + key : key;
+                if (typeof obj[key] == 'object' && obj[key] !== null) {
+                    flatten(obj[key], propName, res);
+                } else {
+                    res[propName] = obj[key];
+                }
+            }
+            return res;
+        }
+
+        function renderPreview(info) {
+            thumbImg.src = info.thumb;
+            fileTitle.value = info.title;
+            currentDownloadUrl = info.url;
+            previewCard.style.display = 'block';
+        }
+
+        // --- Download Logic ---
+        const downloadBtn = document.getElementById('downloadBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressContainer = document.getElementById('progressContainer');
+        const statusText = document.getElementById('statusText');
+        const formatSelect = document.getElementById('formatSelect');
+        const qualitySelect = document.getElementById('qualitySelect');
+
+        downloadBtn.addEventListener('click', () => {
+            if(!currentDownloadUrl) return;
+
+            const format = formatSelect.value;
+            // Note: Real client-side transcoding requires ffmpeg.wasm which is too heavy for this snippet.
+            // We will simulate the "Audio" request by checking if the API provided an audio url (mock) 
+            // or simply changing the extension/MIME type hint for the download.
+            
+            startFakeDownload(currentDownloadUrl, fileTitle.value, format);
+        });
+
+        function startFakeDownload(url, filename, format) {
+            progressContainer.style.display = 'block';
+            statusText.textContent = "Connecting to server...";
+            progressBar.style.width = '0%';
+
+            // Simulate progress since we can't track cross-origin fetch progress easily without headers
+            let width = 0;
+            const interval = setInterval(() => {
+                if (width >= 90) clearInterval(interval);
+                width += 5;
+                progressBar.style.width = width + '%';
+            }, 100);
+
+            // Attempt to download
+            // Note: Cross-Origin downloads are restricted by browsers.
+            // We use fetch -> blob -> objectUrl to try and bypass simple blocks, 
+            // but strict CORS policies on the video server might still block this.
+            
+            fetch(url)
+                .then(response => {
+                    if(!response.ok) throw new Error("Network response was not ok");
+                    
+                    // If file is huge, this buffer approach might crash. 
+                    // But for a single file app, it's the standard way.
+                    const reader = response.body.getReader();
+                    const contentLength = +response.headers.get('Content-Length');
+                    let receivedLength = 0;
+                    
+                    return new ReadableStream({
+                        start(controller) {
+                            function push() {
+                                reader.read().then(({done, value}) => {
+                                    if (done) {
+                                        controller.close();
+                                        return;
+                                    }
+                                    receivedLength += value.length;
+                                    // Calculate real progress if content-length exists
+                                    if(contentLength) {
+                                        width = (receivedLength / contentLength) * 100;
+                                        progressBar.style.width = width + '%';
+                                        statusText.textContent = `Downloading... ${Math.round(width)}%`;
+                                    }
+                                    controller.enqueue(value);
+                                    push();
+                                })
+                            }
+                            push();
+                        }
+                    });
+                })
+                .then(stream => new Response(stream))
+                .then(response => response.blob())
+                .then(blob => {
+                    clearInterval(interval);
+                    progressBar.style.width = '100%';
+                    statusText.textContent = "Processing...";
+
+                    // "Convert" Logic (Simulated for client-side)
+                    // If user wanted Audio, we save as .mp3 (browsers are smart enough to play audio from mp4 containers often, but true conversion needs backend)
+                    const ext = format === 'audio' ? 'mp3' : 'mp4';
+                    const finalFilename = `${filename.replace(/[^a-z0-9]/gi, '_')}.${ext}`;
+
+                    const link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = finalFilename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    statusText.textContent = "Download Complete!";
+                    setTimeout(() => {
+                        progressContainer.style.display = 'none';
+                        statusText.textContent = "";
+                    }, 3000);
+                })
+                .catch(error => {
+                    clearInterval(interval);
+                    console.error("Download failed:", error);
+                    statusText.textContent = "Download failed (CORS restricted). Opening in new tab...";
+                    
+                    // Fallback: Open in new tab
+                    setTimeout(() => {
+                        window.open(url, '_blank');
+                    }, 1000);
+                });
+        }
+    </script>
+</body>
+</html>
