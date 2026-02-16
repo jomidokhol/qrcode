@@ -71,6 +71,7 @@
 
           set(ref(db, 'config/githubToken'), key)
           .then(() => {
+              localStorage.setItem('cachedApiKey', key);
               showToast("API Key Saved! Reloading...");
               setTimeout(() => location.reload(), 1500);
           })
@@ -89,6 +90,9 @@
           const version = document.getElementById('devVersion').value;
           const message = document.getElementById('devMessage').value;
           const status = document.getElementById('devStatus').checked;
+          const logo = document.getElementById('devLogo').value;
+          const link = document.getElementById('devLink').value;
+          const size = document.getElementById('devSize').value;
           const newApiToken = document.getElementById('apiKeyInput').value.trim();
           
           const newTags = [];
@@ -102,24 +106,25 @@
               fix: document.getElementById('featFix').checked
           };
 
-          document.getElementById('settingsLoadingOverlay').style.display = 'flex';
-
-          const updatePayload = {
+          const configData = {
               update: {
                   version: version,
                   message: message,
                   show: status,
+                  logo: logo,
+                  link: link,
+                  size: size,
                   features: updateFeatures
               },
-              newTags: newTags
+              newTags: newTags,
+              githubToken: newApiToken || GIT.token
           };
-          
-          if(newApiToken) {
-              updatePayload.githubToken = newApiToken;
-          }
 
-          update(ref(db, 'config'), updatePayload)
+          document.getElementById('settingsLoadingOverlay').style.display = 'flex';
+
+          update(ref(db, 'config'), configData)
           .then(() => {
+              localStorage.setItem('devConfigCache', JSON.stringify(configData));
               showToast("Config Saved! Reloading...");
               setTimeout(() => location.reload(), 1500);
           })
@@ -157,44 +162,97 @@
 
       onValue(ref(db, 'config'), (snapshot) => {
           const data = snapshot.val();
-          
           if (data) {
-              if(data.githubToken) {
-                  GIT.token = data.githubToken; 
-                  const apiKeyInput = document.getElementById('apiKeyInput');
-                  if(apiKeyInput) apiKeyInput.value = data.githubToken;
-                  updateApiIndicator(true);
-              } else {
-                  updateApiIndicator(false);
-              }
-
-              if (data.update && data.update.show) {
-                  document.getElementById('updatePopup').style.display = 'flex';
-                  document.getElementById('updateMessage').innerText = data.update.message || "A new version is available.";
-                  if(data.update.version) {
-                      document.getElementById('updateTitle').innerHTML = `Update Available (v${data.update.version})`;
-                  }
-                  
-                  const featList = document.getElementById('updateFeaturesList');
-                  featList.innerHTML = '';
-                  if(data.update.features) {
-                      if(data.update.features.security) featList.innerHTML += `<div class="update-item"><i class="fas fa-shield-alt"></i> Security Improvements</div>`;
-                      if(data.update.features.performance) featList.innerHTML += `<div class="update-item"><i class="fas fa-bolt"></i> Performance Boost</div>`;
-                      if(data.update.features.fix) featList.innerHTML += `<div class="update-item"><i class="fas fa-wrench"></i> Bug Fixes</div>`;
-                  }
-              } else {
-                  document.getElementById('updatePopup').style.display = 'none';
-              }
-
-              document.querySelectorAll('.new-badge').forEach(el => el.style.display = 'none');
-              if(data.newTags && Array.isArray(data.newTags)) {
-                  data.newTags.forEach(tagId => {
-                      const badge = document.querySelector(`#${tagId} .new-badge`);
-                      if(badge) badge.style.display = 'block';
-                  });
-              }
+              localStorage.setItem('devConfigCache', JSON.stringify(data));
+              applyConfig(data);
           } else {
               updateApiIndicator(false);
+          }
+      });
+
+      function applyConfig(data) {
+          if(data.githubToken) {
+              GIT.token = data.githubToken; 
+              const apiKeyInput = document.getElementById('apiKeyInput');
+              if(apiKeyInput) apiKeyInput.value = data.githubToken;
+              updateApiIndicator(true);
+          } else {
+              updateApiIndicator(false);
+          }
+
+          if (data.update && data.update.show) {
+              document.getElementById('updatePopup').style.display = 'flex';
+              document.getElementById('updateMessage').innerText = data.update.message || "A new version is available.";
+              
+              const titleHtml = data.update.logo ? 
+                  `<img src="${data.update.logo}" class="update-logo-img"> Update Available` : 
+                  `Update Available`;
+              
+              if(data.update.version) {
+                  document.getElementById('updateTitle').innerHTML = `${titleHtml} <span style="font-size:0.8em; opacity:0.7">v${data.update.version}</span>`;
+              } else {
+                   document.getElementById('updateTitle').innerHTML = titleHtml;
+              }
+
+              const featList = document.getElementById('updateFeaturesList');
+              featList.innerHTML = '';
+              if(data.update.features) {
+                  if(data.update.features.security) featList.innerHTML += `<div class="update-item"><i class="fas fa-shield-alt"></i> Security Improvements</div>`;
+                  if(data.update.features.performance) featList.innerHTML += `<div class="update-item"><i class="fas fa-bolt"></i> Performance Boost</div>`;
+                  if(data.update.features.fix) featList.innerHTML += `<div class="update-item"><i class="fas fa-wrench"></i> Bug Fixes</div>`;
+              }
+              
+              const updateActions = document.getElementById('updateActions');
+              updateActions.innerHTML = '';
+              if(data.update.link) {
+                  let btnHtml = `<a href="${data.update.link}" target="_blank" class="btn btn-primary" style="text-decoration:none; display:inline-block; margin-top:15px;">Download Update</a>`;
+                  if(data.update.size) {
+                      btnHtml += `<div style="font-size:0.75rem; margin-top:5px; opacity:0.6;">Size: ${data.update.size}</div>`;
+                  }
+                  updateActions.innerHTML = btnHtml;
+              }
+
+              const devVersion = document.getElementById('devVersion');
+              const devMessage = document.getElementById('devMessage');
+              const devLogo = document.getElementById('devLogo');
+              const devLink = document.getElementById('devLink');
+              const devSize = document.getElementById('devSize');
+              const devStatus = document.getElementById('devStatus');
+
+              if(devVersion) devVersion.value = data.update.version || '';
+              if(devMessage) devMessage.value = data.update.message || '';
+              if(devLogo) devLogo.value = data.update.logo || '';
+              if(devLink) devLink.value = data.update.link || '';
+              if(devSize) devSize.value = data.update.size || '';
+              if(devStatus) devStatus.checked = data.update.show;
+              
+              if(data.update.features) {
+                  document.getElementById('featSecurity').checked = data.update.features.security;
+                  document.getElementById('featPerformance').checked = data.update.features.performance;
+                  document.getElementById('featFix').checked = data.update.features.fix;
+              }
+
+          } else {
+              document.getElementById('updatePopup').style.display = 'none';
+          }
+
+          document.querySelectorAll('.new-badge').forEach(el => el.style.display = 'none');
+          if(data.newTags && Array.isArray(data.newTags)) {
+              data.newTags.forEach(tagId => {
+                  const badge = document.querySelector(`#${tagId} .new-badge`);
+                  if(badge) badge.style.display = 'block';
+                  const cb = document.querySelector(`.new-tag-checkbox[value="${tagId}"]`);
+                  if(cb) cb.checked = true;
+              });
+          }
+      }
+
+      window.addEventListener('load', () => {
+          const cachedData = localStorage.getItem('devConfigCache');
+          if(cachedData) {
+              try {
+                  applyConfig(JSON.parse(cachedData));
+              } catch(e) { console.error("Cache Parse Error"); }
           }
       });
     </script>
@@ -464,17 +522,19 @@
         .settings-overlay.active { display: block; }
         
         #settingsModal {
-            position: fixed; bottom: -100%; left: 0; width: 100%;
+            position: fixed; bottom: 0; left: 0; width: 100%;
             background: var(--card); border-top-left-radius: 24px; border-top-right-radius: 24px;
             padding: 25px; box-shadow: 0 -5px 20px var(--shadow); z-index: 3500; 
-            transition: 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); border-top: 1px solid var(--border);
-            overflow: hidden; 
+            transition: transform 0.4s cubic-bezier(0.33, 1, 0.68, 1); border-top: 1px solid var(--border);
+            overflow: hidden; transform: translateY(100%);
         }
-        #settingsModal.active { bottom: 0; }
+        #settingsModal.active { transform: translateY(0); }
         .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .settings-input-group { position: relative; display: flex; gap: 10px; margin-bottom: 10px; }
-        .settings-input-group input { flex-grow: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
         
+        .settings-input-wrapper { position: relative; width: 100%; margin-bottom: 10px; }
+        .settings-input-wrapper input { width: 100%; padding: 12px; padding-right: 45px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+        .input-paste-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--primary); cursor: pointer; padding: 5px; }
+
         .social-link-original {
             text-decoration: none; 
             display: flex; 
@@ -521,8 +581,9 @@
         }
         .dark-mode .update-card { background: var(--card); } 
         
-        .update-card h2 { color: var(--primary); margin-bottom: 15px; }
+        .update-card h2 { color: var(--primary); margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
         .update-card p { opacity: 0.8; margin-bottom: 20px; line-height: 1.5; }
+        .update-logo-img { height: 40px; width: auto; }
         .update-features-list { display: flex; flex-direction: column; gap: 10px; text-align: left; margin-top: 15px; }
         .update-item { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 600; opacity: 0.9; }
         .update-item i { color: var(--primary); width: 20px; text-align: center; font-weight: 400; font-size: 0.9rem; } 
@@ -537,7 +598,7 @@
         .settings-loading-logo { width: 60px; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
 
-        .settings-content-blocked { opacity: 0.4; pointer-events: none; filter: blur(2px); transition: 0.3s; }
+        .settings-content-blocked { filter: blur(5px); pointer-events: none; user-select: none; transition: 0.3s; }
         .login-prompt-overlay {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             z-index: 3600; text-align: center; width: 100%; display: none;
@@ -549,6 +610,8 @@
 
         .checkbox-group { display: flex; flex-direction: column; gap: 8px; max-height: 150px; overflow-y: auto; padding: 5px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 15px; }
         .checkbox-item { display: flex; align-items: center; gap: 10px; font-size: 0.8rem; }
+        
+        .dev-input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px; }
 
     </style>
 </head>
@@ -558,8 +621,8 @@
         <div class="update-card">
             <h2 id="updateTitle">Update Available</h2>
             <p id="updateMessage">A new version of One Tool is available.</p>
-            <div id="updateFeaturesList" class="update-features-list">
-            </div>
+            <div id="updateFeaturesList" class="update-features-list"></div>
+            <div id="updateActions"></div>
         </div>
     </div>
 
@@ -1119,11 +1182,11 @@
             </div>
 
             <label style="font-size: 0.85rem; font-weight: 700; display: block; margin-bottom: 8px;">Set API Key</label>
-            <div class="settings-input-group">
+            <div class="settings-input-wrapper">
                 <input type="text" id="apiKeyInput" placeholder="Enter API Key">
-                <button class="btn btn-action" style="width: auto; margin: 0; padding: 0 20px;" onclick="pasteApiKey()"><i class="fas fa-paste"></i> Paste</button>
-                <button class="btn btn-action" style="width: auto; margin: 0; padding: 0 20px; background: var(--primary); color: white;" onclick="saveApiKey()">Save</button>
+                <button class="input-paste-btn" onclick="pasteApiKey()"><i class="fas fa-paste"></i></button>
             </div>
+            <button class="btn btn-action" style="width: auto; margin-bottom: 15px; padding: 0 20px; background: var(--primary); color: white;" onclick="saveApiKey()">Save API Key</button>
             
             <a href="https://t.me/onetoolbd" target="_blank" class="btn btn-action" style="background: transparent; border: 1px solid var(--border); color: var(--text); text-decoration: none; text-align: center; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 8px;">
                 <i class="fab fa-telegram"></i> Get API for Free
@@ -1135,11 +1198,20 @@
                 <h4 style="margin-bottom:15px;">Update Notification Config</h4>
                 
                 <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Version Number</label>
-                <input type="text" id="devVersion" placeholder="e.g. 1.5" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px;">
+                <input type="text" class="dev-input" id="devVersion" placeholder="e.g. 1.5">
                 
                 <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Custom Message</label>
-                <textarea id="devMessage" placeholder="What's new in this update?" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px; height: 80px; font-family: inherit; resize: none;"></textarea>
+                <textarea id="devMessage" placeholder="What's new in this update?" class="dev-input" style="height: 80px; font-family: inherit; resize: none;"></textarea>
                 
+                <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Update Logo (URL)</label>
+                <input type="text" class="dev-input" id="devLogo" placeholder="https://example.com/logo.png">
+                
+                <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Update Button Link</label>
+                <input type="text" class="dev-input" id="devLink" placeholder="https://example.com/download">
+                
+                <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Update Size</label>
+                <input type="text" class="dev-input" id="devSize" placeholder="e.g. 15 MB">
+
                 <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">"New" Tags (Select tools to show badge)</label>
                 <div class="checkbox-group">
                     <label class="checkbox-item"><input type="checkbox" class="new-tag-checkbox" value="card-linkToQr"> Link to QR</label>
@@ -1157,9 +1229,9 @@
 
                 <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Update Card Features</label>
                 <div class="checkbox-group" style="height: auto;">
-                    <label class="checkbox-item"><input type="checkbox" id="featSecurity"> Security Improvements</label>
-                    <label class="checkbox-item"><input type="checkbox" id="featPerformance"> Performance Boost</label>
-                    <label class="checkbox-item"><input type="checkbox" id="featFix"> Bug Fixes</label>
+                    <label class="checkbox-item"><input type="checkbox" id="featSecurity"> <i class="fas fa-shield-alt"></i> Security Improvements</label>
+                    <label class="checkbox-item"><input type="checkbox" id="featPerformance"> <i class="fas fa-bolt"></i> Performance Boost</label>
+                    <label class="checkbox-item"><input type="checkbox" id="featFix"> <i class="fas fa-wrench"></i> Bug Fixes</label>
                 </div>
 
                 <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 20px;">
@@ -2557,6 +2629,14 @@
         updateLinkInputControls();
         linkQrColorBtn.style.backgroundColor = linkQrColor.value;
         linkQrBackgroundBtn.style.backgroundColor = linkQrBackground.value;
+        
+        const cachedKey = localStorage.getItem('cachedApiKey');
+        if(cachedKey) {
+            GIT.token = cachedKey;
+            updateApiIndicator(true);
+            const keyInput = document.getElementById('apiKeyInput');
+            if(keyInput) keyInput.value = cachedKey;
+        }
     </script>
 </body>
 </html>
