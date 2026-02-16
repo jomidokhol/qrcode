@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,10 +7,6 @@
     <title>One Tool | QR & Tools Generator</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts for Update Popup -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0,1" />
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     
@@ -43,7 +40,7 @@
         
         input, .link-url, .upload-box #uploadTitle, #linkUploadTitle, #extractorUploadTitle, 
         #mp3UploadTitle, #pdfUploadTitle, #zipUploadTitle, #gifUploadTitle, footer p, #toast, .filename-input,
-        #urlDownloaderInput, #pdfMakerTitle, #devMessage {
+        #pdfMakerTitle, #devMessage {
             -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text;
         }
 
@@ -64,7 +61,6 @@
         .action-btn { background: var(--primary); color: white; font-size: 0.8rem; font-weight: 600; padding: 0 15px; width: auto; }
         .action-btn:hover { opacity: 0.9; }
 
-        /* API Status Indicator Styles */
         .api-status-bar {
             width: 100%; 
             background: var(--card);
@@ -99,17 +95,17 @@
 
         #progressContainer, #linkProgressContainer, 
         #mp3ProgressContainer, #pdfProgressContainer, 
-        #zipProgressContainer, #gifProgressContainer, #urlDownloadProgressContainer, #pdfMakerProgressContainer { display: none; margin-top: 20px; text-align: left; }
+        #zipProgressContainer, #gifProgressContainer, #pdfMakerProgressContainer { display: none; margin-top: 20px; text-align: left; }
         
         .progress-track { background: var(--border); height: 10px; border-radius: 10px; overflow: hidden; margin-top: 10px; }
         
-        .progress-fill, #mp3ProgressFill, #pdfProgressFill, #zipProgressFill, #gifProgressFill, #urlDownloadProgressFill, #pdfMakerProgressFill { 
+        .progress-fill, #mp3ProgressFill, #pdfProgressFill, #zipProgressFill, #gifProgressFill, #pdfMakerProgressFill { 
             background: var(--primary); height: 100%; width: 0%; transition: width 0.1s; 
         }
         
         #percentLabel, #linkPercentLabel, 
         #mp3PercentLabel, #pdfPercentLabel, 
-        #zipPercentLabel, #gifPercentLabel, #urlDownloadPercentLabel, #pdfMakerPercentLabel { font-size: 0.8rem; font-weight: 700; color: var(--primary); }
+        #zipPercentLabel, #gifPercentLabel, #pdfMakerPercentLabel { font-size: 0.8rem; font-weight: 700; color: var(--primary); }
 
         .upload-box { border: 2px dashed var(--primary); border-radius: 24px; padding: 20px; text-align: center; cursor: pointer; background: rgba(99, 102, 241, 0.05); position: relative; } 
         .upload-box img { display:block; margin: 0 auto 10px; }
@@ -124,11 +120,13 @@
         .btn-action { background: var(--border); color: var(--text); font-size: 0.85rem; }
         .btn-link { background: var(--primary); color: white; font-size: 0.9rem; font-weight: 600; padding: 18px; }
 
-        .option-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 15px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 20px; }
+        .option-card { position: relative; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 15px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 20px; }
         .option-card:hover { border-color: var(--primary); background: rgba(99, 102, 241, 0.05); }
         .option-card i { font-size: 1.8rem; color: var(--primary); }
         .option-card h4 { margin: 0; font-weight: 800; }
         .option-card p { margin: 0; font-size: 0.8rem; opacity: 0.7; }
+
+        .new-badge { position: absolute; top: 10px; right: 10px; background: var(--primary); color: white; font-size: 0.6rem; font-weight: 800; padding: 2px 8px; border-radius: 20px; display: none; }
         
         .icon-back-btn { 
             background: transparent; border: 1px solid var(--border); 
@@ -227,14 +225,6 @@
         
         .bulk-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
 
-        /* Updated PDF Control Styles */
-        .pdf-controls-right {
-            position: absolute; top: 5px; right: 5px; 
-            display: flex; gap: 5px; align-items: center; 
-            background: rgba(255,255,255,0.9); padding: 4px; 
-            border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            z-index: 10;
-        }
         .pdf-page-badge {
             position: absolute; top: 5px; left: 5px;
             background: rgba(0,0,0,0.7); color: white;
@@ -258,19 +248,18 @@
             background: var(--card); border: 1px solid var(--border);
             color: var(--text); display: flex; align-items: center; justify-content: center;
             cursor: pointer; box-shadow: 0 4px 12px var(--shadow); 
-            z-index: 3000 !important; /* Higher than update popup */
+            z-index: 3000 !important; 
             transition: 0.3s; font-size: 1.2rem;
         }
         .settings-btn:hover { background: var(--border); transform: rotate(45deg); }
 
         #mainOptionsView, #linkToQrView, #uploadToQrView, #uploadToLinkView, #qrExtractorView,
-        #mp4ToMp3View, #pdfExtractorView, #zipExtractorView, #videoToGifView, #urlDownloaderView, #pdfMakerView { display: none; }
+        #mp4ToMp3View, #pdfExtractorView, #zipExtractorView, #videoToGifView, #pdfMakerView { display: none; }
 
         .file-list-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); gap: 10px; }
         .file-list-item:last-child { border-bottom: none; }
         .file-list-item .fname { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; font-size: 0.9rem; }
 
-        /* Settings Modal CSS */
         .settings-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); z-index: 1999; display: none;
@@ -281,52 +270,14 @@
         #settingsModal {
             position: fixed; bottom: -100%; left: 0; width: 100%;
             background: var(--card); border-top-left-radius: 24px; border-top-right-radius: 24px;
-            padding: 25px; box-shadow: 0 -5px 20px var(--shadow); z-index: 3500; /* Higher than update popup */
+            padding: 25px; box-shadow: 0 -5px 20px var(--shadow); z-index: 3500; 
             transition: 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); border-top: 1px solid var(--border);
-            /* To handle loading overlay correctly */
             overflow: hidden; 
         }
         #settingsModal.active { bottom: 0; }
         .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        
-        /* UPDATED SETTINGS API INPUT STYLES */
-        .api-input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-            width: 100%;
-            margin-bottom: 10px;
-        }
-        .api-input-wrapper input {
-            padding: 12px;
-            padding-right: 80px; /* Space for buttons */
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            background: var(--bg);
-            color: var(--text);
-            width: 100%;
-        }
-        .api-input-actions {
-            position: absolute;
-            right: 10px;
-            display: flex;
-            gap: 5px;
-            align-items: center;
-        }
-        .api-icon-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text);
-            opacity: 0.7;
-            padding: 5px;
-            font-size: 1.1rem;
-            transition: 0.3s;
-        }
-        .api-icon-btn:hover {
-            opacity: 1;
-            color: var(--primary);
-        }
+        .settings-input-group { position: relative; display: flex; gap: 10px; margin-bottom: 10px; }
+        .settings-input-group input, .settings-input-group select { flex-grow: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
         
         .social-link-original {
             text-decoration: none; 
@@ -342,7 +293,6 @@
         .social-link-fb { color: #1877F2; }
         .social-link-wa { color: #25D366; }
 
-        /* PDF Maker Grid */
         .pdf-maker-item { position: relative; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
         .pdf-maker-item img { width: 100%; height: 100px; object-fit: cover; display: block; }
         .pdf-maker-remove {
@@ -353,7 +303,6 @@
             cursor: pointer; font-size: 0.6rem;
         }
 
-        /* Dev Tools Toggle */
         .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border); transition: .4s; }
@@ -363,128 +312,23 @@
         .slider.round { border-radius: 34px; }
         .slider.round:before { border-radius: 50%; }
 
-        /* Modern Android Update Popup Styles */
         .update-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% 30%, rgba(30, 144, 255, 0.08), rgba(0,0,0,0.8) 70%); /* Darker for overlay effect */
-            z-index: 2500; 
+            background: rgba(0,0,0,0.6); z-index: 2500; 
             display: none; justify-content: center; align-items: center;
             backdrop-filter: blur(5px);
-            padding: 20px;
         }
-
-        .update-card-modern {
-            max-width: 400px;
-            width: 100%;
-            background: #1e232a; /* Fallback */
-            background: rgba(30, 35, 42, 0.95);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 36px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
-            padding: 24px;
-            color: #fff;
-            transition: all 0.2s ease;
-            animation: appear 0.35s cubic-bezier(0.2, 0.9, 0.4, 1);
-            font-family: 'Inter', sans-serif;
-            text-align: left; /* Reset alignment */
+        .update-card {
+            background: var(--bg); padding: 30px; border-radius: 24px;
+            text-align: center; max-width: 90%; width: 380px;
+            border: 1px solid var(--border); box-shadow: 0 10px 40px var(--shadow);
         }
+        .update-card h2 { color: var(--primary); margin-bottom: 20px; font-weight: 800; }
+        .update-features { text-align: left; margin-bottom: 20px; display: flex; flex-direction: column; gap: 12px; }
+        .update-features div { display: flex; align-items: center; gap: 12px; font-size: 0.9rem; font-weight: 600; opacity: 0.9; }
+        .update-features i { font-size: 1rem; color: var(--primary); width: 20px; text-align: center; }
+        .update-card p { opacity: 0.7; margin-bottom: 10px; line-height: 1.5; font-size: 0.85rem; }
 
-        @keyframes appear {
-            0% { opacity: 0; transform: scale(0.92) translateY(8px); }
-            100% { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        .pop-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .brand { display: flex; align-items: center; gap: 12px; }
-        
-        .android-icon {
-            display: flex; align-items: center; justify-content: center;
-            background: rgba(52, 199, 123, 0.2); border-radius: 16px; padding: 6px;
-        }
-        .android-icon .material-symbols-rounded { font-size: 32px; color: #34c759; }
-
-        .title-section { display: flex; flex-direction: column; }
-        .app-name { font-weight: 600; font-size: 18px; letter-spacing: -0.2px; color: #fff; line-height: 1.3; }
-        
-        .build-tag { font-size: 13px; color: rgba(255, 255, 255, 0.55); font-weight: 500; display: flex; align-items: center; gap: 6px; }
-        .build-tag span { background: rgba(255, 255, 255, 0.08); padding: 2px 8px; border-radius: 50px; font-size: 11px; font-weight: 600; color: rgba(255, 255, 255, 0.8); }
-
-        /* Close button visually hidden/disabled based on original request "Non-dismissible" but kept in DOM for style match */
-        .close-btn {
-            background: rgba(255, 255, 255, 0.06); border: none; border-radius: 50%;
-            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-            color: rgba(255, 255, 255, 0.7); cursor: default; transition: 0.1s; opacity: 0.5;
-        }
-        .close-btn .material-symbols-rounded { font-size: 24px; }
-
-        .update-content { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 8px 8px 16px; }
-
-        .animation-badge {
-            background: rgba(0, 102, 204, 0.2); border-radius: 50px; padding: 16px;
-            margin-bottom: 20px; position: relative; display: flex; flex-direction: column; align-items: center;
-        }
-        .circle-glow {
-            background: conic-gradient(from 180deg at 50% 50%, #34c759 0deg, #0a84ff 180deg, #34c759 360deg);
-            width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            animation: rotate 8s linear infinite;
-        }
-        .inner-icon {
-            background: #1e1e24; width: 70px; height: 70px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
-        }
-        .inner-icon .material-symbols-rounded { font-size: 48px; color: #a6ffb2; }
-
-        @keyframes rotate { to { transform: rotate(360deg); } }
-
-        .update-card-modern h2 {
-            font-size: 24px; font-weight: 650; letter-spacing: -0.5px; margin: 16px 0 8px;
-            background: linear-gradient(180deg, #fff 70%, rgba(255,255,255,0.85));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .update-desc {
-            font-size: 15px; line-height: 1.5; color: rgba(255, 255, 255, 0.75);
-            max-width: 280px; margin: 0 auto; font-weight: 400;
-        }
-
-        .chip-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 24px 0 16px; }
-        .chip {
-            background: rgba(118, 118, 128, 0.2); backdrop-filter: blur(10px);
-            padding: 6px 16px; border-radius: 50px; font-size: 13px; font-weight: 500;
-            display: inline-flex; align-items: center; gap: 6px; color: rgba(255, 255, 255, 0.9);
-            border: 0.5px solid rgba(255, 255, 255, 0.08);
-        }
-        .chip .material-symbols-rounded { font-size: 18px; }
-
-        .update-size {
-            display: flex; align-items: center; justify-content: center; gap: 12px;
-            font-size: 14px; background: rgba(0, 0, 0, 0.3); border-radius: 50px;
-            padding: 10px 24px; margin: 8px 0 28px; border: 0.3px solid rgba(255, 255, 255, 0.06);
-            color: rgba(255,255,255,0.8); font-weight: 500; width: fit-content; align-self: center;
-        }
-        .update-size .material-symbols-rounded { font-size: 20px; color: #64b5f6; }
-
-        .actions { display: flex; gap: 12px; margin-top: 8px; width: 100%; }
-        .btn-update-primary {
-            flex: 1; padding: 14px 0; border-radius: 40px; border: none;
-            font-weight: 600; font-size: 15px; display: flex; align-items: center; justify-content: center;
-            gap: 8px; background: #0a84ff; box-shadow: 0 6px 18px rgba(10, 132, 255, 0.35);
-            color: white; cursor: pointer; transition: 0.15s ease;
-        }
-        .btn-update-primary:hover { opacity: 0.9; }
-        .btn-update-primary .material-symbols-rounded { font-size: 20px; }
-
-        .footnote {
-            display: flex; justify-content: center; margin-top: 18px;
-            color: rgba(235, 235, 245, 0.5); font-size: 12px; font-weight: 450; gap: 8px; align-items: center;
-        }
-        .footnote .material-symbols-rounded { font-size: 14px; }
-        .update-card-modern hr { border: none; border-top: 0.33px solid rgba(255, 255, 255, 0.1); margin: 20px 0 10px; }
-
-
-        /* Loading Overlay for Settings */
         .settings-loading-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255, 255, 255, 0.9); z-index: 4000;
@@ -495,12 +339,10 @@
         .settings-loading-logo { width: 60px; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
 
-        /* Auth Blocking and Header Styles */
         .settings-content-blocked { opacity: 0.4; pointer-events: none; filter: blur(2px); transition: 0.3s; }
         .login-prompt-overlay {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            z-index: 3800; /* Increased Z-Index to be above blur */
-            text-align: center; width: 100%; display: none;
+            z-index: 3600; text-align: center; width: 100%; display: none;
         }
         .user-profile-btn { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; border: 2px solid var(--primary); cursor: pointer; display: none; }
         .user-profile-btn img { width: 100%; height: 100%; object-fit: cover; }
@@ -511,69 +353,15 @@
 </head>
 <body>
 
-    <!-- Modern Android Style Update Popup -->
     <div id="updatePopup" class="update-overlay">
-        <div class="update-card-modern">
-            <div class="pop-header">
-                <div class="brand">
-                    <div class="android-icon">
-                        <span class="material-symbols-rounded">android</span>
-                    </div>
-                    <div class="title-section">
-                        <span class="app-name">System Update</span>
-                        <div class="build-tag">
-                            <span id="updateVersion">1.0</span>
-                            <span style="background: rgba(52,199,123,0.15); color: #90e0a0;">LATEST</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="close-btn">
-                    <span class="material-symbols-rounded">close</span>
-                </div>
+        <div class="update-card">
+            <h2 id="updateTitle">Update Available</h2>
+            <div class="update-features">
+                <div><i class="fa-regular fa-shield"></i> Security Improved</div>
+                <div><i class="fa-regular fa-bolt"></i> Fast Performance</div>
+                <div><i class="fa-regular fa-circle-check"></i> Bugs Fixed</div>
             </div>
-
-            <div class="update-content">
-                <div class="animation-badge">
-                    <div class="circle-glow">
-                        <div class="inner-icon">
-                            <span class="material-symbols-rounded">update</span>
-                        </div>
-                    </div>
-                </div>
-                <h2 id="updateTitleDisplay">Update ready</h2>
-                <div class="update-desc" id="updateMessage">
-                    New features and improvements are available.
-                </div>
-                
-                <div class="chip-row">
-                    <div class="chip">
-                        <span class="material-symbols-rounded">security</span> Security
-                    </div>
-                    <div class="chip">
-                        <span class="material-symbols-rounded">bolt</span> Performance
-                    </div>
-                    <div class="chip">
-                        <span class="material-symbols-rounded">bug_report</span> Fixes
-                    </div>
-                </div>
-
-                <div class="update-size">
-                    <span class="material-symbols-rounded">database</span>
-                    <span id="updateSize">-- MB</span>
-                </div>
-            </div>
-
-            <div class="actions">
-                <button class="btn-update-primary" id="updateDownloadBtn">
-                    <span class="material-symbols-rounded">system_update</span> Update now
-                </button>
-            </div>
-
-            <hr>
-            <div class="footnote">
-                <span class="material-symbols-rounded">verified</span>
-                <span>Developed by NUR</span>
-            </div>
+            <p id="updateMessage"></p>
         </div>
     </div>
 
@@ -592,7 +380,6 @@
         </div>
     </header>
 
-    <!-- API Status Indicator Moved Here -->
     <div class="api-status-bar">
         <span id="apiStatusText">API Inactive</span>
         <div id="apiStatusDot" class="status-dot"></div>
@@ -607,7 +394,8 @@
                     <h2 style="margin-bottom: 25px; text-align: center;">Choose Your Service</h2>
                     
                     <div style="display: grid; grid-template-columns: 1fr; gap: 0;">
-                        <div class="option-card" onclick="setView('linkToQrView')">
+                        <div class="option-card" data-tool-id="linkToQr" onclick="setView('linkToQrView')">
+                            <span class="new-badge">NEW</span>
                             <i class="fas fa-link"></i>
                             <div>
                                 <h4>Link to QR</h4>
@@ -615,7 +403,8 @@
                             </div>
                         </div>
                         
-                        <div class="option-card" onclick="setView('uploadToQrView')">
+                        <div class="option-card" data-tool-id="uploadToQr" onclick="setView('uploadToQrView')">
+                            <span class="new-badge">NEW</span>
                             <i class="fas fa-qrcode"></i>
                             <div>
                                 <h4>Upload to QR</h4>
@@ -623,7 +412,8 @@
                             </div>
                         </div>
 
-                        <div class="option-card" onclick="setView('uploadToLinkView')">
+                        <div class="option-card" data-tool-id="uploadToLink" onclick="setView('uploadToLinkView')">
+                            <span class="new-badge">NEW</span>
                             <i class="fas fa-cloud-upload-alt"></i>
                             <div>
                                 <h4>Upload to Link</h4>
@@ -631,7 +421,8 @@
                             </div>
                         </div>
                         
-                        <div class="option-card" onclick="setView('qrExtractorView')">
+                        <div class="option-card" data-tool-id="qrExtractor" onclick="setView('qrExtractorView')">
+                            <span class="new-badge">NEW</span>
                             <i class="fas fa-camera"></i> 
                             <div>
                                 <h4>QR Code Extractor</h4>
@@ -639,15 +430,8 @@
                             </div>
                         </div>
 
-                        <div class="option-card" onclick="setView('urlDownloaderView')">
-                            <i class="fas fa-download"></i> 
-                            <div>
-                                <h4>Url to Download</h4>
-                                <p>Download files directly from URLs with preview.</p>
-                            </div>
-                        </div>
-
-                        <div class="option-card" onclick="setView('pdfMakerView')">
+                        <div class="option-card" data-tool-id="pdfMaker" onclick="setView('pdfMakerView')">
+                            <span class="new-badge">NEW</span>
                             <i class="fas fa-file-pdf"></i> 
                             <div>
                                 <h4>PDF Maker</h4>
@@ -655,7 +439,26 @@
                             </div>
                         </div>
 
-                        <div class="option-card" onclick="setView('mp4ToMp3View')">
+                        <div class="option-card" data-tool-id="slowedReverb" onclick="window.location.href='slowed-reverb.html'">
+                            <span class="new-badge">NEW</span>
+                            <i class="fas fa-headphones"></i> 
+                            <div>
+                                <h4>Audio slowed and reverb</h4>
+                                <p>Add atmospheric effects to your music.</p>
+                            </div>
+                        </div>
+
+                        <div class="option-card" data-tool-id="rgbCmyk" onclick="window.location.href='rgb-to-cmyk-convert.html'">
+                            <span class="new-badge">NEW</span>
+                            <i class="fas fa-palette"></i> 
+                            <div>
+                                <h4>RGB to CMYK</h4>
+                                <p>Convert digital colors for printing.</p>
+                            </div>
+                        </div>
+
+                        <div class="option-card" data-tool-id="mp4ToMp3" onclick="setView('mp4ToMp3View')">
+                            <span class="new-badge">NEW</span>
                             <i class="fas fa-music"></i> 
                             <div>
                                 <h4>MP4 to MP3</h4>
@@ -663,7 +466,8 @@
                             </div>
                         </div>
 
-                        <div class="option-card" onclick="setView('pdfExtractorView')">
+                        <div class="option-card" data-tool-id="pdfExtractor" onclick="setView('pdfExtractorView')">
+                            <span class="new-badge">NEW</span>
                             <i class="fas fa-images"></i> 
                             <div>
                                 <h4>PDF Extractor</h4>
@@ -671,7 +475,8 @@
                             </div>
                         </div>
 
-                        <div class="option-card" onclick="setView('zipExtractorView')">
+                        <div class="option-card" data-tool-id="zipExtractor" onclick="setView('zipExtractorView')">
+                            <span class="new-badge">NEW</span>
                             <i class="fas fa-file-zipper"></i> 
                             <div>
                                 <h4>ZIP Extractor</h4>
@@ -679,7 +484,8 @@
                             </div>
                         </div>
 
-                        <div class="option-card" onclick="setView('videoToGifView')">
+                        <div class="option-card" data-tool-id="videoToGif" onclick="setView('videoToGifView')">
+                            <span class="new-badge">NEW</span>
                             <i class="fas fa-video"></i> 
                             <div>
                                 <h4>Video to GIF</h4>
@@ -882,42 +688,6 @@
                     </div>
                 </div>
 
-                <!-- URL to Download View -->
-                <div id="urlDownloaderView">
-                    <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
-                    <h3 style="margin-bottom: 15px;">Url to Download</h3>
-                    <div class="input-wrapper">
-                        <input type="text" id="urlDownloaderInput" placeholder="Paste direct file URL here..." style="width: 100%; padding: 15px; padding-right: 50px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 1rem;">
-                        <div class="input-controls">
-                            <button class="paste-btn" id="pasteUrlBtn"><i class="fas fa-paste"></i></button>
-                        </div>
-                    </div>
-                    <button class="btn btn-primary" id="checkUrlBtn">Check & Preview</button>
-                    
-                    <div id="urlPreviewArea" style="display: none; margin-top: 20px;">
-                        <div style="text-align: center; margin-bottom: 15px;">
-                            <div id="urlPreviewContent" style="margin-bottom: 10px; max-height: 200px; overflow: hidden; display: flex; justify-content: center; align-items: center;"></div>
-                            <p id="urlFileInfo" style="font-size: 0.85rem; opacity: 0.8;"></p>
-                        </div>
-                        
-                        <div class="filename-wrapper">
-                            <input type="text" id="urlFilename" class="filename-input" placeholder="Filename">
-                            <span class="filename-ext" id="urlFileExt">.ext</span>
-                        </div>
-                        
-                        <div id="urlDownloadProgressContainer">
-                            <div style="display: flex; justify-content: space-between;">
-                                <span style="font-size: 0.8rem; opacity: 0.7;">Downloading...</span>
-                                <span id="urlDownloadPercentLabel">0%</span>
-                            </div>
-                            <div class="progress-track"><div id="urlDownloadProgressFill" class="progress-fill"></div></div>
-                        </div>
-
-                        <button class="btn btn-action" id="downloadUrlBtn" style="margin-top: 15px; background: var(--primary); color: white;"><i class="fas fa-download"></i> Download File</button>
-                    </div>
-                </div>
-
-                <!-- PDF Maker View -->
                 <div id="pdfMakerView">
                     <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
                     <h3 style="margin-bottom: 15px;">PDF Maker</h3>
@@ -1134,7 +904,6 @@
 
     <div class="settings-overlay" id="settingsOverlay" onclick="toggleSettings()"></div>
     <div id="settingsModal">
-        <!-- Loading Overlay for Settings -->
         <div id="settingsLoadingOverlay" class="settings-loading-overlay">
             <img src="img/logo.png" class="settings-loading-logo" alt="Loading...">
         </div>
@@ -1152,12 +921,10 @@
             </div>
 
             <label style="font-size: 0.85rem; font-weight: 700; display: block; margin-bottom: 8px;">Set API Key</label>
-            <div class="api-input-wrapper">
+            <div class="settings-input-group">
                 <input type="text" id="apiKeyInput" placeholder="Enter API Key">
-                <div class="api-input-actions">
-                     <button class="api-icon-btn" onclick="pasteApiKey()" title="Paste"><i class="fas fa-paste"></i></button>
-                     <button class="api-icon-btn" onclick="saveApiKey()" title="Save"><i class="fas fa-save"></i></button>
-                </div>
+                <button class="btn btn-action" style="width: auto; margin: 0; padding: 0 20px;" onclick="pasteApiKey()"><i class="fas fa-paste"></i> Paste</button>
+                <button class="btn btn-action" style="width: auto; margin: 0; padding: 0 20px; background: var(--primary); color: white;" onclick="saveApiKey()">Save</button>
             </div>
             
             <a href="https://t.me/onetoolbd" target="_blank" class="btn btn-action" style="background: transparent; border: 1px solid var(--border); color: var(--text); text-decoration: none; text-align: center; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 8px;">
@@ -1166,30 +933,38 @@
             
             <button class="btn btn-action" style="margin-top: 10px;" onclick="checkDevAccess()"><i class="fas fa-code"></i> Developer Options</button>
             
-            <!-- Dev Options Panel -->
             <div id="devToolsPanel" style="display:none; margin-top:20px; border-top:1px solid var(--border); padding-top:15px;">
-                <h4 style="margin-bottom:15px;">Update Notification Config</h4>
+                <h4 style="margin-bottom:15px;">Config Manager</h4>
                 
                 <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Version Number</label>
                 <input type="text" id="devVersion" placeholder="e.g. 1.5" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px;">
                 
-                <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Update Title</label>
-                <input type="text" id="devTitle" placeholder="e.g. Update Ready" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px;">
-
                 <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Custom Message</label>
-                <textarea id="devMessage" placeholder="What's new in this update?" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px; height: 80px; font-family: inherit; resize: none;"></textarea>
+                <textarea id="devMessage" placeholder="Update message..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px; height: 60px; font-family: inherit; resize: none;"></textarea>
                 
-                <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Package Size</label>
-                <input type="text" id="devSize" placeholder="e.g. 45 MB" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px;">
-
-                <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Download Link</label>
-                <input type="text" id="devLink" placeholder="https://..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px;">
+                <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">New Tag Management</label>
+                <div class="settings-input-group" style="margin-bottom: 15px;">
+                    <select id="devNewTagTool">
+                        <option value="none">None</option>
+                        <option value="linkToQr">Link to QR</option>
+                        <option value="uploadToQr">Upload to QR</option>
+                        <option value="uploadToLink">Upload to Link</option>
+                        <option value="qrExtractor">QR Extractor</option>
+                        <option value="pdfMaker">PDF Maker</option>
+                        <option value="slowedReverb">Slowed & Reverb</option>
+                        <option value="rgbCmyk">RGB to CMYK</option>
+                        <option value="mp4ToMp3">MP4 to MP3</option>
+                        <option value="pdfExtractor">PDF Extractor</option>
+                        <option value="zipExtractor">ZIP Extractor</option>
+                        <option value="videoToGif">Video to GIF</option>
+                    </select>
+                </div>
 
                 <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 20px;">
-                    <label style="font-size: 0.85rem; font-weight: 700;">Show Notification</label>
+                    <label style="font-size: 0.85rem; font-weight: 700;">Show Update Popup</label>
                     <label class="switch">
-                    <input type="checkbox" id="devStatus">
-                    <span class="slider round"></span>
+                        <input type="checkbox" id="devStatus">
+                        <span class="slider round"></span>
                     </label>
                 </div>
                 
@@ -1209,7 +984,7 @@
 
     <script>
         const GIT = {
-            token: "", // Will be loaded from Database
+            token: "", 
             owner: "jomidokhol",
             repo: "qrcode",
             branch: "main",
@@ -1223,9 +998,8 @@
         let selectedFile = null;
         let uploadedLinkFormats = null; 
         let activeColorTarget = null;
-        let pdfMakerFiles = []; // Store selected files for PDF Maker
-        let urlBlob = null; // Store blob for URL downloader
-        let currentUser = null; // Track auth user
+        let pdfMakerFiles = []; 
+        let currentUser = null; 
 
         const views = {
             mainOptionsView: document.getElementById('mainOptionsView'),
@@ -1237,7 +1011,6 @@
             pdfExtractorView: document.getElementById('pdfExtractorView'),
             zipExtractorView: document.getElementById('zipExtractorView'),
             videoToGifView: document.getElementById('videoToGifView'),
-            urlDownloaderView: document.getElementById('urlDownloaderView'),
             pdfMakerView: document.getElementById('pdfMakerView')
         };
         
@@ -1334,7 +1107,6 @@
         const zipProgressFill = document.getElementById('zipProgressFill');
         const zipPercentLabel = document.getElementById('zipPercentLabel');
         let zipSelectedFile = null;
-        let zipExtractedContent = null;
 
         const gifFileInput = document.getElementById('gifFileInput');
         const gifDropZone = document.getElementById('gifDropZone');
@@ -1348,21 +1120,6 @@
         const gifFilename = document.getElementById('gifFilename');
         let gifSelectedFile = null;
 
-        // URL Downloader Elements
-        const urlDownloaderInput = document.getElementById('urlDownloaderInput');
-        const pasteUrlBtn = document.getElementById('pasteUrlBtn');
-        const checkUrlBtn = document.getElementById('checkUrlBtn');
-        const urlPreviewArea = document.getElementById('urlPreviewArea');
-        const urlPreviewContent = document.getElementById('urlPreviewContent');
-        const urlFileInfo = document.getElementById('urlFileInfo');
-        const urlFilename = document.getElementById('urlFilename');
-        const urlFileExt = document.getElementById('urlFileExt');
-        const downloadUrlBtn = document.getElementById('downloadUrlBtn');
-        const urlDownloadProgressContainer = document.getElementById('urlDownloadProgressContainer');
-        const urlDownloadProgressFill = document.getElementById('urlDownloadProgressFill');
-        const urlDownloadPercentLabel = document.getElementById('urlDownloadPercentLabel');
-
-        // PDF Maker Elements
         const pdfMakerInput = document.getElementById('pdfMakerInput');
         const pdfMakerDropZone = document.getElementById('pdfMakerDropZone');
         const pdfMakerPreviewGrid = document.getElementById('pdfMakerPreviewGrid');
@@ -1377,7 +1134,6 @@
 
         const CODE_EXTENSIONS = ['html', 'css', 'js', 'java', 'py', 'python', 'sql', 'pdf', 'xml', 'txt', 'kordova', 'json', 'yml', 'md'];
         
-        // Helper function for forced download (fixes APK freezing issues by using Data URLs)
         function forceDownload(blobOrUrl, filename, isBlob = true) {
             const a = document.createElement('a');
             a.style.display = 'none';
@@ -1420,7 +1176,7 @@
         function setView(newView) {
             customColorPicker.style.display = 'none';
 
-            if (['uploadToQrView', 'uploadToLinkView', 'qrExtractorView', 'mp4ToMp3View', 'pdfExtractorView', 'zipExtractorView', 'videoToGifView', 'urlDownloaderView', 'pdfMakerView'].includes(currentView)) { 
+            if (['uploadToQrView', 'uploadToLinkView', 'qrExtractorView', 'mp4ToMp3View', 'pdfExtractorView', 'zipExtractorView', 'videoToGifView', 'pdfMakerView'].includes(currentView)) { 
                 resetUploadView(currentView);
             }
             
@@ -1428,7 +1184,6 @@
                 views[view].style.display = view === newView ? 'block' : 'none';
             });
             currentView = newView;
-
             localStorage.setItem('lastView', newView);
 
             if (newView === 'linkToQrView') {
@@ -1461,8 +1216,6 @@
                 mp3ProgressFill.style.width = '0%';
                 mp3PercentLabel.innerText = '0%';
                 mp3SelectedFile = null;
-                if(fileIconMp3) fileIconMp3.style.display = 'none';
-                if(uploadIconMp3) uploadIconMp3.style.display = 'block';
             } else if (viewId === 'pdfExtractorView') {
                 document.getElementById('pdfUploadTitle').innerHTML = 'Choose a PDF File';
                 extractPdfBtn.disabled = true;
@@ -1486,7 +1239,6 @@
                 zipProgressFill.style.width = '0%';
                 zipPercentLabel.innerText = '0%';
                 zipSelectedFile = null;
-                zipExtractedContent = null;
                 zipFileList.innerHTML = '';
             } else if (viewId === 'videoToGifView') {
                 document.getElementById('gifUploadTitle').innerHTML = 'Choose Video (Max 30s, 10MB)';
@@ -1501,14 +1253,6 @@
                 gifProgressFill.style.width = '0%';
                 gifPercentLabel.innerText = '0%';
                 gifSelectedFile = null;
-            } else if (viewId === 'urlDownloaderView') {
-                urlDownloaderInput.value = '';
-                urlPreviewArea.style.display = 'none';
-                urlPreviewContent.innerHTML = '';
-                urlDownloadProgressContainer.style.display = 'none';
-                urlDownloadProgressFill.style.width = '0%';
-                urlDownloadPercentLabel.innerText = '0%';
-                urlBlob = null;
             } else if (viewId === 'pdfMakerView') {
                 pdfMakerFiles = [];
                 renderPdfMakerPreview();
@@ -1516,8 +1260,7 @@
                 pdfMakerProgressContainer.style.display = 'none';
                 pdfMakerProgressFill.style.width = '0%';
                 pdfMakerPercentLabel.innerText = '0%';
-            }
-            else if(viewId === 'uploadToQrView') {
+            } else if(viewId === 'uploadToQrView') {
                 document.getElementById('uploadTitle').innerHTML = 'Choose a file';
                 uploadBtn.disabled = true;
                 progressContainer.style.display = 'none';
@@ -1528,11 +1271,6 @@
                 fileInput.value = '';
                 progressFill.style.width = '0%';
                 percentLabel.innerText = '0%';
-                if (uploadIconQr) uploadIconQr.style.display = 'block';
-                if (imagePreviewQr) { imagePreviewQr.style.display = 'none'; imagePreviewQr.src = ''; }
-                if (fileIconQr) fileIconQr.style.display = 'none';
-                if (removeFileQrBtn) removeFileQrBtn.style.display = 'none';
-                if (qrResultFilePreview) qrResultFilePreview.innerHTML = ''; 
             } else if (viewId === 'uploadToLinkView') {
                 document.getElementById('linkUploadTitle').innerHTML = 'Choose a file';
                 linkUploadBtn.disabled = true;
@@ -1544,10 +1282,6 @@
                 linkFileInput.value = '';
                 linkProgressFill.style.width = '0%';
                 linkPercentLabel.innerText = '0%';
-                if (uploadIconLink) uploadIconLink.style.display = 'block';
-                if (imagePreviewLink) { imagePreviewLink.style.display = 'none'; imagePreviewLink.src = ''; }
-                if (fileIconLink) fileIconLink.style.display = 'none';
-                if (removeFileLinkBtn) removeFileLinkBtn.style.display = 'none';
                 uploadedLinkFormats = null; 
             } else if (viewId === 'qrExtractorView') {
                 document.getElementById('extractorUploadTitle').innerHTML = 'Choose a QR Code Image';
@@ -1556,24 +1290,9 @@
                 document.getElementById('extractorUploaderView').style.display = 'block';
                 extractorSelectedFile = null;
                 extractorFileInput.value = '';
-                if (uploadIconExtractor) uploadIconExtractor.style.display = 'block';
-                if (imagePreviewExtractor) { imagePreviewExtractor.style.display = 'none'; imagePreviewExtractor.src = ''; }
-                if (fileIconExtractor) fileIconExtractor.style.display = 'none';
-                if (removeFileExtractorBtn) removeFileExtractorBtn.style.display = 'none';
-                if (extractedDataDisplay) extractedDataDisplay.innerText = '';
-                if (extractorActionButtons) extractorActionButtons.innerHTML = '';
-                const extractorResultFilePreview = document.getElementById('extractorResultFilePreview');
-                if (extractorResultFilePreview) extractorResultFilePreview.innerHTML = '';
             }
         }
         
-        function updateLogoImage() {
-            const logoImage = document.getElementById('logoImage');
-            if (logoImage) { 
-                logoImage.src = 'img/logo.png';
-            }
-        }
-
         function setFilePreview(file, titleEl, iconEl, imgEl, fileIconEl, fileExtEl, removeBtn) {
             const fileSizeMB = file.size / (1024 * 1024);
             
@@ -1596,29 +1315,10 @@
             }
 
             const name = file.name;
-            let displayName = name;
-            
-            if (name.length > 20) {
-                const extIndex = name.lastIndexOf('.');
-                if (extIndex > 0) {
-                    const ext = name.substring(extIndex);
-                    const base = name.substring(0, extIndex);
-                    if (ext.length + 3 < 20) {
-                        displayName = base.substring(0, 20 - ext.length - 3) + '...' + ext;
-                    } else {
-                         displayName = name.substring(0, 17) + '...';
-                    }
-                } else {
-                    displayName = name.substring(0, 17) + '...';
-                }
-            } else {
-                displayName = name;
-            }
-            
+            let displayName = name.length > 20 ? name.substring(0, 17) + '...' : name;
             titleEl.innerHTML = `<b>${displayName}</b><br>Size: ${displaySize}`; 
 
             const ext = name.split('.').pop().toLowerCase();
-
             if(iconEl) iconEl.style.display = 'none';
             if(imgEl) imgEl.style.display = 'none';
             if(fileIconEl) fileIconEl.style.display = 'none';
@@ -1657,33 +1357,20 @@
             if (state && state.view) { setView(state.view); } else { setView('mainOptionsView'); }
         };
 
-        window.onbeforeunload = (e) => {
-            if (selectedFile || linkSelectedFile || mp3SelectedFile) {
-                const message = "Are you sure you want to leave? Your upload/conversion might be interrupted.";
-                e.returnValue = message;
-                return message;
-            }
-        };
-
         document.getElementById('themeToggle').onclick = () => {
             document.body.classList.toggle('dark-mode');
-            updateLogoImage(); 
         };
 
         function toggleColorPicker(buttonId, targetInputId, otherButtonId) {
             const button = document.getElementById(buttonId);
-            const otherButton = document.getElementById(otherButtonId);
-            
             if (customColorPicker.style.display === 'block' && activeColorTarget === targetInputId) {
                 customColorPicker.style.display = 'none';
                 activeColorTarget = null;
                 return;
             }
-
             activeColorTarget = targetInputId;
             const rect = button.getBoundingClientRect();
             const containerRect = document.querySelector('.main-card').getBoundingClientRect();
-            
             customColorPicker.style.top = (rect.bottom - containerRect.top + 5) + 'px';
             customColorPicker.style.left = (rect.left - containerRect.left) + 'px';
             hexInput.value = document.getElementById(targetInputId).value;
@@ -1727,25 +1414,18 @@
             }
         });
 
-        function updateLinkInputControls() {
-            clearLinkInputBtn.style.display = linkInput.value.trim() ? 'block' : 'none';
-        }
-
         function generateLinkQr() {
             const text = linkInput.value.trim();
             const size = linkQrSize.value;
             const darkColor = linkQrColor.value;
             const lightColor = linkQrBackground.value; 
-
-            updateLinkInputControls();
-
+            clearLinkInputBtn.style.display = text ? 'block' : 'none';
             if (!text) {
                 linkQrcodeDiv.innerHTML = '';
                 linkQrcodeDiv.parentElement.style.opacity = 0.3; 
                 if (linkQrCodeSizeDisplay) linkQrCodeSizeDisplay.innerText = `${size}px | Size: N/A`;
                 return;
             }
-
             linkQrcodeDiv.parentElement.style.opacity = 1;
             linkQrcodeDiv.innerHTML = '';
             QRCode.toCanvas(text, {
@@ -1753,22 +1433,14 @@
             }, (err, canvas) => { 
                 if(!err) {
                     linkQrcodeDiv.appendChild(canvas); 
-                    if (linkQrCodeSizeDisplay && canvas) {
-                        const dataURL = canvas.toDataURL('image/png', 1.0);
-                        const sizeInBytes = (dataURL.length * 0.75) - 2; 
-                        const sizeInKB = (sizeInBytes / 1024).toFixed(2);
-                        linkQrCodeSizeDisplay.innerText = `${size}px | Size: ${sizeInKB} KB`;
-                    }
+                    const dataURL = canvas.toDataURL('image/png', 1.0);
+                    const sizeInKB = ((dataURL.length * 0.75) / 1024).toFixed(2);
+                    linkQrCodeSizeDisplay.innerText = `${size}px | Size: ${sizeInKB} KB`;
                 }
             });
         }
         
-        linkInput.addEventListener('input', generateLinkQr);
-        linkQrSize.oninput = (e) => {
-            const size = e.target.value;
-            if (linkQrCodeSizeDisplay) linkQrCodeSizeDisplay.innerText = `${size}px | Size: Calculating...`;
-            generateLinkQr();
-        }
+        linkQrSize.oninput = (e) => { generateLinkQr(); }
         clearLinkInputBtn.onclick = () => { linkInput.value = ''; generateLinkQr(); };
         pasteLinkInputBtn.onclick = async () => {
             try { linkInput.value = await navigator.clipboard.readText(); generateLinkQr(); showToast("Pasted!"); } catch (err) { showToast("Clipboard Error"); }
@@ -1781,126 +1453,15 @@
             }
         };
 
-        // --- URL DOWNLOADER LOGIC (Updated with Axios) ---
-        pasteUrlBtn.onclick = async () => {
-            try { urlDownloaderInput.value = await navigator.clipboard.readText(); showToast("Pasted!"); } catch (err) { showToast("Clipboard Error"); }
-        };
-
-        checkUrlBtn.onclick = () => {
-            const url = urlDownloaderInput.value.trim();
-            if(!url) { showToast("Please enter a URL"); return; }
-            
-            checkUrlBtn.disabled = true;
-            checkUrlBtn.innerText = "Analyzing...";
-            urlPreviewArea.style.display = 'none';
-            
-            // Using Axios to check file info
-            axios.get(url, { responseType: 'blob' })
-            .then(response => {
-                checkUrlBtn.disabled = false;
-                checkUrlBtn.innerText = "Check & Preview";
-                
-                urlBlob = response.data;
-                const contentType = response.headers['content-type'] || "";
-                const contentLen = response.headers['content-length'] || urlBlob.size;
-                
-                // Guess extension
-                let ext = "";
-                const mimeMap = {
-                    'image/jpeg': '.jpg', 'image/png': '.png', 'image/gif': '.gif', 'image/webp': '.webp',
-                    'video/mp4': '.mp4', 'video/webm': '.webm', 'application/pdf': '.pdf',
-                    'application/zip': '.zip', 'audio/mpeg': '.mp3'
-                };
-                
-                if(mimeMap[contentType]) ext = mimeMap[contentType];
-                else {
-                    const urlParts = url.split('/');
-                    const lastPart = urlParts[urlParts.length-1].split('?')[0];
-                    if(lastPart.includes('.')) ext = '.' + lastPart.split('.').pop();
-                }
-                
-                // Filename
-                const urlParts = url.split('/');
-                let suggestedName = urlParts[urlParts.length-1].split('?')[0] || "download";
-                if(suggestedName.includes('.')) suggestedName = suggestedName.split('.').slice(0,-1).join('.');
-                
-                urlFilename.value = suggestedName;
-                urlFileExt.innerText = ext;
-                
-                const sizeMB = (contentLen / (1024*1024)).toFixed(2);
-                urlFileInfo.innerHTML = `Type: ${contentType}<br>Size: ${sizeMB} MB`;
-                
-                urlPreviewArea.style.display = 'block';
-                urlPreviewContent.innerHTML = '';
-                
-                const blobUrl = URL.createObjectURL(urlBlob);
-                
-                if(contentType.startsWith('image/')) {
-                    const img = document.createElement('img');
-                    img.src = blobUrl;
-                    img.style.maxWidth = '100%'; img.style.maxHeight = '200px'; img.style.borderRadius = '8px';
-                    img.onload = () => {
-                        urlFileInfo.innerHTML += `<br>Res: ${img.naturalWidth}x${img.naturalHeight}`;
-                    };
-                    urlPreviewContent.appendChild(img);
-                } else if (contentType.startsWith('video/')) {
-                    const video = document.createElement('video');
-                    video.src = blobUrl;
-                    video.controls = true;
-                    video.style.maxWidth = '100%'; video.style.maxHeight = '200px'; video.style.borderRadius = '8px';
-                    urlPreviewContent.appendChild(video);
-                } else {
-                    urlPreviewContent.innerHTML = `<i class="fas fa-file-download" style="font-size:4rem; color:var(--primary);"></i>`;
-                }
-            })
-            .catch(error => {
-                checkUrlBtn.disabled = false;
-                checkUrlBtn.innerText = "Check & Preview";
-                console.error(error);
-                if(error.message && error.message.includes("Network Error")) {
-                     showToast("CORS Blocked or Network Error. Unable to fetch directly.");
-                     urlFileInfo.innerHTML = `<span style="color:red">CORS Policy restricted direct access.</span>`;
-                     urlPreviewArea.style.display = 'block';
-                     urlPreviewContent.innerHTML = `<i class="fas fa-ban" style="font-size:3rem; color:red;"></i>`;
-                     urlDownloadProgressContainer.style.display = 'none';
-                     // Setup fallback
-                     urlBlob = null;
-                     urlFilename.value = "file";
-                     urlFileExt.innerText = "";
-                } else {
-                     showToast("Error: " + error.message);
-                }
-            });
-        };
-
-        downloadUrlBtn.onclick = () => {
-            if(urlBlob) {
-                // Download from cached blob
-                const fname = (urlFilename.value.trim() || 'download') + urlFileExt.innerText;
-                forceDownload(urlBlob, fname, true);
-                showToast("Download Started");
-            } else {
-                // Fallback for CORS restricted
-                const url = urlDownloaderInput.value.trim();
-                if(url) {
-                    window.open(url, '_blank');
-                    showToast("Opening Link...");
-                }
-            }
-        };
-
-        // --- PDF MAKER LOGIC ---
         pdfMakerDropZone.onclick = () => pdfMakerInput.click();
         pdfMakerInput.onchange = (e) => {
             if(e.target.files && e.target.files.length > 0) {
                 Array.from(e.target.files).forEach(file => {
-                    if(file.type.startsWith('image/')) {
-                        pdfMakerFiles.push(file);
-                    }
+                    if(file.type.startsWith('image/')) pdfMakerFiles.push(file);
                 });
                 renderPdfMakerPreview();
             }
-            pdfMakerInput.value = ''; // Reset to allow adding same files again if needed
+            pdfMakerInput.value = '';
         };
 
         function renderPdfMakerPreview() {
@@ -1933,40 +1494,26 @@
         generatePdfBtn.onclick = async () => {
             if(pdfMakerFiles.length === 0) return;
             generatePdfBtn.disabled = true;
-            generatePdfBtn.innerText = "Generating...";
             pdfMakerProgressContainer.style.display = 'block';
-            pdfMakerProgressFill.style.width = '0%';
-            pdfMakerPercentLabel.innerText = '0%';
-
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            
             for(let i=0; i<pdfMakerFiles.length; i++) {
                 if(i > 0) doc.addPage();
-                
-                // Load image to get dimensions
-                const imgData = await new Promise((resolve) => {
+                const imgData = await new Promise(resolve => {
                     const reader = new FileReader();
                     reader.onload = (e) => resolve(e.target.result);
                     reader.readAsDataURL(pdfMakerFiles[i]);
                 });
-                
                 const imgProps = doc.getImageProperties(imgData);
                 const pdfWidth = doc.internal.pageSize.getWidth();
                 const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-                
                 doc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-                
                 const pct = Math.round(((i+1)/pdfMakerFiles.length)*100);
                 pdfMakerProgressFill.style.width = pct + "%";
                 pdfMakerPercentLabel.innerText = pct + "%";
             }
-            
-            const fname = (pdfMakerFilename.value.trim() || 'document') + '.pdf';
-            doc.save(fname);
-            
+            doc.save((pdfMakerFilename.value.trim() || 'document') + '.pdf');
             generatePdfBtn.disabled = false;
-            generatePdfBtn.innerText = "Generate & Download PDF";
             showToast("PDF Generated!");
         };
 
@@ -1974,19 +1521,10 @@
         mp3FileInput.onchange = (e) => {
             mp3SelectedFile = e.target.files[0];
             if(mp3SelectedFile) {
-                const titleEl = document.getElementById('mp3UploadTitle');
-                if(mp3SelectedFile.size > 50 * 1024 * 1024) {
-                    titleEl.innerHTML = `File too large (>50MB).`;
-                    return;
-                }
-                
-                setFilePreview(mp3SelectedFile, titleEl, uploadIconMp3, null, fileIconMp3, fileIconMp3.querySelector('.file-ext'), document.getElementById('removeFileMp3Btn'));
+                setFilePreview(mp3SelectedFile, document.getElementById('mp3UploadTitle'), uploadIconMp3, null, fileIconMp3, fileIconMp3.querySelector('.file-ext'), document.getElementById('removeFileMp3Btn'));
                 convertMp3Btn.disabled = false;
                 mp3Filename.value = mp3SelectedFile.name.replace(/\.[^/.]+$/, "");
-
-                const videoURL = URL.createObjectURL(mp3SelectedFile);
-                const videoEl = document.getElementById('sourceVideo');
-                videoEl.src = videoURL;
+                document.getElementById('sourceVideo').src = URL.createObjectURL(mp3SelectedFile);
                 document.getElementById('mp3PreviewArea').style.display = 'block';
             }
         };
@@ -1994,80 +1532,43 @@
 
         convertMp3Btn.onclick = async () => {
             convertMp3Btn.disabled = true;
-            convertMp3Btn.innerText = "Converting... (This happens locally)";
             mp3ProgressContainer.style.display = 'block';
-            mp3ProgressFill.style.width = '0%';
-            mp3PercentLabel.innerText = '0%';
-            
             try {
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const arrayBuffer = await mp3SelectedFile.arrayBuffer();
                 const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-                
                 const bitrate = parseInt(document.getElementById('mp3Bitrate').value);
                 const mp3Encoder = new lamejs.Mp3Encoder(1, audioBuffer.sampleRate, bitrate);
                 const samples = audioBuffer.getChannelData(0); 
-                const sampleBlockSize = 1152;
-                const mp3Data = [];
-                
                 const samplesInt16 = new Int16Array(samples.length);
                 for (let i = 0; i < samples.length; i++) {
                     samplesInt16[i] = samples[i] < 0 ? samples[i] * 0x8000 : samples[i] * 0x7FFF;
                 }
-                
+                const mp3Data = [];
                 let i = 0;
                 function encodeChunk() {
                     if (i < samplesInt16.length) {
-                        const end = Math.min(i + sampleBlockSize * 50, samplesInt16.length); // Process 50 blocks at a time
-                        const sampleChunk = samplesInt16.subarray(i, end);
-                        const mp3buf = mp3Encoder.encodeBuffer(sampleChunk);
+                        const end = Math.min(i + 1152 * 50, samplesInt16.length);
+                        const mp3buf = mp3Encoder.encodeBuffer(samplesInt16.subarray(i, end));
                         if (mp3buf.length > 0) mp3Data.push(mp3buf);
-                        
                         i = end;
                         const percent = Math.round((i / samplesInt16.length) * 100);
                         mp3ProgressFill.style.width = percent + "%";
                         mp3PercentLabel.innerText = percent + "%";
-                        
                         requestAnimationFrame(encodeChunk);
                     } else {
                         const mp3buf = mp3Encoder.flush();
                         if (mp3buf.length > 0) mp3Data.push(mp3buf);
-                        
                         const blob = new Blob(mp3Data, { type: 'audio/mp3' });
-                        const url = URL.createObjectURL(blob);
-                        
-                        resultAudio.src = url;
-                        downloadMp3Btn.onclick = () => {
-                            const fname = mp3Filename.value.trim() || 'audio';
-                            forceDownload(blob, `${fname}.mp3`, true);
-                        };
-                        
+                        resultAudio.src = URL.createObjectURL(blob);
+                        downloadMp3Btn.onclick = () => forceDownload(blob, `${mp3Filename.value || 'audio'}.mp3`, true);
                         document.getElementById('mp3UploaderView').style.display = 'none';
                         mp3ResultArea.style.display = 'block';
-                        convertMp3Btn.innerText = "Convert to MP3";
                     }
                 }
                 encodeChunk();
-
-            } catch (error) {
-                showToast("Conversion Failed: " + error.message);
-                convertMp3Btn.disabled = false;
-                convertMp3Btn.innerText = "Convert to MP3";
-            }
+            } catch (error) { showToast("Failed: " + error.message); convertMp3Btn.disabled = false; }
         };
-
-        function togglePdfSelection(wrapper) {
-            const checkbox = wrapper.querySelector('.pdf-select-check');
-            checkbox.checked = !checkbox.checked;
-            if(checkbox.checked) wrapper.classList.add('selected');
-            else wrapper.classList.remove('selected');
-        }
-
-        function downloadSinglePdfPage(idx, event) {
-            event.stopPropagation();
-            const img = document.querySelector(`.pdf-grid-item:nth-child(${idx}) img`);
-            forceDownload(img.src, `page-${idx}.jpg`, false);
-        }
 
         pdfDropZone.onclick = () => pdfFileInput.click();
         pdfFileInput.onchange = (e) => {
@@ -2081,91 +1582,32 @@
 
         extractPdfBtn.onclick = async () => {
             extractPdfBtn.disabled = true;
-            extractPdfBtn.innerText = "Extracting Images...";
             pdfProgressContainer.style.display = 'block';
-            pdfProgressFill.style.width = '0%';
-            pdfPercentLabel.innerText = '0%';
-            
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
-
             try {
-                const arrayBuffer = await pdfSelectedFile.arrayBuffer();
-                const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
-                
-                const scale = parseFloat(document.getElementById('pdfQuality').value);
+                const pdf = await pdfjsLib.getDocument(await pdfSelectedFile.arrayBuffer()).promise;
                 document.getElementById('pdfPageCount').innerText = `Total Pages: ${pdf.numPages}`;
-                pdfPagesGrid.innerHTML = '';
-                
                 for(let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
-                    const viewport = page.getViewport({ scale: scale });
+                    const viewport = page.getViewport({ scale: parseFloat(document.getElementById('pdfQuality').value) });
                     const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-
-                    await page.render({ canvasContext: context, viewport: viewport }).promise;
-                    
-                    const imgUrl = canvas.toDataURL('image/jpeg');
+                    canvas.height = viewport.height; canvas.width = viewport.width;
+                    await page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise;
                     const wrapper = document.createElement('div');
                     wrapper.className = 'pdf-grid-item selected';
-                    wrapper.onclick = function() { togglePdfSelection(this); };
                     wrapper.innerHTML = `
-                        <img src="${imgUrl}" style="width:100%; border-radius:8px; border:1px solid var(--border);">
+                        <img src="${canvas.toDataURL('image/jpeg')}" style="width:100%; border-radius:8px; border:1px solid var(--border);">
                         <span class="pdf-page-badge">Page ${i}</span>
-                        <div class="pdf-controls-right">
-                            <button class="mini-download-btn" onclick="downloadSinglePdfPage(${i}, event)"><i class="fas fa-download"></i></button>
-                            <input type="checkbox" class="pdf-select-check" data-page="${i}" checked style="transform:scale(1.2);">
+                        <div style="position:absolute; top:5px; right:5px; background:white; padding:2px; border-radius:4px; display:flex; gap:4px;">
+                            <input type="checkbox" class="pdf-select-check" data-page="${i}" checked>
                         </div>
                     `;
                     pdfPagesGrid.appendChild(wrapper);
-                    
-                    const percent = Math.round((i / pdf.numPages) * 100);
-                    pdfProgressFill.style.width = percent + "%";
-                    pdfPercentLabel.innerText = percent + "%";
+                    pdfProgressFill.style.width = Math.round((i / pdf.numPages) * 100) + "%";
                 }
-
                 document.getElementById('pdfUploaderView').style.display = 'none';
                 pdfResultArea.style.display = 'block';
-                extractPdfBtn.innerText = "Extract Images";
-            } catch (error) {
-                showToast("Error reading PDF: " + error.message);
-                extractPdfBtn.disabled = false;
-                extractPdfBtn.innerText = "Extract Images";
-            }
-        };
-
-        selectAllPdfBtn.onclick = () => {
-            const wrappers = document.querySelectorAll('.pdf-grid-item');
-            let allSelected = true;
-            wrappers.forEach(w => { if(!w.querySelector('input').checked) allSelected = false; });
-            
-            wrappers.forEach(w => {
-                const cb = w.querySelector('input');
-                if(allSelected) { cb.checked = false; w.classList.remove('selected'); }
-                else { cb.checked = true; w.classList.add('selected'); }
-            });
-        };
-
-        downloadSelectedPdfBtn.onclick = async () => {
-            const checkboxes = document.querySelectorAll('.pdf-select-check:checked');
-            if(checkboxes.length === 0) { showToast("Select at least one page."); return; }
-            
-            alert("Images will be downloaded as a ZIP file.");
-
-            const zip = new JSZip();
-            const folder = zip.folder("extracted_images");
-            
-            for(let i = 0; i < checkboxes.length; i++) {
-                const cb = checkboxes[i];
-                const idx = parseInt(cb.getAttribute('data-page')) - 1;
-                const src = pdfPagesGrid.children[idx].querySelector('img').src;
-                const base64Data = src.split(',')[1];
-                folder.file(`page-${idx+1}.jpg`, base64Data, {base64: true});
-            }
-
-            const content = await zip.generateAsync({type:"blob"});
-            forceDownload(content, "extracted_images.zip", true);
+            } catch (e) { showToast("Error: " + e.message); extractPdfBtn.disabled = false; }
         };
 
         zipDropZone.onclick = () => zipFileInput.click();
@@ -2180,165 +1622,55 @@
 
         extractZipBtn.onclick = async () => {
             extractZipBtn.disabled = true;
-            extractZipBtn.innerText = "Extracting...";
             zipProgressContainer.style.display = 'block';
-            zipProgressFill.style.width = '0%';
-            zipPercentLabel.innerText = '0%';
-            
             try {
                 const zip = new JSZip();
                 const contents = await zip.loadAsync(zipSelectedFile);
-                zipExtractedContent = contents;
-                zipFileList.innerHTML = '';
-                
-                const fileNames = Object.keys(contents.files);
-                const totalFiles = fileNames.length;
-                let processed = 0;
-
-                zipProgressFill.style.width = '50%';
-                zipPercentLabel.innerText = '50%';
-
-                fileNames.forEach(filename => {
+                Object.keys(contents.files).forEach(filename => {
                     if(!contents.files[filename].dir) {
-                        const fileItem = document.createElement('div');
-                        fileItem.className = 'file-list-item';
-                        fileItem.innerHTML = `
-                            <span class="fname" title="${filename}"><i class="fas fa-file"></i> ${filename}</span>
-                            <button class="btn-action" style="padding: 5px 10px; font-size: 0.7rem;">Download</button>
-                        `;
-                        
-                        fileItem.querySelector('button').onclick = async () => {
-                            const blob = await contents.files[filename].async("blob");
-                            forceDownload(blob, filename.split('/').pop(), true);
-                        };
-                        
-                        zipFileList.appendChild(fileItem);
+                        const item = document.createElement('div');
+                        item.className = 'file-list-item';
+                        item.innerHTML = `<span>${filename}</span><button class="btn-action">Save</button>`;
+                        item.querySelector('button').onclick = async () => forceDownload(await contents.files[filename].async("blob"), filename, true);
+                        zipFileList.appendChild(item);
                     }
-                    processed++;
                 });
-                
-                zipProgressFill.style.width = '100%';
-                zipPercentLabel.innerText = '100%';
-
                 document.getElementById('zipUploaderView').style.display = 'none';
                 zipResultArea.style.display = 'block';
-                extractZipBtn.innerText = "Extract Files";
-            } catch(error) {
-                showToast("Error extracting ZIP: " + error.message);
-                extractZipBtn.disabled = false;
-                extractZipBtn.innerText = "Extract Files";
-            }
+            } catch(e) { showToast("Error: " + e.message); extractZipBtn.disabled = false; }
         };
 
         gifDropZone.onclick = () => gifFileInput.click();
         gifFileInput.onchange = (e) => {
             gifSelectedFile = e.target.files[0];
-            const titleEl = document.getElementById('gifUploadTitle');
-            
-            if(gifSelectedFile) {
-                if(gifSelectedFile.size > 10 * 1024 * 1024) {
-                    titleEl.innerHTML = `<span style="color:red;">File too large (>10MB)</span>`;
-                    return;
-                }
-                
-                const videoURL = URL.createObjectURL(gifSelectedFile);
+            if(gifSelectedFile && gifSelectedFile.size <= 10 * 1024 * 1024) {
                 const videoEl = document.getElementById('gifSourceVideo');
-                videoEl.src = videoURL;
-                gifFilename.value = gifSelectedFile.name.replace(/\.[^/.]+$/, "");
-                
+                videoEl.src = URL.createObjectURL(gifSelectedFile);
                 videoEl.onloadedmetadata = () => {
-                    if(videoEl.duration > 30) {
-                        titleEl.innerHTML = `<span style="color:red;">Video too long (>30s)</span>`;
-                        gifSelectedFile = null;
-                        return;
-                    }
-                    
-                    const name = gifSelectedFile.name;
-                    let displayName = name;
-                    if (name.length > 20) {
-                         const extIndex = name.lastIndexOf('.');
-                         if (extIndex > 0) {
-                             const ext = name.substring(extIndex);
-                             const base = name.substring(0, extIndex);
-                             if (ext.length + 3 < 20) {
-                                 displayName = base.substring(0, 20 - ext.length - 3) + '...' + ext;
-                             } else {
-                                  displayName = name.substring(0, 17) + '...';
-                             }
-                         } else {
-                             displayName = name.substring(0, 17) + '...';
-                         }
-                    }
-
-                    titleEl.innerHTML = `<b>${displayName}</b><br>Size: ${(gifSelectedFile.size/1024/1024).toFixed(2)} MB`;
-                    document.getElementById('uploadIconGif').style.display = 'none';
-                    document.getElementById('removeFileGifBtn').style.display = 'block';
-                    document.getElementById('gifPreviewArea').style.display = 'block';
-                    convertGifBtn.disabled = false;
+                    if(videoEl.duration <= 30) {
+                        document.getElementById('gifUploadTitle').innerText = gifSelectedFile.name;
+                        document.getElementById('gifPreviewArea').style.display = 'block';
+                        convertGifBtn.disabled = false;
+                    } else { showToast("Video too long (>30s)"); gifSelectedFile = null; }
                 };
             }
         };
-        document.getElementById('removeFileGifBtn').onclick = (e) => { e.stopPropagation(); resetUploadView('videoToGifView'); };
 
         convertGifBtn.onclick = () => {
             convertGifBtn.disabled = true;
             gifProgressContainer.style.display = 'block';
-            gifProgressFill.style.width = '0%';
-            gifPercentLabel.innerText = '0%';
-            
             const videoEl = document.getElementById('gifSourceVideo');
-            const originalWidth = videoEl.videoWidth;
-            const originalHeight = videoEl.videoHeight;
-            const resValue = document.getElementById('gifResolution').value;
-            
-            let gifW, gifH;
-            
-            if (resValue === 'original') {
-                gifW = originalWidth;
-                gifH = originalHeight;
-            } else {
-                gifW = parseInt(resValue);
-                gifH = Math.round(gifW * (originalHeight / originalWidth));
-            }
-            
+            let w = parseInt(document.getElementById('gifResolution').value) || videoEl.videoWidth;
             gifshot.createGIF({
-                video: [videoEl.src],
-                gifWidth: gifW,
-                gifHeight: gifH, 
-                numFrames: 20, 
-                frameDuration: 1,
-                progressCallback: function(captureProgress) {
-                    const percent = Math.round(captureProgress * 100);
-                    gifProgressFill.style.width = percent + "%";
-                    gifPercentLabel.innerText = percent + "%";
-                }
-            }, function(obj) {
+                video: [videoEl.src], gifWidth: w, gifHeight: Math.round(w * (videoEl.videoHeight/videoEl.videoWidth)),
+                numFrames: 20, progressCallback: p => { gifProgressFill.style.width = Math.round(p*100) + "%"; }
+            }, obj => {
                 if(!obj.error) {
-                    const image = obj.image;
-
-                    // Convert Base64 to Blob to prevent UI freeze on large strings
-                    const byteCharacters = atob(image.split(',')[1]);
-                    const byteNumbers = new Array(byteCharacters.length);
-                    for (let i = 0; i < byteCharacters.length; i++) {
-                        byteNumbers[i] = byteCharacters.charCodeAt(i);
-                    }
-                    const byteArray = new Uint8Array(byteNumbers);
-                    const blob = new Blob([byteArray], {type: 'image/gif'});
-                    const blobUrl = URL.createObjectURL(blob);
-
-                    resultGif.src = blobUrl;
-                    
-                    downloadGifBtn.onclick = () => {
-                        const fname = gifFilename.value.trim() || 'animation';
-                        forceDownload(blob, `${fname}.gif`, true);
-                    };
-                    
+                    resultGif.src = obj.image;
+                    downloadGifBtn.onclick = () => forceDownload(obj.image, `${gifFilename.value || 'animation'}.gif`, false);
                     document.getElementById('gifUploaderView').style.display = 'none';
                     gifResultArea.style.display = 'block';
-                } else {
-                    showToast("GIF Conversion Failed");
-                    convertGifBtn.disabled = false;
-                }
+                } else { showToast("Failed"); convertGifBtn.disabled = false; }
             });
         };
 
@@ -2348,70 +1680,46 @@
             if(selectedFile) {
                 const success = setFilePreview(selectedFile, document.getElementById('uploadTitle'), uploadIconQr, imagePreviewQr, fileIconQr, fileExtQr, removeFileQrBtn);
                 uploadBtn.disabled = !success;
-                if (!success) { selectedFile = null; fileInput.value = ''; }
             }
         };
-        removeFileQrBtn.onclick = (e) => { e.stopPropagation(); resetUploadView('uploadToQrView'); };
 
         uploadBtn.onclick = async () => {
-            if(!selectedFile) return;
-            if(!GIT.token) { showToast("API Key Missing! Set it in Settings."); return; }
+            if(!selectedFile || !GIT.token) { showToast("API Key Missing!"); return; }
             uploadBtn.disabled = true;
-            document.getElementById('uploadTitle').innerHTML = 'Checking file existence...';
-            
-            const fileHash = await calculateFileHash(selectedFile);
-            const fileExt = selectedFile.name.split('.').pop().toLowerCase();
-            const expectedPath = `uploads/${fileHash}.${fileExt}`;
-            const cachedUrl = await checkFileExistenceOnGithub(expectedPath);
-
-            if (cachedUrl) {
-                handleCachedQr(cachedUrl);
-                return;
-            }
-            
-            document.getElementById('uploadTitle').innerHTML = 'File not found. Ready to upload.';
+            const hash = await calculateFileHash(selectedFile);
+            const path = `uploads/${hash}.${selectedFile.name.split('.').pop()}`;
             progressContainer.style.display = 'block';
             uploadBtn.style.display = 'none';
-            removeFileQrBtn.style.display = 'none';
-
-            uploadFileToGithub(selectedFile, fileHash, (uploadedUrl) => {
-                currentUrl = uploadedUrl;
-                document.getElementById('uploaderView').style.display = 'none';
-                resultArea.style.display = 'block';
-                displaySuccessPreview(selectedFile, qrResultFilePreview);
-                generateQR(currentUrl, qrcodeDiv, document.getElementById('qrSize').value);
-            }, (percent) => {
-                progressFill.style.width = percent + "%";
-                percentLabel.innerText = percent + "%";
-            }, 'qr'); 
+            const reader = new FileReader();
+            reader.readAsDataURL(selectedFile);
+            reader.onload = () => {
+                const xhr = new XMLHttpRequest();
+                xhr.open("PUT", `https://api.github.com/repos/${GIT.owner}/${GIT.repo}/contents/${path}`);
+                xhr.setRequestHeader("Authorization", `token ${GIT.token}`);
+                xhr.onload = () => {
+                    if(xhr.status < 300) {
+                        currentUrl = `${GIT.domain}/viewer.html?f=${btoa(JSON.stringify({n:selectedFile.name, p:path}))}`;
+                        document.getElementById('uploaderView').style.display = 'none';
+                        resultArea.style.display = 'block';
+                        generateQR(currentUrl, qrcodeDiv, 600);
+                    } else showToast("Error: " + xhr.status);
+                };
+                xhr.send(JSON.stringify({ message: "upload", content: reader.result.split(',')[1] }));
+            };
         };
 
-        function generateQR(url, targetDiv, size) {
-            targetDiv.innerHTML = '';
-            QRCode.toCanvas(url, {
-                width: size, margin: 2, color: { dark: '#000000', light: '#ffffff' }
-            }, (err, canvas) => { 
+        function generateQR(url, target, size) {
+            target.innerHTML = '';
+            QRCode.toCanvas(url, { width: size, margin: 2 }, (err, canvas) => {
                 if(!err) {
-                    targetDiv.appendChild(canvas); 
-                    if (qrCodeSizeDisplay && canvas) {
-                        const dataURL = canvas.toDataURL('image/png', 1.0);
-                        const sizeInBytes = (dataURL.length * 0.75) - 2; 
-                        const sizeInKB = (sizeInBytes / 1024).toFixed(2);
-                        qrCodeSizeDisplay.innerText = `${size}px | Size: ${sizeInKB} KB`;
-                    }
+                    target.appendChild(canvas);
+                    qrCodeSizeDisplay.innerText = `${size}px | Size: ${((canvas.toDataURL().length*0.75)/1024).toFixed(2)} KB`;
                 }
             });
         }
-        document.getElementById('qrSize').oninput = (e) => {
-            const size = e.target.value;
-            if (qrCodeSizeDisplay) qrCodeSizeDisplay.innerText = `${size}px | Size: Calculating...`;
-            generateQR(currentUrl, qrcodeDiv, size);
-        };
-        document.getElementById('downloadQRBtn').onclick = () => {
-            const canvas = qrcodeDiv.querySelector('canvas');
-            if(canvas) forceDownload(canvas.toDataURL('image/png'), 'qrcode.png', false);
-        };
+        document.getElementById('qrSize').oninput = (e) => generateQR(currentUrl, qrcodeDiv, e.target.value);
         document.getElementById('copyBtn').onclick = () => { navigator.clipboard.writeText(currentUrl); showToast("Copied!"); };
+        document.getElementById('downloadQRBtn').onclick = () => forceDownload(qrcodeDiv.querySelector('canvas').toDataURL(), 'qrcode.png', false);
 
         linkDropZone.onclick = () => linkFileInput.click();
         linkFileInput.onchange = (e) => {
@@ -2419,312 +1727,88 @@
             if(linkSelectedFile) {
                 const success = setFilePreview(linkSelectedFile, document.getElementById('linkUploadTitle'), uploadIconLink, imagePreviewLink, fileIconLink, fileExtLink, removeFileLinkBtn);
                 linkUploadBtn.disabled = !success;
-                if (!success) { linkSelectedFile = null; linkFileInput.value = ''; }
             }
         };
-        removeFileLinkBtn.onclick = (e) => { e.stopPropagation(); resetUploadView('uploadToLinkView'); };
-        
-        function displaySuccessPreview(file, targetEl) {
-            targetEl.innerHTML = '';
-            
-            const name = file.name;
-            let displayName = name;
-            if (name.length > 20) {
-                const extIndex = name.lastIndexOf('.');
-                if (extIndex > 0) {
-                    const ext = name.substring(extIndex);
-                    const base = name.substring(0, extIndex);
-                    if (ext.length + 3 < 20) {
-                        displayName = base.substring(0, 20 - ext.length - 3) + '...' + ext;
-                    } else {
-                         displayName = name.substring(0, 17) + '...';
-                    }
-                } else {
-                    displayName = name.substring(0, 17) + '...';
-                }
-            }
-            
-            const ext = name.split('.').pop().toLowerCase();
-
-            const iconContainer = document.createElement('div');
-            iconContainer.className = 'file-icon-preview';
-            iconContainer.style.margin = '15px auto 10px'; 
-            
-            let displayElement = null;
-
-            if (CODE_EXTENSIONS.includes(ext) || ext === 'zip' || ext === 'pdf') {
-                const iconClass = (ext === 'pdf' || ext === 'zip') ? 'red-icon' : '';
-                const iconFa = ext === 'pdf' ? 'fa-file-pdf' : (ext === 'zip' ? 'fa-file-zipper' : 'fa-folder');
-                iconContainer.className += ' ' + iconClass;
-                iconContainer.innerHTML = `<i class="fas ${iconFa}"></i><span class="file-ext" style="bottom: 0px; right: -5px; background: var(--text); color: var(--bg);">${ext}</span>`;
-                displayElement = iconContainer;
-            } else if (file.type.startsWith('image/')) {
-                const img = document.createElement('img');
-                img.style.maxWidth = '100px'; img.style.maxHeight = '100px'; img.style.borderRadius = '8px'; img.style.margin = '0 auto 10px';
-                const reader = new FileReader();
-                reader.onload = (e) => { img.src = e.target.result; };
-                reader.readAsDataURL(file);
-                displayElement = img;
-            } else {
-                iconContainer.innerHTML = `<i class="fas fa-cloud-arrow-up"></i>`;
-                displayElement = iconContainer;
-            }
-            if (displayElement) {
-                targetEl.appendChild(displayElement);
-                const nameP = document.createElement('p');
-                nameP.style.fontSize = '0.9rem'; nameP.style.opacity = '0.8'; nameP.innerText = `${displayName}`;
-                targetEl.appendChild(nameP);
-            }
-        }
-        
-        function handleCachedQr(uploadedUrl) {
-            currentUrl = uploadedUrl;
-            document.getElementById('uploaderView').style.display = 'none';
-            resultArea.style.display = 'block';
-            if (selectedFile) displaySuccessPreview(selectedFile, qrResultFilePreview);
-            generateQR(currentUrl, qrcodeDiv, document.getElementById('qrSize').value);
-        }
-
-        function handleCachedLink(uploadedUrl, file) {
-            const base64Data = uploadedUrl.split('?f=')[1];
-            const fileData = JSON.parse(atob(base64Data));
-            const directLink = `https://raw.githubusercontent.com/${GIT.owner}/${GIT.repo}/${GIT.branch}/${fileData.p}`;
-            const viewerLink = uploadedUrl; 
-            const fileNameWithoutExt = fileData.n.split('.').slice(0, -1).join('.');
-
-            uploadedLinkFormats = {
-                direct: directLink, viewer: viewerLink, 
-                html_full: `<a href="${viewerLink}"><img src="${directLink}" alt="${fileNameWithoutExt}" border="0"></a>`,
-                html_image: `<img src="${directLink}" alt="${fileNameWithoutExt}" border="0">`, 
-                bbcode: `[img]${directLink}[/img]`, bbcode_full: `[url=${viewerLink}][img]${directLink}[/img][/url]`
-            };
-            
-            document.getElementById('directLink').innerText = directLink;
-            displaySuccessPreview(file, document.getElementById('resultFilePreview'));
-            selectLinkFormat('viewer', 'Viewer\'s Link'); 
-            document.getElementById('linkUploaderView').style.display = 'none';
-            linkResultArea.style.display = 'block';
-        }
-        
-        function toggleLinkOptions() {
-            const dropdown = document.getElementById('linkOptionsDropdown');
-            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-        }
-
-        function selectLinkFormat(formatKey, formatName) {
-            const displayArea = document.getElementById('linkFormatDisplay');
-            if (!uploadedLinkFormats) { displayArea.innerText = 'Error'; return; }
-            displayArea.innerText = uploadedLinkFormats[formatKey] || 'Error';
-            document.getElementById('selectedLinkFormatText').innerText = formatName;
-            document.getElementById('linkOptionsDropdown').style.display = 'none';
-        }
-
-        function copySelectedLink() {
-            const text = document.getElementById('linkFormatDisplay').innerText;
-            if (text && !text.startsWith('Error')) { navigator.clipboard.writeText(text); showToast("Copied!"); }
-        }
 
         linkUploadBtn.onclick = async () => {
-            if(!linkSelectedFile) return;
-            if(!GIT.token) { showToast("API Key Missing! Set it in Settings."); return; }
+            if(!linkSelectedFile || !GIT.token) return;
             linkUploadBtn.disabled = true;
-            document.getElementById('linkUploadTitle').innerHTML = 'Checking file existence...';
-            
-            const fileHash = await calculateFileHash(linkSelectedFile);
-            const fileExt = linkSelectedFile.name.split('.').pop().toLowerCase();
-            const expectedPath = `uploads/${fileHash}.${fileExt}`;
-            const cachedUrl = await checkFileExistenceOnGithub(expectedPath);
-
-            if (cachedUrl) { handleCachedLink(cachedUrl, linkSelectedFile); return; }
-            
-            document.getElementById('linkUploadTitle').innerHTML = 'Ready to upload.';
+            const hash = await calculateFileHash(linkSelectedFile);
+            const path = `uploads/${hash}.${linkSelectedFile.name.split('.').pop()}`;
             linkProgressContainer.style.display = 'block';
-            linkUploadBtn.style.display = 'none';
-            removeFileLinkBtn.style.display = 'none';
-
-            uploadFileToGithub(linkSelectedFile, fileHash, (uploadedUrl) => {
-                handleCachedLink(uploadedUrl, linkSelectedFile);
-            }, (percent) => {
-                linkProgressFill.style.width = percent + "%";
-                linkPercentLabel.innerText = percent + "%";
-            }, 'link'); 
-        };
-        
-        function checkFileExistenceOnGithub(path) {
-            return new Promise((resolve) => {
-                const xhr = new XMLHttpRequest();
-                xhr.open("GET", `https://api.github.com/repos/${GIT.owner}/${GIT.repo}/contents/${path}`);
-                xhr.setRequestHeader("Authorization", `token ${GIT.token}`);
-                xhr.onload = () => {
-                    if (xhr.status === 200) {
-                        const fileData = { n: path.split('/').pop(), p: path, s: 'N/A' };
-                        resolve(`${GIT.domain}/viewer.html?f=${btoa(JSON.stringify(fileData))}`);
-                    } else resolve(null);
-                };
-                xhr.onerror = () => resolve(null);
-                xhr.send();
-            });
-        }
-
-        function uploadFileToGithub(file, fileHash, onSuccess, onProgress, viewType = 'qr') {
             const reader = new FileReader();
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(linkSelectedFile);
             reader.onload = () => {
-                const base64 = reader.result.split(',')[1];
-                const fileExt = file.name.split('.').pop();
-                const path = `uploads/${fileHash}.${fileExt}`;
                 const xhr = new XMLHttpRequest();
                 xhr.open("PUT", `https://api.github.com/repos/${GIT.owner}/${GIT.repo}/contents/${path}`);
                 xhr.setRequestHeader("Authorization", `token ${GIT.token}`);
-                xhr.setRequestHeader("Content-Type", "application/json");
-                xhr.upload.onprogress = (e) => {
-                    if (e.lengthComputable) {
-                        const percent = Math.round((e.loaded / e.total) * 100);
-                        onProgress(percent);
-                    }
-                };
                 xhr.onload = () => {
-                    if (xhr.status === 201 || xhr.status === 200) {
-                        const fileData = { n: file.name, p: path, s: (file.size / (1024*1024)).toFixed(2) };
-                        onSuccess(`${GIT.domain}/viewer.html?f=${btoa(JSON.stringify(fileData))}`);
-                        showToast("Uploaded Successfully!");
-                    } else {
-                        showToast("Error: " + xhr.status);
-                        if (viewType === 'qr') resetUploadView('uploadToQrView'); else resetUploadView('uploadToLinkView');
+                    if(xhr.status < 300) {
+                        const direct = `https://raw.githubusercontent.com/${GIT.owner}/${GIT.repo}/${GIT.branch}/${path}`;
+                        const viewer = `${GIT.domain}/viewer.html?f=${btoa(JSON.stringify({n:linkSelectedFile.name, p:path}))}`;
+                        uploadedLinkFormats = { direct, viewer };
+                        document.getElementById('directLink').innerText = direct;
+                        document.getElementById('linkUploaderView').style.display = 'none';
+                        linkResultArea.style.display = 'block';
                     }
                 };
-                xhr.onerror = () => { 
-                    showToast("Network Error");
-                    if (viewType === 'qr') resetUploadView('uploadToQrView'); else resetUploadView('uploadToLinkView');
-                };
-                xhr.send(JSON.stringify({ message: "upload", content: base64, branch: GIT.branch }));
+                xhr.send(JSON.stringify({ message: "upload", content: reader.result.split(',')[1] }));
             };
-        }
+        };
 
         extractorDropZone.onclick = () => extractorFileInput.click();
         extractorFileInput.onchange = (e) => {
             extractorSelectedFile = e.target.files[0];
-            if(extractorSelectedFile) {
-                if (!extractorSelectedFile.type.startsWith('image/')) {
-                    document.getElementById('extractorUploadTitle').innerHTML = `<span style="color: red;">File must be an image.</span>`;
-                    return;
-                }
-                const success = setFilePreview(extractorSelectedFile, document.getElementById('extractorUploadTitle'), uploadIconExtractor, imagePreviewExtractor, fileIconExtractor, fileExtExtractor, removeFileExtractorBtn);
-                extractBtn.disabled = !success; 
+            if(extractorSelectedFile && extractorSelectedFile.type.startsWith('image/')) {
+                setFilePreview(extractorSelectedFile, document.getElementById('extractorUploadTitle'), uploadIconExtractor, imagePreviewExtractor, fileIconExtractor, fileExtExtractor, removeFileExtractorBtn);
+                extractBtn.disabled = false;
             }
         };
-        removeFileExtractorBtn.onclick = (e) => { e.stopPropagation(); resetUploadView('qrExtractorView'); };
 
         extractBtn.onclick = async () => {
-            if (!extractorSelectedFile) return;
-            extractBtn.disabled = true;
-            document.getElementById('extractorUploadTitle').innerHTML = 'Processing...';
-            try {
-                const rawData = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const img = new Image();
-                        img.onload = () => {
-                            const canvas = document.createElement('canvas');
-                            const ctx = canvas.getContext('2d');
-                            canvas.width = img.width; canvas.height = img.height;
-                            ctx.drawImage(img, 0, 0);
-                            const imageData = ctx.getImageData(0, 0, img.width, img.height);
-                            const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
-                            if (code) resolve(code.data); else reject("No QR code found.");
-                        };
-                        img.src = e.target.result;
-                    };
-                    reader.readAsDataURL(extractorSelectedFile);
-                });
-
-                displaySuccessPreview(extractorSelectedFile, document.getElementById('extractorResultFilePreview'));
-                extractedDataDisplay.innerText = rawData;
-                extractorActionButtons.innerHTML = ''; 
-                
-                const copyBtn = document.createElement('button');
-                copyBtn.className = 'btn btn-action';
-                copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
-                copyBtn.onclick = () => { navigator.clipboard.writeText(rawData); showToast("Copied!"); }; 
-                
-                const downloadTxtBtn = document.createElement('button');
-                downloadTxtBtn.className = 'btn btn-action';
-                downloadTxtBtn.innerHTML = '<i class="fas fa-download"></i> Download Text';
-                downloadTxtBtn.onclick = () => {
-                    const blob = new Blob([rawData], {type: "text/plain;charset=utf-8"});
-                    forceDownload(blob, 'qrcode_data.txt', true);
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width; canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    const code = jsQR(ctx.getImageData(0,0,img.width,img.height).data, img.width, img.height);
+                    if(code) {
+                        extractedDataDisplay.innerText = code.data;
+                        document.getElementById('extractorUploaderView').style.display = 'none';
+                        extractorResultArea.style.display = 'block';
+                        const b = document.createElement('button'); b.className='btn btn-action'; b.innerText='Copy';
+                        b.onclick=() => { navigator.clipboard.writeText(code.data); showToast("Copied"); };
+                        extractorActionButtons.appendChild(b);
+                    } else showToast("No QR Found");
                 };
-                
-                extractorActionButtons.style.gridTemplateColumns = '1fr 1fr';
-                extractorActionButtons.appendChild(copyBtn);
-                extractorActionButtons.appendChild(downloadTxtBtn);
-
-                document.getElementById('extractorUploaderView').style.display = 'none';
-                extractorResultArea.style.display = 'block';
-            } catch (error) {
-                showToast(error);
-                extractBtn.disabled = false; 
-            }
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(extractorSelectedFile);
         };
-        
+
         function toggleSettings() {
-            const modal = document.getElementById('settingsModal');
-            const overlay = document.getElementById('settingsOverlay');
-            modal.classList.toggle('active');
-            overlay.classList.toggle('active');
-            
-            // Reset Dev Panel visibility on toggle
-            if(!modal.classList.contains('active')) {
-                document.getElementById('devToolsPanel').style.display = 'none';
-            }
+            document.getElementById('settingsModal').classList.toggle('active');
+            document.getElementById('settingsOverlay').classList.toggle('active');
         }
-        
         settingsBtn.onclick = toggleSettings;
         
         async function pasteApiKey() {
-            try {
-                const text = await navigator.clipboard.readText();
-                document.getElementById('apiKeyInput').value = text;
-                showToast("Pasted!");
-            } catch (err) {
-                showToast("Clipboard Error");
-            }
+            try { document.getElementById('apiKeyInput').value = await navigator.clipboard.readText(); showToast("Pasted"); } catch(e) {}
         }
         
         function checkDevAccess() {
-            const userInput = prompt("Enter Passkey:");
-            if (userInput === PASSKEY) {
+            if(prompt("Passkey:") === PASSKEY) {
                 document.getElementById('devToolsPanel').style.display = 'block';
-                showToast("Developer Access Granted");
-            } else {
-                alert("Access Denied");
+                showToast("Access Granted");
             }
         }
-        
-        // Update Indicator Logic
-        function updateApiIndicator(isActive) {
-            const statusText = document.getElementById('apiStatusText');
-            const statusDot = document.getElementById('apiStatusDot');
-            
-            if(isActive) {
-                statusText.innerText = 'API Active';
-                statusDot.classList.add('active');
-            } else {
-                statusText.innerText = 'API Inactive';
-                statusDot.classList.remove('active');
-            }
-        }
-
-        updateLogoImage(); 
-        updateLinkInputControls();
-        linkQrColorBtn.style.backgroundColor = linkQrColor.value;
-        linkQrBackgroundBtn.style.backgroundColor = linkQrBackground.value;
     </script>
 
-    <!-- NEW MODULAR FIREBASE IMPLEMENTATION -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-      import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
       import { getDatabase, ref, set, update, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
       import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
@@ -2735,169 +1819,62 @@
         projectId: "one-tool01",
         storageBucket: "one-tool01.firebasestorage.app",
         messagingSenderId: "546992530595",
-        appId: "1:546992530595:web:77bf6c3fe2438b3c980b16",
-        measurementId: "G-GMNCXBV0J1"
+        appId: "1:546992530595:web:77bf6c3fe2438b3c980b16"
       };
 
-      // Initialize Firebase
       const app = initializeApp(firebaseConfig);
-      const analytics = getAnalytics(app);
       const db = getDatabase(app);
       const auth = getAuth(app);
 
-      // EXPOSE FUNCTIONS TO WINDOW FOR GLOBAL ACCESS
-
-      window.googleSignIn = () => {
-          const provider = new GoogleAuthProvider();
-          signInWithPopup(auth, provider).then((result) => {
-              showToast("Signed In Successfully");
-          }).catch((error) => {
-              showToast("Login Failed: " + error.message);
-          });
-      };
-
-      window.googleSignOut = () => {
-          if(confirm("Are you sure you want to sign out?")) {
-              signOut(auth).then(() => {
-                  showToast("Signed Out");
-              }).catch((error) => {
-                  showToast("Error: " + error.message);
-              });
-          }
-      };
+      window.googleSignIn = () => signInWithPopup(auth, new GoogleAuthProvider());
+      window.googleSignOut = () => confirm("Sign out?") && signOut(auth);
 
       window.saveApiKey = () => {
-          // Auth Check
-          if(!currentUser) {
-              showToast("Please Sign In First");
-              return;
-          }
-
-          const key = document.getElementById('apiKeyInput').value.trim();
-          
-          // Show Loading Overlay
+          if(!currentUser) return showToast("Sign In First");
           document.getElementById('settingsLoadingOverlay').style.display = 'flex';
-
-          // Use Modular Set
-          set(ref(db, 'config/githubToken'), key)
-          .then(() => {
-              showToast("API Key Saved! Reloading...");
-              // Keep overlay, wait, then reload
-              setTimeout(() => location.reload(), 1500);
-          })
-          .catch(e => {
-              // Hide Overlay on Error
-              document.getElementById('settingsLoadingOverlay').style.display = 'none';
-              showToast("Error: " + e.message);
-          });
+          set(ref(db, 'config/githubToken'), document.getElementById('apiKeyInput').value).then(() => location.reload());
       };
 
       window.saveUpdateConfig = () => {
-          // Auth Check
-          if(!currentUser) {
-              showToast("Please Sign In First");
-              return;
-          }
-
-          const version = document.getElementById('devVersion').value;
-          const title = document.getElementById('devTitle').value;
-          const message = document.getElementById('devMessage').value;
-          const size = document.getElementById('devSize').value;
-          const link = document.getElementById('devLink').value;
-          const status = document.getElementById('devStatus').checked;
-          
-          // Show Loading
+          if(!currentUser) return showToast("Sign In First");
           document.getElementById('settingsLoadingOverlay').style.display = 'flex';
-
-          const updatePayload = {
+          update(ref(db, 'config'), {
               update: {
-                  version: version,
-                  title: title,
-                  message: message,
-                  size: size,
-                  link: link,
-                  show: status
-              }
-          };
-
-          update(ref(db, 'config'), updatePayload)
-          .then(() => {
-              showToast("Config Saved! Reloading...");
-              setTimeout(() => location.reload(), 1500);
-          })
-          .catch((error) => {
-               // Hide Overlay on Error
-              document.getElementById('settingsLoadingOverlay').style.display = 'none';
-              showToast("Error: " + error.message);
-          });
+                  version: document.getElementById('devVersion').value,
+                  message: document.getElementById('devMessage').value,
+                  show: document.getElementById('devStatus').checked
+              },
+              newTag: document.getElementById('devNewTagTool').value
+          }).then(() => location.reload());
       };
 
-      // AUTH LISTENER
-      onAuthStateChanged(auth, (user) => {
-          const loginBtn = document.getElementById('headerLoginBtn');
-          const profileBtn = document.getElementById('headerUserProfile');
-          const userAvatar = document.getElementById('userAvatar');
-          const settingsContent = document.getElementById('settingsContentWrapper');
-          const loginPrompt = document.getElementById('loginPromptOverlay');
-
-          if (user) {
-              // Signed In
-              currentUser = user; // Set global var
-              loginBtn.style.display = 'none';
-              profileBtn.style.display = 'block';
-              userAvatar.src = user.photoURL;
-
-              // Unblock Settings
-              settingsContent.classList.remove('settings-content-blocked');
-              loginPrompt.style.display = 'none';
-          } else {
-              // Signed Out
-              currentUser = null;
-              loginBtn.style.display = 'block';
-              profileBtn.style.display = 'none';
-              userAvatar.src = '';
-
-              // Block Settings
-              settingsContent.classList.add('settings-content-blocked');
-              loginPrompt.style.display = 'block';
-          }
+      onAuthStateChanged(auth, user => {
+          currentUser = user;
+          document.getElementById('headerLoginBtn').style.display = user ? 'none' : 'block';
+          document.getElementById('headerUserProfile').style.display = user ? 'block' : 'none';
+          if(user) document.getElementById('userAvatar').src = user.photoURL;
+          document.getElementById('settingsContentWrapper').className = user ? '' : 'settings-content-blocked';
+          document.getElementById('loginPromptOverlay').style.display = user ? 'none' : 'block';
       });
 
-      // DATABASE LISTENER
-      onValue(ref(db, 'config'), (snapshot) => {
-          const data = snapshot.val();
-          
-          if (data) {
-              // Update Global API Token
+      onValue(ref(db, 'config'), snap => {
+          const data = snap.val();
+          if(data) {
               if(data.githubToken) {
-                  GIT.token = data.githubToken; // Set global GIT object
-                  // Auto-fill input in settings
-                  const apiKeyInput = document.getElementById('apiKeyInput');
-                  if(apiKeyInput) apiKeyInput.value = data.githubToken;
-                  updateApiIndicator(true);
-              } else {
-                  updateApiIndicator(false);
+                  GIT.token = data.githubToken;
+                  document.getElementById('apiKeyInput').value = data.githubToken;
+                  document.getElementById('apiStatusDot').classList.add('active');
+                  document.getElementById('apiStatusText').innerText = 'API Active';
               }
-
-              // Check for Updates
-              if (data.update && data.update.show) {
+              if(data.update?.show) {
                   document.getElementById('updatePopup').style.display = 'flex';
-                  
-                  // Map Data to New Popup Structure
-                  if(data.update.version) document.getElementById('updateVersion').innerText = data.update.version;
-                  if(data.update.title) document.getElementById('updateTitleDisplay').innerText = data.update.title;
-                  if(data.update.message) document.getElementById('updateMessage').innerText = data.update.message;
-                  if(data.update.size) document.getElementById('updateSize').innerText = data.update.size;
-                  
-                  // Setup Download Button
-                  if(data.update.link) {
-                      document.getElementById('updateDownloadBtn').onclick = () => window.open(data.update.link, '_blank');
-                  }
-              } else {
-                  document.getElementById('updatePopup').style.display = 'none';
+                  document.getElementById('updateMessage').innerText = data.update.message;
               }
-          } else {
-              updateApiIndicator(false);
+              document.querySelectorAll('.new-badge').forEach(b => b.style.display = 'none');
+              if(data.newTag && data.newTag !== 'none') {
+                  const card = document.querySelector(`.option-card[data-tool-id="${data.newTag}"]`);
+                  if(card) card.querySelector('.new-badge').style.display = 'block';
+              }
           }
       });
     </script>
