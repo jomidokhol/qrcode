@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -156,7 +157,7 @@
               userAvatar.src = '';
 
               settingsContent.classList.add('settings-content-blocked');
-              loginPrompt.style.display = 'block';
+              loginPrompt.style.display = 'flex'; // Changed to flex for centering
           }
       });
 
@@ -182,17 +183,23 @@
 
           if (data.update && data.update.show) {
               document.getElementById('updatePopup').style.display = 'flex';
-              document.getElementById('updateMessage').innerText = data.update.message || "A new version is available.";
               
-              const titleHtml = data.update.logo ? 
-                  `<img src="${data.update.logo}" class="update-logo-img"> Update Available` : 
-                  `Update Available`;
-              
-              if(data.update.version) {
-                  document.getElementById('updateTitle').innerHTML = `${titleHtml} <span style="font-size:0.8em; opacity:0.7">v${data.update.version}</span>`;
-              } else {
-                   document.getElementById('updateTitle').innerHTML = titleHtml;
+              // New Logic for Update Popup Layout
+              const updateTitleContainer = document.getElementById('updateTitle');
+              updateTitleContainer.innerHTML = '';
+              updateTitleContainer.style.flexDirection = 'column';
+
+              if(data.update.logo) {
+                  updateTitleContainer.innerHTML += `<img src="${data.update.logo}" class="update-logo-img" style="margin-bottom:10px;">`;
               }
+              
+              updateTitleContainer.innerHTML += `<span style="font-size:1.5rem; font-weight:700;">Update Available</span>`;
+
+              if(data.update.version) {
+                  updateTitleContainer.innerHTML += `<span style="font-size:0.9rem; opacity:0.7; margin-top:5px;">Version ${data.update.version}</span>`;
+              }
+
+              document.getElementById('updateMessage').innerText = data.update.message || "A new version is available.";
 
               const featList = document.getElementById('updateFeaturesList');
               featList.innerHTML = '';
@@ -532,7 +539,7 @@
         .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         
         .settings-input-wrapper { position: relative; width: 100%; margin-bottom: 10px; }
-        .settings-input-wrapper input { width: 100%; padding: 12px; padding-right: 45px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+        .settings-input-wrapper input { width: 100%; padding: 12px; padding-right: 45px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); height: 48px; }
         .input-paste-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--primary); cursor: pointer; padding: 5px; }
 
         .social-link-original {
@@ -601,7 +608,8 @@
         .settings-content-blocked { filter: blur(5px); pointer-events: none; user-select: none; transition: 0.3s; }
         .login-prompt-overlay {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            z-index: 3600; text-align: center; width: 100%; display: none;
+            z-index: 4001; text-align: center; width: 100%; display: none;
+            flex-direction: column; align-items: center; justify-content: center;
         }
         .user-profile-btn { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; border: 2px solid var(--primary); cursor: pointer; display: none; }
         .user-profile-btn img { width: 100%; height: 100%; object-fit: cover; }
@@ -619,7 +627,7 @@
 
     <div id="updatePopup" class="update-overlay">
         <div class="update-card">
-            <h2 id="updateTitle">Update Available</h2>
+            <div id="updateTitle" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 15px;"></div>
             <p id="updateMessage">A new version of One Tool is available.</p>
             <div id="updateFeaturesList" class="update-features-list"></div>
             <div id="updateActions"></div>
@@ -753,9 +761,19 @@
                                 <p>Convert RGB colors to CMYK format.</p>
                             </div>
                         </div>
+
+                        <div class="option-card" onclick="window.location.href='img-compress.html'" id="card-imgCompress">
+                            <div class="new-badge">NEW</div>
+                            <i class="fas fa-compress-arrows-alt"></i>
+                            <div>
+                                <h4>Image Compressor</h4>
+                                <p>Compress images to reduce size.</p>
+                            </div>
+                        </div>
                     </div>
                     
                     <button class="btn" style="background: transparent; border: 1px solid var(--border); color: var(--text); margin-top: 20px; font-weight: 600;">How to use tools?</button>
+                    <button class="btn" style="background: transparent; border: 1px solid var(--border); color: var(--text); margin-top: 10px; font-weight: 600;" onclick="window.location.href='more-tools.html'">More Tools</button>
                 </div>
 
                 <div id="linkToQrView">
@@ -1168,6 +1186,12 @@
         <div id="settingsLoadingOverlay" class="settings-loading-overlay">
             <img src="img/logo.png" class="settings-loading-logo" alt="Loading...">
         </div>
+        
+        <div id="loginPromptOverlay" class="login-prompt-overlay">
+            <i class="fas fa-lock" style="font-size: 2rem; color: var(--text); opacity: 0.5; margin-bottom: 10px;"></i>
+            <p style="font-size: 0.9rem; font-weight: 700; margin-bottom: 15px;">Sign in required to change settings</p>
+            <button class="btn btn-primary" onclick="googleSignIn()" style="width: auto; display: inline-flex; padding: 10px 20px;">Sign In with Google</button>
+        </div>
 
         <div class="settings-header">
             <h3>Settings</h3>
@@ -1175,18 +1199,16 @@
         </div>
         
         <div id="settingsContentWrapper">
-            <div id="loginPromptOverlay" class="login-prompt-overlay">
-                <i class="fas fa-lock" style="font-size: 2rem; color: var(--text); opacity: 0.5; margin-bottom: 10px;"></i>
-                <p style="font-size: 0.9rem; font-weight: 700; margin-bottom: 15px;">Sign in required to change settings</p>
-                <button class="btn btn-primary" onclick="googleSignIn()" style="width: auto; display: inline-flex; padding: 10px 20px;">Sign In with Google</button>
-            </div>
-
             <label style="font-size: 0.85rem; font-weight: 700; display: block; margin-bottom: 8px;">Set API Key</label>
-            <div class="settings-input-wrapper">
-                <input type="text" id="apiKeyInput" placeholder="Enter API Key">
-                <button class="input-paste-btn" onclick="pasteApiKey()"><i class="fas fa-paste"></i></button>
+            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px;">
+                <button class="btn btn-action" style="width: 50px; height: 48px; padding: 0; display: flex; align-items: center; justify-content: center; background: var(--primary); color: white; flex-shrink: 0;" onclick="saveApiKey()">
+                    <i class="fas fa-save"></i>
+                </button>
+                <div class="settings-input-wrapper" style="margin-bottom: 0; flex-grow: 1;">
+                    <input type="text" id="apiKeyInput" placeholder="Enter API Key">
+                    <button class="input-paste-btn" onclick="pasteApiKey()"><i class="fas fa-paste"></i></button>
+                </div>
             </div>
-            <button class="btn btn-action" style="width: auto; margin-bottom: 15px; padding: 0 20px; background: var(--primary); color: white;" onclick="saveApiKey()">Save API Key</button>
             
             <a href="https://t.me/onetoolbd" target="_blank" class="btn btn-action" style="background: transparent; border: 1px solid var(--border); color: var(--text); text-decoration: none; text-align: center; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 8px;">
                 <i class="fab fa-telegram"></i> Get API for Free
@@ -1225,6 +1247,7 @@
                     <label class="checkbox-item"><input type="checkbox" class="new-tag-checkbox" value="card-videoToGif"> Video to GIF</label>
                     <label class="checkbox-item"><input type="checkbox" class="new-tag-checkbox" value="card-slowedReverb"> Audio Slowed & Reverb</label>
                     <label class="checkbox-item"><input type="checkbox" class="new-tag-checkbox" value="card-rgbCmyk"> RGB to CMYK</label>
+                    <label class="checkbox-item"><input type="checkbox" class="new-tag-checkbox" value="card-imgCompress"> Image Compressor</label>
                 </div>
 
                 <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Update Card Features</label>
