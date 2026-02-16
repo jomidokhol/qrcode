@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    {
+      "source": "/topup/:category/:game",
+      "destination": "/topup"
+    }
+  ],
+  "cleanUrls": true
+}
