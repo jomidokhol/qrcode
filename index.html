@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +7,7 @@
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.1.0/dist/jsQR.min.js"></script> 
     
@@ -18,6 +17,187 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gifshot/0.3.2/gifshot.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
+      import { getDatabase, ref, set, update, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+      import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAEBrWDMiEGuqQGvA4197ljLcvtQk_i43Y",
+        authDomain: "one-tool01.firebaseapp.com",
+        databaseURL: "https://one-tool01-default-rtdb.asia-southeast1.firebasedatabase.app", 
+        projectId: "one-tool01",
+        storageBucket: "one-tool01.firebasestorage.app",
+        messagingSenderId: "546992530595",
+        appId: "1:546992530595:web:77bf6c3fe2438b3c980b16",
+        measurementId: "G-GMNCXBV0J1"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const db = getDatabase(app);
+      const auth = getAuth(app);
+
+      window.googleSignIn = () => {
+          const provider = new GoogleAuthProvider();
+          signInWithPopup(auth, provider).then((result) => {
+              showToast("Signed In Successfully");
+          }).catch((error) => {
+              showToast("Login Failed: " + error.message);
+          });
+      };
+
+      window.googleSignOut = () => {
+          if(confirm("Are you sure you want to sign out?")) {
+              signOut(auth).then(() => {
+                  showToast("Signed Out");
+              }).catch((error) => {
+                  showToast("Error: " + error.message);
+              });
+          }
+      };
+
+      window.saveApiKey = () => {
+          if(!currentUser) {
+              showToast("Please Sign In First");
+              return;
+          }
+
+          const key = document.getElementById('apiKeyInput').value.trim();
+          
+          document.getElementById('settingsLoadingOverlay').style.display = 'flex';
+
+          set(ref(db, 'config/githubToken'), key)
+          .then(() => {
+              showToast("API Key Saved! Reloading...");
+              setTimeout(() => location.reload(), 1500);
+          })
+          .catch(e => {
+              document.getElementById('settingsLoadingOverlay').style.display = 'none';
+              showToast("Error: " + e.message);
+          });
+      };
+
+      window.saveUpdateConfig = () => {
+          if(!currentUser) {
+              showToast("Please Sign In First");
+              return;
+          }
+
+          const version = document.getElementById('devVersion').value;
+          const message = document.getElementById('devMessage').value;
+          const status = document.getElementById('devStatus').checked;
+          const newApiToken = document.getElementById('apiKeyInput').value.trim();
+          
+          const newTags = [];
+          document.querySelectorAll('.new-tag-checkbox:checked').forEach(cb => {
+              newTags.push(cb.value);
+          });
+
+          const updateFeatures = {
+              security: document.getElementById('featSecurity').checked,
+              performance: document.getElementById('featPerformance').checked,
+              fix: document.getElementById('featFix').checked
+          };
+
+          document.getElementById('settingsLoadingOverlay').style.display = 'flex';
+
+          const updatePayload = {
+              update: {
+                  version: version,
+                  message: message,
+                  show: status,
+                  features: updateFeatures
+              },
+              newTags: newTags
+          };
+          
+          if(newApiToken) {
+              updatePayload.githubToken = newApiToken;
+          }
+
+          update(ref(db, 'config'), updatePayload)
+          .then(() => {
+              showToast("Config Saved! Reloading...");
+              setTimeout(() => location.reload(), 1500);
+          })
+          .catch((error) => {
+              document.getElementById('settingsLoadingOverlay').style.display = 'none';
+              showToast("Error: " + error.message);
+          });
+      };
+
+      onAuthStateChanged(auth, (user) => {
+          const loginBtn = document.getElementById('headerLoginBtn');
+          const profileBtn = document.getElementById('headerUserProfile');
+          const userAvatar = document.getElementById('userAvatar');
+          const settingsContent = document.getElementById('settingsContentWrapper');
+          const loginPrompt = document.getElementById('loginPromptOverlay');
+
+          if (user) {
+              currentUser = user; 
+              loginBtn.style.display = 'none';
+              profileBtn.style.display = 'block';
+              userAvatar.src = user.photoURL;
+
+              settingsContent.classList.remove('settings-content-blocked');
+              loginPrompt.style.display = 'none';
+          } else {
+              currentUser = null;
+              loginBtn.style.display = 'block';
+              profileBtn.style.display = 'none';
+              userAvatar.src = '';
+
+              settingsContent.classList.add('settings-content-blocked');
+              loginPrompt.style.display = 'block';
+          }
+      });
+
+      onValue(ref(db, 'config'), (snapshot) => {
+          const data = snapshot.val();
+          
+          if (data) {
+              if(data.githubToken) {
+                  GIT.token = data.githubToken; 
+                  const apiKeyInput = document.getElementById('apiKeyInput');
+                  if(apiKeyInput) apiKeyInput.value = data.githubToken;
+                  updateApiIndicator(true);
+              } else {
+                  updateApiIndicator(false);
+              }
+
+              if (data.update && data.update.show) {
+                  document.getElementById('updatePopup').style.display = 'flex';
+                  document.getElementById('updateMessage').innerText = data.update.message || "A new version is available.";
+                  if(data.update.version) {
+                      document.getElementById('updateTitle').innerHTML = `Update Available (v${data.update.version})`;
+                  }
+                  
+                  const featList = document.getElementById('updateFeaturesList');
+                  featList.innerHTML = '';
+                  if(data.update.features) {
+                      if(data.update.features.security) featList.innerHTML += `<div class="update-item"><i class="fas fa-shield-alt"></i> Security Improvements</div>`;
+                      if(data.update.features.performance) featList.innerHTML += `<div class="update-item"><i class="fas fa-bolt"></i> Performance Boost</div>`;
+                      if(data.update.features.fix) featList.innerHTML += `<div class="update-item"><i class="fas fa-wrench"></i> Bug Fixes</div>`;
+                  }
+              } else {
+                  document.getElementById('updatePopup').style.display = 'none';
+              }
+
+              document.querySelectorAll('.new-badge').forEach(el => el.style.display = 'none');
+              if(data.newTags && Array.isArray(data.newTags)) {
+                  data.newTags.forEach(tagId => {
+                      const badge = document.querySelector(`#${tagId} .new-badge`);
+                      if(badge) badge.style.display = 'block';
+                  });
+              }
+          } else {
+              updateApiIndicator(false);
+          }
+      });
+    </script>
 
     <style>
         :root { --primary: #10b981; --bg: #ffffff; --card: #f8fafc; --text: #0f172a; --border: #e2e8f0; --shadow: rgba(0, 0, 0, 0.1); }
@@ -120,13 +300,22 @@
         .btn-action { background: var(--border); color: var(--text); font-size: 0.85rem; }
         .btn-link { background: var(--primary); color: white; font-size: 0.9rem; font-weight: 600; padding: 18px; }
 
-        .option-card { position: relative; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 15px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 20px; }
+        .option-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 15px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 20px; position: relative; }
         .option-card:hover { border-color: var(--primary); background: rgba(99, 102, 241, 0.05); }
         .option-card i { font-size: 1.8rem; color: var(--primary); }
         .option-card h4 { margin: 0; font-weight: 800; }
         .option-card p { margin: 0; font-size: 0.8rem; opacity: 0.7; }
 
-        .new-badge { position: absolute; top: 10px; right: 10px; background: var(--primary); color: white; font-size: 0.6rem; font-weight: 800; padding: 2px 8px; border-radius: 20px; display: none; }
+        .new-badge {
+            position: absolute; top: 12px; right: 12px;
+            background: #ef4444; color: white;
+            font-size: 0.6rem; font-weight: 800;
+            padding: 3px 6px; border-radius: 6px;
+            display: none; 
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
         
         .icon-back-btn { 
             background: transparent; border: 1px solid var(--border); 
@@ -225,6 +414,13 @@
         
         .bulk-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
 
+        .pdf-controls-right {
+            position: absolute; top: 5px; right: 5px; 
+            display: flex; gap: 5px; align-items: center; 
+            background: rgba(255,255,255,0.9); padding: 4px; 
+            border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
         .pdf-page-badge {
             position: absolute; top: 5px; left: 5px;
             background: rgba(0,0,0,0.7); color: white;
@@ -277,7 +473,7 @@
         #settingsModal.active { bottom: 0; }
         .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .settings-input-group { position: relative; display: flex; gap: 10px; margin-bottom: 10px; }
-        .settings-input-group input, .settings-input-group select { flex-grow: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+        .settings-input-group input { flex-grow: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
         
         .social-link-original {
             text-decoration: none; 
@@ -314,20 +510,22 @@
 
         .update-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); z-index: 2500; 
+            background: rgba(0,0,0,0.9); z-index: 2500; 
             display: none; justify-content: center; align-items: center;
             backdrop-filter: blur(5px);
         }
         .update-card {
-            background: var(--bg); padding: 30px; border-radius: 24px;
-            text-align: center; max-width: 90%; width: 380px;
-            border: 1px solid var(--border); box-shadow: 0 10px 40px var(--shadow);
+            background: #ffffff; padding: 30px; border-radius: 24px;
+            text-align: center; max-width: 90%; width: 400px;
+            border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
-        .update-card h2 { color: var(--primary); margin-bottom: 20px; font-weight: 800; }
-        .update-features { text-align: left; margin-bottom: 20px; display: flex; flex-direction: column; gap: 12px; }
-        .update-features div { display: flex; align-items: center; gap: 12px; font-size: 0.9rem; font-weight: 600; opacity: 0.9; }
-        .update-features i { font-size: 1rem; color: var(--primary); width: 20px; text-align: center; }
-        .update-card p { opacity: 0.7; margin-bottom: 10px; line-height: 1.5; font-size: 0.85rem; }
+        .dark-mode .update-card { background: var(--card); } 
+        
+        .update-card h2 { color: var(--primary); margin-bottom: 15px; }
+        .update-card p { opacity: 0.8; margin-bottom: 20px; line-height: 1.5; }
+        .update-features-list { display: flex; flex-direction: column; gap: 10px; text-align: left; margin-top: 15px; }
+        .update-item { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 600; opacity: 0.9; }
+        .update-item i { color: var(--primary); width: 20px; text-align: center; font-weight: 400; font-size: 0.9rem; } 
 
         .settings-loading-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -349,6 +547,9 @@
         .login-btn-header { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer; display: none; }
         .login-btn-header:hover { opacity: 0.9; }
 
+        .checkbox-group { display: flex; flex-direction: column; gap: 8px; max-height: 150px; overflow-y: auto; padding: 5px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 15px; }
+        .checkbox-item { display: flex; align-items: center; gap: 10px; font-size: 0.8rem; }
+
     </style>
 </head>
 <body>
@@ -356,12 +557,9 @@
     <div id="updatePopup" class="update-overlay">
         <div class="update-card">
             <h2 id="updateTitle">Update Available</h2>
-            <div class="update-features">
-                <div><i class="fa-regular fa-shield"></i> Security Improved</div>
-                <div><i class="fa-regular fa-bolt"></i> Fast Performance</div>
-                <div><i class="fa-regular fa-circle-check"></i> Bugs Fixed</div>
+            <p id="updateMessage">A new version of One Tool is available.</p>
+            <div id="updateFeaturesList" class="update-features-list">
             </div>
-            <p id="updateMessage"></p>
         </div>
     </div>
 
@@ -394,8 +592,8 @@
                     <h2 style="margin-bottom: 25px; text-align: center;">Choose Your Service</h2>
                     
                     <div style="display: grid; grid-template-columns: 1fr; gap: 0;">
-                        <div class="option-card" data-tool-id="linkToQr" onclick="setView('linkToQrView')">
-                            <span class="new-badge">NEW</span>
+                        <div class="option-card" onclick="setView('linkToQrView')" id="card-linkToQr">
+                            <div class="new-badge">NEW</div>
                             <i class="fas fa-link"></i>
                             <div>
                                 <h4>Link to QR</h4>
@@ -403,8 +601,8 @@
                             </div>
                         </div>
                         
-                        <div class="option-card" data-tool-id="uploadToQr" onclick="setView('uploadToQrView')">
-                            <span class="new-badge">NEW</span>
+                        <div class="option-card" onclick="setView('uploadToQrView')" id="card-uploadToQr">
+                            <div class="new-badge">NEW</div>
                             <i class="fas fa-qrcode"></i>
                             <div>
                                 <h4>Upload to QR</h4>
@@ -412,8 +610,8 @@
                             </div>
                         </div>
 
-                        <div class="option-card" data-tool-id="uploadToLink" onclick="setView('uploadToLinkView')">
-                            <span class="new-badge">NEW</span>
+                        <div class="option-card" onclick="setView('uploadToLinkView')" id="card-uploadToLink">
+                            <div class="new-badge">NEW</div>
                             <i class="fas fa-cloud-upload-alt"></i>
                             <div>
                                 <h4>Upload to Link</h4>
@@ -421,8 +619,8 @@
                             </div>
                         </div>
                         
-                        <div class="option-card" data-tool-id="qrExtractor" onclick="setView('qrExtractorView')">
-                            <span class="new-badge">NEW</span>
+                        <div class="option-card" onclick="setView('qrExtractorView')" id="card-qrExtractor">
+                            <div class="new-badge">NEW</div>
                             <i class="fas fa-camera"></i> 
                             <div>
                                 <h4>QR Code Extractor</h4>
@@ -430,8 +628,8 @@
                             </div>
                         </div>
 
-                        <div class="option-card" data-tool-id="pdfMaker" onclick="setView('pdfMakerView')">
-                            <span class="new-badge">NEW</span>
+                        <div class="option-card" onclick="setView('pdfMakerView')" id="card-pdfMaker">
+                            <div class="new-badge">NEW</div>
                             <i class="fas fa-file-pdf"></i> 
                             <div>
                                 <h4>PDF Maker</h4>
@@ -439,26 +637,8 @@
                             </div>
                         </div>
 
-                        <div class="option-card" data-tool-id="slowedReverb" onclick="window.location.href='slowed-reverb.html'">
-                            <span class="new-badge">NEW</span>
-                            <i class="fas fa-headphones"></i> 
-                            <div>
-                                <h4>Audio slowed and reverb</h4>
-                                <p>Add atmospheric effects to your music.</p>
-                            </div>
-                        </div>
-
-                        <div class="option-card" data-tool-id="rgbCmyk" onclick="window.location.href='rgb-to-cmyk-convert.html'">
-                            <span class="new-badge">NEW</span>
-                            <i class="fas fa-palette"></i> 
-                            <div>
-                                <h4>RGB to CMYK</h4>
-                                <p>Convert digital colors for printing.</p>
-                            </div>
-                        </div>
-
-                        <div class="option-card" data-tool-id="mp4ToMp3" onclick="setView('mp4ToMp3View')">
-                            <span class="new-badge">NEW</span>
+                        <div class="option-card" onclick="setView('mp4ToMp3View')" id="card-mp4ToMp3">
+                            <div class="new-badge">NEW</div>
                             <i class="fas fa-music"></i> 
                             <div>
                                 <h4>MP4 to MP3</h4>
@@ -466,8 +646,8 @@
                             </div>
                         </div>
 
-                        <div class="option-card" data-tool-id="pdfExtractor" onclick="setView('pdfExtractorView')">
-                            <span class="new-badge">NEW</span>
+                        <div class="option-card" onclick="setView('pdfExtractorView')" id="card-pdfExtractor">
+                            <div class="new-badge">NEW</div>
                             <i class="fas fa-images"></i> 
                             <div>
                                 <h4>PDF Extractor</h4>
@@ -475,8 +655,8 @@
                             </div>
                         </div>
 
-                        <div class="option-card" data-tool-id="zipExtractor" onclick="setView('zipExtractorView')">
-                            <span class="new-badge">NEW</span>
+                        <div class="option-card" onclick="setView('zipExtractorView')" id="card-zipExtractor">
+                            <div class="new-badge">NEW</div>
                             <i class="fas fa-file-zipper"></i> 
                             <div>
                                 <h4>ZIP Extractor</h4>
@@ -484,12 +664,30 @@
                             </div>
                         </div>
 
-                        <div class="option-card" data-tool-id="videoToGif" onclick="setView('videoToGifView')">
-                            <span class="new-badge">NEW</span>
+                        <div class="option-card" onclick="setView('videoToGifView')" id="card-videoToGif">
+                            <div class="new-badge">NEW</div>
                             <i class="fas fa-video"></i> 
                             <div>
                                 <h4>Video to GIF</h4>
                                 <p>Convert short clips to GIF animation.</p>
+                            </div>
+                        </div>
+
+                        <div class="option-card" onclick="window.location.href='slowed-reverb.html'" id="card-slowedReverb">
+                            <div class="new-badge">NEW</div>
+                            <i class="fas fa-compact-disc"></i> 
+                            <div>
+                                <h4>Audio Slowed & Reverb</h4>
+                                <p>Slow down and add reverb to audio.</p>
+                            </div>
+                        </div>
+
+                        <div class="option-card" onclick="window.location.href='rgb-to-cmyk-convert.html'" id="card-rgbCmyk">
+                            <div class="new-badge">NEW</div>
+                            <i class="fas fa-palette"></i> 
+                            <div>
+                                <h4>RGB to CMYK</h4>
+                                <p>Convert RGB colors to CMYK format.</p>
                             </div>
                         </div>
                     </div>
@@ -934,37 +1132,41 @@
             <button class="btn btn-action" style="margin-top: 10px;" onclick="checkDevAccess()"><i class="fas fa-code"></i> Developer Options</button>
             
             <div id="devToolsPanel" style="display:none; margin-top:20px; border-top:1px solid var(--border); padding-top:15px;">
-                <h4 style="margin-bottom:15px;">Config Manager</h4>
+                <h4 style="margin-bottom:15px;">Update Notification Config</h4>
                 
                 <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Version Number</label>
                 <input type="text" id="devVersion" placeholder="e.g. 1.5" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px;">
                 
                 <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Custom Message</label>
-                <textarea id="devMessage" placeholder="Update message..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px; height: 60px; font-family: inherit; resize: none;"></textarea>
+                <textarea id="devMessage" placeholder="What's new in this update?" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px; height: 80px; font-family: inherit; resize: none;"></textarea>
                 
-                <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">New Tag Management</label>
-                <div class="settings-input-group" style="margin-bottom: 15px;">
-                    <select id="devNewTagTool">
-                        <option value="none">None</option>
-                        <option value="linkToQr">Link to QR</option>
-                        <option value="uploadToQr">Upload to QR</option>
-                        <option value="uploadToLink">Upload to Link</option>
-                        <option value="qrExtractor">QR Extractor</option>
-                        <option value="pdfMaker">PDF Maker</option>
-                        <option value="slowedReverb">Slowed & Reverb</option>
-                        <option value="rgbCmyk">RGB to CMYK</option>
-                        <option value="mp4ToMp3">MP4 to MP3</option>
-                        <option value="pdfExtractor">PDF Extractor</option>
-                        <option value="zipExtractor">ZIP Extractor</option>
-                        <option value="videoToGif">Video to GIF</option>
-                    </select>
+                <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">"New" Tags (Select tools to show badge)</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" class="new-tag-checkbox" value="card-linkToQr"> Link to QR</label>
+                    <label class="checkbox-item"><input type="checkbox" class="new-tag-checkbox" value="card-uploadToQr"> Upload to QR</label>
+                    <label class="checkbox-item"><input type="checkbox" class="new-tag-checkbox" value="card-uploadToLink"> Upload to Link</label>
+                    <label class="checkbox-item"><input type="checkbox" class="new-tag-checkbox" value="card-qrExtractor"> QR Extractor</label>
+                    <label class="checkbox-item"><input type="checkbox" class="new-tag-checkbox" value="card-pdfMaker"> PDF Maker</label>
+                    <label class="checkbox-item"><input type="checkbox" class="new-tag-checkbox" value="card-mp4ToMp3"> MP4 to MP3</label>
+                    <label class="checkbox-item"><input type="checkbox" class="new-tag-checkbox" value="card-pdfExtractor"> PDF Extractor</label>
+                    <label class="checkbox-item"><input type="checkbox" class="new-tag-checkbox" value="card-zipExtractor"> ZIP Extractor</label>
+                    <label class="checkbox-item"><input type="checkbox" class="new-tag-checkbox" value="card-videoToGif"> Video to GIF</label>
+                    <label class="checkbox-item"><input type="checkbox" class="new-tag-checkbox" value="card-slowedReverb"> Audio Slowed & Reverb</label>
+                    <label class="checkbox-item"><input type="checkbox" class="new-tag-checkbox" value="card-rgbCmyk"> RGB to CMYK</label>
+                </div>
+
+                <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Update Card Features</label>
+                <div class="checkbox-group" style="height: auto;">
+                    <label class="checkbox-item"><input type="checkbox" id="featSecurity"> Security Improvements</label>
+                    <label class="checkbox-item"><input type="checkbox" id="featPerformance"> Performance Boost</label>
+                    <label class="checkbox-item"><input type="checkbox" id="featFix"> Bug Fixes</label>
                 </div>
 
                 <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 20px;">
-                    <label style="font-size: 0.85rem; font-weight: 700;">Show Update Popup</label>
+                    <label style="font-size: 0.85rem; font-weight: 700;">Show Notification</label>
                     <label class="switch">
-                        <input type="checkbox" id="devStatus">
-                        <span class="slider round"></span>
+                    <input type="checkbox" id="devStatus">
+                    <span class="slider round"></span>
                     </label>
                 </div>
                 
@@ -1107,6 +1309,7 @@
         const zipProgressFill = document.getElementById('zipProgressFill');
         const zipPercentLabel = document.getElementById('zipPercentLabel');
         let zipSelectedFile = null;
+        let zipExtractedContent = null;
 
         const gifFileInput = document.getElementById('gifFileInput');
         const gifDropZone = document.getElementById('gifDropZone');
@@ -1184,6 +1387,7 @@
                 views[view].style.display = view === newView ? 'block' : 'none';
             });
             currentView = newView;
+
             localStorage.setItem('lastView', newView);
 
             if (newView === 'linkToQrView') {
@@ -1216,6 +1420,8 @@
                 mp3ProgressFill.style.width = '0%';
                 mp3PercentLabel.innerText = '0%';
                 mp3SelectedFile = null;
+                if(fileIconMp3) fileIconMp3.style.display = 'none';
+                if(uploadIconMp3) uploadIconMp3.style.display = 'block';
             } else if (viewId === 'pdfExtractorView') {
                 document.getElementById('pdfUploadTitle').innerHTML = 'Choose a PDF File';
                 extractPdfBtn.disabled = true;
@@ -1239,6 +1445,7 @@
                 zipProgressFill.style.width = '0%';
                 zipPercentLabel.innerText = '0%';
                 zipSelectedFile = null;
+                zipExtractedContent = null;
                 zipFileList.innerHTML = '';
             } else if (viewId === 'videoToGifView') {
                 document.getElementById('gifUploadTitle').innerHTML = 'Choose Video (Max 30s, 10MB)';
@@ -1260,7 +1467,8 @@
                 pdfMakerProgressContainer.style.display = 'none';
                 pdfMakerProgressFill.style.width = '0%';
                 pdfMakerPercentLabel.innerText = '0%';
-            } else if(viewId === 'uploadToQrView') {
+            }
+            else if(viewId === 'uploadToQrView') {
                 document.getElementById('uploadTitle').innerHTML = 'Choose a file';
                 uploadBtn.disabled = true;
                 progressContainer.style.display = 'none';
@@ -1271,6 +1479,11 @@
                 fileInput.value = '';
                 progressFill.style.width = '0%';
                 percentLabel.innerText = '0%';
+                if (uploadIconQr) uploadIconQr.style.display = 'block';
+                if (imagePreviewQr) { imagePreviewQr.style.display = 'none'; imagePreviewQr.src = ''; }
+                if (fileIconQr) fileIconQr.style.display = 'none';
+                if (removeFileQrBtn) removeFileQrBtn.style.display = 'none';
+                if (qrResultFilePreview) qrResultFilePreview.innerHTML = ''; 
             } else if (viewId === 'uploadToLinkView') {
                 document.getElementById('linkUploadTitle').innerHTML = 'Choose a file';
                 linkUploadBtn.disabled = true;
@@ -1282,6 +1495,10 @@
                 linkFileInput.value = '';
                 linkProgressFill.style.width = '0%';
                 linkPercentLabel.innerText = '0%';
+                if (uploadIconLink) uploadIconLink.style.display = 'block';
+                if (imagePreviewLink) { imagePreviewLink.style.display = 'none'; imagePreviewLink.src = ''; }
+                if (fileIconLink) fileIconLink.style.display = 'none';
+                if (removeFileLinkBtn) removeFileLinkBtn.style.display = 'none';
                 uploadedLinkFormats = null; 
             } else if (viewId === 'qrExtractorView') {
                 document.getElementById('extractorUploadTitle').innerHTML = 'Choose a QR Code Image';
@@ -1290,9 +1507,24 @@
                 document.getElementById('extractorUploaderView').style.display = 'block';
                 extractorSelectedFile = null;
                 extractorFileInput.value = '';
+                if (uploadIconExtractor) uploadIconExtractor.style.display = 'block';
+                if (imagePreviewExtractor) { imagePreviewExtractor.style.display = 'none'; imagePreviewExtractor.src = ''; }
+                if (fileIconExtractor) fileIconExtractor.style.display = 'none';
+                if (removeFileExtractorBtn) removeFileExtractorBtn.style.display = 'none';
+                if (extractedDataDisplay) extractedDataDisplay.innerText = '';
+                if (extractorActionButtons) extractorActionButtons.innerHTML = '';
+                const extractorResultFilePreview = document.getElementById('extractorResultFilePreview');
+                if (extractorResultFilePreview) extractorResultFilePreview.innerHTML = '';
             }
         }
         
+        function updateLogoImage() {
+            const logoImage = document.getElementById('logoImage');
+            if (logoImage) { 
+                logoImage.src = 'img/logo.png';
+            }
+        }
+
         function setFilePreview(file, titleEl, iconEl, imgEl, fileIconEl, fileExtEl, removeBtn) {
             const fileSizeMB = file.size / (1024 * 1024);
             
@@ -1315,10 +1547,29 @@
             }
 
             const name = file.name;
-            let displayName = name.length > 20 ? name.substring(0, 17) + '...' : name;
+            let displayName = name;
+            
+            if (name.length > 20) {
+                const extIndex = name.lastIndexOf('.');
+                if (extIndex > 0) {
+                    const ext = name.substring(extIndex);
+                    const base = name.substring(0, extIndex);
+                    if (ext.length + 3 < 20) {
+                        displayName = base.substring(0, 20 - ext.length - 3) + '...' + ext;
+                    } else {
+                         displayName = name.substring(0, 17) + '...';
+                    }
+                } else {
+                    displayName = name.substring(0, 17) + '...';
+                }
+            } else {
+                displayName = name;
+            }
+            
             titleEl.innerHTML = `<b>${displayName}</b><br>Size: ${displaySize}`; 
 
             const ext = name.split('.').pop().toLowerCase();
+
             if(iconEl) iconEl.style.display = 'none';
             if(imgEl) imgEl.style.display = 'none';
             if(fileIconEl) fileIconEl.style.display = 'none';
@@ -1357,20 +1608,33 @@
             if (state && state.view) { setView(state.view); } else { setView('mainOptionsView'); }
         };
 
+        window.onbeforeunload = (e) => {
+            if (selectedFile || linkSelectedFile || mp3SelectedFile) {
+                const message = "Are you sure you want to leave? Your upload/conversion might be interrupted.";
+                e.returnValue = message;
+                return message;
+            }
+        };
+
         document.getElementById('themeToggle').onclick = () => {
             document.body.classList.toggle('dark-mode');
+            updateLogoImage(); 
         };
 
         function toggleColorPicker(buttonId, targetInputId, otherButtonId) {
             const button = document.getElementById(buttonId);
+            const otherButton = document.getElementById(otherButtonId);
+            
             if (customColorPicker.style.display === 'block' && activeColorTarget === targetInputId) {
                 customColorPicker.style.display = 'none';
                 activeColorTarget = null;
                 return;
             }
+
             activeColorTarget = targetInputId;
             const rect = button.getBoundingClientRect();
             const containerRect = document.querySelector('.main-card').getBoundingClientRect();
+            
             customColorPicker.style.top = (rect.bottom - containerRect.top + 5) + 'px';
             customColorPicker.style.left = (rect.left - containerRect.left) + 'px';
             hexInput.value = document.getElementById(targetInputId).value;
@@ -1414,18 +1678,25 @@
             }
         });
 
+        function updateLinkInputControls() {
+            clearLinkInputBtn.style.display = linkInput.value.trim() ? 'block' : 'none';
+        }
+
         function generateLinkQr() {
             const text = linkInput.value.trim();
             const size = linkQrSize.value;
             const darkColor = linkQrColor.value;
             const lightColor = linkQrBackground.value; 
-            clearLinkInputBtn.style.display = text ? 'block' : 'none';
+
+            updateLinkInputControls();
+
             if (!text) {
                 linkQrcodeDiv.innerHTML = '';
                 linkQrcodeDiv.parentElement.style.opacity = 0.3; 
                 if (linkQrCodeSizeDisplay) linkQrCodeSizeDisplay.innerText = `${size}px | Size: N/A`;
                 return;
             }
+
             linkQrcodeDiv.parentElement.style.opacity = 1;
             linkQrcodeDiv.innerHTML = '';
             QRCode.toCanvas(text, {
@@ -1433,14 +1704,22 @@
             }, (err, canvas) => { 
                 if(!err) {
                     linkQrcodeDiv.appendChild(canvas); 
-                    const dataURL = canvas.toDataURL('image/png', 1.0);
-                    const sizeInKB = ((dataURL.length * 0.75) / 1024).toFixed(2);
-                    linkQrCodeSizeDisplay.innerText = `${size}px | Size: ${sizeInKB} KB`;
+                    if (linkQrCodeSizeDisplay && canvas) {
+                        const dataURL = canvas.toDataURL('image/png', 1.0);
+                        const sizeInBytes = (dataURL.length * 0.75) - 2; 
+                        const sizeInKB = (sizeInBytes / 1024).toFixed(2);
+                        linkQrCodeSizeDisplay.innerText = `${size}px | Size: ${sizeInKB} KB`;
+                    }
                 }
             });
         }
         
-        linkQrSize.oninput = (e) => { generateLinkQr(); }
+        linkInput.addEventListener('input', generateLinkQr);
+        linkQrSize.oninput = (e) => {
+            const size = e.target.value;
+            if (linkQrCodeSizeDisplay) linkQrCodeSizeDisplay.innerText = `${size}px | Size: Calculating...`;
+            generateLinkQr();
+        }
         clearLinkInputBtn.onclick = () => { linkInput.value = ''; generateLinkQr(); };
         pasteLinkInputBtn.onclick = async () => {
             try { linkInput.value = await navigator.clipboard.readText(); generateLinkQr(); showToast("Pasted!"); } catch (err) { showToast("Clipboard Error"); }
@@ -1457,11 +1736,13 @@
         pdfMakerInput.onchange = (e) => {
             if(e.target.files && e.target.files.length > 0) {
                 Array.from(e.target.files).forEach(file => {
-                    if(file.type.startsWith('image/')) pdfMakerFiles.push(file);
+                    if(file.type.startsWith('image/')) {
+                        pdfMakerFiles.push(file);
+                    }
                 });
                 renderPdfMakerPreview();
             }
-            pdfMakerInput.value = '';
+            pdfMakerInput.value = ''; 
         };
 
         function renderPdfMakerPreview() {
@@ -1494,26 +1775,39 @@
         generatePdfBtn.onclick = async () => {
             if(pdfMakerFiles.length === 0) return;
             generatePdfBtn.disabled = true;
+            generatePdfBtn.innerText = "Generating...";
             pdfMakerProgressContainer.style.display = 'block';
+            pdfMakerProgressFill.style.width = '0%';
+            pdfMakerPercentLabel.innerText = '0%';
+
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
+            
             for(let i=0; i<pdfMakerFiles.length; i++) {
                 if(i > 0) doc.addPage();
-                const imgData = await new Promise(resolve => {
+                
+                const imgData = await new Promise((resolve) => {
                     const reader = new FileReader();
                     reader.onload = (e) => resolve(e.target.result);
                     reader.readAsDataURL(pdfMakerFiles[i]);
                 });
+                
                 const imgProps = doc.getImageProperties(imgData);
                 const pdfWidth = doc.internal.pageSize.getWidth();
                 const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                
                 doc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+                
                 const pct = Math.round(((i+1)/pdfMakerFiles.length)*100);
                 pdfMakerProgressFill.style.width = pct + "%";
                 pdfMakerPercentLabel.innerText = pct + "%";
             }
-            doc.save((pdfMakerFilename.value.trim() || 'document') + '.pdf');
+            
+            const fname = (pdfMakerFilename.value.trim() || 'document') + '.pdf';
+            doc.save(fname);
+            
             generatePdfBtn.disabled = false;
+            generatePdfBtn.innerText = "Generate & Download PDF";
             showToast("PDF Generated!");
         };
 
@@ -1521,10 +1815,19 @@
         mp3FileInput.onchange = (e) => {
             mp3SelectedFile = e.target.files[0];
             if(mp3SelectedFile) {
-                setFilePreview(mp3SelectedFile, document.getElementById('mp3UploadTitle'), uploadIconMp3, null, fileIconMp3, fileIconMp3.querySelector('.file-ext'), document.getElementById('removeFileMp3Btn'));
+                const titleEl = document.getElementById('mp3UploadTitle');
+                if(mp3SelectedFile.size > 50 * 1024 * 1024) {
+                    titleEl.innerHTML = `File too large (>50MB).`;
+                    return;
+                }
+                
+                setFilePreview(mp3SelectedFile, titleEl, uploadIconMp3, null, fileIconMp3, fileIconMp3.querySelector('.file-ext'), document.getElementById('removeFileMp3Btn'));
                 convertMp3Btn.disabled = false;
                 mp3Filename.value = mp3SelectedFile.name.replace(/\.[^/.]+$/, "");
-                document.getElementById('sourceVideo').src = URL.createObjectURL(mp3SelectedFile);
+
+                const videoURL = URL.createObjectURL(mp3SelectedFile);
+                const videoEl = document.getElementById('sourceVideo');
+                videoEl.src = videoURL;
                 document.getElementById('mp3PreviewArea').style.display = 'block';
             }
         };
@@ -1532,43 +1835,80 @@
 
         convertMp3Btn.onclick = async () => {
             convertMp3Btn.disabled = true;
+            convertMp3Btn.innerText = "Converting... (This happens locally)";
             mp3ProgressContainer.style.display = 'block';
+            mp3ProgressFill.style.width = '0%';
+            mp3PercentLabel.innerText = '0%';
+            
             try {
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const arrayBuffer = await mp3SelectedFile.arrayBuffer();
                 const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                
                 const bitrate = parseInt(document.getElementById('mp3Bitrate').value);
                 const mp3Encoder = new lamejs.Mp3Encoder(1, audioBuffer.sampleRate, bitrate);
                 const samples = audioBuffer.getChannelData(0); 
+                const sampleBlockSize = 1152;
+                const mp3Data = [];
+                
                 const samplesInt16 = new Int16Array(samples.length);
                 for (let i = 0; i < samples.length; i++) {
                     samplesInt16[i] = samples[i] < 0 ? samples[i] * 0x8000 : samples[i] * 0x7FFF;
                 }
-                const mp3Data = [];
+                
                 let i = 0;
                 function encodeChunk() {
                     if (i < samplesInt16.length) {
-                        const end = Math.min(i + 1152 * 50, samplesInt16.length);
-                        const mp3buf = mp3Encoder.encodeBuffer(samplesInt16.subarray(i, end));
+                        const end = Math.min(i + sampleBlockSize * 50, samplesInt16.length); 
+                        const sampleChunk = samplesInt16.subarray(i, end);
+                        const mp3buf = mp3Encoder.encodeBuffer(sampleChunk);
                         if (mp3buf.length > 0) mp3Data.push(mp3buf);
+                        
                         i = end;
                         const percent = Math.round((i / samplesInt16.length) * 100);
                         mp3ProgressFill.style.width = percent + "%";
                         mp3PercentLabel.innerText = percent + "%";
+                        
                         requestAnimationFrame(encodeChunk);
                     } else {
                         const mp3buf = mp3Encoder.flush();
                         if (mp3buf.length > 0) mp3Data.push(mp3buf);
+                        
                         const blob = new Blob(mp3Data, { type: 'audio/mp3' });
-                        resultAudio.src = URL.createObjectURL(blob);
-                        downloadMp3Btn.onclick = () => forceDownload(blob, `${mp3Filename.value || 'audio'}.mp3`, true);
+                        const url = URL.createObjectURL(blob);
+                        
+                        resultAudio.src = url;
+                        downloadMp3Btn.onclick = () => {
+                            const fname = mp3Filename.value.trim() || 'audio';
+                            forceDownload(blob, `${fname}.mp3`, true);
+                        };
+                        
                         document.getElementById('mp3UploaderView').style.display = 'none';
                         mp3ResultArea.style.display = 'block';
+                        convertMp3Btn.innerText = "Convert to MP3";
                     }
                 }
                 encodeChunk();
-            } catch (error) { showToast("Failed: " + error.message); convertMp3Btn.disabled = false; }
+
+            } catch (error) {
+                showToast("Conversion Failed: " + error.message);
+                convertMp3Btn.disabled = false;
+                convertMp3Btn.innerText = "Convert to MP3";
+            }
         };
+
+        function togglePdfSelection(wrapper) {
+            const checkbox = wrapper.querySelector('.pdf-select-check');
+            checkbox.checked = !checkbox.checked;
+            if(checkbox.checked) wrapper.classList.add('selected');
+            else wrapper.classList.remove('selected');
+        }
+
+        function downloadSinglePdfPage(idx, event) {
+            event.stopPropagation();
+            const img = document.querySelector(`.pdf-grid-item:nth-child(${idx}) img`);
+            forceDownload(img.src, `page-${idx}.jpg`, false);
+        }
 
         pdfDropZone.onclick = () => pdfFileInput.click();
         pdfFileInput.onchange = (e) => {
@@ -1582,32 +1922,91 @@
 
         extractPdfBtn.onclick = async () => {
             extractPdfBtn.disabled = true;
+            extractPdfBtn.innerText = "Extracting Images...";
             pdfProgressContainer.style.display = 'block';
+            pdfProgressFill.style.width = '0%';
+            pdfPercentLabel.innerText = '0%';
+            
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
             try {
-                const pdf = await pdfjsLib.getDocument(await pdfSelectedFile.arrayBuffer()).promise;
+                const arrayBuffer = await pdfSelectedFile.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                
+                const scale = parseFloat(document.getElementById('pdfQuality').value);
                 document.getElementById('pdfPageCount').innerText = `Total Pages: ${pdf.numPages}`;
+                pdfPagesGrid.innerHTML = '';
+                
                 for(let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
-                    const viewport = page.getViewport({ scale: parseFloat(document.getElementById('pdfQuality').value) });
+                    const viewport = page.getViewport({ scale: scale });
                     const canvas = document.createElement('canvas');
-                    canvas.height = viewport.height; canvas.width = viewport.width;
-                    await page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise;
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+
+                    await page.render({ canvasContext: context, viewport: viewport }).promise;
+                    
+                    const imgUrl = canvas.toDataURL('image/jpeg');
                     const wrapper = document.createElement('div');
                     wrapper.className = 'pdf-grid-item selected';
+                    wrapper.onclick = function() { togglePdfSelection(this); };
                     wrapper.innerHTML = `
-                        <img src="${canvas.toDataURL('image/jpeg')}" style="width:100%; border-radius:8px; border:1px solid var(--border);">
+                        <img src="${imgUrl}" style="width:100%; border-radius:8px; border:1px solid var(--border);">
                         <span class="pdf-page-badge">Page ${i}</span>
-                        <div style="position:absolute; top:5px; right:5px; background:white; padding:2px; border-radius:4px; display:flex; gap:4px;">
-                            <input type="checkbox" class="pdf-select-check" data-page="${i}" checked>
+                        <div class="pdf-controls-right">
+                            <button class="mini-download-btn" onclick="downloadSinglePdfPage(${i}, event)"><i class="fas fa-download"></i></button>
+                            <input type="checkbox" class="pdf-select-check" data-page="${i}" checked style="transform:scale(1.2);">
                         </div>
                     `;
                     pdfPagesGrid.appendChild(wrapper);
-                    pdfProgressFill.style.width = Math.round((i / pdf.numPages) * 100) + "%";
+                    
+                    const percent = Math.round((i / pdf.numPages) * 100);
+                    pdfProgressFill.style.width = percent + "%";
+                    pdfPercentLabel.innerText = percent + "%";
                 }
+
                 document.getElementById('pdfUploaderView').style.display = 'none';
                 pdfResultArea.style.display = 'block';
-            } catch (e) { showToast("Error: " + e.message); extractPdfBtn.disabled = false; }
+                extractPdfBtn.innerText = "Extract Images";
+            } catch (error) {
+                showToast("Error reading PDF: " + error.message);
+                extractPdfBtn.disabled = false;
+                extractPdfBtn.innerText = "Extract Images";
+            }
+        };
+
+        selectAllPdfBtn.onclick = () => {
+            const wrappers = document.querySelectorAll('.pdf-grid-item');
+            let allSelected = true;
+            wrappers.forEach(w => { if(!w.querySelector('input').checked) allSelected = false; });
+            
+            wrappers.forEach(w => {
+                const cb = w.querySelector('input');
+                if(allSelected) { cb.checked = false; w.classList.remove('selected'); }
+                else { cb.checked = true; w.classList.add('selected'); }
+            });
+        };
+
+        downloadSelectedPdfBtn.onclick = async () => {
+            const checkboxes = document.querySelectorAll('.pdf-select-check:checked');
+            if(checkboxes.length === 0) { showToast("Select at least one page."); return; }
+            
+            alert("Images will be downloaded as a ZIP file.");
+
+            const zip = new JSZip();
+            const folder = zip.folder("extracted_images");
+            
+            for(let i = 0; i < checkboxes.length; i++) {
+                const cb = checkboxes[i];
+                const idx = parseInt(cb.getAttribute('data-page')) - 1;
+                const src = pdfPagesGrid.children[idx].querySelector('img').src;
+                const base64Data = src.split(',')[1];
+                folder.file(`page-${idx+1}.jpg`, base64Data, {base64: true});
+            }
+
+            const content = await zip.generateAsync({type:"blob"});
+            forceDownload(content, "extracted_images.zip", true);
         };
 
         zipDropZone.onclick = () => zipFileInput.click();
@@ -1622,55 +2021,164 @@
 
         extractZipBtn.onclick = async () => {
             extractZipBtn.disabled = true;
+            extractZipBtn.innerText = "Extracting...";
             zipProgressContainer.style.display = 'block';
+            zipProgressFill.style.width = '0%';
+            zipPercentLabel.innerText = '0%';
+            
             try {
                 const zip = new JSZip();
                 const contents = await zip.loadAsync(zipSelectedFile);
-                Object.keys(contents.files).forEach(filename => {
+                zipExtractedContent = contents;
+                zipFileList.innerHTML = '';
+                
+                const fileNames = Object.keys(contents.files);
+                const totalFiles = fileNames.length;
+                let processed = 0;
+
+                zipProgressFill.style.width = '50%';
+                zipPercentLabel.innerText = '50%';
+
+                fileNames.forEach(filename => {
                     if(!contents.files[filename].dir) {
-                        const item = document.createElement('div');
-                        item.className = 'file-list-item';
-                        item.innerHTML = `<span>${filename}</span><button class="btn-action">Save</button>`;
-                        item.querySelector('button').onclick = async () => forceDownload(await contents.files[filename].async("blob"), filename, true);
-                        zipFileList.appendChild(item);
+                        const fileItem = document.createElement('div');
+                        fileItem.className = 'file-list-item';
+                        fileItem.innerHTML = `
+                            <span class="fname" title="${filename}"><i class="fas fa-file"></i> ${filename}</span>
+                            <button class="btn-action" style="padding: 5px 10px; font-size: 0.7rem;">Download</button>
+                        `;
+                        
+                        fileItem.querySelector('button').onclick = async () => {
+                            const blob = await contents.files[filename].async("blob");
+                            forceDownload(blob, filename.split('/').pop(), true);
+                        };
+                        
+                        zipFileList.appendChild(fileItem);
                     }
+                    processed++;
                 });
+                
+                zipProgressFill.style.width = '100%';
+                zipPercentLabel.innerText = '100%';
+
                 document.getElementById('zipUploaderView').style.display = 'none';
                 zipResultArea.style.display = 'block';
-            } catch(e) { showToast("Error: " + e.message); extractZipBtn.disabled = false; }
+                extractZipBtn.innerText = "Extract Files";
+            } catch(error) {
+                showToast("Error extracting ZIP: " + error.message);
+                extractZipBtn.disabled = false;
+                extractZipBtn.innerText = "Extract Files";
+            }
         };
 
         gifDropZone.onclick = () => gifFileInput.click();
         gifFileInput.onchange = (e) => {
             gifSelectedFile = e.target.files[0];
-            if(gifSelectedFile && gifSelectedFile.size <= 10 * 1024 * 1024) {
+            const titleEl = document.getElementById('gifUploadTitle');
+            
+            if(gifSelectedFile) {
+                if(gifSelectedFile.size > 10 * 1024 * 1024) {
+                    titleEl.innerHTML = `<span style="color:red;">File too large (>10MB)</span>`;
+                    return;
+                }
+                
+                const videoURL = URL.createObjectURL(gifSelectedFile);
                 const videoEl = document.getElementById('gifSourceVideo');
-                videoEl.src = URL.createObjectURL(gifSelectedFile);
+                videoEl.src = videoURL;
+                gifFilename.value = gifSelectedFile.name.replace(/\.[^/.]+$/, "");
+                
                 videoEl.onloadedmetadata = () => {
-                    if(videoEl.duration <= 30) {
-                        document.getElementById('gifUploadTitle').innerText = gifSelectedFile.name;
-                        document.getElementById('gifPreviewArea').style.display = 'block';
-                        convertGifBtn.disabled = false;
-                    } else { showToast("Video too long (>30s)"); gifSelectedFile = null; }
+                    if(videoEl.duration > 30) {
+                        titleEl.innerHTML = `<span style="color:red;">Video too long (>30s)</span>`;
+                        gifSelectedFile = null;
+                        return;
+                    }
+                    
+                    const name = gifSelectedFile.name;
+                    let displayName = name;
+                    if (name.length > 20) {
+                         const extIndex = name.lastIndexOf('.');
+                         if (extIndex > 0) {
+                             const ext = name.substring(extIndex);
+                             const base = name.substring(0, extIndex);
+                             if (ext.length + 3 < 20) {
+                                 displayName = base.substring(0, 20 - ext.length - 3) + '...' + ext;
+                             } else {
+                                  displayName = name.substring(0, 17) + '...';
+                             }
+                         } else {
+                             displayName = name.substring(0, 17) + '...';
+                         }
+                    }
+
+                    titleEl.innerHTML = `<b>${displayName}</b><br>Size: ${(gifSelectedFile.size/1024/1024).toFixed(2)} MB`;
+                    document.getElementById('uploadIconGif').style.display = 'none';
+                    document.getElementById('removeFileGifBtn').style.display = 'block';
+                    document.getElementById('gifPreviewArea').style.display = 'block';
+                    convertGifBtn.disabled = false;
                 };
             }
         };
+        document.getElementById('removeFileGifBtn').onclick = (e) => { e.stopPropagation(); resetUploadView('videoToGifView'); };
 
         convertGifBtn.onclick = () => {
             convertGifBtn.disabled = true;
             gifProgressContainer.style.display = 'block';
+            gifProgressFill.style.width = '0%';
+            gifPercentLabel.innerText = '0%';
+            
             const videoEl = document.getElementById('gifSourceVideo');
-            let w = parseInt(document.getElementById('gifResolution').value) || videoEl.videoWidth;
+            const originalWidth = videoEl.videoWidth;
+            const originalHeight = videoEl.videoHeight;
+            const resValue = document.getElementById('gifResolution').value;
+            
+            let gifW, gifH;
+            
+            if (resValue === 'original') {
+                gifW = originalWidth;
+                gifH = originalHeight;
+            } else {
+                gifW = parseInt(resValue);
+                gifH = Math.round(gifW * (originalHeight / originalWidth));
+            }
+            
             gifshot.createGIF({
-                video: [videoEl.src], gifWidth: w, gifHeight: Math.round(w * (videoEl.videoHeight/videoEl.videoWidth)),
-                numFrames: 20, progressCallback: p => { gifProgressFill.style.width = Math.round(p*100) + "%"; }
-            }, obj => {
+                video: [videoEl.src],
+                gifWidth: gifW,
+                gifHeight: gifH, 
+                numFrames: 20, 
+                frameDuration: 1,
+                progressCallback: function(captureProgress) {
+                    const percent = Math.round(captureProgress * 100);
+                    gifProgressFill.style.width = percent + "%";
+                    gifPercentLabel.innerText = percent + "%";
+                }
+            }, function(obj) {
                 if(!obj.error) {
-                    resultGif.src = obj.image;
-                    downloadGifBtn.onclick = () => forceDownload(obj.image, `${gifFilename.value || 'animation'}.gif`, false);
+                    const image = obj.image;
+
+                    const byteCharacters = atob(image.split(',')[1]);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const blob = new Blob([byteArray], {type: 'image/gif'});
+                    const blobUrl = URL.createObjectURL(blob);
+
+                    resultGif.src = blobUrl;
+                    
+                    downloadGifBtn.onclick = () => {
+                        const fname = gifFilename.value.trim() || 'animation';
+                        forceDownload(blob, `${fname}.gif`, true);
+                    };
+                    
                     document.getElementById('gifUploaderView').style.display = 'none';
                     gifResultArea.style.display = 'block';
-                } else { showToast("Failed"); convertGifBtn.disabled = false; }
+                } else {
+                    showToast("GIF Conversion Failed");
+                    convertGifBtn.disabled = false;
+                }
             });
         };
 
@@ -1680,46 +2188,70 @@
             if(selectedFile) {
                 const success = setFilePreview(selectedFile, document.getElementById('uploadTitle'), uploadIconQr, imagePreviewQr, fileIconQr, fileExtQr, removeFileQrBtn);
                 uploadBtn.disabled = !success;
+                if (!success) { selectedFile = null; fileInput.value = ''; }
             }
         };
+        removeFileQrBtn.onclick = (e) => { e.stopPropagation(); resetUploadView('uploadToQrView'); };
 
         uploadBtn.onclick = async () => {
-            if(!selectedFile || !GIT.token) { showToast("API Key Missing!"); return; }
+            if(!selectedFile) return;
+            if(!GIT.token) { showToast("API Key Missing! Set it in Settings."); return; }
             uploadBtn.disabled = true;
-            const hash = await calculateFileHash(selectedFile);
-            const path = `uploads/${hash}.${selectedFile.name.split('.').pop()}`;
+            document.getElementById('uploadTitle').innerHTML = 'Checking file existence...';
+            
+            const fileHash = await calculateFileHash(selectedFile);
+            const fileExt = selectedFile.name.split('.').pop().toLowerCase();
+            const expectedPath = `uploads/${fileHash}.${fileExt}`;
+            const cachedUrl = await checkFileExistenceOnGithub(expectedPath);
+
+            if (cachedUrl) {
+                handleCachedQr(cachedUrl);
+                return;
+            }
+            
+            document.getElementById('uploadTitle').innerHTML = 'File not found. Ready to upload.';
             progressContainer.style.display = 'block';
             uploadBtn.style.display = 'none';
-            const reader = new FileReader();
-            reader.readAsDataURL(selectedFile);
-            reader.onload = () => {
-                const xhr = new XMLHttpRequest();
-                xhr.open("PUT", `https://api.github.com/repos/${GIT.owner}/${GIT.repo}/contents/${path}`);
-                xhr.setRequestHeader("Authorization", `token ${GIT.token}`);
-                xhr.onload = () => {
-                    if(xhr.status < 300) {
-                        currentUrl = `${GIT.domain}/viewer.html?f=${btoa(JSON.stringify({n:selectedFile.name, p:path}))}`;
-                        document.getElementById('uploaderView').style.display = 'none';
-                        resultArea.style.display = 'block';
-                        generateQR(currentUrl, qrcodeDiv, 600);
-                    } else showToast("Error: " + xhr.status);
-                };
-                xhr.send(JSON.stringify({ message: "upload", content: reader.result.split(',')[1] }));
-            };
+            removeFileQrBtn.style.display = 'none';
+
+            uploadFileToGithub(selectedFile, fileHash, (uploadedUrl) => {
+                currentUrl = uploadedUrl;
+                document.getElementById('uploaderView').style.display = 'none';
+                resultArea.style.display = 'block';
+                displaySuccessPreview(selectedFile, qrResultFilePreview);
+                generateQR(currentUrl, qrcodeDiv, document.getElementById('qrSize').value);
+            }, (percent) => {
+                progressFill.style.width = percent + "%";
+                percentLabel.innerText = percent + "%";
+            }, 'qr'); 
         };
 
-        function generateQR(url, target, size) {
-            target.innerHTML = '';
-            QRCode.toCanvas(url, { width: size, margin: 2 }, (err, canvas) => {
+        function generateQR(url, targetDiv, size) {
+            targetDiv.innerHTML = '';
+            QRCode.toCanvas(url, {
+                width: size, margin: 2, color: { dark: '#000000', light: '#ffffff' }
+            }, (err, canvas) => { 
                 if(!err) {
-                    target.appendChild(canvas);
-                    qrCodeSizeDisplay.innerText = `${size}px | Size: ${((canvas.toDataURL().length*0.75)/1024).toFixed(2)} KB`;
+                    targetDiv.appendChild(canvas); 
+                    if (qrCodeSizeDisplay && canvas) {
+                        const dataURL = canvas.toDataURL('image/png', 1.0);
+                        const sizeInBytes = (dataURL.length * 0.75) - 2; 
+                        const sizeInKB = (sizeInBytes / 1024).toFixed(2);
+                        qrCodeSizeDisplay.innerText = `${size}px | Size: ${sizeInKB} KB`;
+                    }
                 }
             });
         }
-        document.getElementById('qrSize').oninput = (e) => generateQR(currentUrl, qrcodeDiv, e.target.value);
+        document.getElementById('qrSize').oninput = (e) => {
+            const size = e.target.value;
+            if (qrCodeSizeDisplay) qrCodeSizeDisplay.innerText = `${size}px | Size: Calculating...`;
+            generateQR(currentUrl, qrcodeDiv, size);
+        };
+        document.getElementById('downloadQRBtn').onclick = () => {
+            const canvas = qrcodeDiv.querySelector('canvas');
+            if(canvas) forceDownload(canvas.toDataURL('image/png'), 'qrcode.png', false);
+        };
         document.getElementById('copyBtn').onclick = () => { navigator.clipboard.writeText(currentUrl); showToast("Copied!"); };
-        document.getElementById('downloadQRBtn').onclick = () => forceDownload(qrcodeDiv.querySelector('canvas').toDataURL(), 'qrcode.png', false);
 
         linkDropZone.onclick = () => linkFileInput.click();
         linkFileInput.onchange = (e) => {
@@ -1727,156 +2259,304 @@
             if(linkSelectedFile) {
                 const success = setFilePreview(linkSelectedFile, document.getElementById('linkUploadTitle'), uploadIconLink, imagePreviewLink, fileIconLink, fileExtLink, removeFileLinkBtn);
                 linkUploadBtn.disabled = !success;
+                if (!success) { linkSelectedFile = null; linkFileInput.value = ''; }
             }
         };
+        removeFileLinkBtn.onclick = (e) => { e.stopPropagation(); resetUploadView('uploadToLinkView'); };
+        
+        function displaySuccessPreview(file, targetEl) {
+            targetEl.innerHTML = '';
+            
+            const name = file.name;
+            let displayName = name;
+            if (name.length > 20) {
+                const extIndex = name.lastIndexOf('.');
+                if (extIndex > 0) {
+                    const ext = name.substring(extIndex);
+                    const base = name.substring(0, extIndex);
+                    if (ext.length + 3 < 20) {
+                        displayName = base.substring(0, 20 - ext.length - 3) + '...' + ext;
+                    } else {
+                         displayName = name.substring(0, 17) + '...';
+                    }
+                } else {
+                    displayName = name.substring(0, 17) + '...';
+                }
+            }
+            
+            const ext = name.split('.').pop().toLowerCase();
+
+            const iconContainer = document.createElement('div');
+            iconContainer.className = 'file-icon-preview';
+            iconContainer.style.margin = '15px auto 10px'; 
+            
+            let displayElement = null;
+
+            if (CODE_EXTENSIONS.includes(ext) || ext === 'zip' || ext === 'pdf') {
+                const iconClass = (ext === 'pdf' || ext === 'zip') ? 'red-icon' : '';
+                const iconFa = ext === 'pdf' ? 'fa-file-pdf' : (ext === 'zip' ? 'fa-file-zipper' : 'fa-folder');
+                iconContainer.className += ' ' + iconClass;
+                iconContainer.innerHTML = `<i class="fas ${iconFa}"></i><span class="file-ext" style="bottom: 0px; right: -5px; background: var(--text); color: var(--bg);">${ext}</span>`;
+                displayElement = iconContainer;
+            } else if (file.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.style.maxWidth = '100px'; img.style.maxHeight = '100px'; img.style.borderRadius = '8px'; img.style.margin = '0 auto 10px';
+                const reader = new FileReader();
+                reader.onload = (e) => { img.src = e.target.result; };
+                reader.readAsDataURL(file);
+                displayElement = img;
+            } else {
+                iconContainer.innerHTML = `<i class="fas fa-cloud-arrow-up"></i>`;
+                displayElement = iconContainer;
+            }
+            if (displayElement) {
+                targetEl.appendChild(displayElement);
+                const nameP = document.createElement('p');
+                nameP.style.fontSize = '0.9rem'; nameP.style.opacity = '0.8'; nameP.innerText = `${displayName}`;
+                targetEl.appendChild(nameP);
+            }
+        }
+        
+        function handleCachedQr(uploadedUrl) {
+            currentUrl = uploadedUrl;
+            document.getElementById('uploaderView').style.display = 'none';
+            resultArea.style.display = 'block';
+            if (selectedFile) displaySuccessPreview(selectedFile, qrResultFilePreview);
+            generateQR(currentUrl, qrcodeDiv, document.getElementById('qrSize').value);
+        }
+
+        function handleCachedLink(uploadedUrl, file) {
+            const base64Data = uploadedUrl.split('?f=')[1];
+            const fileData = JSON.parse(atob(base64Data));
+            const directLink = `https://raw.githubusercontent.com/${GIT.owner}/${GIT.repo}/${GIT.branch}/${fileData.p}`;
+            const viewerLink = uploadedUrl; 
+            const fileNameWithoutExt = fileData.n.split('.').slice(0, -1).join('.');
+
+            uploadedLinkFormats = {
+                direct: directLink, viewer: viewerLink, 
+                html_full: `<a href="${viewerLink}"><img src="${directLink}" alt="${fileNameWithoutExt}" border="0"></a>`,
+                html_image: `<img src="${directLink}" alt="${fileNameWithoutExt}" border="0">`, 
+                bbcode: `[img]${directLink}[/img]`, bbcode_full: `[url=${viewerLink}][img]${directLink}[/img][/url]`
+            };
+            
+            document.getElementById('directLink').innerText = directLink;
+            displaySuccessPreview(file, document.getElementById('resultFilePreview'));
+            selectLinkFormat('viewer', 'Viewer\'s Link'); 
+            document.getElementById('linkUploaderView').style.display = 'none';
+            linkResultArea.style.display = 'block';
+        }
+        
+        function toggleLinkOptions() {
+            const dropdown = document.getElementById('linkOptionsDropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function selectLinkFormat(formatKey, formatName) {
+            const displayArea = document.getElementById('linkFormatDisplay');
+            if (!uploadedLinkFormats) { displayArea.innerText = 'Error'; return; }
+            displayArea.innerText = uploadedLinkFormats[formatKey] || 'Error';
+            document.getElementById('selectedLinkFormatText').innerText = formatName;
+            document.getElementById('linkOptionsDropdown').style.display = 'none';
+        }
+
+        function copySelectedLink() {
+            const text = document.getElementById('linkFormatDisplay').innerText;
+            if (text && !text.startsWith('Error')) { navigator.clipboard.writeText(text); showToast("Copied!"); }
+        }
 
         linkUploadBtn.onclick = async () => {
-            if(!linkSelectedFile || !GIT.token) return;
+            if(!linkSelectedFile) return;
+            if(!GIT.token) { showToast("API Key Missing! Set it in Settings."); return; }
             linkUploadBtn.disabled = true;
-            const hash = await calculateFileHash(linkSelectedFile);
-            const path = `uploads/${hash}.${linkSelectedFile.name.split('.').pop()}`;
+            document.getElementById('linkUploadTitle').innerHTML = 'Checking file existence...';
+            
+            const fileHash = await calculateFileHash(linkSelectedFile);
+            const fileExt = linkSelectedFile.name.split('.').pop().toLowerCase();
+            const expectedPath = `uploads/${fileHash}.${fileExt}`;
+            const cachedUrl = await checkFileExistenceOnGithub(expectedPath);
+
+            if (cachedUrl) { handleCachedLink(cachedUrl, linkSelectedFile); return; }
+            
+            document.getElementById('linkUploadTitle').innerHTML = 'Ready to upload.';
             linkProgressContainer.style.display = 'block';
+            linkUploadBtn.style.display = 'none';
+            removeFileLinkBtn.style.display = 'none';
+
+            uploadFileToGithub(linkSelectedFile, fileHash, (uploadedUrl) => {
+                handleCachedLink(uploadedUrl, linkSelectedFile);
+            }, (percent) => {
+                linkProgressFill.style.width = percent + "%";
+                linkPercentLabel.innerText = percent + "%";
+            }, 'link'); 
+        };
+        
+        function checkFileExistenceOnGithub(path) {
+            return new Promise((resolve) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open("GET", `https://api.github.com/repos/${GIT.owner}/${GIT.repo}/contents/${path}`);
+                xhr.setRequestHeader("Authorization", `token ${GIT.token}`);
+                xhr.onload = () => {
+                    if (xhr.status === 200) {
+                        const fileData = { n: path.split('/').pop(), p: path, s: 'N/A' };
+                        resolve(`${GIT.domain}/viewer.html?f=${btoa(JSON.stringify(fileData))}`);
+                    } else resolve(null);
+                };
+                xhr.onerror = () => resolve(null);
+                xhr.send();
+            });
+        }
+
+        function uploadFileToGithub(file, fileHash, onSuccess, onProgress, viewType = 'qr') {
             const reader = new FileReader();
-            reader.readAsDataURL(linkSelectedFile);
+            reader.readAsDataURL(file);
             reader.onload = () => {
+                const base64 = reader.result.split(',')[1];
+                const fileExt = file.name.split('.').pop();
+                const path = `uploads/${fileHash}.${fileExt}`;
                 const xhr = new XMLHttpRequest();
                 xhr.open("PUT", `https://api.github.com/repos/${GIT.owner}/${GIT.repo}/contents/${path}`);
                 xhr.setRequestHeader("Authorization", `token ${GIT.token}`);
-                xhr.onload = () => {
-                    if(xhr.status < 300) {
-                        const direct = `https://raw.githubusercontent.com/${GIT.owner}/${GIT.repo}/${GIT.branch}/${path}`;
-                        const viewer = `${GIT.domain}/viewer.html?f=${btoa(JSON.stringify({n:linkSelectedFile.name, p:path}))}`;
-                        uploadedLinkFormats = { direct, viewer };
-                        document.getElementById('directLink').innerText = direct;
-                        document.getElementById('linkUploaderView').style.display = 'none';
-                        linkResultArea.style.display = 'block';
+                xhr.setRequestHeader("Content-Type", "application/json");
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable) {
+                        const percent = Math.round((e.loaded / e.total) * 100);
+                        onProgress(percent);
                     }
                 };
-                xhr.send(JSON.stringify({ message: "upload", content: reader.result.split(',')[1] }));
+                xhr.onload = () => {
+                    if (xhr.status === 201 || xhr.status === 200) {
+                        const fileData = { n: file.name, p: path, s: (file.size / (1024*1024)).toFixed(2) };
+                        onSuccess(`${GIT.domain}/viewer.html?f=${btoa(JSON.stringify(fileData))}`);
+                        showToast("Uploaded Successfully!");
+                    } else {
+                        showToast("Error: " + xhr.status);
+                        if (viewType === 'qr') resetUploadView('uploadToQrView'); else resetUploadView('uploadToLinkView');
+                    }
+                };
+                xhr.onerror = () => { 
+                    showToast("Network Error");
+                    if (viewType === 'qr') resetUploadView('uploadToQrView'); else resetUploadView('uploadToLinkView');
+                };
+                xhr.send(JSON.stringify({ message: "upload", content: base64, branch: GIT.branch }));
             };
-        };
+        }
 
         extractorDropZone.onclick = () => extractorFileInput.click();
         extractorFileInput.onchange = (e) => {
             extractorSelectedFile = e.target.files[0];
-            if(extractorSelectedFile && extractorSelectedFile.type.startsWith('image/')) {
-                setFilePreview(extractorSelectedFile, document.getElementById('extractorUploadTitle'), uploadIconExtractor, imagePreviewExtractor, fileIconExtractor, fileExtExtractor, removeFileExtractorBtn);
-                extractBtn.disabled = false;
+            if(extractorSelectedFile) {
+                if (!extractorSelectedFile.type.startsWith('image/')) {
+                    document.getElementById('extractorUploadTitle').innerHTML = `<span style="color: red;">File must be an image.</span>`;
+                    return;
+                }
+                const success = setFilePreview(extractorSelectedFile, document.getElementById('extractorUploadTitle'), uploadIconExtractor, imagePreviewExtractor, fileIconExtractor, fileExtExtractor, removeFileExtractorBtn);
+                extractBtn.disabled = !success; 
             }
         };
+        removeFileExtractorBtn.onclick = (e) => { e.stopPropagation(); resetUploadView('qrExtractorView'); };
 
         extractBtn.onclick = async () => {
-            const reader = new FileReader();
-            reader.onload = e => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = img.width; canvas.height = img.height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-                    const code = jsQR(ctx.getImageData(0,0,img.width,img.height).data, img.width, img.height);
-                    if(code) {
-                        extractedDataDisplay.innerText = code.data;
-                        document.getElementById('extractorUploaderView').style.display = 'none';
-                        extractorResultArea.style.display = 'block';
-                        const b = document.createElement('button'); b.className='btn btn-action'; b.innerText='Copy';
-                        b.onclick=() => { navigator.clipboard.writeText(code.data); showToast("Copied"); };
-                        extractorActionButtons.appendChild(b);
-                    } else showToast("No QR Found");
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(extractorSelectedFile);
-        };
+            if (!extractorSelectedFile) return;
+            extractBtn.disabled = true;
+            document.getElementById('extractorUploadTitle').innerHTML = 'Processing...';
+            try {
+                const rawData = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            canvas.width = img.width; canvas.height = img.height;
+                            ctx.drawImage(img, 0, 0);
+                            const imageData = ctx.getImageData(0, 0, img.width, img.height);
+                            const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
+                            if (code) resolve(code.data); else reject("No QR code found.");
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(extractorSelectedFile);
+                });
 
+                displaySuccessPreview(extractorSelectedFile, document.getElementById('extractorResultFilePreview'));
+                extractedDataDisplay.innerText = rawData;
+                extractorActionButtons.innerHTML = ''; 
+                
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'btn btn-action';
+                copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                copyBtn.onclick = () => { navigator.clipboard.writeText(rawData); showToast("Copied!"); }; 
+                
+                const downloadTxtBtn = document.createElement('button');
+                downloadTxtBtn.className = 'btn btn-action';
+                downloadTxtBtn.innerHTML = '<i class="fas fa-download"></i> Download Text';
+                downloadTxtBtn.onclick = () => {
+                    const blob = new Blob([rawData], {type: "text/plain;charset=utf-8"});
+                    forceDownload(blob, 'qrcode_data.txt', true);
+                };
+                
+                extractorActionButtons.style.gridTemplateColumns = '1fr 1fr';
+                extractorActionButtons.appendChild(copyBtn);
+                extractorActionButtons.appendChild(downloadTxtBtn);
+
+                document.getElementById('extractorUploaderView').style.display = 'none';
+                extractorResultArea.style.display = 'block';
+            } catch (error) {
+                showToast(error);
+                extractBtn.disabled = false; 
+            }
+        };
+        
         function toggleSettings() {
-            document.getElementById('settingsModal').classList.toggle('active');
-            document.getElementById('settingsOverlay').classList.toggle('active');
+            const modal = document.getElementById('settingsModal');
+            const overlay = document.getElementById('settingsOverlay');
+            modal.classList.toggle('active');
+            overlay.classList.toggle('active');
+            
+            if(!modal.classList.contains('active')) {
+                document.getElementById('devToolsPanel').style.display = 'none';
+            }
         }
+        
         settingsBtn.onclick = toggleSettings;
         
         async function pasteApiKey() {
-            try { document.getElementById('apiKeyInput').value = await navigator.clipboard.readText(); showToast("Pasted"); } catch(e) {}
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('apiKeyInput').value = text;
+                showToast("Pasted!");
+            } catch (err) {
+                showToast("Clipboard Error");
+            }
         }
         
         function checkDevAccess() {
-            if(prompt("Passkey:") === PASSKEY) {
+            const userInput = prompt("Enter Passkey:");
+            if (userInput === PASSKEY) {
                 document.getElementById('devToolsPanel').style.display = 'block';
-                showToast("Access Granted");
+                showToast("Developer Access Granted");
+            } else {
+                alert("Access Denied");
             }
         }
-    </script>
+        
+        function updateApiIndicator(isActive) {
+            const statusText = document.getElementById('apiStatusText');
+            const statusDot = document.getElementById('apiStatusDot');
+            
+            if(isActive) {
+                statusText.innerText = 'API Active';
+                statusDot.classList.add('active');
+            } else {
+                statusText.innerText = 'API Inactive';
+                statusDot.classList.remove('active');
+            }
+        }
 
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-      import { getDatabase, ref, set, update, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
-      import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyAEBrWDMiEGuqQGvA4197ljLcvtQk_i43Y",
-        authDomain: "one-tool01.firebaseapp.com",
-        databaseURL: "https://one-tool01-default-rtdb.asia-southeast1.firebasedatabase.app", 
-        projectId: "one-tool01",
-        storageBucket: "one-tool01.firebasestorage.app",
-        messagingSenderId: "546992530595",
-        appId: "1:546992530595:web:77bf6c3fe2438b3c980b16"
-      };
-
-      const app = initializeApp(firebaseConfig);
-      const db = getDatabase(app);
-      const auth = getAuth(app);
-
-      window.googleSignIn = () => signInWithPopup(auth, new GoogleAuthProvider());
-      window.googleSignOut = () => confirm("Sign out?") && signOut(auth);
-
-      window.saveApiKey = () => {
-          if(!currentUser) return showToast("Sign In First");
-          document.getElementById('settingsLoadingOverlay').style.display = 'flex';
-          set(ref(db, 'config/githubToken'), document.getElementById('apiKeyInput').value).then(() => location.reload());
-      };
-
-      window.saveUpdateConfig = () => {
-          if(!currentUser) return showToast("Sign In First");
-          document.getElementById('settingsLoadingOverlay').style.display = 'flex';
-          update(ref(db, 'config'), {
-              update: {
-                  version: document.getElementById('devVersion').value,
-                  message: document.getElementById('devMessage').value,
-                  show: document.getElementById('devStatus').checked
-              },
-              newTag: document.getElementById('devNewTagTool').value
-          }).then(() => location.reload());
-      };
-
-      onAuthStateChanged(auth, user => {
-          currentUser = user;
-          document.getElementById('headerLoginBtn').style.display = user ? 'none' : 'block';
-          document.getElementById('headerUserProfile').style.display = user ? 'block' : 'none';
-          if(user) document.getElementById('userAvatar').src = user.photoURL;
-          document.getElementById('settingsContentWrapper').className = user ? '' : 'settings-content-blocked';
-          document.getElementById('loginPromptOverlay').style.display = user ? 'none' : 'block';
-      });
-
-      onValue(ref(db, 'config'), snap => {
-          const data = snap.val();
-          if(data) {
-              if(data.githubToken) {
-                  GIT.token = data.githubToken;
-                  document.getElementById('apiKeyInput').value = data.githubToken;
-                  document.getElementById('apiStatusDot').classList.add('active');
-                  document.getElementById('apiStatusText').innerText = 'API Active';
-              }
-              if(data.update?.show) {
-                  document.getElementById('updatePopup').style.display = 'flex';
-                  document.getElementById('updateMessage').innerText = data.update.message;
-              }
-              document.querySelectorAll('.new-badge').forEach(b => b.style.display = 'none');
-              if(data.newTag && data.newTag !== 'none') {
-                  const card = document.querySelector(`.option-card[data-tool-id="${data.newTag}"]`);
-                  if(card) card.querySelector('.new-badge').style.display = 'block';
-              }
-          }
-      });
+        updateLogoImage(); 
+        updateLinkInputControls();
+        linkQrColorBtn.style.backgroundColor = linkQrColor.value;
+        linkQrBackgroundBtn.style.backgroundColor = linkQrBackground.value;
     </script>
 </body>
 </html>
