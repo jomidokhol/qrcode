@@ -1,2 +1,619 @@
-Coming soon...
-<b>24/02/2026</b>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One Tool | Vector & Icon Tools</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- ImageTracer.js for converting Image to SVG -->
+    <script src="https://cdn.jsdelivr.net/npm/imagetracerjs@1.2.6/imagetracer_v1.2.6.min.js"></script>
+
+    <!-- Firebase SDK for Database Integration -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+      import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAEBrWDMiEGuqQGvA4197ljLcvtQk_i43Y",
+        authDomain: "one-tool01.firebaseapp.com",
+        databaseURL: "https://one-tool01-default-rtdb.asia-southeast1.firebasedatabase.app", 
+        projectId: "one-tool01",
+        storageBucket: "one-tool01.firebasestorage.app",
+        messagingSenderId: "546992530595",
+        appId: "1:546992530595:web:77bf6c3fe2438b3c980b16",
+        measurementId: "G-GMNCXBV0J1"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
+
+      // Listen for Developer config updates
+      onValue(ref(db, 'config'), (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+              document.querySelectorAll('.new-badge').forEach(el => el.style.display = 'none');
+              if(data.newTags && Array.isArray(data.newTags)) {
+                  data.newTags.forEach(tagId => {
+                      const badge = document.querySelector(`#${tagId} .new-badge`);
+                      if(badge) badge.style.display = 'block';
+                  });
+              }
+          }
+      });
+    </script>
+
+    <style>
+        :root { --primary: #10b981; --bg: #ffffff; --card: #f8fafc; --text: #0f172a; --border: #e2e8f0; --shadow: rgba(0, 0, 0, 0.1); }
+        .dark-mode { --bg: #000000; --card: #111111; --text: #ffffff; --border: #222222; --shadow: rgba(255, 255, 255, 0.1); }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background-color: var(--bg); color: var(--text); 
+            transition: 0.4s; min-height: 100vh; display: flex; 
+            flex-direction: column; 
+            -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
+        }
+        
+        input, .upload-box #svgUploadTitle, .upload-box #iconUploadTitle, footer p, #toast, .filename-input, #codeOutputArea {
+            -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text;
+        }
+
+        header { 
+            position: sticky; top: 0; z-index: 1000; width: 100%; 
+            background: var(--bg); border-bottom: 1px solid var(--border); 
+            padding: 15px 20px; box-shadow: 0 2px 4px var(--shadow);
+            display: flex; justify-content: center; flex-direction: column;
+        }
+        .header-content { 
+            width: 100%; max-width: 500px; display: flex; 
+            justify-content: space-between; align-items: center; margin: 0 auto;
+        }
+        .logo { font-weight: 800; font-size: 1.4rem; color: var(--primary); display: flex; align-items: center; gap: 8px; cursor: pointer; text-decoration: none;}
+        .logo img { height: 50px; }
+        .header-actions { display: flex; align-items: center; gap: 10px; }
+        .theme-btn { background: var(--border); border: none; width: 40px; height: 40px; border-radius: 12px; cursor: pointer; color: var(--text); transition: 0.3s; }
+
+        .btn:focus, .btn:active, .theme-btn:focus, .theme-btn:active, 
+        .icon-back-btn:focus, .icon-back-btn:active, .remove-file-btn:focus, .remove-file-btn:active,
+        .option-card:focus, .option-card:active {
+            outline: none; -webkit-tap-highlight-color: transparent; box-shadow: none;
+        }
+
+        .main-content { flex-grow: 1; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .container { width: 100%; max-width: 500px; }
+        .main-card { background: var(--card); border: 1px solid var(--border); border-radius: 32px; padding: 30px; box-shadow: 0 25px 50px -12px var(--shadow); }
+
+        footer { 
+            width: 100%; background: var(--bg); border-top: 1px solid var(--border); 
+            padding: 15px 20px; text-align: center; font-size: 0.8rem; opacity: 0.7;
+        }
+
+        .option-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 15px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 20px; position: relative; }
+        .option-card:hover { border-color: var(--primary); background: rgba(99, 102, 241, 0.05); }
+        .option-card i { font-size: 1.8rem; color: var(--primary); }
+        .option-card h4 { margin: 0; font-weight: 800; }
+        .option-card p { margin: 0; font-size: 0.8rem; opacity: 0.7; }
+
+        .new-badge {
+            position: absolute; top: 12px; right: 12px;
+            background: #ef4444; color: white;
+            font-size: 0.6rem; font-weight: 800;
+            padding: 3px 6px; border-radius: 6px;
+            display: none; /* Hidden by default, controlled by DB */
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .upload-box { border: 2px dashed var(--primary); border-radius: 24px; padding: 20px; text-align: center; cursor: pointer; background: rgba(99, 102, 241, 0.05); position: relative; } 
+        .upload-box img { display:block; margin: 0 auto 10px; }
+
+        .btn { width: 100%; padding: 14px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-action { background: var(--border); color: var(--text); font-size: 0.85rem; }
+
+        .icon-back-btn { 
+            background: transparent; border: 1px solid var(--border); 
+            font-size: 1rem; margin-bottom: 20px; 
+            width: 40px; height: 40px; border-radius: 50%;
+            cursor: pointer; color: var(--text); 
+            display: flex; align-items: center; justify-content: center;
+            padding: 0; transition: 0.3s;
+        }
+        .icon-back-btn:hover { background: var(--border); }
+
+        .remove-file-btn {
+            position: absolute; top: 10px; right: 10px;
+            background: var(--border); color: var(--text); 
+            border: 1px solid var(--text); border-radius: 50%;
+            width: 25px; height: 25px; font-size: 0.7rem;
+            display: none; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.3s; z-index: 10; opacity: 0.8;
+        }
+        .remove-file-btn:hover { background: var(--text); color: var(--bg); opacity: 1; }
+
+        .filename-wrapper { display: flex; gap: 5px; margin-top: 15px; align-items: center; }
+        .filename-input { flex-grow: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+        .filename-ext { padding: 12px; background: var(--border); border-radius: 8px; font-size: 0.8rem; font-weight: 700; }
+
+        .custom-select {
+            padding: 8px 12px; border-radius: 12px; border: 1px solid var(--border); 
+            background: var(--bg); color: var(--text); font-size: 0.85rem; outline: none;
+            transition: 0.3s; cursor: pointer; width: 130px;
+        }
+        .custom-select:hover { border-color: var(--primary); }
+
+        .progress-track { background: var(--border); height: 10px; border-radius: 10px; overflow: hidden; margin-top: 10px; }
+        .progress-fill { background: var(--primary); height: 100%; width: 0%; transition: width 0.1s; }
+
+        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 4001; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 0.9rem; }
+        #toast.show { visibility: visible; -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
+        @keyframes fadeout { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
+
+        /* Code Block Styles */
+        .code-block { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 12px; padding: 15px; width: 100%; height: 150px; font-family: monospace; font-size: 0.8rem; resize: none; overflow-y: auto; outline: none; margin-top: 10px;}
+        .format-tabs { display: flex; gap: 5px; margin-top: 15px; border-bottom: 2px solid var(--border); padding-bottom: 5px;}
+        .format-tab { padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 700; opacity: 0.6; transition: 0.3s; }
+        .format-tab.active { background: var(--primary); color: white; opacity: 1; }
+        
+        #imgToSvgView, #svgToIconView { display: none; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <div class="logo" onclick="window.location.href='index.html'">
+                <img id="logoImage" src="img/logo.png" alt="Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'50\' height=\'50\'><rect width=\'50\' height=\'50\' fill=\'%2310b981\'/></svg>'">
+            </div>
+            <div class="header-actions">
+                <button class="theme-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <div class="container">
+            <div class="main-card">
+                
+                <!-- Main Selection Menu -->
+                <div id="mainOptionsView">
+                    <h2 style="margin-bottom: 25px; text-align: center;">Vector & Icon Tools</h2>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 0;">
+                        <div class="option-card" onclick="setView('imgToSvgView')" id="card-imgToSvg">
+                            <div class="new-badge">NEW</div>
+                            <i class="fas fa-vector-square"></i>
+                            <div>
+                                <h4>Image to SVG</h4>
+                                <p>Convert raster images (PNG, JPG) to scalable SVG.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="option-card" onclick="setView('svgToIconView')" id="card-svgToIcon">
+                            <div class="new-badge">NEW</div>
+                            <i class="fas fa-code"></i>
+                            <div>
+                                <h4>SVG to Icon Code</h4>
+                                <p>Convert SVGs into HTML, React, or Vue components.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1. Image to SVG Converter Tool -->
+                <div id="imgToSvgView">
+                    <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
+                    <h3 style="margin-bottom: 15px;">Image to SVG Converter</h3>
+                    
+                    <div id="svgUploaderView">
+                        <div class="upload-box" id="svgDropZone">
+                            <button class="remove-file-btn" id="removeFileSvgBtn" style="display: none;"><i class="fas fa-times"></i></button>
+                            <i class="fas fa-vector-square" id="uploadIconSvg" style="font-size: 2.5rem; color: var(--primary);"></i>
+                            <img id="imagePreviewSvg" style="display:none; max-width: 100px; max-height: 100px; border-radius: 8px; margin: 0 auto 10px;">
+                            <h3 id="svgUploadTitle" style="margin-top:10px;">Choose an Image (JPG, PNG)</h3>
+                            <input type="file" id="svgFileInput" hidden accept="image/png, image/jpeg, image/jpg, image/webp">
+                        </div>
+
+                        <div style="margin-top: 15px; display: flex; align-items: center; justify-content: space-between;">
+                            <label style="font-size: 0.8rem; font-weight: 600;">Color Mode:</label>
+                            <select id="svgQuality" class="custom-select">
+                                <option value="default" selected>Standard Color</option>
+                                <option value="detailed">Detailed Color</option>
+                                <option value="bw">Black & White</option>
+                                <option value="posterized1">Cartoon Style</option>
+                                <option value="curvy">Smooth & Curvy</option>
+                            </select>
+                        </div>
+
+                        <div style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between;">
+                            <label style="font-size: 0.8rem; font-weight: 600;">Scale/Resolution:</label>
+                            <select id="svgScale" class="custom-select">
+                                <option value="0.5">0.5x (Small)</option>
+                                <option value="1" selected>1x (Original)</option>
+                                <option value="2">2x (High)</option>
+                                <option value="5">5x (Ultra)</option>
+                                <option value="10">10x (Massive)</option>
+                            </select>
+                        </div>
+
+                        <div id="svgProgressContainer" style="display: none; margin-top: 20px;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="font-size: 0.8rem; opacity: 0.7;">Converting...</span>
+                                <span id="svgPercentLabel" style="font-size: 0.8rem; font-weight: 700; color: var(--primary);">0%</span>
+                            </div>
+                            <div class="progress-track"><div id="svgProgressFill" class="progress-fill"></div></div>
+                        </div>
+
+                        <button class="btn btn-primary" id="convertSvgBtn" disabled style="margin-top: 15px;">Convert to SVG</button>
+                    </div>
+
+                    <div id="svgResultArea" style="display: none;">
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <i class="fas fa-check-circle" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 10px;"></i>
+                            <h4 style="margin-bottom: 5px;">Conversion Successful!</h4>
+                        </div>
+                        
+                        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 15px; text-align: center; margin-bottom: 15px;">
+                            <label style="font-size: 0.7rem; font-weight: 700; display: block; margin-bottom: 10px; text-align: left;">Vector Preview:</label>
+                            <div id="resultSvgPreview" style="max-width: 100%; overflow: hidden; display: flex; justify-content: center; align-items: center;"></div>
+                        </div>
+
+                        <div class="filename-wrapper">
+                            <input type="text" id="svgFilename" class="filename-input" placeholder="Enter Filename">
+                            <span class="filename-ext">.svg</span>
+                        </div>
+
+                        <button class="btn btn-action" id="downloadSvgBtn" style="margin-top: 10px;"><i class="fas fa-download"></i> Download SVG</button>
+                        <button class="btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="setView('imgToSvgView', true)">Convert Another Image</button>
+                    </div>
+                </div>
+
+                <!-- 2. SVG to Icon Tool -->
+                <div id="svgToIconView">
+                    <button class="icon-back-btn" onclick="setView('mainOptionsView')"><i class="fas fa-arrow-left"></i></button>
+                    <h3 style="margin-bottom: 15px;">SVG to Icon Code</h3>
+                    
+                    <div id="iconUploaderView">
+                        <div class="upload-box" id="iconDropZone">
+                            <button class="remove-file-btn" id="removeFileIconBtn" style="display: none;"><i class="fas fa-times"></i></button>
+                            <i class="fas fa-file-code" id="uploadIconIcon" style="font-size: 2.5rem; color: var(--primary);"></i>
+                            <h3 id="iconUploadTitle" style="margin-top:10px;">Choose an SVG File</h3>
+                            <input type="file" id="iconFileInput" hidden accept=".svg, image/svg+xml">
+                        </div>
+                        <button class="btn btn-primary" id="generateIconBtn" disabled style="margin-top: 15px;">Generate Code</button>
+                    </div>
+
+                    <div id="iconResultArea" style="display: none;">
+                        <div style="display: flex; gap: 5px; justify-content: center; margin-bottom: 10px;">
+                            <button class="btn btn-action" style="padding: 8px 10px; font-size: 0.7rem;" onclick="setIconPreviewBg('#ffffff', '#000000')"><i class="fas fa-sun"></i> Light</button>
+                            <button class="btn btn-action" style="padding: 8px 10px; font-size: 0.7rem;" onclick="setIconPreviewBg('#111111', '#ffffff')"><i class="fas fa-moon"></i> Dark</button>
+                            <button class="btn btn-action" style="padding: 8px 10px; font-size: 0.7rem;" onclick="setIconPreviewBg('transparent', 'var(--text)')"><i class="fas fa-border-none"></i> Transparent</button>
+                        </div>
+                        <div id="iconPreviewBox" style="padding: 30px; border-radius: 12px; border: 1px solid var(--border); background: transparent; transition: 0.3s; display: flex; justify-content: center; align-items: center; margin-bottom: 15px;">
+                            <div id="iconSvgContent" style="max-width: 150px; max-height: 150px; display: flex; justify-content: center; align-items: center;"></div>
+                        </div>
+
+                        <div class="format-tabs">
+                            <div class="format-tab active" onclick="switchIconTab('html')">HTML/CSS</div>
+                            <div class="format-tab" onclick="switchIconTab('react')">React (JSX)</div>
+                            <div class="format-tab" onclick="switchIconTab('vue')">Vue.js</div>
+                        </div>
+
+                        <textarea id="codeOutputArea" class="code-block" readonly></textarea>
+
+                        <button class="btn btn-action" id="copyCodeBtn" style="margin-top: 10px; background: var(--primary); color: white;"><i class="fas fa-copy"></i> Copy Code</button>
+                        <button class="btn" style="background: transparent; border: 1px solid var(--border); font-size: 0.8rem; margin-top: 15px;" onclick="setView('svgToIconView', true)">Convert Another Icon</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2026 One Tool. Developed by <b>Nur</b>.</p>
+    </footer>
+
+    <div id="toast"></div>
+
+    <script>
+        // Views Logic
+        const views =['mainOptionsView', 'imgToSvgView', 'svgToIconView'];
+        
+        function setView(viewId, reset = false) {
+            if(reset) {
+                if(viewId === 'imgToSvgView') resetSvgUploader();
+                if(viewId === 'svgToIconView') resetIconUploader();
+            }
+            views.forEach(v => {
+                document.getElementById(v).style.display = (v === viewId) ? 'block' : 'none';
+            });
+        }
+
+        // Theme toggle logic
+        document.getElementById('themeToggle').onclick = () => {
+            document.body.classList.toggle('dark-mode');
+        };
+
+        // Utility: Show Toast
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
+        // Utility: Download Blob
+        function forceDownload(blob, filename) {
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            const url = window.URL.createObjectURL(blob);
+            a.href = url;
+            a.download = filename;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+
+        // ==========================================
+        // TOOL 1: Image to SVG Converter Logic
+        // ==========================================
+        const svgDropZone = document.getElementById('svgDropZone');
+        const svgFileInput = document.getElementById('svgFileInput');
+        const removeFileSvgBtn = document.getElementById('removeFileSvgBtn');
+        const uploadIconSvg = document.getElementById('uploadIconSvg');
+        const imagePreviewSvg = document.getElementById('imagePreviewSvg');
+        const svgUploadTitle = document.getElementById('svgUploadTitle');
+        const convertSvgBtn = document.getElementById('convertSvgBtn');
+        const svgFilename = document.getElementById('svgFilename');
+        
+        let selectedImageFile = null;
+
+        function resetSvgUploader() {
+            selectedImageFile = null;
+            svgFileInput.value = '';
+            imagePreviewSvg.src = '';
+            imagePreviewSvg.style.display = 'none';
+            uploadIconSvg.style.display = 'block';
+            removeFileSvgBtn.style.display = 'none';
+            svgUploadTitle.innerHTML = 'Choose an Image (JPG, PNG)';
+            convertSvgBtn.disabled = true;
+            document.getElementById('svgUploaderView').style.display = 'block';
+            document.getElementById('svgResultArea').style.display = 'none';
+            document.getElementById('svgProgressContainer').style.display = 'none';
+        }
+
+        svgDropZone.onclick = () => svgFileInput.click();
+        
+        svgFileInput.onchange = (e) => {
+            selectedImageFile = e.target.files[0];
+            if(selectedImageFile) {
+                if (!selectedImageFile.type.startsWith('image/')) {
+                    svgUploadTitle.innerHTML = `<span style="color: red;">Please select a valid image.</span>`;
+                    return;
+                }
+
+                if(selectedImageFile.size > 5 * 1024 * 1024) {
+                    showToast("Warning: Large images may freeze the browser.");
+                }
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    imagePreviewSvg.src = event.target.result;
+                    imagePreviewSvg.style.display = 'block';
+                    uploadIconSvg.style.display = 'none';
+                    removeFileSvgBtn.style.display = 'flex';
+                    
+                    let displayName = selectedImageFile.name;
+                    if (displayName.length > 20) {
+                        displayName = displayName.substring(0, 17) + '...';
+                    }
+                    svgUploadTitle.innerHTML = `<b>${displayName}</b>`;
+                    svgFilename.value = selectedImageFile.name.replace(/\.[^/.]+$/, "");
+                    
+                    convertSvgBtn.disabled = false;
+                };
+                reader.readAsDataURL(selectedImageFile);
+            }
+        };
+
+        removeFileSvgBtn.onclick = (e) => {
+            e.stopPropagation();
+            resetSvgUploader();
+        };
+
+        convertSvgBtn.onclick = () => {
+            if (!selectedImageFile) return;
+
+            convertSvgBtn.disabled = true;
+            document.getElementById('svgProgressContainer').style.display = 'block';
+            const progressFill = document.getElementById('svgProgressFill');
+            const percentLabel = document.getElementById('svgPercentLabel');
+            
+            progressFill.style.width = '0%';
+            percentLabel.innerText = '0%';
+
+            // Fake progress animation matching index.html
+            let pct = 0;
+            const progressInterval = setInterval(() => {
+                pct += Math.floor(Math.random() * 10) + 5;
+                if(pct > 85) pct = 85; 
+                progressFill.style.width = pct + '%';
+                percentLabel.innerText = pct + '%';
+            }, 200);
+
+            const qualityMode = document.getElementById('svgQuality').value;
+            const scaleFactor = parseFloat(document.getElementById('svgScale').value);
+
+            setTimeout(() => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const dataUrl = e.target.result;
+
+                    try {
+                        let options = typeof ImageTracer.optionpresets[qualityMode] !== 'undefined' 
+                            ? Object.assign({}, ImageTracer.optionpresets[qualityMode]) 
+                            : {};
+                        options.scale = scaleFactor; // Fix for resolution cropping
+
+                        ImageTracer.imageToSVG(dataUrl, function(svgstr) {
+                            clearInterval(progressInterval);
+                            progressFill.style.width = '100%';
+                            percentLabel.innerText = '100%';
+
+                            setTimeout(() => {
+                                const blob = new Blob([svgstr], {type: 'image/svg+xml'});
+                                const blobUrl = URL.createObjectURL(blob);
+                                
+                                const previewContainer = document.getElementById('resultSvgPreview');
+                                previewContainer.innerHTML = `<img src="${blobUrl}" style="max-width: 100%; height: auto; border-radius: 8px;">`;
+
+                                document.getElementById('svgUploaderView').style.display = 'none';
+                                document.getElementById('svgResultArea').style.display = 'block';
+                                
+                                document.getElementById('downloadSvgBtn').onclick = () => {
+                                    const fname = svgFilename.value.trim() || 'vectorized';
+                                    forceDownload(blob, `${fname}.svg`);
+                                };
+                                
+                                showToast("Successfully Vectorized!");
+                            }, 300);
+                            
+                        }, options); 
+                    } catch (error) {
+                        clearInterval(progressInterval);
+                        showToast("Conversion Failed: " + error.message);
+                        convertSvgBtn.disabled = false;
+                        document.getElementById('svgProgressContainer').style.display = 'none';
+                    }
+                };
+                reader.readAsDataURL(selectedImageFile);
+            }, 100);
+        };
+
+
+        // ==========================================
+        // TOOL 2: SVG to Icon Code Logic
+        // ==========================================
+        const iconDropZone = document.getElementById('iconDropZone');
+        const iconFileInput = document.getElementById('iconFileInput');
+        const removeFileIconBtn = document.getElementById('removeFileIconBtn');
+        const uploadIconIcon = document.getElementById('uploadIconIcon');
+        const iconUploadTitle = document.getElementById('iconUploadTitle');
+        const generateIconBtn = document.getElementById('generateIconBtn');
+        const codeOutputArea = document.getElementById('codeOutputArea');
+        
+        let rawSvgContent = '';
+        let generatedCodes = { html: '', react: '', vue: '' };
+        let currentTab = 'html';
+
+        function resetIconUploader() {
+            iconFileInput.value = '';
+            uploadIconIcon.style.display = 'block';
+            removeFileIconBtn.style.display = 'none';
+            iconUploadTitle.innerHTML = 'Choose an SVG File';
+            generateIconBtn.disabled = true;
+            document.getElementById('iconUploaderView').style.display = 'block';
+            document.getElementById('iconResultArea').style.display = 'none';
+            rawSvgContent = '';
+            setIconPreviewBg('transparent', 'var(--text)');
+        }
+
+        iconDropZone.onclick = () => iconFileInput.click();
+
+        iconFileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if(file) {
+                if (file.type !== 'image/svg+xml' && !file.name.endsWith('.svg')) {
+                    iconUploadTitle.innerHTML = `<span style="color: red;">Please select a valid SVG file.</span>`;
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    rawSvgContent = event.target.result;
+                    uploadIconIcon.style.display = 'none';
+                    removeFileIconBtn.style.display = 'flex';
+                    
+                    let displayName = file.name;
+                    if (displayName.length > 20) displayName = displayName.substring(0, 17) + '...';
+                    iconUploadTitle.innerHTML = `<b>${displayName}</b><br><i class="fas fa-file-code" style="font-size:1.5rem; margin-top:5px; color:var(--primary);"></i>`;
+                    
+                    generateIconBtn.disabled = false;
+                };
+                reader.readAsText(file);
+            }
+        };
+
+        removeFileIconBtn.onclick = (e) => {
+            e.stopPropagation();
+            resetIconUploader();
+        };
+
+        generateIconBtn.onclick = () => {
+            if(!rawSvgContent) return;
+
+            // Generate HTML (Clean original)
+            generatedCodes.html = rawSvgContent.trim();
+
+            // Generate Vue Template
+            generatedCodes.vue = `<template>\n  ${rawSvgContent.trim().split('\n').join('\n  ')}\n</template>`;
+
+            // Generate React (JSX format attributes)
+            let reactSvg = rawSvgContent.replace(/class=/g, "className=");
+            reactSvg = reactSvg.replace(/([a-z]+)-([a-z]+)=/g, function(match, p1, p2) {
+                if(p1 === 'data' || p1 === 'aria') return match;
+                return p1 + p2.charAt(0).toUpperCase() + p2.slice(1) + '=';
+            });
+            reactSvg = reactSvg.replace(/xmlns:xlink=/g, "xmlnsXlink=");
+            reactSvg = reactSvg.replace(/xlink:href=/g, "xlinkHref=");
+            generatedCodes.react = `const SvgIcon = (props) => (\n  ${reactSvg.trim().split('\n').join('\n  ')}\n);\n\nexport default SvgIcon;`;
+
+            // Display UI
+            document.getElementById('iconSvgContent').innerHTML = rawSvgContent;
+            
+            // Fix internal SVG width/height for preview scaling
+            const svgEl = document.getElementById('iconSvgContent').querySelector('svg');
+            if(svgEl) {
+                svgEl.style.width = '100%';
+                svgEl.style.height = '100%';
+            }
+
+            document.getElementById('iconUploaderView').style.display = 'none';
+            document.getElementById('iconResultArea').style.display = 'block';
+            
+            switchIconTab('html');
+        };
+
+        function switchIconTab(tabName) {
+            currentTab = tabName;
+            document.querySelectorAll('.format-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            codeOutputArea.value = generatedCodes[tabName];
+        }
+
+        document.getElementById('copyCodeBtn').onclick = () => {
+            codeOutputArea.select();
+            document.execCommand('copy');
+            showToast("Code Copied to Clipboard!");
+        };
+
+        function setIconPreviewBg(bgColor, svgColor) {
+            const box = document.getElementById('iconPreviewBox');
+            box.style.backgroundColor = bgColor;
+            box.style.color = svgColor; 
+        }
+
+        // Initialize view
+        setView('mainOptionsView');
+
+    </script>
+</body>
+</html>
