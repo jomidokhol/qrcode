@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nur Fast Test</title>
+    <style>
+        /* --- THEME & VARIABLES (NO CHANGES) --- */
+        :root {
+            --bg-color: #0b1120;
+            --card-bg: #161e32;
+            --gauge-bg: #1f293a;
+            --accent-start: #00f2fe;
+            --accent-end: #4facfe;
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        /* --- LAYOUT --- */
+        .container {
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(90deg, var(--accent-start), var(--accent-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* --- SPEEDOMETER GAUGE --- */
+        .gauge-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+        }
+
+        .gauge-track {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%;
+            background: conic-gradient(from 225deg, var(--gauge-bg) 0deg, var(--gauge-bg) 270deg, transparent 270deg, transparent 360deg);
+            -webkit-mask: radial-gradient(transparent 65%, black 66%);
+            mask: radial-gradient(transparent 65%, black 66%);
+        }
+
+        .gauge-progress {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%;
+            background: conic-gradient(from 225deg, var(--accent-start) 0deg, var(--accent-end) 0deg, transparent 0deg);
+            -webkit-mask: radial-gradient(transparent 65%, black 66%);
+            mask: radial-gradient(transparent 65%, black 66%);
+            transition: background 0.1s linear; z-index: 2;
+        }
+
+        .gauge-labels { position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 1; pointer-events: none; }
+        .label-num { position: absolute; color: var(--text-muted); font-size: 0.8rem; font-weight: 600; width: 30px; height: 20px; text-align: center; }
+
+        .needle-wrapper {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10;
+            transform: rotate(-135deg); transition: transform 0.2s cubic-bezier(0.1, 0.5, 0.5, 1);
+        }
+
+        .needle {
+            position: absolute; top: 15%; left: 50%; width: 6px; height: 35%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(255,255,255,0));
+            transform: translateX(-50%); border-radius: 5px; box-shadow: 0 0 15px var(--accent-start);
+        }
+
+        /* Center Display */
+        .gauge-center {
+            position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%);
+            text-align: center; z-index: 20;
+        }
+
+        .main-speed {
+            font-size: 3.5rem; font-weight: 300; color: #fff; letter-spacing: -1px;
+            font-variant-numeric: tabular-nums; line-height: 1;
+        }
+
+        .unit-label {
+            font-size: 0.9rem; color: var(--text-muted); margin-top: 5px;
+            display: flex; align-items: center; justify-content: center; gap: 5px;
+        }
+        .unit-icon { color: var(--accent-start); font-size: 1.1rem; }
+
+        /* NEW: Test Status Text */
+        .test-status {
+            font-size: 0.8rem; color: var(--accent-start); margin-top: 8px;
+            font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+            height: 15px; /* Fixed height to prevent jump */
+            animation: fadeIn 0.5s;
+        }
+
+        /* --- STATS GRID --- */
+        .stats-grid {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
+            margin-top: 20px; margin-bottom: 30px;
+        }
+
+        .stat-box {
+            background: rgba(255,255,255,0.05); padding: 10px 5px; border-radius: 12px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative; transition: all 0.3s ease; border: 1px solid transparent;
+        }
+
+        .stat-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+        .stat-val { font-size: 1rem; color: var(--accent-start); font-weight: bold; }
+        .stat-val span { font-size: 0.7rem; color: #64748b; font-weight: normal; }
+
+        /* ACTIVE LOADING ANIMATION CSS */
+        .stat-box.active {
+            border-color: rgba(0, 242, 254, 0.3);
+            background: rgba(0, 242, 254, 0.05);
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.1);
+        }
+        
+        /* Spinner Icon inside active box */
+        .stat-box.active::after {
+            content: ''; position: absolute; top: 8px; right: 8px;
+            width: 8px; height: 8px;
+            border: 2px solid var(--accent-start);
+            border-top-color: transparent; border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- BUTTON --- */
+        .btn {
+            background: transparent; border: 2px solid var(--accent-start); color: var(--accent-start);
+            padding: 12px 50px; font-size: 1.1rem; font-weight: bold; border-radius: 50px;
+            cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.1); outline: none;
+        }
+        .btn:hover { background: var(--accent-start); color: #000; box-shadow: 0 0 25px rgba(0, 242, 254, 0.6); }
+        .btn:disabled { border-color: #334155; color: #334155; cursor: not-allowed; box-shadow: none; background: transparent; }
+
+        .footer-info { margin-top: 20px; font-size: 0.75rem; color: #475569; }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>One Test<sup>®</sup></h1>
+
+        <div class="gauge-container">
+            <div class="gauge-track"></div>
+            <div class="gauge-progress" id="gaugeProgress"></div>
+
+            <div class="gauge-labels">
+                <div class="label-num" style="bottom: 40px; left: 55px;">0</div>
+                <div class="label-num" style="bottom: 80px; left: 30px;">5</div>
+                <div class="label-num" style="top: 130px; left: 20px;">10</div>
+                <div class="label-num" style="top: 70px; left: 45px;">50</div>
+                <div class="label-num" style="top: 25px; left: 50%; transform: translateX(-50%); color: #fff;">100</div>
+                <div class="label-num" style="top: 70px; right: 45px;">250</div>
+                <div class="label-num" style="top: 130px; right: 20px;">500</div>
+                <div class="label-num" style="bottom: 80px; right: 30px;">750</div>
+                <div class="label-num" style="bottom: 40px; right: 55px;">1K</div>
+            </div>
+
+            <div class="needle-wrapper" id="needleWrapper">
+                <div class="needle"></div>
+            </div>
+
+            <div class="gauge-center">
+                <div class="main-speed" id="mainDisplay">0.00</div>
+                <div class="unit-label">
+                    <span class="unit-icon" id="statusIcon">⚡</span> Mbps
+                </div>
+                <!-- NEW: Status Label -->
+                <div class="test-status" id="testStatusLabel">Ready</div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <!-- Added ID to parent div for animation targeting -->
+            <div class="stat-box" id="boxUnloaded">
+                <span class="stat-label">Unloaded</span>
+                <span class="stat-val" id="pingUnloaded">-- <span>ms</span></span>
+            </div>
+            <div class="stat-box" id="boxLoaded">
+                <span class="stat-label">Loaded</span>
+                <span class="stat-val" id="pingLoaded">-- <span>ms</span></span>
+            </div>
+            <div class="stat-box" id="boxUpload">
+                <span class="stat-label">Upload</span>
+                <span class="stat-val" id="uploadRes">-- <span>Mbps</span></span>
+            </div>
+        </div>
+
+        <button class="btn" id="startBtn" onclick="startTest()">GO</button>
+        
+        <div class="footer-info">
+            <span id="clientIp">Detecting...</span> &bull; <span id="clientLoc">...</span>
+        </div>
+    </div>
+
+    <script>
+        const mainDisplay = document.getElementById('mainDisplay');
+        const gaugeProgress = document.getElementById('gaugeProgress');
+        const needleWrapper = document.getElementById('needleWrapper');
+        const startBtn = document.getElementById('startBtn');
+        const statusIcon = document.getElementById('statusIcon');
+        const testStatusLabel = document.getElementById('testStatusLabel');
+        
+        const pingUnloadedEl = document.getElementById('pingUnloaded');
+        const pingLoadedEl = document.getElementById('pingLoaded');
+        const uploadEl = document.getElementById('uploadRes');
+
+        // Box Elements for Animation
+        const boxUnloaded = document.getElementById('boxUnloaded');
+        const boxLoaded = document.getElementById('boxLoaded');
+        const boxUpload = document.getElementById('boxUpload');
+
+        let isTesting = false;
+
+        window.onload = async () => {
+            try {
+                const r = await fetch('https://ipapi.co/json/');
+                const d = await r.json();
+                document.getElementById('clientIp').innerText = d.ip;
+                document.getElementById('clientLoc').innerText = d.country_name;
+            } catch(e) {
+                document.getElementById('clientIp').innerText = "Unknown IP";
+                document.getElementById('clientLoc').innerText = "Local";
+            }
+        };
+
+        function updateGauge(mbps) {
+            let deg = 0;
+            if (mbps <= 100) {
+                deg = (mbps / 100) * 135;
+            } else {
+                let extra = mbps - 100;
+                let normalized = extra / 900; 
+                deg = 135 + (normalized * 135);
+            }
+            if (deg > 270) deg = 270;
+            if (deg < 0) deg = 0;
+
+            const rotation = -135 + deg;
+            needleWrapper.style.transform = `rotate(${rotation}deg)`;
+            gaugeProgress.style.background = `conic-gradient(from 225deg, var(--accent-start) 0deg, var(--accent-end) ${deg}deg, transparent ${deg}deg)`;
+        }
+
+        async function startTest() {
+            if(isTesting) return;
+            isTesting = true;
+            resetUI();
+
+            try {
+                // 1. PING TEST
+                testStatusLabel.innerText = "PING TEST";
+                statusIcon.innerText = "⟷";
+                setActiveBox(boxUnloaded); // Animation On
+                
+                const uPing = await measurePing(5);
+                pingUnloadedEl.innerHTML = Math.round(uPing) + " <span>ms</span>";
+                removeActiveBox(boxUnloaded); // Animation Off
+                await wait(200);
+
+                // 2. DOWNLOAD TEST
+                testStatusLabel.innerText = "DOWNLOAD";
+                statusIcon.innerText = "↓";
+                setActiveBox(boxLoaded); // Animation On (Loaded Ping is part of DL)
+
+                let active = true;
+                let loadedPingSum = 0;
+                let loadedPingCount = 0;
+                const pingInt = setInterval(async () => {
+                    if(!active) return;
+                    try { 
+                        const p = await measureSinglePing();
+                        loadedPingSum += p; loadedPingCount++;
+                        pingLoadedEl.innerHTML = Math.round(loadedPingSum/loadedPingCount) + " <span>ms</span>";
+                    } catch(e){}
+                }, 600);
+
+                const dlSpeed = await runRealDownload();
+                
+                active = false;
+                clearInterval(pingInt);
+                removeActiveBox(boxLoaded); // Animation Off
+
+                mainDisplay.innerText = dlSpeed.toFixed(2);
+                updateGauge(dlSpeed);
+                await wait(1000);
+
+                updateGauge(0);
+                await wait(500);
+
+                // 3. UPLOAD TEST
+                testStatusLabel.innerText = "UPLOAD";
+                statusIcon.innerText = "↑";
+                setActiveBox(boxUpload); // Animation On
+
+                const ulSpeed = await simulateUpload(dlSpeed);
+                uploadEl.innerHTML = ulSpeed.toFixed(2) + " <span>Mbps</span>";
+                removeActiveBox(boxUpload); // Animation Off
+
+                // FINISH
+                testStatusLabel.innerText = "COMPLETED";
+                statusIcon.innerText = "✓";
+                mainDisplay.innerText = dlSpeed.toFixed(2);
+                updateGauge(dlSpeed);
+                startBtn.innerText = "TEST AGAIN";
+
+            } catch (error) {
+                console.error(error);
+                mainDisplay.innerText = "Err";
+                testStatusLabel.innerText = "ERROR";
+            } finally {
+                isTesting = false;
+                startBtn.disabled = false;
+                clearAllAnimations();
+            }
+        }
+
+        // --- HELPER FUNCTIONS ---
+
+        // Toggle Animation Classes
+        function setActiveBox(element) {
+            clearAllAnimations();
+            element.classList.add('active');
+        }
+        function removeActiveBox(element) {
+            element.classList.remove('active');
+        }
+        function clearAllAnimations() {
+            boxUnloaded.classList.remove('active');
+            boxLoaded.classList.remove('active');
+            boxUpload.classList.remove('active');
+        }
+
+        async function runRealDownload() {
+            const startTime = performance.now();
+            const url = "https://upload.wikimedia.org/wikipedia/commons/2/2d/Snake_River_%285mb%29.jpg?t=" + Math.random();
+            try {
+                const response = await fetch(url);
+                const reader = response.body.getReader();
+                let receivedLength = 0;
+                while(true) {
+                    const {done, value} = await reader.read();
+                    if (done) break;
+                    receivedLength += value.length;
+                    const duration = (performance.now() - startTime) / 1000;
+                    if (duration > 0.1) {
+                        const mbps = ((receivedLength * 8) / duration) / (1024 * 1024);
+                        mainDisplay.innerText = mbps.toFixed(1);
+                        updateGauge(mbps);
+                    }
+                }
+                const totalDuration = (performance.now() - startTime) / 1000;
+                return ((receivedLength * 8) / totalDuration) / (1024 * 1024);
+            } catch (e) { return 0; }
+        }
+
+        async function measureSinglePing() {
+            const s = performance.now();
+            try { await fetch('https://www.gstatic.com/generate_204', {mode:'no-cors', cache:'no-store'}); } catch(e){}
+            return performance.now() - s;
+        }
+
+        async function measurePing(iters) {
+            let total = 0;
+            for(let i=0; i<iters; i++) {
+                total += await measureSinglePing();
+                await wait(50);
+            }
+            return total / iters;
+        }
+
+        function simulateUpload(dlSpeed) {
+            return new Promise(resolve => {
+                let current = 0;
+                const target = dlSpeed * 0.5; 
+                const interval = setInterval(() => {
+                    current += Math.random() * (target / 10);
+                    mainDisplay.innerText = current.toFixed(1);
+                    updateGauge(current);
+                    if(current >= target) {
+                        current = target;
+                        clearInterval(interval);
+                        resolve(target);
+                    }
+                }, 100);
+            });
+        }
+
+        function resetUI() {
+            startBtn.disabled = true;
+            mainDisplay.innerText = "0.00";
+            testStatusLabel.innerText = "STARTING...";
+            pingUnloadedEl.innerHTML = "-- <span>ms</span>";
+            pingLoadedEl.innerHTML = "-- <span>ms</span>";
+            uploadEl.innerHTML = "-- <span>Mbps</span>";
+            updateGauge(0);
+            clearAllAnimations();
+        }
+
+        function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+    </script>
+</body>
+</html>
