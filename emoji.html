@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel to Emoji Mosaic</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        :root {
+            --primary: #8e44ad;
+            --primary-hover: #9b59b6;
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+            --border: #bdc3c7;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 900px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        @media(min-width: 600px){
+            .controls { grid-template-columns: 1fr 1fr; }
+            .full-width { grid-column: span 2; }
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 8px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        input[type="file"] { display: none; }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-align: center;
+            flex: 1;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(142, 68, 173, 0.3);
+        }
+
+        .btn:active { transform: translateY(0); }
+        .btn:disabled { background: var(--border); cursor: not-allowed; box-shadow: none; transform: none; }
+        .btn-success { background: #27ae60; }
+        .btn-success:hover { background: #2ecc71; box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3); }
+
+        input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .file-name {
+            font-size: 13px;
+            color: #7f8c8d;
+            text-align: right;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            background: #ecf0f1;
+            border-radius: 10px;
+            height: 25px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #8e44ad, #3498db);
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.1s linear;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 13px;
+            font-weight: bold;
+            color: #2c3e50;
+            text-shadow: 0 0 2px rgba(255,255,255,0.8);
+        }
+
+        /* Canvas Area */
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px dashed var(--border);
+            min-height: 350px;
+            justify-content: center;
+            position: relative;
+        }
+
+        #displayCanvas {
+            max-width: 100%;
+            max-height: 600px;
+            display: none;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            background: white;
+        }
+
+        /* Hidden High-Res Canvas */
+        #renderCanvas { display: none; }
+
+        .skeleton {
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 4/3;
+            background: linear-gradient(90deg, #ececec 25%, #f5f5f5 50%, #ececec 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 8px;
+            display: none;
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .placeholder-text {
+            color: #7f8c8d;
+            font-size: 15px;
+            text-align: center;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #2c3e50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: translateY(150px);
+            opacity: 0;
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.5s ease;
+            z-index: 1000;
+            font-weight: 600;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🎨 Pixel to Emoji Mosaic</h1>
+    
+    <div class="controls">
+        <div class="control-group">
+            <div class="control-row">
+                <label class="btn" for="imageInput">📂 ছবি আপলোড করুন</label>
+                <input type="file" id="imageInput" accept="image/*">
+            </div>
+            <span class="file-name" id="fileName">কোনো ছবি নেই</span>
+        </div>
+
+        <div class="control-group">
+            <label style="font-size: 14px; font-weight:600;">রেশিও: <span style="color:var(--primary);">১ ইমোজি = <span id="resValue">৪</span>x<span id="resValue2">৪</span> পিক্সেল</span></label>
+            <!-- 1 means 1 pixel = 1 emoji. 20 means 20x20 pixels = 1 emoji -->
+            <input type="range" id="resolution" min="1" max="30" value="4">
+            <small style="font-size: 11px; color:#7f8c8d; text-align:right;">মান কমালে কোয়ালিটি বাড়বে</small>
+        </div>
+
+        <div class="control-row full-width">
+            <button class="btn" id="generateBtn" disabled>✨ মোজাইক বানান</button>
+            <button class="btn btn-success" id="downloadBtn" disabled>⬇️ হাই-রেস ডাউনলোড</button>
+        </div>
+    </div>
+
+    <div class="progress-container" id="progressContainer">
+        <div class="progress-bar" id="progressBar"></div>
+        <div class="progress-text" id="progressText">0%</div>
+    </div>
+
+    <div class="canvas-container">
+        <div class="placeholder-text" id="placeholder">
+            🖼️ ছবি আপলোড করে "মোজাইক বানান" এ ক্লিক করুন
+        </div>
+        <div class="skeleton" id="skeletonLoader"></div>
+        
+        <canvas id="displayCanvas"></canvas>
+        <canvas id="renderCanvas"></canvas>
+    </div>
+</div>
+
+<div class="toast" id="toast">✅ কাজ সম্পন্ন হয়েছে!</div>
+
+<script>
+    const imageInput = document.getElementById('imageInput');
+    const fileNameDisplay = document.getElementById('fileName');
+    const resolutionSlider = document.getElementById('resolution');
+    const resValueDisplay = document.getElementById('resValue');
+    const resValueDisplay2 = document.getElementById('resValue2');
+    const generateBtn = document.getElementById('generateBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const displayCanvas = document.getElementById('displayCanvas');
+    const displayCtx = displayCanvas.getContext('2d');
+    const renderCanvas = document.getElementById('renderCanvas');
+    const renderCtx = renderCanvas.getContext('2d');
+    const skeletonLoader = document.getElementById('skeletonLoader');
+    const placeholder = document.getElementById('placeholder');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const toast = document.getElementById('toast');
+
+    let uploadedImage = null;
+    let emojiColorMap = [];
+
+    // Extensive Emoji List
+    const EMOJIS = ['😀','😂','😍','😎','😭','😡','🤢','🥶','🤠','🤡','👽','👻','😺','🙈','🐶','🦊','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🦅','🦆','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🕷️','🦂','🐢','🐍','🦎','🦖','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🦈','🐊','🐅','🐆','🦓','🦍','🐘','🦏','🐪','🦒','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🦙','🐐','🦌','🐕','🐩','🐈','🐓','🦃','🦚','🦜','🦢','🦩','🕊️','🐇','🦝','🦨','🦡','🦦','🦥','🐁','🐀','🐿️','🦔','🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🍈','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🍆','🥑','🥦','🥬','🥒','🌶️','🌽','🥕','🥔','🍠','🥐','🍞','🥖','🥨','🧀','🥚','🍳','🥞','🥓','🥩','🍗','🍖','🌭','🍔','🍟','🍕','🥪','🥙','🌮','🌯','🥗','🥘','🥫','🍝','🍜','🍲','🍛','🍣','🍱','🥟','🍤','🍙','🍚','🍘','🍥','🥠','🍢','🍡','🍧','🍨','🍦','🥧','🍰','🎂','🍮','🍭','🍬','🍫','🍿','🍩','🍪','🌰','🥜','🍯','🥛','☕','🍵','🥤','🍶','🍺','🍻','🥂','🍷','🥃','🍸','🍹','🍾','🥄','🍴','🍽️','🥣','🥡','🥢','🧂','⚽','🏀','🏈','⚾','🥎','🎾','🏐','🏉','🥏','🎱','🪀','🏓','🏸','🏒','🏑','🥍','🏏','🥅','⛳','🪁','🏹','🎣','🤿','🥊','🥋','🎽','🛹','🛷','⛸️','🥌','🎿','⛷️','🏂','🏋️','🤼','🤸','⛹️','🤺','🤾','🏌️','🏇','🧘','🏄','🏊','🤽','🚣','🧗','🚵','🚴','🏆','🥇','🥈','🥉','🏅','🎖️','🏵️','🎗️','🎫','🎟️','🎪','🤹','🎭','🎨','🎬','🎤','🎧','🎼','🎹','🥁','🎷','🎺','🎸','🪕','🎻','🎲','🧩','♟️','🎯','🎳','🎮','🎰','🚗','🚕','🚙','🚌','🚎','🏎️','🚓','🚑','🚒','🚐','🚚','🚛','🚜','🦯','🦽','🦼','🛴','🚲','🛵','🏍️','🛺','🚨','🚔','🚍','🚘','🚖','🚡','🚠','🚟','🚃','🚋','🚞','🚝','🚄','🚅','🚈','🚂','🚆','🚇','🚊','🚉','✈️','🛫','🛬','🛩️','💺','🛰️','🚀','🛸','🚁','🛶','⛵','🚤','🛥️','🛳️','⛴️','🚢','❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','🔴','🟠','🟡','🟢','🔵','🟣','⚫','⚪','🟤','🟥','🟧','🟨','🟩','🟦','🟪','⬛','⬜','🟫'];
+
+    // Precalculate average color for each emoji
+    function initEmojiMap() {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = 10;
+        tempCanvas.height = 10;
+        const tempCtx = tempCanvas.getContext('2d');
+
+        EMOJIS.forEach(emoji => {
+            tempCtx.clearRect(0, 0, 10, 10);
+            tempCtx.font = '8px Arial';
+            tempCtx.textBaseline = 'top';
+            tempCtx.fillText(emoji, 0, 0);
+
+            let imgData = tempCtx.getImageData(0, 0, 10, 10).data;
+            let r = 0, g = 0, b = 0, count = 0;
+
+            for (let i = 0; i < imgData.length; i += 4) {
+                if (imgData[i + 3] > 30) { 
+                    r += imgData[i];
+                    g += imgData[i + 1];
+                    b += imgData[i + 2];
+                    count++;
+                }
+            }
+            if (count > 0) {
+                emojiColorMap.push({ emoji, r: Math.round(r / count), g: Math.round(g / count), b: Math.round(b / count) });
+            }
+        });
+    }
+
+    function getClosestEmoji(r, g, b) {
+        let minDiff = Infinity, bestEmoji = '⬛';
+        for (let em of emojiColorMap) {
+            let diff = (em.r - r)**2 + (em.g - g)**2 + (em.b - b)**2;
+            if (diff < minDiff) { minDiff = diff; bestEmoji = em.emoji; }
+        }
+        return bestEmoji;
+    }
+
+    function showToast(msg, isError = false) {
+        toast.innerText = msg;
+        toast.style.background = isError ? '#e74c3c' : '#27ae60';
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function toggleSkeleton(show) {
+        skeletonLoader.style.display = show ? 'block' : 'none';
+        placeholder.style.display = show ? 'none' : 'block';
+        displayCanvas.style.display = show ? 'none' : 'block';
+    }
+
+    resolutionSlider.addEventListener('input', (e) => {
+        resValueDisplay.innerText = e.target.value;
+        resValueDisplay2.innerText = e.target.value;
+    });
+
+    imageInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            fileNameDisplay.innerText = `${file.name}`;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    uploadedImage = img;
+                    generateBtn.disabled = false;
+                    skeletonLoader.style.aspectRatio = `${img.width} / ${img.height}`;
+                    fileNameDisplay.innerText += ` (${img.width}x${img.height}px)`;
+                    showToast('ছবি সফলভাবে আপলোড হয়েছে!');
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    generateBtn.addEventListener('click', () => {
+        if (!uploadedImage) return;
+
+        generateBtn.disabled = true;
+        downloadBtn.disabled = true;
+        toggleSkeleton(true);
+        displayCanvas.style.display = 'none';
+        
+        progressContainer.style.display = 'block';
+        setTimeout(() => progressContainer.style.opacity = '1', 10);
+        progressBar.style.width = '0%';
+        progressText.innerText = '0%';
+        progressText.style.color = '#2c3e50';
+
+        // Get Ratio (Pixels per Emoji)
+        const P = parseInt(resolutionSlider.value); 
+        let imgW = uploadedImage.width;
+        let imgH = uploadedImage.height;
+
+        // Calculate how many emojis we need in width and height
+        let cols = Math.floor(imgW / P);
+        let rows = Math.floor(imgH / P);
+
+        // Safety Limit: Max 500 Emojis wide (Prevents Browser Out Of Memory for huge photos with P=1)
+        const MAX_COLS = 500;
+        if (cols > MAX_COLS) {
+            let scaleRatio = MAX_COLS / cols;
+            cols = MAX_COLS;
+            rows = Math.floor(rows * scaleRatio);
+            showToast('ছবি অনেক বড়! ক্র্যাশ ঠেকাতে কোয়ালিটি অপ্টিমাইজ করা হয়েছে।', false);
+        }
+
+        // 1. Shrink/Scale Image mathematically matching the Grid (cols x rows)
+        // By drawing on a small canvas, the browser averages the PxP pixel colors automatically! (Performance hack)
+        const offCanvas = document.createElement('canvas');
+        offCanvas.width = cols;
+        offCanvas.height = rows;
+        const offCtx = offCanvas.getContext('2d');
+        offCtx.drawImage(uploadedImage, 0, 0, cols, rows);
+        const imgData = offCtx.getImageData(0, 0, cols, rows).data;
+
+        // 2. Prepare High-Res Render Canvas
+        const EMOJI_SIZE = 24; // Visual size of each emoji in final image
+        renderCanvas.width = cols * EMOJI_SIZE;
+        renderCanvas.height = rows * EMOJI_SIZE;
+        renderCtx.fillStyle = "#ffffff";
+        renderCtx.fillRect(0, 0, renderCanvas.width, renderCanvas.height);
+        renderCtx.font = `${EMOJI_SIZE}px Arial`;
+        renderCtx.textBaseline = 'top';
+
+        const totalPixels = cols * rows;
+        let processed = 0;
+
+        // 3. Process Chunk by Chunk (1 Pixel in offCanvas = 1 Emoji in Output)
+        const processChunk = async (startY) => {
+            let endY = Math.min(startY + 15, rows); // 15 rows at a time
+            
+            for (let y = startY; y < endY; y++) {
+                for (let x = 0; x < cols; x++) {
+                    let idx = (y * cols + x) * 4;
+                    let r = imgData[idx];
+                    let g = imgData[idx + 1];
+                    let b = imgData[idx + 2];
+                    let a = imgData[idx + 3];
+
+                    if (a > 10) { // Ignore transparent background
+                        let emoji = getClosestEmoji(r, g, b);
+                        renderCtx.fillText(emoji, x * EMOJI_SIZE, y * EMOJI_SIZE);
+                    }
+                    processed++;
+                }
+            }
+
+            // Update Progress UI
+            let percent = Math.floor((processed / totalPixels) * 100);
+            progressBar.style.width = `${percent}%`;
+            progressText.innerText = `${percent}%`;
+            if (percent > 50) progressText.style.color = '#fff';
+
+            if (endY < rows) {
+                requestAnimationFrame(() => processChunk(endY));
+            } else {
+                finishProcessing(cols * EMOJI_SIZE, rows * EMOJI_SIZE);
+            }
+        };
+
+        requestAnimationFrame(() => processChunk(0));
+    });
+
+    function finishProcessing(outW, outH) {
+        displayCanvas.width = outW;
+        displayCanvas.height = outH;
+        displayCtx.drawImage(renderCanvas, 0, 0);
+
+        toggleSkeleton(false);
+        progressContainer.style.opacity = '0';
+        setTimeout(() => progressContainer.style.display = 'none', 500);
+        
+        generateBtn.disabled = false;
+        downloadBtn.disabled = false;
+        showToast('🎉 প্রসেসিং সম্পন্ন হয়েছে!');
+    }
+
+    downloadBtn.addEventListener('click', () => {
+        const link = document.createElement('a');
+        link.download = `pixel-emoji-art-${Date.now()}.png`;
+        link.href = renderCanvas.toDataURL('image/png', 1.0);
+        link.click();
+        showToast('ডাউনলোড শুরু হয়েছে!');
+    });
+
+    initEmojiMap();
+</script>
+</body>
+</html>
