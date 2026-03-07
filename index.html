@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" href="https://i.ibb.co.com/LzMhCz3v/IMG-20260208-220205.png" sizes="96x96" type="image/png">
-    <link rel="apple-touch-icon" href="https://i.ibb.co.com/LzMhCz3v/IMG-20260208-220205.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>One Tool | QR & Tools Generator</title>
@@ -96,6 +94,7 @@
           const link = document.getElementById('devLink').value;
           const size = document.getElementById('devSize').value;
           const newApiToken = document.getElementById('apiKeyInput').value.trim();
+          const ramadanTimerStatus = document.getElementById('devRamadanStatus').checked;
           
           const newTags = [];
           document.querySelectorAll('.new-tag-checkbox:checked').forEach(cb => {
@@ -119,7 +118,8 @@
                   features: updateFeatures
               },
               newTags: newTags,
-              githubToken: newApiToken || GIT.token
+              githubToken: newApiToken || GIT.token,
+              ramadanTimer: ramadanTimerStatus
           };
 
           document.getElementById('settingsLoadingOverlay').style.display = 'flex';
@@ -203,7 +203,6 @@
 
               const featList = document.getElementById('updateFeaturesList');
               featList.innerHTML = '';
-              // Modified icons to square check style
               if(data.update.features) {
                   if(data.update.features.security) featList.innerHTML += `<div class="update-item"><i class="fas fa-square-check"></i> Security Improvements</div>`;
                   if(data.update.features.performance) featList.innerHTML += `<div class="update-item"><i class="fas fa-square-check"></i> Performance Boost</div>`;
@@ -239,9 +238,18 @@
                   document.getElementById('featPerformance').checked = data.update.features.performance;
                   document.getElementById('featFix').checked = data.update.features.fix;
               }
-
           } else {
               document.getElementById('updatePopup').style.display = 'none';
+          }
+
+          if (data.ramadanTimer !== undefined) {
+              document.getElementById('ramadanTimerContainer').style.display = data.ramadanTimer ? 'block' : 'none';
+              if(document.getElementById('devRamadanStatus')) {
+                  document.getElementById('devRamadanStatus').checked = data.ramadanTimer;
+              }
+              if(data.ramadanTimer) {
+                  window.initRamadanTimer();
+              }
           }
 
           document.querySelectorAll('.new-badge').forEach(el => el.style.display = 'none');
@@ -332,7 +340,7 @@
             padding: 20px; 
         }
         .container { width: 100%; max-width: 500px; }
-        .main-card { background: var(--card); border: 1px solid var(--border); border-radius: 32px; padding: 30px; box-shadow: 0 25px 50px -12p var(--shadow); }
+        .main-card { background: var(--card); border: 1px solid var(--border); border-radius: 32px; padding: 30px; box-shadow: 0 25px 50px -12px var(--shadow); }
 
         footer { 
             width: 100%; background: var(--bg); border-top: 1px solid var(--border); 
@@ -622,6 +630,50 @@
         
         .dev-input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px; }
 
+        /* Ramadan Timer Theme Styles */
+        .ramadan-timer-wrapper { font-family: 'Plus Jakarta Sans', sans-serif; margin-bottom: 25px; }
+        .ramadan-header { text-align: center; margin-bottom: 15px; }
+        .ramadan-header h2 { color: var(--primary); margin: 0; font-size: 1.5rem; font-weight: 800; }
+        .ramadan-header p { opacity: 0.7; margin: 5px 0; font-size: 0.8rem; }
+        .islamic-card {
+            background: #0d3b2e; border-radius: 16px; padding: 25px; text-align: center;
+            color: #ffffff; position: relative; overflow: hidden; border: 2px solid #d4af37;
+            box-shadow: 0 10px 25px rgba(13, 59, 46, 0.2);
+        }
+        .dark-mode .islamic-card { box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .islamic-card::before, .islamic-card::after {
+            content: ''; position: absolute; width: 80px; height: 80px;
+            border: 2px solid #d4af37; opacity: 0.2;
+        }
+        .islamic-card::before { top: -40px; left: -40px; transform: rotate(45deg); }
+        .islamic-card::after { bottom: -40px; right: -40px; transform: rotate(45deg); }
+        .mosque-icon-left, .mosque-icon-right {
+            position: absolute; bottom: -10px; opacity: 0.15; font-size: 8rem; color: #d4af37; pointer-events: none;
+        }
+        .mosque-icon-left { left: -20px; transform: scaleX(-1); }
+        .mosque-icon-right { right: -20px; }
+        .bismillah { font-size: 1.5rem; color: #d4af37; margin-bottom: 10px; font-weight: bold; z-index: 1; position: relative; }
+        .district-select {
+            width: 100%; padding: 12px; font-size: 1rem; border: 1px solid var(--border);
+            border-radius: 12px; margin-bottom: 15px; background: var(--bg); color: var(--text); outline: none;
+            font-weight: 600; cursor: pointer;
+        }
+        .district-name { font-size: 1.5rem; font-weight: 800; margin: 10px 0; color: #d4af37; z-index: 1; position: relative; }
+        .times-container {
+            display: flex; justify-content: space-between; margin: 15px 0;
+            border-top: 1px solid rgba(212, 175, 55, 0.3); border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+            padding: 10px 0; z-index: 1; position: relative;
+        }
+        .time-box { flex: 1; }
+        .time-box h3 { margin: 0; font-size: 1rem; color: #e2e8e5; font-weight: 600; }
+        .time-box p { margin: 5px 0 0; font-size: 1.4rem; font-weight: 700; color: #d4af37; }
+        .countdown-container {
+            margin-top: 15px; background: rgba(255, 255, 255, 0.05); padding: 12px;
+            border-radius: 12px; border: 1px solid rgba(212, 175, 55, 0.3); z-index: 1; position: relative;
+        }
+        .countdown-title { font-size: 0.9rem; margin: 0 0 5px; color: #ccc; }
+        .timer { font-size: 1.8rem; font-weight: 800; letter-spacing: 2px; color: #d4af37; }
+        .next-event-text { font-size: 0.8rem; margin-top: 5px; color: #fff; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -661,6 +713,41 @@
         <div class="container">
             <div class="main-card">
                 <div id="mainOptionsView">
+                    
+                    <div id="ramadanTimerContainer" class="ramadan-timer-wrapper" style="display: none;">
+                        <div class="ramadan-header">
+                            <h2>রমজান সময়সূচি</h2>
+                            <p>ইসলামিক ফাউন্ডেশন বাংলাদেশের সময় অনুকরণে</p>
+                        </div>
+                        <select id="districtSelect" class="district-select" onchange="window.updateRamadanUI()"></select>
+                        <div class="islamic-card">
+                            <i class="fas fa-mosque mosque-icon-left"></i>
+                            <i class="fas fa-mosque mosque-icon-right"></i>
+                            <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم</div>
+                            <div class="district-name" id="displayDistrict">ঢাকা</div>
+                            
+                            <div class="times-container">
+                                <div class="time-box" style="border-right: 1px solid rgba(212, 175, 55, 0.3);">
+                                    <h3>সেহেরীর শেষ সময়</h3>
+                                    <p id="sehriTime">--:--</p>
+                                </div>
+                                <div class="time-box">
+                                    <h3>ইফতারের সময়</h3>
+                                    <p id="iftarTime">--:--</p>
+                                </div>
+                            </div>
+
+                            <div class="countdown-container">
+                                <p class="countdown-title">সময় বাকি</p>
+                                <div class="timer" id="countdownTimer">০০:০০:০০</div>
+                                <p class="next-event-text" id="nextEventText">--</p>
+                            </div>
+                            <div style="font-size: 0.7rem; color: #aaa; margin-top: 10px; z-index: 1; position: relative;">
+                                বি.দ্র: ৩ মিনিট আগে সেহেরী ও ৩ মিনিট পরে ইফতার করা উত্তম।
+                            </div>
+                        </div>
+                    </div>
+
                     <h2 style="margin-bottom: 25px; text-align: center;">Choose Your Service</h2>
                     
                     <div style="display: grid; grid-template-columns: 1fr; gap: 0;">
@@ -769,6 +856,15 @@
                             <div>
                                 <h4>Image Compressor</h4>
                                 <p>Compress images to reduce size.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="option-card" onclick="window.location.href='jakat-calculator.html'" id="card-zakatCalculator">
+                            <div class="new-badge">NEW</div>
+                            <i class="fas fa-hand-holding-heart"></i> 
+                            <div>
+                                <h4>যাকাত ক্যালকুলেটর</h4>
+                                <p>সহজেই আপনার যাকাতের পরিমাণ হিসাব করুন।</p>
                             </div>
                         </div>
                     </div>
@@ -1256,6 +1352,7 @@
                     <label class="checkbox-item"><input type="checkbox" class="new-tag-checkbox" value="card-slowedReverb"> Audio Slowed & Reverb</label>
                     <label class="checkbox-item"><input type="checkbox" class="new-tag-checkbox" value="card-rgbCmyk"> RGB to CMYK</label>
                     <label class="checkbox-item"><input type="checkbox" class="new-tag-checkbox" value="card-imgCompress"> Image Compressor</label>
+                    <label class="checkbox-item"><input type="checkbox" class="new-tag-checkbox" value="card-zakatCalculator"> Zakat Calculator</label>
                 </div>
 
                 <label style="font-size: 0.75rem; font-weight: 700; display: block; margin-bottom: 5px;">Update Card Features</label>
@@ -1269,6 +1366,14 @@
                     <label style="font-size: 0.85rem; font-weight: 700;">Show Notification</label>
                     <label class="switch">
                     <input type="checkbox" id="devStatus">
+                    <span class="slider round"></span>
+                    </label>
+                </div>
+                
+                <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 20px;">
+                    <label style="font-size: 0.85rem; font-weight: 700;">Show Ramadan Timer</label>
+                    <label class="switch">
+                    <input type="checkbox" id="devRamadanStatus">
                     <span class="slider round"></span>
                     </label>
                 </div>
@@ -1989,7 +2094,6 @@
                     }
                     encodeChunk();
                 } else if (format === 'wav') {
-                    // Quick WAV conversion
                     mp3ProgressFill.style.width = "50%";
                     mp3PercentLabel.innerText = "50%";
                     setTimeout(() => {
@@ -2722,6 +2826,122 @@
             return new Blob([buffer], {type: "audio/wav"});
         }
 
+        // Ramadan Timer JS Logic
+        let ramadanInitialized = false;
+        let rTimerInterval;
+        const bdDistricts = [
+            { name: "ঢাকা", offset: 0 }, { name: "গাজীপুর", offset: 0 }, { name: "নারায়ণগঞ্জ", offset: -1 },
+            { name: "মুন্সীগঞ্জ", offset: -1 }, { name: "মানিকগঞ্জ", offset: 1 }, { name: "নরসিংদী", offset: -1 },
+            { name: "টাঙ্গাইল", offset: 1 }, { name: "কিশোরগঞ্জ", offset: -2 }, { name: "ফরিদপুর", offset: 2 },
+            { name: "মাদারীপুর", offset: 1 }, { name: "শরীয়তপুর", offset: 1 }, { name: "গোপালগঞ্জ", offset: 2 },
+            { name: "রাজবাড়ী", offset: 2 }, { name: "ময়মনসিংহ", offset: -1 }, { name: "জামালপুর", offset: 0 },
+            { name: "শেরপুর", offset: 0 }, { name: "নেত্রকোণা", offset: -2 }, { name: "চট্টগ্রাম", offset: -5 },
+            { name: "কক্সবাজার", offset: -5 }, { name: "নোয়াখালী", offset: -3 }, { name: "লক্ষ্মীপুর", offset: -2 },
+            { name: "ফেনী", offset: -3 }, { name: "কুমিল্লা", offset: -2 }, { name: "চাঁদপুর", offset: -2 },
+            { name: "ব্রাহ্মণবাড়িয়া", offset: -3 }, { name: "সিলেট", offset: -6 }, { name: "সুনামগঞ্জ", offset: -5 },
+            { name: "হবিগঞ্জ", offset: -4 }, { name: "মৌলভীবাজার", offset: -5 }, { name: "রাজশাহী", offset: 6 },
+            { name: "নাটোর", offset: 5 }, { name: "নওগাঁ", offset: 6 }, { name: "চাঁপাইনবাবগঞ্জ", offset: 8 },
+            { name: "পাবনা", offset: 4 }, { name: "সিরাজগঞ্জ", offset: 3 }, { name: "বগুড়া", offset: 4 },
+            { name: "জয়পুরহাট", offset: 5 }, { name: "রংপুর", offset: 5 }, { name: "দিনাজপুর", offset: 7 },
+            { name: "গাইবান্ধা", offset: 4 }, { name: "কুড়িগ্রাম", offset: 3 }, { name: "লালমনিরহাট", offset: 4 },
+            { name: "নীলফামারী", offset: 6 }, { name: "পঞ্চগড়", offset: 8 }, { name: "ঠাকুরগাঁও", offset: 8 },
+            { name: "খুলনা", offset: 4 }, { name: "বাগেরহাট", offset: 3 }, { name: "সাতক্ষীরা", offset: 5 },
+            { name: "যশোর", offset: 5 }, { name: "মাগুরা", offset: 3 }, { name: "ঝিনাইদহ", offset: 4 },
+            { name: "নড়াইল", offset: 3 }, { name: "কুষ্টিয়া", offset: 4 }, { name: "চুয়াডাঙ্গা", offset: 5 },
+            { name: "মেহেরপুর", offset: 6 }, { name: "বরিশাল", offset: 1 }, { name: "ভোলা", offset: -1 },
+            { name: "ঝালকাঠি", offset: 2 }, { name: "পিরোজপুর", offset: 2 }, { name: "পটুয়াখালী", offset: 1 },
+            { name: "বরগুনা", offset: 2 }, { name: "রাঙ্গামাটি", offset: -5 }, { name: "খাগড়াছড়ি", offset: -5 },
+            { name: "বান্দরবান", offset: -5 }
+        ];
+
+        const baseSehriHour = 4;
+        const baseSehriMin = 50;
+        const baseIftarHour = 18; 
+        const baseIftarMin = 15;
+
+        window.initRamadanTimer = () => {
+            if(ramadanInitialized) return;
+            const select = document.getElementById('districtSelect');
+            if(!select) return;
+            bdDistricts.sort((a, b) => a.name.localeCompare(b.name, 'bn'));
+            bdDistricts.forEach((dist, index) => {
+                let option = document.createElement('option');
+                option.value = index;
+                option.text = dist.name;
+                if(dist.name === "ঢাকা") option.selected = true;
+                select.appendChild(option);
+            });
+            window.updateRamadanUI();
+            rTimerInterval = setInterval(window.updateRamadanUI, 1000);
+            ramadanInitialized = true;
+        };
+
+        window.formatTimeAMPM = (date) => {
+            let hours = date.getHours();
+            let minutes = date.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; 
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            return hours + ':' + minutes + ' ' + ampm;
+        };
+
+        window.convertToBanglaNumber = (str) => {
+            const banglaNumbers = {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯'};
+            return str.replace(/[0-9]/g, function(w) { return banglaNumbers[w]; });
+        };
+
+        window.updateRamadanUI = () => {
+            const select = document.getElementById('districtSelect');
+            if(!select) return;
+            const selectedIndex = select.value;
+            const district = bdDistricts[selectedIndex];
+            if(!district) return;
+            
+            document.getElementById('displayDistrict').innerText = district.name;
+            const now = new Date();
+            
+            let sehriTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), baseSehriHour, baseSehriMin, 0);
+            sehriTime.setMinutes(sehriTime.getMinutes() + district.offset);
+
+            let iftarTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), baseIftarHour, baseIftarMin, 0);
+            iftarTime.setMinutes(iftarTime.getMinutes() + district.offset);
+
+            document.getElementById('sehriTime').innerText = window.convertToBanglaNumber(window.formatTimeAMPM(sehriTime));
+            document.getElementById('iftarTime').innerText = window.convertToBanglaNumber(window.formatTimeAMPM(iftarTime));
+
+            let nextEventTime;
+            let eventName;
+
+            if (now < sehriTime) {
+                nextEventTime = sehriTime;
+                eventName = "সেহেরীর শেষ সময়ের জন্য";
+            } else if (now < iftarTime) {
+                nextEventTime = iftarTime;
+                eventName = "ইফতারের জন্য";
+            } else {
+                nextEventTime = new Date(sehriTime);
+                nextEventTime.setDate(nextEventTime.getDate() + 1);
+                eventName = "আগামীকাল সেহেরীর জন্য";
+            }
+
+            document.getElementById('nextEventText').innerText = eventName;
+
+            const diff = nextEventTime - now;
+            if (diff > 0) {
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                let timerString = 
+                    (hours < 10 ? "0" + hours : hours) + ":" + 
+                    (minutes < 10 ? "0" + minutes : minutes) + ":" + 
+                    (seconds < 10 ? "0" + seconds : seconds);
+                
+                document.getElementById('countdownTimer').innerText = window.convertToBanglaNumber(timerString);
+            }
+        };
+
         updateLogoImage(); 
         updateLinkInputControls();
         linkQrColorBtn.style.backgroundColor = linkQrColor.value;
@@ -2735,7 +2955,5 @@
             if(keyInput) keyInput.value = cachedKey;
         }
     </script>
-    <script async="async" data-cfasync="false" src="https://pl28743379.effectivegatecpm.com/e8a4101484bcc312e8a1ce9f0d1eadac/invoke.js"></script>
-<div id="container-e8a4101484bcc312e8a1ce9f0d1eadac"></div>
 </body>
 </html>
