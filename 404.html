@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 error</title>
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
+    <style>
+        /* CSS (আপনার দেওয়া স্টাইল অনুযায়ী) */
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            background: linear-gradient(90deg, rgba(47,54,64,1) 23%, rgba(24,27,32,1) 100%);
+            overflow: hidden;
+            font-family: 'Righteous', cursive;
+        }
+
+        .moon {
+            background: linear-gradient(90deg, rgba(208,208,208,1) 48%, rgba(145,145,145,1) 100%);
+            position: absolute;
+            top: -100px;
+            left: -300px;
+            width: 900px;
+            height: 900px;
+            border-radius: 100%;
+            box-shadow: 0px 0px 30px -4px rgba(0,0,0,0.5);
+        }
+
+        .moon__crater {
+            position: absolute;
+            border-radius: 100%;
+            background: linear-gradient(90deg, rgba(122,122,122,1) 38%, rgba(195,195,195,1) 100%);
+            opacity: 0.6;
+        }
+
+        .moon__crater1 { top: 250px; left: 500px; width: 60px; height: 180px; }
+        .moon__crater2 { top: 650px; left: 340px; width: 40px; height: 80px; transform: rotate(55deg); }
+        .moon__crater3 { top: -20px; left: 40px; width: 65px; height: 120px; transform: rotate(250deg); }
+
+        .star {
+            background: grey;
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            border-radius: 100%;
+            opacity: 0.4;
+            animation: shimmer 1.5s infinite alternate;
+        }
+
+        @keyframes shimmer {
+            from { opacity: 0; }
+            to { opacity: 0.7; }
+        }
+
+        .star1 { top: 40%; left: 50%; animation-delay: 1s; }
+        .star2 { top: 60%; left: 90%; animation-delay: 3s; }
+        .star3 { top: 10%; left: 70%; animation-delay: 2s; }
+        .star4 { top: 90%; left: 40%; }
+        .star5 { top: 20%; left: 30%; animation-delay: 0.5s; }
+
+        .error {
+            position: absolute;
+            left: 100px;
+            top: 45%;
+            transform: translateY(-50%);
+            color: #363e49;
+            z-index: 10;
+        }
+
+        .error__title { font-size: 10em; line-height: 1; }
+        .error__subtitle { font-size: 2em; }
+        .error__description { opacity: 0.5; margin-top: 10px; }
+
+        /* সংশোধিত বাটন স্টাইল */
+        .error__button {
+            display: inline-block;
+            text-decoration: none;
+            min-width: 10em;
+            margin-top: 3em;
+            padding: 0.8em 2em;
+            outline: none;
+            border-radius: 8em;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 0.85em;
+            font-family: 'Righteous', cursive;
+            background-color: #e67e22;
+            border: 2px solid #e67e22;
+            color: white;
+            text-align: center;
+        }
+
+        .error__button:hover {
+            box-shadow: 0px 0px 15px rgba(230, 126, 34, 0.6);
+            transform: scale(1.05);
+            background-color: #d35400;
+        }
+
+        /* Astronaut */
+        .astronaut {
+            position: absolute;
+            width: 185px;
+            height: 300px;
+            left: 70%;
+            top: 50%;
+            transform: translate(-50%, -50%) rotate(20deg) scale(1.2);
+            animation: floatAstronaut 5s ease-in-out infinite;
+        }
+
+        @keyframes floatAstronaut {
+            0%, 100% { transform: translate(-50%, -50%) rotate(20deg) scale(1.2); }
+            50% { transform: translate(-50%, -60%) rotate(25deg) scale(1.2); }
+        }
+
+        .astronaut__head { background-color: white; position: absolute; top: 60px; left: 60px; width: 60px; height: 60px; border-radius: 2em; }
+        .astronaut__backpack { background-color: #bfbfbf; position: absolute; top: 90px; left: 47px; width: 86px; height: 90px; border-radius: 8px; }
+        .astronaut__body { background-color: #e6e6e6; position: absolute; top: 115px; left: 55px; width: 70px; height: 80px; border-radius: 8px; }
+        .astronaut__arm-left1 { background-color: #e6e6e6; position: absolute; top: 127px; left: 9px; width: 65px; height: 20px; border-radius: 8px; transform: rotate(-30deg); }
+        .astronaut__arm-right1 { background-color: #e6e6e6; position: absolute; top: 113px; left: 100px; width: 65px; height: 20px; border-radius: 8px; transform: rotate(-10deg); }
+        .astronaut__leg-left { background-color: #e6e6e6; position: absolute; top: 188px; left: 50px; width: 23px; height: 75px; transform: rotate(10deg); }
+        .astronaut__leg-right { background-color: #e6e6e6; position: absolute; top: 188px; left: 108px; width: 23px; height: 75px; transform: rotate(-10deg); }
+        .astronaut__foot-left { background-color: white; position: absolute; top: 240px; left: 43px; width: 28px; height: 20px; border-bottom: 4px solid #e67e22; border-radius: 8px 8px 2px 2px;}
+        .astronaut__foot-right { background-color: white; position: absolute; top: 240px; left: 111px; width: 28px; height: 20px; border-bottom: 4px solid #e67e22; border-radius: 8px 8px 2px 2px;}
+        .astronaut__cord { position: absolute; top: -100px; left: -100px; }
+    </style>
+</head>
+<body>
+
+    <div class="moon"></div>
+    <div class="moon__crater moon__crater1"></div>
+    <div class="moon__crater moon__crater2"></div>
+    <div class="moon__crater moon__crater3"></div>
+
+    <div class="star star1"></div>
+    <div class="star star2"></div>
+    <div class="star star3"></div>
+    <div class="star star4"></div>
+    <div class="star star5"></div>
+
+    <div class="error">
+        <div class="error__title">404</div>
+        <div class="error__subtitle">Oops...</div>
+        <div class="error__description"></div>
+        
+        <a href="index.html" class="error__button">GO BACK HOME</a>
+    </div>
+
+    <div class="astronaut">
+        <div class="astronaut__backpack"></div>
+        <div class="astronaut__body"></div>
+        <div class="astronaut__arm-left1"></div>
+        <div class="astronaut__arm-right1"></div>
+        <div class="astronaut__leg-left"></div>
+        <div class="astronaut__leg-right"></div>
+        <div class="astronaut__foot-left"></div>
+        <div class="astronaut__foot-right"></div>
+        
+        <div class="astronaut__cord">
+            <canvas id="cord" height="500px" width="500px"></canvas>
+        </div>
+        
+        <div class="astronaut__head">
+            <canvas id="visor" width="60px" height="60px"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Visor Draw
+        function drawVisor() {
+            const canvas = document.getElementById('visor');
+            const ctx = canvas.getContext('2d');
+            ctx.beginPath();
+            ctx.moveTo(5, 45);
+            ctx.bezierCurveTo(15, 64, 45, 64, 55, 45);
+            ctx.lineTo(55, 20);
+            ctx.bezierCurveTo(55, 15, 50, 10, 45, 10);
+            ctx.lineTo(15, 10);
+            ctx.bezierCurveTo(15, 10, 5, 10, 5, 20);
+            ctx.lineTo(5, 45);
+            ctx.fillStyle = '#2f3640';
+            ctx.fill();
+        }
+
+        // Cord Animation
+        const cordCanvas = document.getElementById('cord');
+        const ctxCord = cordCanvas.getContext('2d');
+        let y1 = 160, y2 = 100, y3 = 100;
+        let y1F = true, y2F = false, y3F = true;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            ctxCord.clearRect(0, 0, 500, 500);
+            ctxCord.beginPath();
+            ctxCord.moveTo(130, 170);
+            ctxCord.bezierCurveTo(250, y1, 345, y2, 400, y3);
+            ctxCord.strokeStyle = 'white';
+            ctxCord.lineWidth = 8;
+            ctxCord.stroke();
+
+            if (y1 <= 100 || y1 >= 300) y1F = !y1F;
+            if (y2 <= 100 || y2 >= 310) y2F = !y2F;
+            if (y3 <= 100 || y3 >= 317) y3F = !y3F;
+
+            y1F ? y1 += 1 : y1 -= 1;
+            y2F ? y2 += 1 : y2 -= 1;
+            y3F ? y3 += 1 : y3 -= 1;
+        }
+
+        drawVisor();
+        animate();
+    </script>
+</body>
+</html>
