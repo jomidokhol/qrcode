@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebAuthn Biometric Demo</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f4f4f9;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        button {
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background-color: #004494;
+        }
+        #output {
+            margin-top: 20px;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+            text-align: left;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Biometric Authentication</h2>
+    <p>This demonstrates how a browser requests local fingerprint/FaceID authentication via WebAuthn.</p>
+    <button id="registerBtn">Register Device (Requires Sensor)</button>
+    <div id="output"></div>
+</div>
+
+<script>
+    // Utility to convert strings to Uint8Array (required for WebAuthn challenges)
+    function bufferEncode(value) {
+        return new TextEncoder().encode(value);
+    }
+
+    document.getElementById('registerBtn').addEventListener('click', async () => {
+        const outputEl = document.getElementById('output');
+        outputEl.style.display = 'block';
+        outputEl.innerText = "Waiting for local device sensor...";
+
+        // In a real application, this challenge must come from your backend server
+        const challengeFromServer = "random-secure-challenge-string"; 
+        const userId = "user-12345";
+
+        const publicKeyCredentialCreationOptions = {
+            // The challenge must be a buffer
+            challenge: bufferEncode(challengeFromServer),
+            rp: {
+                name: "WebAuthn Demo App",
+                // id: "localhost" // Un-comment and match your domain in production
+            },
+            user: {
+                id: bufferEncode(userId),
+                name: "user@example.com",
+                displayName: "Demo User"
+            },
+            pubKeyCredParams: [
+                { alg: -7, type: "public-key" }, // ES256
+                { alg: -257, type: "public-key" } // RS256
+            ],
+            authenticatorSelection: {
+                authenticatorAttachment: "platform", // Forces the use of the device's built-in sensor (fingerprint/FaceID)
+                userVerification: "required" // Forces the user to verify (e.g., scan fingerprint)
+            },
+            timeout: 60000,
+            attestation: "none"
+        };
+
+        try {
+            // This triggers the browser/OS UI prompting the user for their fingerprint
+            const credential = await navigator.credentials.create({
+                publicKey: publicKeyCredentialCreationOptions
+            });
+
+            // The result contains the new Public Key, NOT the fingerprint
+            console.log(credential);
+            outputEl.innerHTML = `<strong>Success!</strong> Public Key Credential Generated:<br><br>
+                                  <strong>ID:</strong> ${credential.id}<br><br>
+                                  <em>Note: The raw fingerprint remains securely locked in your device's hardware. Only a cryptographic key was shared.</em>`;
+        } catch (err) {
+            console.error(err);
+            outputEl.innerHTML = `<span style="color: red;"><strong>Error:</strong> ${err.message}</span><br><br>
+                                  Make sure you are running this on localhost or HTTPS, and your device has a fingerprint/biometric sensor setup.`;
+        }
+    });
+</script>
+
+</body>
+</html>
