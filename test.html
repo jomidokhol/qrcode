@@ -87,18 +87,19 @@
         .ring-3 { stroke-dasharray: 80; stroke-dashoffset: 40; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        #toast-box { position: fixed; top: 20px; right: 20px; z-index: 10001; }
+        /* Updated Toast CSS */
+        #toast-box { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10001; width: 90%; max-width: 400px; display: flex; flex-direction: column; align-items: center; }
         .toast {
-            width: 300px; padding: 15px; margin-bottom: 10px; border-radius: 8px; color: #fff;
-            font-size: 14px; font-weight: 600; display: flex; align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2); backdrop-filter: blur(5px);
-            opacity: 0; transform: translateX(100%);
-            animation: slideIn 0.5s forwards, fadeOut 0.5s forwards 3s;
+            width: 100%; padding: 16px 20px; margin-bottom: 10px; border-radius: 4px; color: #fff;
+            font-size: 16px; font-weight: 500; display: flex; align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            opacity: 0; transform: translateY(-20px);
+            animation: slideDown 0.4s forwards, fadeOut 0.4s forwards 3s;
         }
-        .toast-error { background: rgba(255, 0, 0, 0.7); border-left: 5px solid #ff0000; }
-        .toast-success { background: rgba(0, 128, 0, 0.7); border-left: 5px solid #00ff00; }
-        .toast i { margin-right: 10px; font-size: 18px; }
-        @keyframes slideIn { to { transform: translateX(0); opacity: 1; } }
+        .toast-error { background-color: #c9444d; } /* bKash style red */
+        .toast-success { background-color: #28a745; } /* Green */
+        .toast i { margin-right: 15px; font-size: 24px; color: #ffffff; }
+        @keyframes slideDown { to { transform: translateY(0); opacity: 1; } }
         @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
 
     </style>
@@ -209,7 +210,7 @@
     function goToPaymentPage() {
         const amountInput = document.getElementById('paymentAmount').value;
         if (!amountInput || amountInput <= 0) {
-            showToast("অনুগ্রহ করে সঠিক টাকার পরিমাণ দিন", "error");
+            showToast("অনুগ্রহ করে সঠিক টাকার পরিমাণ দিন", "error"); // এটি অ্যামাউন্ট পেজের জন্য অপরিবর্তিত রাখা হলো
             return;
         }
         
@@ -235,7 +236,12 @@
         const toast = document.createElement('div');
         toast.classList.add('toast');
         
-        let iconHtml = type === 'error' ? '<i class="fas fa-exclamation-circle"></i>' : '<i class="fas fa-check-circle"></i>';
+        // Updated FontAwesome Icons
+        let iconHtml = type === 'error' ? '<i class="fa-solid fa-shield-halved"></i>' : '<i class="fas fa-check-circle"></i>';
+        
+        // Alternative standard error icon if shield-halved isn't available:
+        // let iconHtml = type === 'error' ? '<i class="fas fa-exclamation-circle"></i>' : '<i class="fas fa-check-circle"></i>';
+
         toast.classList.add(type === 'error' ? 'toast-error' : 'toast-success');
         toast.innerHTML = iconHtml + message;
         toastBox.appendChild(toast);
@@ -248,7 +254,7 @@
         const trxID = inputField.value.trim(); 
 
         if (trxID.length < 8 || trxID.length > 12) {
-            showToast("আপনার ট্রানজেকশন আইডি ভুল", "error");
+            showToast("Your transaction ID is incorrect.", "error");
             return;
         }
 
@@ -263,44 +269,55 @@
                                            .get();
             
             let isPaymentValid = false;
+            let matchedDocId = null; // যে ডকুমেন্টে TrxID মিলবে সেটির ID সংরক্ষণ করার জন্য
 
             snapshot.forEach(doc => {
                 const data = doc.data();
                 const smsText = data.message || "";
 
-                // শর্ত ২: TrxID খোঁজা (Regex: TrxID এর পরে ১০টি A-Z বা 0-9)
+                // শর্ত ২: TrxID খোঁজা
                 const trxRegex = /TrxID[:\s]*([A-Z0-9]{10})/i;
                 const trxMatch = smsText.match(trxRegex);
                 const extractedTrxID = trxMatch ? trxMatch[1] : null;
 
-                // শর্ত ৩: টাকার পরিমাণ খোঁজা (Regex: received Tk এর পরে অঙ্কসমূহ)
+                // শর্ত ৩: টাকার পরিমাণ খোঁজা
                 const amountRegex = /received Tk[:\s]*(\d+)/i;
                 const amountMatch = smsText.match(amountRegex);
                 const extractedAmount = amountMatch ? parseInt(amountMatch[1]) : null;
 
-                // মিল চেক করা
+                // মিল চেক করা এবং পূর্বে ব্যবহার হয়েছে কিনা (used ফিল্ড) তা চেক করা
                 if (extractedTrxID === trxID && extractedAmount === targetAmount) {
-                    isPaymentValid = true;
+                    if (data.used !== true) { // যদি আগে ব্যবহার না হয়ে থাকে
+                        isPaymentValid = true;
+                        matchedDocId = doc.id;
+                    }
                 }
             });
 
-            loadingOverlay.style.display = 'none';
+            if (isPaymentValid && matchedDocId) {
+                // সফল হলে ওই ডকুমেন্টে used ফিল্ড true করে দেওয়া হচ্ছে
+                await autoPayDb.collection('AutoPayMessages').doc(matchedDocId).update({
+                    used: true
+                });
 
-            if (isPaymentValid) {
-                showToast("পেমেন্ট সফলভাবে ভেরিফাই হয়েছে!", "success");
+                loadingOverlay.style.display = 'none';
+                showToast("Payment successful", "success");
+                
                 // এখানে আপনার সাকসেস লজিক দিন (যেমন ডাটাবেজে অর্ডার সেভ করা)
                 setTimeout(() => {
-                    alert("পেমেন্ট ভেরিফাইড! পরবর্তী ধাপে নেওয়া হচ্ছে...");
+                    alert("Payment successful! Taking you to the next step...");
                     // processDatabaseOrder(trxID); // আপনার আগের ফাংশন কল করতে পারেন
                 }, 1500);
             } else {
-                showToast("পেমেন্ট পাওয়া যায়নি অথবা এমাউন্ট ভুল!", "error");
+                loadingOverlay.style.display = 'none';
+                showToast("Your transaction ID is incorrect.", "error");
             }
 
         } catch (error) {
             loadingOverlay.style.display = 'none';
             console.error(error);
-            showToast("সার্ভার এরর! আবার চেষ্টা করুন।", "error");
+            // কোন সার্ভার এরর হলেও এই একই ম্যাসেজ দেখাবে
+            showToast("Your transaction ID is incorrect.", "error");
         }
     }
 </script>
