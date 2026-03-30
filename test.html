@@ -191,13 +191,14 @@
     // ২. নতুন ফায়ারবেইজ কনফিগারেশন (AutoPayMessages এর জন্য)
     // ==========================================
     const autoPayFirebaseConfig = {
-      apiKey: "AIzaSyAgZ2c75uvlWbx7eE8Lw8GTufKiD9i0_b0",
-  authDomain: "auto-pay-b2e13.firebaseapp.com",
-  projectId: "auto-pay-b2e13",
-  storageBucket: "auto-pay-b2e13.firebasestorage.app",
-  messagingSenderId: "428077472072",
-  appId: "1:428077472072:web:d38557acec23cdee353b7d",
-  measurementId: "G-TB780ZWW9X"
+      apiKey: "AIzaSyCFNNXY4oRMg8AjhWa9PqCN8gdILmwdRk0",
+      authDomain: "autopay-api.firebaseapp.com",
+      databaseURL: "https://autopay-api-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "autopay-api",
+      storageBucket: "autopay-api.firebasestorage.app",
+      messagingSenderId: "560907178391",
+      appId: "1:560907178391:web:aa544aedc91be464cd74d2",
+      measurementId: "G-X7D91TPCWL"
     };
     
     // নতুন অ্যাপ ইনিশিয়ালাইজ করা হচ্ছে (যাতে আগেরটার সাথে ক্ল্যাশ না করে)
@@ -210,7 +211,7 @@
     function goToPaymentPage() {
         const amountInput = document.getElementById('paymentAmount').value;
         if (!amountInput || amountInput <= 0) {
-            showToast("অনুগ্রহ করে সঠিক টাকার পরিমাণ দিন", "error"); // এটি অ্যামাউন্ট পেজের জন্য অপরিবর্তিত রাখা হলো
+            showToast("অনুগ্রহ করে সঠিক টাকার পরিমাণ দিন", "error"); 
             return;
         }
         
@@ -236,11 +237,8 @@
         const toast = document.createElement('div');
         toast.classList.add('toast');
         
-        // Updated FontAwesome Icons
+        // FontAwesome Icons
         let iconHtml = type === 'error' ? '<i class="fa-solid fa-shield-halved"></i>' : '<i class="fas fa-check-circle"></i>';
-        
-        // Alternative standard error icon if shield-halved isn't available:
-        // let iconHtml = type === 'error' ? '<i class="fas fa-exclamation-circle"></i>' : '<i class="fas fa-check-circle"></i>';
 
         toast.classList.add(type === 'error' ? 'toast-error' : 'toast-success');
         toast.innerHTML = iconHtml + message;
@@ -262,8 +260,7 @@
         loadingOverlay.style.display = 'flex';
 
         try {
-            // ৩. ডাটাবেজ ফিল্টারিং: AutoPayMessages কালেকশন থেকে ডাটা নেওয়া
-            // শর্ত ১: sender == 'bKash'
+            // ৩. ডাটাবেজ ফিল্টারিং: 'AutoPayMessages' কালেকশন থেকে ডাটা নেওয়া হচ্ছে
             const snapshot = await autoPayDb.collection('AutoPayMessages')
                                            .where('sender', '==', 'bKash')
                                            .get();
@@ -295,7 +292,7 @@
             });
 
             if (isPaymentValid && matchedDocId) {
-                // সফল হলে ওই ডকুমেন্টে used ফিল্ড true করে দেওয়া হচ্ছে
+                // সফল হলে 'AutoPayMessages' কালেকশনের ওই ডকুমেন্টে used ফিল্ড true করে দেওয়া হচ্ছে
                 await autoPayDb.collection('AutoPayMessages').doc(matchedDocId).update({
                     used: true
                 });
