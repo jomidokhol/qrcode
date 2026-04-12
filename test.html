@@ -260,9 +260,9 @@
         loadingOverlay.style.display = 'flex';
 
         try {
-            // ৩. ডাটাবেজ ফিল্টারিং: 'AutoPayMessages' কালেকশন থেকে ডাটা নেওয়া হচ্ছে
+            // ৩. ডাটাবেজ ফিল্টারিং: 'AutoPayMessages' কালেকশন থেকে ডাটা নেওয়া হচ্ছে (bKash এবং NAGAD উভয়ের জন্য)
             const snapshot = await autoPayDb.collection('AutoPayMessages')
-                                           .where('sender', '==', 'bKash')
+                                           .where('sender', 'in', ['bKash', 'NAGAD'])
                                            .get();
             
             let isPaymentValid = false;
@@ -271,44 +271,49 @@
             snapshot.forEach(doc => {
                 const data = doc.data();
                 const smsText = data.message || "";
+                const senderName = data.sender || "";
 
                 // যদি আগে থেকেই used: true থাকে, তাহলে এই ডকুমেন্টটি বাতিল করে পরেরটি চেক করবে
                 if (data.used === true) {
                     return; 
                 }
 
-                // --- ফিল্টারিং সিস্টেম ১ (আগের নিয়ম) ---
-                const trxRegex1 = /TrxID[:\s]*([A-Z0-9]{10})/i;
-                const trxMatch1 = smsText.match(trxRegex1);
-                const extractedTrxID1 = trxMatch1 ? trxMatch1[1] : null;
+                // --- ফিল্টারিং সিস্টেম ১ (আগের নিয়ম) - শুধুমাত্র 'bKash' এর জন্য ---
+                if (senderName === 'bKash') {
+                    const trxRegex1 = /TrxID[:\s]*([A-Z0-9]{10})/i;
+                    const trxMatch1 = smsText.match(trxRegex1);
+                    const extractedTrxID1 = trxMatch1 ? trxMatch1[1] : null;
 
-                const amountRegex1 = /received Tk[:\s]*(\d+)/i;
-                const amountMatch1 = smsText.match(amountRegex1);
-                const extractedAmount1 = amountMatch1 ? parseInt(amountMatch1[1]) : null;
+                    const amountRegex1 = /received Tk[:\s]*(\d+)/i;
+                    const amountMatch1 = smsText.match(amountRegex1);
+                    const extractedAmount1 = amountMatch1 ? parseInt(amountMatch1[1]) : null;
 
-                if (extractedTrxID1 === trxID && extractedAmount1 === targetAmount) {
-                    isPaymentValid = true;
-                    matchedDocId = doc.id;
-                    return; // Match পাওয়া গেলে এই লুপের এখানেই কাজ শেষ
-                }
-
-                // --- ফিল্টারিং সিস্টেম ২ (নতুন নিয়ম) ---
-                // পুরো ম্যাসেজে 'Received' লেখাটি আছে কিনা
-                if (/Received/i.test(smsText)) {
-                    // 'Amount' এর পর Tk এর পর থেকে দশমিক এর আগে পর্যন্ত অঙ্ক (স্পেস ছাড়া)
-                    const amountRegex2 = /Amount.*?Tk\s*(\d+)\./i;
-                    const amountMatch2 = smsText.match(amountRegex2);
-                    const extractedAmount2 = amountMatch2 ? parseInt(amountMatch2[1]) : null;
-
-                    // 'TxnID:' এর পর ৮ থেকে ১০ অঙ্ক ও অক্ষরের কোড (স্পেস ছাড়া)
-                    const trxRegex2 = /TxnID:\s*([A-Za-z0-9]{8,10})(?!\w)/i;
-                    const trxMatch2 = smsText.match(trxRegex2);
-                    const extractedTrxID2 = trxMatch2 ? trxMatch2[1] : null;
-
-                    // মিল চেক করা
-                    if (extractedTrxID2 === trxID && extractedAmount2 === targetAmount) {
+                    if (extractedTrxID1 === trxID && extractedAmount1 === targetAmount) {
                         isPaymentValid = true;
                         matchedDocId = doc.id;
+                        return; // Match পাওয়া গেলে এই লুপের এখানেই কাজ শেষ
+                    }
+                }
+
+                // --- ফিল্টারিং সিস্টেম ২ (নতুন নিয়ম) - শুধুমাত্র 'NAGAD' এর জন্য ---
+                if (senderName === 'NAGAD') {
+                    // পুরো ম্যাসেজে 'Received' লেখাটি আছে কিনা
+                    if (/Received/i.test(smsText)) {
+                        // 'Amount' এর পর Tk এর পর থেকে দশমিক এর আগে পর্যন্ত অঙ্ক (স্পেস ছাড়া)
+                        const amountRegex2 = /Amount.*?Tk\s*(\d+)\./i;
+                        const amountMatch2 = smsText.match(amountRegex2);
+                        const extractedAmount2 = amountMatch2 ? parseInt(amountMatch2[1]) : null;
+
+                        // 'TxnID:' এর পর ৮ থেকে ১০ অঙ্ক ও অক্ষরের কোড (স্পেস ছাড়া)
+                        const trxRegex2 = /TxnID:\s*([A-Za-z0-9]{8,10})(?!\w)/i;
+                        const trxMatch2 = smsText.match(trxRegex2);
+                        const extractedTrxID2 = trxMatch2 ? trxMatch2[1] : null;
+
+                        // মিল চেক করা
+                        if (extractedTrxID2 === trxID && extractedAmount2 === targetAmount) {
+                            isPaymentValid = true;
+                            matchedDocId = doc.id;
+                        }
                     }
                 }
             });
