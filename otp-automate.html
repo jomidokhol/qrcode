@@ -3,241 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OTP Automation App</title>
-    <!-- Importing SMTP.js to handle the API sending process -->
-    <script src="https://smtpjs.com/v3/smtp.js"></script>
-    <style>
-        :root {
-            --primary: #4F46E5;
-            --primary-hover: #4338CA;
-            --bg: #F3F4F6;
-            --card-bg: #FFFFFF;
-            --text: #1F2937;
-            --border: #D1D5DB;
-        }
-
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .app-container {
-            background: var(--card-bg);
-            width: 100%;
-            max-width: 450px;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        h2 { text-align: center; margin-top: 0; color: var(--primary); }
-        
-        .section {
-            background: #f9fafb;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid var(--border);
-        }
-
-        .section-title {
-            font-size: 14px;
-            font-weight: bold;
-            color: #6B7280;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .form-group { margin-bottom: 15px; }
-        
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        input {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 14px;
-            transition: border 0.3s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
-        }
-
-        .hint { font-size: 12px; color: #ef4444; margin-top: 4px; }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        button:hover { background: var(--primary-hover); }
-        button:disabled { background: #9CA3AF; cursor: not-allowed; }
-
-        .status {
-            margin-top: 15px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 14px;
-            min-height: 20px;
-        }
-
-        .success { color: #10B981; }
-        .error { color: #EF4444; }
-
-        /* Hidden Verification Section */
-        #verify-section { display: none; margin-top: 20px; }
-    </style>
+    <title>XYZ Shop - Secure Login</title>
+    <!-- স্টাইলিং এর জন্য Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4 font-sans">
 
-<div class="app-container">
-    <h2>Secure OTP Automator</h2>
-
-    <!-- 1. Configuration Section -->
-    <div class="section">
-        <div class="section-title">1. Sender Setup (Your Gmail)</div>
-        <div class="form-group">
-            <label>Sender Gmail Address</label>
-            <input type="email" id="senderEmail" placeholder="e.g., your.email@gmail.com">
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+        <!-- Header -->
+        <div class="bg-emerald-800 p-6 text-center">
+            <h1 class="text-2xl font-bold text-white tracking-wide">XYZ Shop</h1>
+            <p class="text-emerald-200 text-sm mt-1">Secure Account Verification</p>
         </div>
-        <div class="form-group">
-            <label>Gmail App Password</label>
-            <input type="password" id="senderPassword" placeholder="16-character App Password">
-            <div class="hint">* Use a 16-digit Google App Password, not your standard login password.</div>
-        </div>
-    </div>
 
-    <!-- 2. Send OTP Section -->
-    <div class="section">
-        <div class="section-title">2. Send OTP</div>
-        <div class="form-group">
-            <label>Recipient Email Address</label>
-            <input type="email" id="recipientEmail" placeholder="Where should the OTP go?">
-        </div>
-        <button id="sendBtn" onclick="sendOTP()">Send OTP</button>
-    </div>
+        <div class="p-6">
+            <!-- Alert Message Box -->
+            <div id="alertBox" class="hidden mb-4 p-3 rounded-lg text-sm font-medium text-center transition-all"></div>
 
-    <div id="statusMessage" class="status"></div>
+            <!-- Step 1: Configuration (API Key) -->
+            <div id="configSection" class="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-xl">
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">System Config (Dev Only)</label>
+                <input type="text" id="apiKeyInput" placeholder="Paste your Applet API Key here" class="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 mb-2">
+                <button onclick="saveApiKey()" class="w-full bg-gray-800 text-white text-xs font-bold py-2 rounded-lg hover:bg-gray-900">Save API Key to LocalStorage</button>
+            </div>
 
-    <!-- 3. Verify OTP Section (Appears after sending) -->
-    <div class="section" id="verify-section">
-        <div class="section-title">3. Verify Identity</div>
-        <div class="form-group">
-            <label>Enter the 6-digit OTP</label>
-            <input type="text" id="userInputOtp" placeholder="Enter OTP here" maxlength="6">
-        </div>
-        <button id="verifyBtn" onclick="verifyOTP()">Verify Code</button>
-    </div>
-</div>
-
-<script>
-    let generatedOTP = null;
-
-    function sendOTP() {
-        const senderEmail = document.getElementById('senderEmail').value.trim();
-        const senderPassword = document.getElementById('senderPassword').value.trim();
-        const recipientEmail = document.getElementById('recipientEmail').value.trim();
-        const statusEl = document.getElementById('statusMessage');
-        const sendBtn = document.getElementById('sendBtn');
-
-        // Validation
-        if (!senderEmail || !senderPassword || !recipientEmail) {
-            showMessage("Please fill in all Setup and Recipient fields.", "error");
-            return;
-        }
-
-        // Generate a random 6-digit OTP
-        generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
-
-        // Update UI to Loading State
-        sendBtn.innerText = "Sending securely...";
-        sendBtn.disabled = true;
-        showMessage("Connecting to mail server...", "");
-
-        // Sending Email using SMTP.js
-        Email.send({
-            Host: "smtp.gmail.com",
-            Username: senderEmail,
-            Password: senderPassword,
-            To: recipientEmail,
-            From: senderEmail,
-            Subject: "Your Secure Login OTP",
-            Body: `
-                <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 10px; max-width: 400px; text-align: center;">
-                    <h2 style="color: #4F46E5;">OTP Verification</h2>
-                    <p>You requested a One-Time Password. Here is your code:</p>
-                    <h1 style="background: #F3F4F6; padding: 10px; letter-spacing: 5px; border-radius: 5px; color: #333;">${generatedOTP}</h1>
-                    <p style="color: #888; font-size: 12px;">Do not share this code with anyone. It will expire shortly.</p>
+            <!-- Step 2: Request OTP -->
+            <div id="requestSection" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                    <input type="email" id="emailInput" placeholder="user@example.com" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
                 </div>
-            `
-        }).then(message => {
-            sendBtn.innerText = "Send OTP";
-            sendBtn.disabled = false;
+                <button id="sendBtn" onclick="sendOtp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-emerald-200">
+                    Send Verification Code
+                </button>
+            </div>
 
-            if (message === "OK") {
-                showMessage(`Success! OTP sent to ${recipientEmail}`, "success");
-                // Reveal the verification section
-                document.getElementById('verify-section').style.display = 'block';
-                document.getElementById('userInputOtp').value = ''; // Reset input
-            } else {
-                showMessage("Failed to send. Ensure your App Password is correct. Log: " + message, "error");
-            }
-        }).catch(err => {
-            sendBtn.innerText = "Send OTP";
-            sendBtn.disabled = false;
-            showMessage("Error: " + err, "error");
-        });
-    }
+            <!-- Step 3: Verify OTP (Initially Hidden) -->
+            <div id="verifySection" class="space-y-4 hidden mt-6 pt-6 border-t border-gray-100">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Enter 6-Digit OTP</label>
+                    <input type="text" id="otpInput" maxlength="6" placeholder="• • • • • •" class="w-full px-4 py-3 border border-gray-300 rounded-xl text-center text-2xl tracking-[0.5em] focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all">
+                </div>
+                <button id="verifyBtn" onclick="verifyOtp()" class="w-full bg-gray-900 hover:bg-black text-white font-bold py-3 rounded-xl transition-all">
+                    Verify & Login
+                </button>
+                <button onclick="resetFlow()" class="w-full text-sm text-gray-500 hover:text-gray-800 font-medium py-2">
+                    Use a different email
+                </button>
+            </div>
 
-    function verifyOTP() {
-        const userEnteredOtp = document.getElementById('userInputOtp').value.trim();
+            <!-- Step 4: Success Screen (Initially Hidden) -->
+            <div id="successSection" class="hidden text-center py-6">
+                <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Verified Successfully!</h2>
+                <p class="text-gray-500 mb-6">Welcome to XYZ Shop dashboard.</p>
+                <button onclick="resetFlow()" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-6 rounded-lg transition-colors">Start Over</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // আপনার সার্ভারের লোকাল বা লাইভ URL দিন
+        const API_URL = 'http://localhost:3000/api/v1/send'; 
         
-        if (!userEnteredOtp) {
-            showMessage("Please enter the OTP first.", "error");
-            return;
+        let generatedOtp = null; // পাঠানো OTP এখানে সেভ থাকবে
+
+        // পেজ লোড হলে LocalStorage থেকে API Key নিয়ে আসা
+        window.onload = () => {
+            const savedKey = localStorage.getItem('xyz_api_key');
+            if (savedKey) {
+                document.getElementById('apiKeyInput').value = savedKey;
+            }
+        };
+
+        // ১. API Key সেভ করার ফাংশন
+        function saveApiKey() {
+            const key = document.getElementById('apiKeyInput').value.trim();
+            if(!key) return showAlert('Please enter an API Key', 'error');
+            localStorage.setItem('xyz_api_key', key);
+            showAlert('API Key Saved to Local Storage!', 'success');
         }
 
-        if (userEnteredOtp === generatedOTP) {
-            showMessage("✅ OTP Verified Successfully! Access Granted.", "success");
-            document.getElementById('verify-section').style.border = "2px solid #10B981";
-        } else {
-            showMessage("❌ Incorrect OTP. Please try again.", "error");
-            document.getElementById('verify-section').style.border = "2px solid #EF4444";
+        // ২. OTP পাঠানোর ফাংশন
+        async function sendOtp() {
+            const email = document.getElementById('emailInput').value.trim();
+            const apiKey = document.getElementById('apiKeyInput').value.trim();
+            const btn = document.getElementById('sendBtn');
+
+            if (!apiKey) return showAlert('Please save your API Key first.', 'error');
+            if (!email) return showAlert('Please enter an email address.', 'error');
+
+            // একটি ৬ ডিজিটের র‍্যান্ডম OTP জেনারেট করা হচ্ছে
+            generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+
+            try {
+                btn.innerText = "Sending...";
+                btn.disabled = true;
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        to: email,
+                        otp: generatedOtp,
+                        subject: 'XYZ Shop - Your Login Code'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('OTP Sent! Check your email.', 'success');
+                    // ইমেইল ইনপুট হাইড করে OTP ইনপুট শো করা
+                    document.getElementById('requestSection').classList.add('hidden');
+                    document.getElementById('verifySection').classList.remove('hidden');
+                } else {
+                    showAlert(data.error || 'Failed to send OTP', 'error');
+                }
+            } catch (error) {
+                showAlert('Network error. Is your server running?', 'error');
+            } finally {
+                btn.innerText = "Send Verification Code";
+                btn.disabled = false;
+            }
         }
-    }
 
-    function showMessage(text, type) {
-        const statusEl = document.getElementById('statusMessage');
-        statusEl.innerText = text;
-        statusEl.className = "status " + type;
-    }
-</script>
+        // ৩. OTP ভেরিফাই করার ফাংশন
+        function verifyOtp() {
+            const userOtp = document.getElementById('otpInput').value.trim();
+            
+            if (!userOtp) return showAlert('Please enter the OTP', 'error');
 
+            // ইউজার ইনপুট করা OTP এর সাথে আমাদের জেনারেট করা OTP ম্যাচ করানো
+            if (userOtp === generatedOtp) {
+                // সাকসেস!
+                document.getElementById('verifySection').classList.add('hidden');
+                document.getElementById('configSection').classList.add('hidden');
+                document.getElementById('alertBox').classList.add('hidden');
+                document.getElementById('successSection').classList.remove('hidden');
+            } else {
+                showAlert('Invalid Verification Code. Try again.', 'error');
+            }
+        }
+
+        // ৪. রিসেট বা আবার শুরু করার ফাংশন
+        function resetFlow() {
+            generatedOtp = null;
+            document.getElementById('otpInput').value = '';
+            document.getElementById('emailInput').value = '';
+            
+            document.getElementById('successSection').classList.add('hidden');
+            document.getElementById('verifySection').classList.add('hidden');
+            document.getElementById('requestSection').classList.remove('hidden');
+            document.getElementById('configSection').classList.remove('hidden');
+            document.getElementById('alertBox').classList.add('hidden');
+        }
+
+        // এলার্ট দেখানোর হেল্পার ফাংশন
+        function showAlert(message, type) {
+            const box = document.getElementById('alertBox');
+            box.innerText = message;
+            box.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-emerald-100', 'text-emerald-700');
+            
+            if (type === 'error') {
+                box.classList.add('bg-red-100', 'text-red-700');
+            } else {
+                box.classList.add('bg-emerald-100', 'text-emerald-700');
+            }
+        }
+    </script>
 </body>
 </html>
