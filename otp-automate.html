@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Automation App</title>
+    <!-- Importing SMTP.js to handle the API sending process -->
+    <script src="https://smtpjs.com/v3/smtp.js"></script>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --bg: #F3F4F6;
+            --card-bg: #FFFFFF;
+            --text: #1F2937;
+            --border: #D1D5DB;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .app-container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 450px;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 { text-align: center; margin-top: 0; color: var(--primary); }
+        
+        .section {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #6B7280;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+
+        .hint { font-size: 12px; color: #ef4444; margin-top: 4px; }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover { background: var(--primary-hover); }
+        button:disabled { background: #9CA3AF; cursor: not-allowed; }
+
+        .status {
+            margin-top: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            min-height: 20px;
+        }
+
+        .success { color: #10B981; }
+        .error { color: #EF4444; }
+
+        /* Hidden Verification Section */
+        #verify-section { display: none; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <h2>Secure OTP Automator</h2>
+
+    <!-- 1. Configuration Section -->
+    <div class="section">
+        <div class="section-title">1. Sender Setup (Your Gmail)</div>
+        <div class="form-group">
+            <label>Sender Gmail Address</label>
+            <input type="email" id="senderEmail" placeholder="e.g., your.email@gmail.com">
+        </div>
+        <div class="form-group">
+            <label>Gmail App Password</label>
+            <input type="password" id="senderPassword" placeholder="16-character App Password">
+            <div class="hint">* Use a 16-digit Google App Password, not your standard login password.</div>
+        </div>
+    </div>
+
+    <!-- 2. Send OTP Section -->
+    <div class="section">
+        <div class="section-title">2. Send OTP</div>
+        <div class="form-group">
+            <label>Recipient Email Address</label>
+            <input type="email" id="recipientEmail" placeholder="Where should the OTP go?">
+        </div>
+        <button id="sendBtn" onclick="sendOTP()">Send OTP</button>
+    </div>
+
+    <div id="statusMessage" class="status"></div>
+
+    <!-- 3. Verify OTP Section (Appears after sending) -->
+    <div class="section" id="verify-section">
+        <div class="section-title">3. Verify Identity</div>
+        <div class="form-group">
+            <label>Enter the 6-digit OTP</label>
+            <input type="text" id="userInputOtp" placeholder="Enter OTP here" maxlength="6">
+        </div>
+        <button id="verifyBtn" onclick="verifyOTP()">Verify Code</button>
+    </div>
+</div>
+
+<script>
+    let generatedOTP = null;
+
+    function sendOTP() {
+        const senderEmail = document.getElementById('senderEmail').value.trim();
+        const senderPassword = document.getElementById('senderPassword').value.trim();
+        const recipientEmail = document.getElementById('recipientEmail').value.trim();
+        const statusEl = document.getElementById('statusMessage');
+        const sendBtn = document.getElementById('sendBtn');
+
+        // Validation
+        if (!senderEmail || !senderPassword || !recipientEmail) {
+            showMessage("Please fill in all Setup and Recipient fields.", "error");
+            return;
+        }
+
+        // Generate a random 6-digit OTP
+        generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // Update UI to Loading State
+        sendBtn.innerText = "Sending securely...";
+        sendBtn.disabled = true;
+        showMessage("Connecting to mail server...", "");
+
+        // Sending Email using SMTP.js
+        Email.send({
+            Host: "smtp.gmail.com",
+            Username: senderEmail,
+            Password: senderPassword,
+            To: recipientEmail,
+            From: senderEmail,
+            Subject: "Your Secure Login OTP",
+            Body: `
+                <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 10px; max-width: 400px; text-align: center;">
+                    <h2 style="color: #4F46E5;">OTP Verification</h2>
+                    <p>You requested a One-Time Password. Here is your code:</p>
+                    <h1 style="background: #F3F4F6; padding: 10px; letter-spacing: 5px; border-radius: 5px; color: #333;">${generatedOTP}</h1>
+                    <p style="color: #888; font-size: 12px;">Do not share this code with anyone. It will expire shortly.</p>
+                </div>
+            `
+        }).then(message => {
+            sendBtn.innerText = "Send OTP";
+            sendBtn.disabled = false;
+
+            if (message === "OK") {
+                showMessage(`Success! OTP sent to ${recipientEmail}`, "success");
+                // Reveal the verification section
+                document.getElementById('verify-section').style.display = 'block';
+                document.getElementById('userInputOtp').value = ''; // Reset input
+            } else {
+                showMessage("Failed to send. Ensure your App Password is correct. Log: " + message, "error");
+            }
+        }).catch(err => {
+            sendBtn.innerText = "Send OTP";
+            sendBtn.disabled = false;
+            showMessage("Error: " + err, "error");
+        });
+    }
+
+    function verifyOTP() {
+        const userEnteredOtp = document.getElementById('userInputOtp').value.trim();
+        
+        if (!userEnteredOtp) {
+            showMessage("Please enter the OTP first.", "error");
+            return;
+        }
+
+        if (userEnteredOtp === generatedOTP) {
+            showMessage("✅ OTP Verified Successfully! Access Granted.", "success");
+            document.getElementById('verify-section').style.border = "2px solid #10B981";
+        } else {
+            showMessage("❌ Incorrect OTP. Please try again.", "error");
+            document.getElementById('verify-section').style.border = "2px solid #EF4444";
+        }
+    }
+
+    function showMessage(text, type) {
+        const statusEl = document.getElementById('statusMessage');
+        statusEl.innerText = text;
+        statusEl.className = "status " + type;
+    }
+</script>
+
+</body>
+</html>
