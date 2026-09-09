@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One Tool - অডিও এবং এইচটিএমএল স্টুডিও</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font (Hind Siliguri) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Hind Siliguri', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+
+        .clean-card {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: skeleton-load 1.2s infinite ease-in-out;
+        }
+
+        @keyframes skeleton-load {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- নোটিফিকেশন মেসেজ (Toast) -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-3 px-5 py-3 rounded-lg bg-slate-900 text-white shadow-lg text-sm">
+        <i id="toast-icon" class="fas fa-check-circle text-emerald-400"></i>
+        <span id="toast-msg">সফল হয়েছে</span>
+    </div>
+
+    <!-- হেডার ও মেনুবার -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+            <!-- লোগো -->
+            <div onclick="navigate('home')" class="flex items-center gap-2 cursor-pointer">
+                <div class="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-lg">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-none text-slate-800">One Tool</h1>
+                    <span class="text-[11px] text-slate-500 font-medium">অডিও স্টুডিও</span>
+                </div>
+            </div>
+
+            <!-- নেভিগেশন বাটন -->
+            <nav class="flex items-center gap-1 sm:gap-2">
+                <button onclick="navigate('home')" id="btn-nav-home" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-indigo-50 text-indigo-600 transition-colors">
+                    হোম
+                </button>
+                <button onclick="navigate('audio2html')" id="btn-nav-audio2html" class="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+                    অডিও থেকে এইচটিএমএল
+                </button>
+                <button onclick="navigate('html2audio')" id="btn-nav-html2audio" class="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+                    এইচটিএমএল থেকে অডিও
+                </button>
+                <button onclick="navigate('guide')" id="btn-nav-guide" class="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+                    ব্যবহার বিধি
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- মূল কনটেন্ট এরিয়া -->
+    <main class="max-w-4xl mx-auto px-4 py-8 w-full flex-grow">
+
+        <!-- ==================== পেজ ১: ল্যান্ডিং পেজ ==================== -->
+        <section id="page-home" class="space-y-6">
+            <div class="clean-card rounded-2xl p-8 text-center bg-gradient-to-b from-white to-slate-50/50">
+                <span class="text-xs font-semibold px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full border border-indigo-100 inline-block mb-3">
+                    ১০০% ব্রাউজার প্রসেসিং • নিরাপদ ও সার্ভারহীন
+                </span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-800">অডিও এবং এইচটিএমএল রূপান্তরকারী</h2>
+                <p class="text-slate-600 text-sm mt-2 max-w-xl mx-auto">
+                    আপনার যেকোনো অডিও ফাইলকে অফলাইন এইচটিএমএল ফাইলে রূপান্তর করুন অথবা কোড থেকে সরাসরি অডিও ফাইলটি উদ্ধার ও প্লে করুন।
+                </p>
+
+                <div class="flex flex-wrap justify-center gap-3 mt-6">
+                    <button onclick="navigate('audio2html')" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
+                        অডিও থেকে এইচটিএমএল বানান
+                    </button>
+                    <button onclick="navigate('html2audio')" class="px-5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-medium transition-colors shadow-sm">
+                        এইচটিএমএল থেকে অডিও শুনুন
+                    </button>
+                </div>
+            </div>
+
+            <!-- টুল কার্ডসমূহ -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div onclick="navigate('audio2html')" class="clean-card p-6 rounded-2xl hover:border-indigo-300 cursor-pointer transition-all">
+                    <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg mb-4">
+                        <i class="fas fa-file-code"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800">অডিও টু এইচটিএমএল (HTML)</h3>
+                    <p class="text-slate-500 text-xs mt-1 leading-relaxed">
+                        MP3, WAV বা যেকোনো অডিও ফাইল নির্বাচন করুন এবং স্বয়ংসম্পূর্ণ এইচটিএমএল কোড ও ফাইল তৈরি করুন।
+                    </p>
+                </div>
+
+                <div onclick="navigate('html2audio')" class="clean-card p-6 rounded-2xl hover:border-indigo-300 cursor-pointer transition-all">
+                    <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg mb-4">
+                        <i class="fas fa-file-audio"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800">এইচটিএমএল টু অডিও (Audio)</h3>
+                    <p class="text-slate-500 text-xs mt-1 leading-relaxed">
+                        পূর্বে তৈরি করা এইচটিএমএল ফাইল বা কোড দিন। মূল কোয়ালিটির অডিও শুনুন এবং সরাসরি ডাউনলোড করুন।
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== পেজ ২: অডিও থেকে এইচটিএমএল ==================== -->
+        <section id="page-audio2html" class="hidden space-y-6">
+            <div class="border-b border-slate-200 pb-4 flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">অডিও ফাইলকে এইচটিএমএল এ রূপান্তর</h2>
+                    <p class="text-xs text-slate-500">আপনার ডিভাইস থেকে যেকোনো অডিও ফাইল আপলোড করুন</p>
+                </div>
+                <button onclick="resetAudio2Html()" class="px-3 py-1.5 text-xs font-medium border border-slate-300 rounded-lg hover:bg-slate-100 text-slate-600">
+                    রিসেট
+                </button>
+            </div>
+
+            <!-- ফাইল আপলোড বক্স -->
+            <div id="a2h-box-upload" class="clean-card rounded-2xl p-8 border-2 border-dashed border-slate-300 hover:border-indigo-500 text-center cursor-pointer transition-colors relative">
+                <input type="file" id="a2h-input-file" accept="audio/*,.mp2,.wav,.mp3,.ogg,.m4a" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                <div class="w-12 h-12 mx-auto rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl mb-3">
+                    <i class="fas fa-arrow-up-from-bracket"></i>
+                </div>
+                <h4 class="text-sm font-semibold text-slate-700">অডিও ফাইল এখানে রাখুন অথবা ব্রাউজ করুন</h4>
+                <p class="text-xs text-slate-400 mt-1">সাপোর্টেড ফরম্যাট: MP3, WAV, MP2, OGG ইত্যাদি</p>
+            </div>
+
+            <!-- প্রোগ্রেস ও স্কেলিটন লোডার -->
+            <div id="a2h-box-loading" class="hidden clean-card rounded-2xl p-6 space-y-4">
+                <div class="flex items-center justify-between text-xs text-slate-600">
+                    <span id="a2h-txt-filename" class="font-semibold truncate max-w-xs">প্রসেসিং হচ্ছে...</span>
+                    <span id="a2h-txt-percent" class="font-bold text-indigo-600">0%</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <div id="a2h-bar" class="bg-indigo-600 h-full w-0 transition-all duration-200"></div>
+                </div>
+                <div class="space-y-2 pt-2">
+                    <div class="h-3 skeleton rounded w-3/4"></div>
+                    <div class="h-3 skeleton rounded w-1/2"></div>
+                </div>
+            </div>
+
+            <!-- ফলাফল সেকশন -->
+            <div id="a2h-box-result" class="hidden space-y-4">
+                <div class="clean-card rounded-2xl p-6 space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                        <div>
+                            <span class="text-xs font-semibold text-emerald-600 flex items-center gap-1">
+                                <i class="fas fa-check-circle"></i> সফলভাবে তৈরি হয়েছে
+                            </span>
+                            <h4 id="a2h-txt-stats" class="text-sm font-bold text-slate-800 mt-0.5">অডিও নাম</h4>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="copyGeneratedHtml()" class="px-4 py-2 text-xs font-semibold border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg flex items-center gap-1.5">
+                                <i class="fas fa-copy"></i> কপি কোড
+                            </button>
+                            <button onclick="downloadGeneratedHtml()" class="px-4 py-2 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg flex items-center gap-1.5 shadow-sm">
+                                <i class="fas fa-download"></i> এইচটিএমএল ডাউনলোড (.html)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- লাইভ অডিও প্লেয়ার প্রিভিউ -->
+                    <div>
+                        <label class="text-xs font-medium text-slate-500 block mb-1">অডিও প্লেয়ার প্রিভিউ:</label>
+                        <audio id="a2h-player-preview" controls class="w-full h-10"></audio>
+                    </div>
+
+                    <!-- এইচটিএমএল কোড বক্স -->
+                    <div>
+                        <label class="text-xs font-medium text-slate-500 block mb-1">উৎপন্ন এইচটিএমএল কোড:</label>
+                        <textarea id="a2h-code-view" readonly rows="5" class="w-full bg-slate-50 text-slate-700 text-xs font-mono p-3 rounded-lg border border-slate-200 focus:outline-none resize-none"></textarea>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== পেজ ৩: এইচটিএমএল থেকে অডিও ==================== -->
+        <section id="page-html2audio" class="hidden space-y-6">
+            <div class="border-b border-slate-200 pb-4 flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">এইচটিএমএল থেকে অডিও প্লে ও ডাউনলোড</h2>
+                    <p class="text-xs text-slate-500">আপনার সংরক্ষিত এইচটিএমএল ফাইল দিন বা কোড পেস্ট করুন</p>
+                </div>
+                <button onclick="resetHtml2Audio()" class="px-3 py-1.5 text-xs font-medium border border-slate-300 rounded-lg hover:bg-slate-100 text-slate-600">
+                    রিসেট
+                </button>
+            </div>
+
+            <!-- ইনপুট মেথড (ফাইল বা কোড) -->
+            <div class="clean-card rounded-2xl p-6 space-y-4">
+                <div class="flex gap-2 border-b border-slate-100 pb-3">
+                    <button onclick="setExtractorTab('file')" id="tab-btn-file" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-600">
+                        ফাইল দিন
+                    </button>
+                    <button onclick="setExtractorTab('paste')" id="tab-btn-paste" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50">
+                        কোড পেস্ট করুন
+                    </button>
+                </div>
+
+                <!-- ১. ফাইল আপলোড অপশন -->
+                <div id="h2a-tab-file" class="border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-xl p-6 text-center cursor-pointer relative">
+                    <input type="file" id="h2a-input-file" accept=".html,.htm,.txt" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                    <i class="fas fa-file-code text-indigo-600 text-2xl mb-2"></i>
+                    <h4 class="text-xs font-semibold text-slate-700">এইচটিএমএল (.html) ফাইলটি এখানে সিলেক্ট করুন</h4>
+                </div>
+
+                <!-- ২. কোড পেস্ট অপশন -->
+                <div id="h2a-tab-paste" class="hidden space-y-3">
+                    <textarea id="h2a-input-text" rows="4" placeholder="এইচটিএমএল কোড এখানে পেস্ট করুন..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono focus:outline-none focus:border-indigo-500"></textarea>
+                    <button onclick="extractFromCodeInput()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold">
+                        অডিও এক্সট্র্যাক্ট করুন
+                    </button>
+                </div>
+            </div>
+
+            <!-- অডিও প্লেয়ার ও ডাউনলোড বক্স -->
+            <div id="h2a-box-player" class="hidden clean-card rounded-2xl p-6 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                    <div>
+                        <h4 id="h2a-txt-title" class="text-sm font-bold text-slate-800">অডিও ফাইল প্রস্তুত</h4>
+                        <p id="h2a-txt-size" class="text-xs text-slate-500">সাইজ হিসেব হচ্ছে...</p>
+                    </div>
+                    <button onclick="downloadExtractedAudioFile()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+                        <i class="fas fa-download"></i> অডিও ফাইল ডাউনলোড
+                    </button>
+                </div>
+
+                <audio id="h2a-main-player" controls class="w-full h-10"></audio>
+            </div>
+        </section>
+
+        <!-- ==================== পেজ ৪: ব্যবহার বিধি ও সহায়িকা ==================== -->
+        <section id="page-guide" class="hidden space-y-6">
+            <div class="border-b border-slate-200 pb-4">
+                <h2 class="text-xl font-bold text-slate-800">ব্যবহার সহায়িকা ও তথ্য</h2>
+                <p class="text-xs text-slate-500">টুলগুলো ব্যবহারের নিয়মাবলী নিচে দেওয়া হলো</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="clean-card rounded-2xl p-5 space-y-2">
+                    <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <span class="w-6 h-6 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">১</span>
+                        অডিও থেকে এইচটিএমএল রূপান্তর
+                    </h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        • "অডিও থেকে এইচটিএমএল" পেজে যান এবং আপনার অডিও ফাইলটি সিলেক্ট করুন।<br>
+                        • প্রসেস শেষ হলে সরাসরি ডাউনলোড বাটনে ক্লিক করে `.html` ফাইল সংরক্ষণ করুন অথবা কোড কপি করে নিন।
+                    </p>
+                </div>
+
+                <div class="clean-card rounded-2xl p-5 space-y-2">
+                    <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <span class="w-6 h-6 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">২</span>
+                        এইচটিএমএল থেকে অডিও উদ্ধার
+                    </h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        • "এইচটিএমএল থেকে অডিও" পেজে যান এবং পূর্বে রূপান্তরিত `.html` ফাইলটি দিন অথবা কোড পেস্ট করুন।<br>
+                        • ফাইলটি লোড হওয়ামাত্রই প্লেয়ারে গান শোনা যাবে এবং ডাউনলোড বাটনে ক্লিক করে আসল অডিও ফাইলটি নামানো যাবে।
+                    </p>
+                </div>
+            </div>
+
+            <!-- ডেভেলপার ও প্রতিষ্ঠান সংক্রান্ত তথ্য -->
+            <div class="clean-card rounded-2xl p-6 bg-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                    <h4 class="text-xs font-semibold uppercase text-slate-400">উদ্যোগ ও ডেভেলপমেন্ট</h4>
+                    <p class="text-base font-bold text-slate-800 mt-0.5">One Tool প্রতিষ্ঠান</p>
+                    <p class="text-xs text-slate-600">প্রধান ডেভেলপার: <span class="font-semibold text-slate-800">Nur Muhammad (নূর মুহাম্মদ)</span></p>
+                </div>
+                <div class="text-xs text-slate-500 bg-white px-3 py-1.5 rounded-lg border border-slate-200">
+                    সংস্করণ: 2.0 (সম্পূর্ণ বাংলা সংস্করণ)
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ফুটার -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+        <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p>© 2026 <b>One Tool</b> - সর্বস্বত্ব সংরক্ষিত।</p>
+            <p>ডেভেলপ করেছেন: <span class="font-medium text-slate-700">Nur Muhammad</span></p>
+        </div>
+    </footer>
+
+    <!-- স্ক্রিপ্ট লজিক -->
+    <script>
+        let currentHtmlCode = "";
+        let currentHtmlFileName = "audio_player.html";
+        let extractedBlobUrl = null;
+        let extractedExtension = "mp3";
+
+        // পেজ নেভিগেশন হ্যান্ডলার
+        function navigate(page) {
+            const pages = ['home', 'audio2html', 'html2audio', 'guide'];
+            pages.forEach(p => {
+                const el = document.getElementById(`page-${p}`);
+                const btn = document.getElementById(`btn-nav-${p}`);
+                if (el) el.classList.add('hidden');
+                if (btn) {
+                    btn.className = "px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors";
+                }
+            });
+
+            const activePage = document.getElementById(`page-${page}`);
+            const activeBtn = document.getElementById(`btn-nav-${page}`);
+            if (activePage) activePage.classList.remove('hidden');
+            if (activeBtn) {
+                activeBtn.className = "px-3 py-1.5 rounded-lg text-sm font-medium bg-indigo-50 text-indigo-600 transition-colors";
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // টোস্ট নোটিফিকেশন ফাংশন
+        function showNotification(text, isSuccess = true) {
+            const toast = document.getElementById('toast');
+            const msg = document.getElementById('toast-msg');
+            const icon = document.getElementById('toast-icon');
+
+            msg.innerText = text;
+            icon.className = isSuccess ? 'fas fa-check-circle text-emerald-400' : 'fas fa-exclamation-circle text-rose-400';
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 2500);
+        }
+
+        // ১. অডিও টু এইচটিএমএল রূপান্তর লজিক
+        const a2hInput = document.getElementById('a2h-input-file');
+        const a2hBoxUpload = document.getElementById('a2h-box-upload');
+        const a2hBoxLoading = document.getElementById('a2h-box-loading');
+        const a2hBoxResult = document.getElementById('a2h-box-result');
+        const a2hBar = document.getElementById('a2h-bar');
+        const a2hPercent = document.getElementById('a2h-txt-percent');
+        const a2hFileName = document.getElementById('a2h-txt-filename');
+        const a2hStats = document.getElementById('a2h-txt-stats');
+        const a2hPreview = document.getElementById('a2h-player-preview');
+        const a2hCodeView = document.getElementById('a2h-code-view');
+
+        a2hInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            a2hBoxUpload.classList.add('hidden');
+            a2hBoxLoading.classList.remove('hidden');
+            a2hBoxResult.classList.add('hidden');
+
+            a2hFileName.innerText = file.name;
+
+            let progress = 0;
+            const timer = setInterval(() => {
+                if (progress < 90) {
+                    progress += 15;
+                    a2hBar.style.width = progress + '%';
+                    a2hPercent.innerText = progress + '%';
+                }
+            }, 80);
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                clearInterval(timer);
+                a2hBar.style.width = '100%';
+                a2hPercent.innerText = '100%';
+
+                const base64Data = event.target.result;
+                const mime = file.type || 'audio/mp3';
+
+                currentHtmlCode = createHtmlTemplate(file.name, mime, base64Data);
+                currentHtmlFileName = file.name.substring(0, file.name.lastIndexOf('.')) + '.html';
+
+                setTimeout(() => {
+                    a2hBoxLoading.classList.add('hidden');
+                    a2hBoxResult.classList.remove('hidden');
+
+                    a2hStats.innerText = `${file.name} (${formatSize(file.size)})`;
+                    a2hPreview.src = base64Data;
+                    a2hCodeView.value = currentHtmlCode;
+
+                    showNotification('এইচটিএমএল ফাইল সফলভাবে প্রস্তুত হয়েছে!');
+                }, 300);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function createHtmlTemplate(name, mime, dataUrl) {
+            return `<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${name} - অডিও প্লেয়ার</title>
+    <meta name="audio-info" data-name="${name}" data-mime="${mime}">
+    <style>
+        body { font-family: sans-serif; background: #f8fafc; color: #0f172a; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; max-width: 420px; width: 100%; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); text-align: center; }
+        h2 { font-size: 16px; margin: 0 0 4px 0; word-break: break-word; color: #1e293b; }
+        p { font-size: 12px; color: #64748b; margin: 0 0 16px 0; }
+        audio { width: 100%; margin-top: 8px; }
+        .foot { font-size: 11px; color: #94a3b8; margin-top: 16px; border-top: 1px solid #f1f5f9; padding-top: 12px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>${name}</h2>
+        <p>One Tool অডিও প্লেয়ার</p>
+        <audio controls autoplay>
+            <source src="${dataUrl}" type="${mime}">
+            আপনার ব্রাউজার এই অডিও সাপোর্ট করে না।
+        </audio>
+        <div class="foot">ডেভেলপার: Nur Muhammad • One Tool</div>
+    </div>
+</body>
+</html>`;
+        }
+
+        function copyGeneratedHtml() {
+            if (!currentHtmlCode) return;
+            navigator.clipboard.writeText(currentHtmlCode).then(() => {
+                showNotification('কোড ক্লিপবোর্ডে কপি করা হয়েছে!');
+            });
+        }
+
+        function downloadGeneratedHtml() {
+            if (!currentHtmlCode) return;
+            const blob = new Blob([currentHtmlCode], { type: 'text/html;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = currentHtmlFileName || "audio.html";
+            link.click();
+            URL.revokeObjectURL(link.href);
+            showNotification('এইচটিএমএল ফাইল ডাউনলোড সম্পন্ন!');
+        }
+
+        function resetAudio2Html() {
+            a2hInput.value = '';
+            currentHtmlCode = '';
+            a2hBoxUpload.classList.remove('hidden');
+            a2hBoxLoading.classList.add('hidden');
+            a2hBoxResult.classList.add('hidden');
+            a2hPreview.pause();
+            a2hPreview.src = '';
+        }
+
+        // ২. এইচটিএমএল টু অডিও উদ্ধার লজিক
+        const h2aInputFile = document.getElementById('h2a-input-file');
+        const h2aInputText = document.getElementById('h2a-input-text');
+        const h2aBoxPlayer = document.getElementById('h2a-box-player');
+        const h2aMainPlayer = document.getElementById('h2a-main-player');
+        const h2aTxtTitle = document.getElementById('h2a-txt-title');
+        const h2aTxtSize = document.getElementById('h2a-txt-size');
+
+        function setExtractorTab(tab) {
+            const btnFile = document.getElementById('tab-btn-file');
+            const btnPaste = document.getElementById('tab-btn-paste');
+            const tabFile = document.getElementById('h2a-tab-file');
+            const tabPaste = document.getElementById('h2a-tab-paste');
+
+            if (tab === 'file') {
+                btnFile.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-600";
+                btnPaste.className = "px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50";
+                tabFile.classList.remove('hidden');
+                tabPaste.classList.add('hidden');
+            } else {
+                btnPaste.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-600";
+                btnFile.className = "px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50";
+                tabPaste.classList.remove('hidden');
+                tabFile.classList.add('hidden');
+            }
+        }
+
+        h2aInputFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => processHtmlToExtractAudio(ev.target.result, file.name);
+            reader.readAsText(file);
+        });
+
+        function extractFromCodeInput() {
+            const code = h2aInputText.value.trim();
+            if (!code) {
+                showNotification('এইচটিএমএল কোড দিন!', false);
+                return;
+            }
+            processHtmlToExtractAudio(code, "extracted_audio");
+        }
+
+        function processHtmlToExtractAudio(content, fallbackName) {
+            try {
+                let dataUri = "";
+                let detectedName = fallbackName;
+                extractedExtension = "mp3";
+
+                // Base64 regex
+                const regex = /data:audio\/([a-zA-Z0-9.-]+);base64,[A-Za-z0-9+/=]+/i;
+                const match = content.match(regex);
+
+                if (match) {
+                    dataUri = match[0];
+                    extractedExtension = match[1] === 'mpeg' ? 'mp3' : match[1];
+                }
+
+                // নাম খোঁজার চেষ্টা
+                const domParser = new DOMParser();
+                const doc = domParser.parseFromString(content, 'text/html');
+                const meta = doc.querySelector('meta[name="audio-info"]');
+                if (meta && meta.getAttribute('data-name')) {
+                    detectedName = meta.getAttribute('data-name');
+                }
+
+                if (!dataUri) {
+                    showNotification('কোনো অডিও ডাটা পাওয়া যায়নি!', false);
+                    return;
+                }
+
+                const blob = base64ToBlob(dataUri);
+                if (extractedBlobUrl) URL.revokeObjectURL(extractedBlobUrl);
+                extractedBlobUrl = URL.createObjectURL(blob);
+
+                h2aBoxPlayer.classList.remove('hidden');
+                h2aMainPlayer.src = extractedBlobUrl;
+                h2aTxtTitle.innerText = detectedName.includes('.') ? detectedName : `${detectedName}.${extractedExtension}`;
+                h2aTxtSize.innerText = `সাইজ: ${formatSize(blob.size)}`;
+
+                showNotification('অডিও সফলভাবে উদ্ধার হয়েছে!');
+            } catch (err) {
+                showNotification('প্রসেস করতে ত্রুটি হয়েছে!', false);
+            }
+        }
+
+        function downloadExtractedAudioFile() {
+            if (!extractedBlobUrl) return;
+            const link = document.createElement('a');
+            link.href = extractedBlobUrl;
+            link.download = h2aTxtTitle.innerText || `audio.${extractedExtension}`;
+            link.click();
+            showNotification('অডিও ফাইল ডাউনলোড হচ্ছে...');
+        }
+
+        function resetHtml2Audio() {
+            h2aInputFile.value = '';
+            h2aInputText.value = '';
+            h2aBoxPlayer.classList.add('hidden');
+            h2aMainPlayer.pause();
+            h2aMainPlayer.src = '';
+            if (extractedBlobUrl) {
+                URL.revokeObjectURL(extractedBlobUrl);
+                extractedBlobUrl = null;
+            }
+        }
+
+        // সহায়ক ফাংশন
+        function base64ToBlob(dataURI) {
+            const parts = dataURI.split(',');
+            const byteString = atob(parts[1]);
+            const mimeString = parts[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            return new Blob([ab], { type: mimeString });
+        }
+
+        function formatSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+    </script>
+</body>
+</html>
