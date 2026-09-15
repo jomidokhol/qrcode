@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>প্রফেশনাল সিভি মেকার | Professional CV Builder</title>
+  <title>প্রফেশনাল বিডি-স্টাইল সিভি বিল্ডার (1-Page A4)</title>
   
-  <!-- Google Fonts: Hind Siliguri (বাংলা ফন্ট) -->
+  <!-- বাংলা ও ইংরেজি উভয়ের জন্য স্ট্যান্ডার্ড ফন্ট -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- Tailwind CSS CDN -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- PDF & Image Generation Libraries -->
@@ -22,541 +22,447 @@
 
   <style>
     * {
-      font-family: 'Hind Siliguri', sans-serif;
+      box-sizing: border-box;
+      font-family: 'Hind Siliguri', 'Roboto', Arial, sans-serif;
     }
 
-    /* A4 Size Paper Simulation */
-    .a4-page {
+    /* হুবহু ১ পেজ A4 ডাইমেনশন ও বর্ডার গ্যারান্টি */
+    .a4-sheet {
       width: 210mm;
-      min-height: 297mm;
-      padding: 18mm 20mm;
+      height: 297mm; /* ফিক্সড A4 হাইট */
+      max-height: 297mm;
+      padding: 12mm 15mm;
       margin: 0 auto;
       background: #ffffff;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 5px 25px rgba(0,0,0,0.15);
       position: relative;
-      box-sizing: border-box;
+      overflow: hidden; /* ২য় পেজে যাওয়া আটকাবে */
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
     }
 
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
+    /* ছবির মতো গ্রে-বার সেকশন হেডার */
+    .section-bar {
+      background-color: var(--bar-bg, #e5e7eb);
+      color: var(--bar-text, #111827);
+      font-weight: 700;
+      font-size: 11.5px;
+      padding: 2.5px 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+      border-left: 4px solid var(--bar-accent, #374151);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
-    /* Drag and Drop styling */
+    /* ড্র্যাগ অ্যান্ড ড্রপ স্টাইল */
     .draggable-section {
-      cursor: move;
+      cursor: grab;
       position: relative;
-      transition: background-color 0.2s, transform 0.15s ease;
-      border-radius: 6px;
-      padding: 4px 6px;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
+      border-radius: 3px;
     }
-    .draggable-section:hover {
-      background-color: rgba(59, 130, 246, 0.04);
-      outline: 1px dashed #60a5fa;
+    .draggable-section:active {
+      cursor: grabbing;
     }
     .draggable-section.dragging {
-      opacity: 0.4;
-      background: #e2e8f0;
+      opacity: 0.35;
+      background: #e0f2fe;
     }
 
-    /* Templates styles */
-    .template-modern {
-      --primary-color: #1e3a8a;
-      --secondary-color: #3b82f6;
+    /* টেবিল ডিজাইন (ছবি ১ ও ২ এর মতো নিখুঁত বর্ডার) */
+    .cv-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10.5px;
+      margin-top: 2px;
     }
-    .template-executive {
-      --primary-color: #064e3b;
-      --secondary-color: #10b981;
+    .cv-table th, .cv-table td {
+      border: 1px solid #9ca3af;
+      padding: 2.5px 5px;
+      text-align: left;
     }
-    .template-creative {
-      --primary-color: #831843;
-      --secondary-color: #f43f5e;
-    }
-    .template-minimal {
-      --primary-color: #1f2937;
-      --secondary-color: #64748b;
-    }
-
-    .theme-heading {
-      color: var(--primary-color);
-      border-bottom: 2px solid var(--secondary-color);
-    }
-    .theme-badge {
-      background-color: var(--primary-color);
-      color: white;
+    .cv-table th {
+      background-color: #f3f4f6;
+      font-weight: 700;
+      color: #1f2937;
     }
 
+    /* থিম স্টাইলস */
+    .theme-classic {
+      --bar-bg: #e5e7eb;
+      --bar-text: #111827;
+      --bar-accent: #4b5563;
+      --primary-name: #1e3a8a;
+    }
+    .theme-bdjobs {
+      --bar-bg: #e2e8f0;
+      --bar-text: #0f172a;
+      --bar-accent: #2563eb;
+      --primary-name: #1d4ed8;
+    }
+    .theme-darkbar {
+      --bar-bg: #334155;
+      --bar-text: #ffffff;
+      --bar-accent: #0f172a;
+      --primary-name: #0f172a;
+    }
+
+    /* প্রিন্ট ও পেপার পেজিং */
     @media print {
-      body * {
-        visibility: hidden;
-      }
-      #cv-preview, #cv-preview * {
-        visibility: visible;
-      }
-      #cv-preview {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        margin: 0;
-        padding: 10mm;
-        box-shadow: none;
-      }
-      .no-print {
-        display: none !important;
+      body { background: transparent !important; padding: 0 !important; }
+      .no-print { display: none !important; }
+      .a4-sheet {
+        box-shadow: none !important;
+        margin: 0 !important;
+        width: 210mm !important;
+        height: 297mm !important;
+        page-break-after: avoid;
+        page-break-inside: avoid;
       }
     }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+<body class="bg-slate-200 text-slate-800 min-h-screen flex flex-col">
 
-  <!-- Top Header Navigation -->
+  <!-- শীর্ষ নেভিগেশন বার ও ডাউনলোড বাটন -->
   <header class="no-print bg-slate-900 text-white sticky top-0 z-50 shadow-md">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
+    <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-wrap justify-between items-center gap-2">
       <div class="flex items-center gap-2">
-        <i class="fa-solid fa-file-invoice text-indigo-400 text-2xl"></i>
-        <h1 class="text-xl font-bold tracking-wide">স্মার্ট বাংলা সিভি বিল্ডার</h1>
+        <i class="fa-solid fa-file-invoice text-blue-400 text-xl"></i>
+        <h1 class="text-base md:text-lg font-bold">BD স্টাইল ১-পেজ সিভি মেকার</h1>
       </div>
 
-      <!-- Quick Action Downloads -->
-      <div class="flex flex-wrap items-center gap-2 text-sm">
-        <button onclick="downloadPDF()" class="bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-md font-semibold flex items-center gap-1.5 shadow transition">
+      <div class="flex items-center gap-2 text-xs">
+        <button onclick="downloadPDF()" class="bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded font-bold flex items-center gap-1.5 shadow">
           <i class="fa-solid fa-file-pdf"></i> PDF ডাউনলোড
         </button>
-        <button onclick="downloadImage('png')" class="bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-md font-semibold flex items-center gap-1.5 shadow transition">
+        <button onclick="downloadImage('png')" class="bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded font-bold flex items-center gap-1.5 shadow">
           <i class="fa-solid fa-image"></i> PNG
         </button>
-        <button onclick="downloadImage('jpeg')" class="bg-sky-600 hover:bg-sky-700 px-3 py-1.5 rounded-md font-semibold flex items-center gap-1.5 shadow transition">
+        <button onclick="downloadImage('jpeg')" class="bg-sky-600 hover:bg-sky-700 px-3 py-1.5 rounded font-bold flex items-center gap-1.5 shadow">
           <i class="fa-solid fa-file-image"></i> JPG
         </button>
-        <button onclick="window.print()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-md font-semibold flex items-center gap-1.5 transition">
+        <button onclick="window.print()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded font-bold flex items-center gap-1">
           <i class="fa-solid fa-print"></i> প্রিন্ট
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Main Container: Dual Split Screen -->
+  <!-- মূল বডি: বামে ইনপুট প্যানেল, ডানে রিয়েল-টাইম ১-পেজ প্রিভিউ -->
   <div class="flex-1 flex flex-col lg:flex-row max-w-[1700px] w-full mx-auto overflow-hidden">
-    
-    <!-- LEFT PANEL: Editor & Form Controls -->
-    <div class="no-print w-full lg:w-[48%] bg-white border-r border-slate-200 h-[calc(100vh-60px)] overflow-y-auto p-5">
+
+    <!-- বাম পাশের কন্ট্রোল প্যানেল (Editor & Settings) -->
+    <div class="no-print w-full lg:w-[45%] bg-white border-r border-slate-300 h-[calc(100vh-52px)] overflow-y-auto p-4 space-y-4">
       
-      <!-- Top Tabs (তথ্য পূরণ, টেমপ্লেট ডিজাইন, সেটিংস) -->
-      <div class="flex border-b border-slate-200 mb-5 text-sm font-medium">
-        <button onclick="switchTab('tab-editor')" id="btn-tab-editor" class="tab-btn py-2 px-4 border-b-2 border-indigo-600 text-indigo-600 font-bold flex items-center gap-2">
-          <i class="fa-solid fa-pen-to-square"></i> তথ্য পূরণ
-        </button>
-        <button onclick="switchTab('tab-templates')" id="btn-tab-templates" class="tab-btn py-2 px-4 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
-          <i class="fa-solid fa-palette"></i> টেমপ্লেট ও রঙ
-        </button>
+      <!-- সেটিংস ও অপশনস -->
+      <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div class="flex items-center gap-2">
+          <label class="font-bold text-slate-700">টেমপ্লেট বার স্টাইল:</label>
+          <select id="theme-selector" onchange="changeTheme(this.value)" class="border rounded p-1 font-semibold text-slate-700 outline-none">
+            <option value="theme-bdjobs">Bdjobs গ্রে ও ব্লু (ছবি ১)</option>
+            <option value="theme-classic">স্ট্যান্ডার্ড ক্লাসিকাল গ্রে (ছবি ২)</option>
+            <option value="theme-darkbar">ডার্ক এক্সিকিউটিভ বার</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="font-bold text-slate-700">ফন্ট সাইজ স্কেল:</span>
+          <button onclick="adjustPageScale(-0.5)" class="border px-2 py-0.5 rounded bg-white hover:bg-slate-100 font-bold">-</button>
+          <span id="scale-label" class="font-semibold text-slate-600">100%</span>
+          <button onclick="adjustPageScale(0.5)" class="border px-2 py-0.5 rounded bg-white hover:bg-slate-100 font-bold">+</button>
+        </div>
       </div>
 
-      <!-- TAB 1: FORM EDITOR -->
-      <div id="tab-editor" class="tab-content space-y-6">
-
-        <!-- ছবি ও প্রাথমিক প্রোফাইল -->
-        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 shadow-sm">
-          <h3 class="font-bold text-slate-700 mb-3 flex items-center gap-2 text-base">
-            <i class="fa-solid fa-user text-indigo-600"></i> ব্যক্তিগত পরিচিতি ও ছবি
-          </h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">পূর্ণ নাম</label>
-              <input type="text" id="inp-name" value="মোঃ তানভীর আহমেদ" oninput="updateLiveView()" class="w-full border rounded-md p-2 text-sm focus:ring-2 focus:ring-indigo-400 outline-none">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">আবেদনকৃত পদ / শিরোনাম</label>
-              <input type="text" id="inp-title" value="সেলস অ্যাসিস্ট্যান্ট / শপ এক্সিকিউটিভ" oninput="updateLiveView()" class="w-full border rounded-md p-2 text-sm focus:ring-2 focus:ring-indigo-400 outline-none">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">মোবাইল নম্বর</label>
-              <input type="text" id="inp-phone" value="+৮৮০১৭১২-৩৪৫৬৭৮" oninput="updateLiveView()" class="w-full border rounded-md p-2 text-sm focus:ring-2 focus:ring-indigo-400 outline-none">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">ইমেইল এড্রেস</label>
-              <input type="email" id="inp-email" value="tanvir.sales@email.com" oninput="updateLiveView()" class="w-full border rounded-md p-2 text-sm focus:ring-2 focus:ring-indigo-400 outline-none">
-            </div>
-            <div class="md:col-span-2">
-              <label class="block text-xs font-semibold text-slate-600 mb-1">বর্তমান ঠিকানা</label>
-              <input type="text" id="inp-address" value="রাজশাহী, বাংলাদেশ" oninput="updateLiveView()" class="w-full border rounded-md p-2 text-sm focus:ring-2 focus:ring-indigo-400 outline-none">
-            </div>
-
-            <!-- পাসপোর্ট ছবি আপলোড -->
-            <div class="md:col-span-2 mt-2 pt-2 border-t border-slate-200 flex items-center justify-between">
-              <div>
-                <label class="block text-xs font-bold text-slate-700">পাসপোর্ট সাইজের ছবি যুক্ত করুন</label>
-                <input type="file" id="inp-photo" accept="image/*" onchange="handlePhotoUpload(event)" class="text-xs text-slate-500 mt-1 file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
-              </div>
-              <div class="flex items-center gap-2">
-                <input type="checkbox" id="toggle-photo" checked onchange="toggleSectionVisibility('sec-photo-view', this.checked)" class="rounded text-indigo-600">
-                <label for="toggle-photo" class="text-xs text-slate-600 cursor-pointer">ছবি দেখান</label>
-              </div>
-            </div>
+      <!-- ১. পরিচিতি ও ছবি -->
+      <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+        <h3 class="font-bold text-slate-800 text-xs uppercase mb-2 flex items-center justify-between">
+          <span>১. পরিচিতি ও পাসপোর্ট ছবি</span>
+          <label class="text-[11px] font-normal cursor-pointer flex items-center gap-1">
+            <input type="checkbox" id="toggle-photo" checked onchange="toggleElement('cv-photo-box', this.checked)"> ছবি দেখান
+          </label>
+        </h3>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="col-span-2">
+            <label class="font-semibold text-slate-600">পূর্ণ নাম:</label>
+            <input type="text" id="inp-name" value="মোঃ তানভীর আহমেদ" oninput="renderCV()" class="w-full border rounded p-1.5 font-bold">
+          </div>
+          <div>
+            <label class="font-semibold text-slate-600">মোবাইল:</label>
+            <input type="text" id="inp-mobile" value="+৮৮০১৭১২-৩৪৫৬৭৮" oninput="renderCV()" class="w-full border rounded p-1.5">
+          </div>
+          <div>
+            <label class="font-semibold text-slate-600">ই-মেইল:</label>
+            <input type="text" id="inp-email" value="tanvir.sales@email.com" oninput="renderCV()" class="w-full border rounded p-1.5">
+          </div>
+          <div class="col-span-2">
+            <label class="font-semibold text-slate-600">ঠিকানা:</label>
+            <input type="text" id="inp-address" value="রাজঘাট, অভয়নগর, যশোর।" oninput="renderCV()" class="w-full border rounded p-1.5">
+          </div>
+          <div class="col-span-2 mt-1">
+            <label class="font-semibold text-slate-600 block mb-1">পাসপোর্ট সাইজ ছবি আপলোড করুন:</label>
+            <input type="file" accept="image/*" onchange="uploadPhoto(event)" class="text-xs file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-blue-100 file:text-blue-800">
           </div>
         </div>
+      </div>
 
-        <!-- ক্যারিয়ার অবজেক্টিভ -->
-        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex justify-between items-center mb-2">
-            <h3 class="font-bold text-slate-700 flex items-center gap-2 text-base">
-              <i class="fa-solid fa-bullseye text-indigo-600"></i> ক্যারিয়ার অবজেক্টিভ
-            </h3>
-            <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
-              <input type="checkbox" id="toggle-obj" checked onchange="toggleSectionVisibility('sec-objective', this.checked)"> অন/অফ
-            </label>
-          </div>
-          <textarea id="inp-objective" rows="4" oninput="updateLiveView()" class="w-full border rounded-md p-2 text-sm focus:ring-2 focus:ring-indigo-400 outline-none">একজন উদ্যমী ও প্রযুক্তিপ্রেমী কর্মী হিসেবে কোনো স্বনামধন্য মোবাইল ও গ্যাজেট শপে সেলস অ্যাসিস্ট্যান্ট / শপ এক্সিকিউটিভ পদে কাজ করতে আগ্রহী। কাস্টমার সার্ভিস ও প্রডাক্ট প্রেজেন্টেশনে ১০ মাসের পূর্ব অভিজ্ঞতা কাজে লাগিয়ে প্রতিষ্ঠানের বিক্রয় বৃদ্ধি এবং গ্রাহক সন্তুষ্টি নিশ্চিত করাই আমার লক্ষ্য।</textarea>
+      <!-- ২. ক্যারিয়ার অবজেক্টিভ -->
+      <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+        <div class="flex justify-between items-center mb-1">
+          <h3 class="font-bold text-slate-800 text-xs uppercase">২. ক্যারিয়ার অবজেক্টিভ (Career Objective)</h3>
+          <label class="text-[11px] cursor-pointer"><input type="checkbox" id="toggle-obj" checked onchange="toggleElement('sec-obj-view', this.checked)"> অন/অফ</label>
         </div>
+        <textarea id="inp-obj" rows="3" oninput="renderCV()" class="w-full border rounded p-1.5 text-xs">একজন উদ্যমী ও প্রযুক্তিপ্রেমী কর্মী হিসেবে কোনো স্বনামধন্য মোবাইল ও গ্যাজেট শপে সেলস অ্যাসিস্ট্যান্ট / শপ এক্সিকিউটিভ পদে কাজ করতে আগ্রহী। কাস্টমার সার্ভিস ও প্রডাক্ট প্রেজেন্টেশনে ১০ মাসের পূর্ব অভিজ্ঞতা কাজে লাগিয়ে প্রতিষ্ঠানের বিক্রয় বৃদ্ধি এবং গ্রাহক সন্তুষ্টি নিশ্চিত করাই আমার লক্ষ্য।</textarea>
+      </div>
 
-        <!-- পেশাগত অভিজ্ঞতা -->
-        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex justify-between items-center mb-2">
-            <h3 class="font-bold text-slate-700 flex items-center gap-2 text-base">
-              <i class="fa-solid fa-briefcase text-indigo-600"></i> পেশাগত অভিজ্ঞতা (Work Experience)
-            </h3>
-            <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
-              <input type="checkbox" id="toggle-exp" checked onchange="toggleSectionVisibility('sec-experience', this.checked)"> অন/অফ
-            </label>
-          </div>
-          <div id="experience-list" class="space-y-4">
-            <!-- অভিজ্ঞতা আইটেম ডিফল্ট -->
-            <div class="exp-item p-3 border rounded-lg bg-white relative">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-                <div>
-                  <label class="font-semibold">পদবী:</label>
-                  <input type="text" class="exp-role w-full border rounded p-1.5" value="সেলস এক্সিকিউটিভ / শপ অ্যাসিস্ট্যান্ট" oninput="updateLiveView()">
-                </div>
-                <div>
-                  <label class="font-semibold">প্রতিষ্ঠানের নাম:</label>
-                  <input type="text" class="exp-company w-full border rounded p-1.5" value="[এখানে পূর্বের দোকানের নাম লিখুন]" oninput="updateLiveView()">
-                </div>
-                <div class="md:col-span-2">
-                  <label class="font-semibold">মেয়াদ / সময়কাল:</label>
-                  <input type="text" class="exp-period w-full border rounded p-1.5" value="[মাস, বছর] – [মাস, বছর] (মোট ১০ মাস)" oninput="updateLiveView()">
-                </div>
-                <div class="md:col-span-2">
-                  <label class="font-semibold">দায়িত্বসমূহ (প্রতি লাইনে একটি করে):</label>
-                  <textarea rows="4" class="exp-desc w-full border rounded p-1.5" oninput="updateLiveView()">গ্রাহকদের চাহিদা বুঝে সঠিক মোবাইল, স্মার্টওয়াচ, ইয়ারবাড ও অন্যান্য অ্যাক্সেসরিজ নির্বাচনে পরামর্শ প্রদান।
+      <!-- ৩. পেশাগত অভিজ্ঞতা -->
+      <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+        <div class="flex justify-between items-center mb-1">
+          <h3 class="font-bold text-slate-800 text-xs uppercase">৩. পেশাগত অভিজ্ঞতা (Employment History)</h3>
+          <label class="text-[11px] cursor-pointer"><input type="checkbox" id="toggle-exp" checked onchange="toggleElement('sec-exp-view', this.checked)"> অন/অফ</label>
+        </div>
+        <div class="text-xs space-y-1.5">
+          <input type="text" id="inp-exp-role" value="সেলস এক্সিকিউটিভ / শপ অ্যাসিস্ট্যান্ট (মোট ১০ মাস)" oninput="renderCV()" class="w-full border rounded p-1 font-semibold" placeholder="পদবী ও মেয়াদ">
+          <input type="text" id="inp-exp-comp" value="প্রতিষ্ঠানের নাম: [এখানে পূর্বের দোকানের নাম লিখুন]" oninput="renderCV()" class="w-full border rounded p-1" placeholder="কোম্পানির নাম">
+          <textarea id="inp-exp-desc" rows="4" oninput="renderCV()" class="w-full border rounded p-1.5 text-xs" placeholder="দায়িত্বসমূহ (প্রতি লাইনে একটি)">গ্রাহকদের চাহিদা বুঝে সঠিক মোবাইল, স্মার্টওয়াচ, ইয়ারবাড ও অন্যান্য অ্যাক্সেসরিজ নির্বাচনে পরামর্শ প্রদান।
 নতুন গ্যাজেটের ফিচার ও বৈশিষ্ট্য সুন্দরভাবে গ্রাহকের সামনে উপস্থাপন।
 স্টকের হিসাব রাখা এবং প্রোডাক্ট ডিসপ্লে পরিচ্ছন্ন ও আকর্ষণীয় রাখা।
 ক্যাশ ম্যানেজমেন্ট ও কাস্টমারদের সাথে সুসম্পর্ক বজায় রাখা।</textarea>
-                </div>
-              </div>
-            </div>
-          </div>
-          <button onclick="addExperienceField()" class="mt-3 text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-bold px-3 py-1.5 rounded-md flex items-center gap-1">
-            <i class="fa-solid fa-plus"></i> আরও অভিজ্ঞতা যোগ করুন
-          </button>
         </div>
-
-        <!-- শিক্ষাগত যোগ্যতা -->
-        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex justify-between items-center mb-2">
-            <h3 class="font-bold text-slate-700 flex items-center gap-2 text-base">
-              <i class="fa-solid fa-graduation-cap text-indigo-600"></i> শিক্ষাগত যোগ্যতা
-            </h3>
-            <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
-              <input type="checkbox" id="toggle-edu" checked onchange="toggleSectionVisibility('sec-education', this.checked)"> অন/অফ
-            </label>
-          </div>
-          <div id="education-list" class="space-y-3">
-            <!-- HSC -->
-            <div class="edu-item p-3 border rounded-lg bg-white text-xs grid grid-cols-2 gap-2">
-              <div>
-                <label class="font-semibold">ডিগ্রি / পরীক্ষা:</label>
-                <input type="text" class="edu-degree w-full border rounded p-1.5" value="উচ্চ মাধ্যমিক (HSC)" oninput="updateLiveView()">
-              </div>
-              <div>
-                <label class="font-semibold">ইনস্টিটিউট / কলেজ:</label>
-                <input type="text" class="edu-inst w-full border rounded p-1.5" value="Gopalpur Degree College" oninput="updateLiveView()">
-              </div>
-              <div>
-                <label class="font-semibold">বোর্ড:</label>
-                <input type="text" class="edu-board w-full border rounded p-1.5" value="রাজশাহী বোর্ড" oninput="updateLiveView()">
-              </div>
-              <div>
-                <label class="font-semibold">পাসের সন:</label>
-                <input type="text" class="edu-year w-full border rounded p-1.5" value="২০২৬" oninput="updateLiveView()">
-              </div>
-              <div class="col-span-2">
-                <label class="font-semibold">ফলাফল:</label>
-                <input type="text" class="edu-result w-full border rounded p-1.5" value="অপেক্ষমাণ" oninput="updateLiveView()">
-              </div>
-            </div>
-            <!-- SSC -->
-            <div class="edu-item p-3 border rounded-lg bg-white text-xs grid grid-cols-2 gap-2">
-              <div>
-                <label class="font-semibold">ডিগ্রি / পরীক্ষা:</label>
-                <input type="text" class="edu-degree w-full border rounded p-1.5" value="মাধ্যমিক (SSC)" oninput="updateLiveView()">
-              </div>
-              <div>
-                <label class="font-semibold">স্কুল:</label>
-                <input type="text" class="edu-inst w-full border rounded p-1.5" value="[আপনার স্কুলের নাম লিখুন]" oninput="updateLiveView()">
-              </div>
-              <div>
-                <label class="font-semibold">বোর্ড:</label>
-                <input type="text" class="edu-board w-full border rounded p-1.5" value="রাজশাহী বোর্ড" oninput="updateLiveView()">
-              </div>
-              <div>
-                <label class="font-semibold">পাসের সন:</label>
-                <input type="text" class="edu-year w-full border rounded p-1.5" value="২০২২" oninput="updateLiveView()">
-              </div>
-              <div class="col-span-2">
-                <label class="font-semibold">ফলাফল / জিপিএ:</label>
-                <input type="text" class="edu-result w-full border rounded p-1.5" value="জিপিএ: ৪.৮৩ (স্কেল ৫.০০)" oninput="updateLiveView()">
-              </div>
-            </div>
-          </div>
-          <button onclick="addEducationField()" class="mt-3 text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-bold px-3 py-1.5 rounded-md flex items-center gap-1">
-            <i class="fa-solid fa-plus"></i> আরও শিক্ষাগত যোগ্যতা যোগ করুন
-          </button>
-        </div>
-
-        <!-- বিশেষ দক্ষতা ও বৈশিষ্ট্য -->
-        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex justify-between items-center mb-2">
-            <h3 class="font-bold text-slate-700 flex items-center gap-2 text-base">
-              <i class="fa-solid fa-award text-indigo-600"></i> বিশেষ দক্ষতা ও বৈশিষ্ট্য
-            </h3>
-            <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
-              <input type="checkbox" id="toggle-skills" checked onchange="toggleSectionVisibility('sec-skills', this.checked)"> অন/অফ
-            </label>
-          </div>
-          <textarea id="inp-skills" rows="5" oninput="updateLiveView()" class="w-full border rounded-md p-2 text-sm focus:ring-2 focus:ring-indigo-400 outline-none">প্রযুক্তিগত জ্ঞান: স্মার্টফোন (অ্যান্ড্রয়েড/আইওএস) ও আধুনিক গ্যাজেট সম্পর্কে ভালো ধারণা।
-যোগাযোগ দক্ষতা: অত্যন্ত বন্ধুভাবাপন্ন আচরণ ও গ্রাহককে যেকোনো পণ্যের বিস্তারিত বোঝানোর ক্ষমতা।
-কম্পিউটার দক্ষতা: মৌলিক কম্পিউটার পরিচালনা ও বেসিক এমএস অফিস/ক্যাশ সফটওয়্যার ব্যবহার।
-অন্যান্য: দ্রুত শেখার মানসিকতা এবং দ্রুত সিদ্ধান্ত নেওয়ার ক্ষমতা।</textarea>
-          <span class="text-[11px] text-slate-400">টিপস: প্রতি লাইনে একটি করে দক্ষতা লিখুন।</span>
-        </div>
-
-        <!-- ভাষাগত দক্ষতা -->
-        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex justify-between items-center mb-2">
-            <h3 class="font-bold text-slate-700 flex items-center gap-2 text-base">
-              <i class="fa-solid fa-language text-indigo-600"></i> ভাষাগত দক্ষতা (Language Proficiency)
-            </h3>
-            <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
-              <input type="checkbox" id="toggle-lang" checked onchange="toggleSectionVisibility('sec-languages', this.checked)"> অন/অফ
-            </label>
-          </div>
-          <textarea id="inp-languages" rows="2" oninput="updateLiveView()" class="w-full border rounded-md p-2 text-sm focus:ring-2 focus:ring-indigo-400 outline-none">বাংলা: সাবলীল
-ইংরেজি: সাধারণ কথোপকথন ও পণ্যের নাম/বিবরণ বোঝার দক্ষতা</textarea>
-        </div>
-
-        <!-- ব্যক্তিগত তথ্যাবলী -->
-        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex justify-between items-center mb-3">
-            <h3 class="font-bold text-slate-700 flex items-center gap-2 text-base">
-              <i class="fa-solid fa-id-card text-indigo-600"></i> ব্যক্তিগত তথ্যাবলী (Personal Details)
-            </h3>
-            <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
-              <input type="checkbox" id="toggle-personal" checked onchange="toggleSectionVisibility('sec-personal', this.checked)"> অন/অফ
-            </label>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-            <div>
-              <label class="font-semibold">পিতার নাম:</label>
-              <input type="text" id="inp-father" value="মো: রেজাউল করিম (Md Rezaul Karim)" oninput="updateLiveView()" class="w-full border rounded p-1.5">
-            </div>
-            <div>
-              <label class="font-semibold">মাতার নাম:</label>
-              <input type="text" id="inp-mother" value="মোছা: আজমিরা বেগম (Mst Azmira Begum)" oninput="updateLiveView()" class="w-full border rounded p-1.5">
-            </div>
-            <div>
-              <label class="font-semibold">জন্ম তারিখ:</label>
-              <input type="text" id="inp-dob" value="১০ অক্টোবর, ২০০৮" oninput="updateLiveView()" class="w-full border rounded p-1.5">
-            </div>
-            <div>
-              <label class="font-semibold">জাতীয়তা:</label>
-              <input type="text" id="inp-nationality" value="বাংলাদেশি" oninput="updateLiveView()" class="w-full border rounded p-1.5">
-            </div>
-            <div>
-              <label class="font-semibold">ধর্ম:</label>
-              <input type="text" id="inp-religion" value="ইসলাম (সুন্নি)" oninput="updateLiveView()" class="w-full border rounded p-1.5">
-            </div>
-            <div>
-              <label class="font-semibold">উচ্চতা:</label>
-              <input type="text" id="inp-height" value="৫ ফুট ৯ ইঞ্চি" oninput="updateLiveView()" class="w-full border rounded p-1.5">
-            </div>
-            <div>
-              <label class="font-semibold">ওজন:</label>
-              <input type="text" id="inp-weight" value="৬০+ কেজি" oninput="updateLiveView()" class="w-full border rounded p-1.5">
-            </div>
-            <div>
-              <label class="font-semibold">বৈবাহিক অবস্থা:</label>
-              <input type="text" id="inp-marital" value="অবিবাহিত" oninput="updateLiveView()" class="w-full border rounded p-1.5">
-            </div>
-          </div>
-        </div>
-
-        <!-- কাস্টম নতুন ক্যাটাগরি তৈরি করুন -->
-        <div class="p-4 bg-indigo-50/70 border-2 border-dashed border-indigo-300 rounded-xl">
-          <h4 class="font-bold text-indigo-900 text-sm mb-2 flex items-center gap-1.5">
-            <i class="fa-solid fa-folder-plus"></i> নতুন কাস্টম ক্যাটাগরি যোগ করুন
-          </h4>
-          <div class="space-y-2 text-xs">
-            <input type="text" id="new-sec-title" placeholder="ক্যাটাগরি বা সেকশনের নাম (যেমন: রেফারেন্স / শখ)" class="w-full border rounded p-2">
-            <textarea id="new-sec-content" placeholder="বিবরণ লিখুন..." rows="2" class="w-full border rounded p-2"></textarea>
-            <button onclick="addNewCustomSection()" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-md hover:bg-indigo-700 transition">
-              + এই সেকশনটি সিভিতে যোগ করুন
-            </button>
-          </div>
-        </div>
-
       </div>
 
-      <!-- TAB 2: TEMPLATES & DESIGN -->
-      <div id="tab-templates" class="tab-content hidden space-y-6">
-        <div>
-          <h3 class="font-bold text-slate-800 mb-3">টেমপ্লেট নির্বাচন করুন</h3>
-          <div class="grid grid-cols-2 gap-3">
-            <div onclick="selectTemplate('template-modern')" class="cursor-pointer border-2 border-indigo-600 rounded-lg p-3 bg-indigo-50/50 hover:shadow-md transition">
-              <div class="font-bold text-sm text-indigo-900">১. মডার্ন ব্লু (Classic Modern)</div>
-              <p class="text-xs text-slate-500 mt-1">ক্লিন ও স্ট্যান্ডার্ড কর্পোরেট ফরম্যাট</p>
+      <!-- ৪. শিক্ষাগত যোগ্যতা (টেবিল) -->
+      <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+        <div class="flex justify-between items-center mb-1">
+          <h3 class="font-bold text-slate-800 text-xs uppercase">৪. শিক্ষাগত যোগ্যতা (Academic Table)</h3>
+          <label class="text-[11px] cursor-pointer"><input type="checkbox" id="toggle-edu" checked onchange="toggleElement('sec-edu-view', this.checked)"> অন/অফ</label>
+        </div>
+        <p class="text-[11px] text-slate-500 mb-2">ছবি ১ এর মতো টেবিল স্টাইলে স্বয়ংক্রিয়ভাবে ডানপাশে প্রদর্শিত হবে।</p>
+        <div class="space-y-2 text-xs">
+          <!-- HSC -->
+          <div class="p-2 border rounded bg-white">
+            <span class="font-bold text-blue-800 block mb-1">উচ্চ মাধ্যমিক (HSC)</span>
+            <div class="grid grid-cols-2 gap-1 text-[11px]">
+              <input type="text" id="edu-hsc-inst" value="Gopalpur Degree College" oninput="renderCV()" class="border p-1 rounded" placeholder="ইনস্টিটিউট">
+              <input type="text" id="edu-hsc-board" value="রাজশাহী বোর্ড" oninput="renderCV()" class="border p-1 rounded" placeholder="বোর্ড">
+              <input type="text" id="edu-hsc-year" value="২০২৬" oninput="renderCV()" class="border p-1 rounded" placeholder="পাসের সন">
+              <input type="text" id="edu-hsc-result" value="অপেক্ষমাণ" oninput="renderCV()" class="border p-1 rounded" placeholder="ফলাফল">
             </div>
-            <div onclick="selectTemplate('template-executive')" class="cursor-pointer border-2 border-slate-200 rounded-lg p-3 hover:border-emerald-600 bg-emerald-50/30 hover:shadow-md transition">
-              <div class="font-bold text-sm text-emerald-900">২. এক্সিকিউটিভ এমারেল্ড</div>
-              <p class="text-xs text-slate-500 mt-1">মার্জিত গ্রিন হেডার ও আধুনিক লুক</p>
-            </div>
-            <div onclick="selectTemplate('template-creative')" class="cursor-pointer border-2 border-slate-200 rounded-lg p-3 hover:border-rose-600 bg-rose-50/30 hover:shadow-md transition">
-              <div class="font-bold text-sm text-rose-900">৩. ক্রিয়েটিভ রুবি</div>
-              <p class="text-xs text-slate-500 mt-1">সেলস ও মার্কেটিং পদের জন্য আকর্ষণীয়</p>
-            </div>
-            <div onclick="selectTemplate('template-minimal')" class="cursor-pointer border-2 border-slate-200 rounded-lg p-3 hover:border-slate-800 bg-slate-50 hover:shadow-md transition">
-              <div class="font-bold text-sm text-slate-900">৪. মিনিমালিস্ট ডার্ক</div>
-              <p class="text-xs text-slate-500 mt-1">সাদামাটা, সিরিয়াস ও ক্লাসিক রূপরেখা</p>
+          </div>
+          <!-- SSC -->
+          <div class="p-2 border rounded bg-white">
+            <span class="font-bold text-blue-800 block mb-1">মাধ্যমিক (SSC)</span>
+            <div class="grid grid-cols-2 gap-1 text-[11px]">
+              <input type="text" id="edu-ssc-inst" value="[আপনার স্কুলের নাম লিখুন]" oninput="renderCV()" class="border p-1 rounded" placeholder="স্কুল">
+              <input type="text" id="edu-ssc-board" value="রাজশাহী বোর্ড" oninput="renderCV()" class="border p-1 rounded" placeholder="বোর্ড">
+              <input type="text" id="edu-ssc-year" value="২০২২" oninput="renderCV()" class="border p-1 rounded" placeholder="পাসের সন">
+              <input type="text" id="edu-ssc-result" value="জিপিএ: ৪.৮৩" oninput="renderCV()" class="border p-1 rounded" placeholder="ফলাফল">
             </div>
           </div>
         </div>
+      </div>
 
-        <div>
-          <h3 class="font-bold text-slate-800 mb-2">ফন্ট সাইজ অ্যাডজাস্ট করুন</h3>
-          <div class="flex items-center gap-4">
-            <button onclick="changeFontSize(-1)" class="border px-3 py-1 rounded bg-slate-100 hover:bg-slate-200 text-sm font-bold">- ছোট করুন</button>
-            <span id="font-size-label" class="text-xs font-semibold text-slate-600">স্বাভাবিক (14px)</span>
-            <button onclick="changeFontSize(1)" class="border px-3 py-1 rounded bg-slate-100 hover:bg-slate-200 text-sm font-bold">+ বড় করুন</button>
-          </div>
+      <!-- ৫. বিশেষ দক্ষতা -->
+      <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+        <div class="flex justify-between items-center mb-1">
+          <h3 class="font-bold text-slate-800 text-xs uppercase">৫. বিশেষ দক্ষতা ও বৈশিষ্ট্য (Skills)</h3>
+          <label class="text-[11px] cursor-pointer"><input type="checkbox" id="toggle-skills" checked onchange="toggleElement('sec-skills-view', this.checked)"> অন/অফ</label>
         </div>
+        <textarea id="inp-skills" rows="4" oninput="renderCV()" class="w-full border rounded p-1.5 text-xs">প্রযুক্তিগত জ্ঞান: স্মার্টফোন (অ্যান্ড্রয়েড/আইওএস) ও আধুনিক গ্যাজেট সম্পর্কে সম্যক ধারণা।
+যোগাযোগ দক্ষতা: অত্যন্ত বন্ধুভাবাপন্ন আচরণ ও গ্রাহককে যেকোনো পণ্যের ফিচার বোঝানোর ক্ষমতা।
+কম্পিউটার দক্ষতা: মৌলিক কম্পিউটার পরিচালনা ও বেসিক এমএস অফিস/ক্যাশ সফটওয়্যার পরিচালনা।
+ব্যক্তিগত বৈশিষ্ট্য: দ্রুত শেখার মানসিকতা এবং যেকোনো পরিস্থিতিতে সিদ্ধান্ত নেওয়ার ক্ষমতা।</textarea>
+      </div>
 
-        <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg text-xs text-blue-800 leading-relaxed">
-          <i class="fa-solid fa-circle-info mr-1"></i> <strong>ড্র্যাগ অ্যান্ড ড্রপ টিপস:</strong> ডানপাশের প্রিভিউতে যেকোনো সেকশনের উপর মাউস রেখে ড্র্যাগ (টেনে) করে সহজে আগে বা পরে নিয়ে যেতে পারেন।
+      <!-- ৬. ভাষাগত দক্ষতা (ছবি ২ এর মতো টেবিল) -->
+      <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+        <div class="flex justify-between items-center mb-1">
+          <h3 class="font-bold text-slate-800 text-xs uppercase">৬. ভাষাগত দক্ষতা (Language Table)</h3>
+          <label class="text-[11px] cursor-pointer"><input type="checkbox" id="toggle-lang" checked onchange="toggleElement('sec-lang-view', this.checked)"> অন/অফ</label>
         </div>
+        <p class="text-[11px] text-slate-500">বাংলা ও ইংরেজি দক্ষতা টেবিল আকারে তৈরি করা হয়েছে (প্রয়োজনে এডিট করুন)।</p>
+      </div>
+
+      <!-- ৭. ব্যক্তিগত তথ্যাবলী -->
+      <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+        <div class="flex justify-between items-center mb-1">
+          <h3 class="font-bold text-slate-800 text-xs uppercase">৭. ব্যক্তিগত তথ্যাবলী (Personal Details)</h3>
+          <label class="text-[11px] cursor-pointer"><input type="checkbox" id="toggle-per" checked onchange="toggleElement('sec-per-view', this.checked)"> অন/অফ</label>
+        </div>
+        <div class="grid grid-cols-2 gap-1.5 text-[11px]">
+          <input type="text" id="p-father" value="মো: রেজাউল করিম (Md Rezaul Karim)" oninput="renderCV()" class="border p-1 rounded" placeholder="পিতার নাম">
+          <input type="text" id="p-mother" value="মোছা: আজমিরা বেগম (Mst Azmira Begum)" oninput="renderCV()" class="border p-1 rounded" placeholder="মাতার নাম">
+          <input type="text" id="p-dob" value="১০ অক্টোবর, ২০০৮" oninput="renderCV()" class="border p-1 rounded" placeholder="জন্ম তারিখ">
+          <input type="text" id="p-nation" value="বাংলাদেশি" oninput="renderCV()" class="border p-1 rounded" placeholder="জাতীয়তা">
+          <input type="text" id="p-rel" value="ইসলাম (সুন্নি)" oninput="renderCV()" class="border p-1 rounded" placeholder="ধর্ম">
+          <input type="text" id="p-marital" value="অবিবাহিত" oninput="renderCV()" class="border p-1 rounded" placeholder="বৈবাহিক অবস্থা">
+          <input type="text" id="p-height" value="৫ ফুট ৯ ইঞ্চি" oninput="renderCV()" class="border p-1 rounded" placeholder="উচ্চতা">
+          <input type="text" id="p-weight" value="৬০+ কেজি" oninput="renderCV()" class="border p-1 rounded" placeholder="ওজন">
+        </div>
+      </div>
+
+      <!-- নতুন কাস্টম ক্যাটাগরি তৈরি -->
+      <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs space-y-1.5">
+        <h4 class="font-bold text-blue-900">+ নতুন কাস্টম সেকশন যোগ করুন</h4>
+        <input type="text" id="custom-title" placeholder="ক্যাটাগরির নাম (যেমন: রেফারেন্স বা ট্রেনিং)" class="w-full border p-1 rounded">
+        <textarea id="custom-body" rows="2" placeholder="বিস্তারিত তথ্য..." class="w-full border p-1 rounded"></textarea>
+        <button onclick="addCustomSection()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 rounded">সিভিতে যুক্ত করুন</button>
       </div>
 
     </div>
 
-    <!-- RIGHT PANEL: Live CV Preview Paper -->
-    <div class="w-full lg:w-[52%] bg-slate-200/80 h-[calc(100vh-60px)] overflow-y-auto p-4 lg:p-8 flex justify-center items-start">
+    <!-- ডান পাশের A4 প্রিভিউ (সরাসরি ১ পেজের মধ্যে ফিট হওয়া রেডি ডকুমেন্ট) -->
+    <div class="w-full lg:w-[55%] bg-slate-300 h-[calc(100vh-52px)] overflow-y-auto p-4 md:p-6 flex justify-center items-start">
       
-      <!-- Actual A4 Document for Render and Download -->
-      <div id="cv-preview" class="a4-page template-modern text-slate-800">
-
-        <!-- HEADER SECTION (Always Top) -->
-        <div class="flex flex-row justify-between items-start border-b-2 border-slate-300 pb-5 mb-5">
-          <div class="flex-1 pr-4">
-            <h1 id="view-name" class="text-2xl font-bold text-slate-900 tracking-tight">মোঃ তানভীর আহমেদ</h1>
-            <p id="view-title" class="text-sm font-semibold text-slate-600 mt-0.5">সেলস অ্যাসিস্ট্যান্ট / শপ এক্সিকিউটিভ</p>
-            
-            <div class="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-xs text-slate-600">
-              <span class="flex items-center gap-1.5"><i class="fa-solid fa-phone text-indigo-600"></i> <span id="view-phone">+৮৮০১৭১২-৩৪৫৬৭৮</span></span>
-              <span class="flex items-center gap-1.5"><i class="fa-solid fa-envelope text-indigo-600"></i> <span id="view-email">tanvir.sales@email.com</span></span>
-              <span class="flex items-center gap-1.5"><i class="fa-solid fa-location-dot text-indigo-600"></i> <span id="view-address">রাজশাহী, বাংলাদেশ</span></span>
+      <!-- A4 Page Target -->
+      <div id="cv-preview-page" class="a4-sheet theme-bdjobs text-slate-900 text-xs shadow-2xl">
+        
+        <!-- HEADER (ছবি ১ ও ২ অনুযায়ী: বামে নাম ও তথ্য, ডানে ছবি) -->
+        <div class="flex justify-between items-start pb-3 mb-2 border-b border-slate-300">
+          <div class="flex-1 pr-3">
+            <h1 id="v-name" class="text-xl font-bold tracking-tight text-blue-800" style="color: var(--primary-name);">MD. MASUM SHEIKH</h1>
+            <div class="mt-1 space-y-0.5 text-[11px] leading-tight text-slate-800">
+              <p><strong class="font-semibold">ঠিকানা / Address:</strong> <span id="v-address">রাজঘাট, অভয়নগর, যশোর।</span></p>
+              <p><strong class="font-semibold">মোবাইল / Mobile:</strong> <span id="v-mobile">+৮৮০১৭১২-৩৪৫৬৭৮</span></p>
+              <p><strong class="font-semibold">ই-মেইল / E-mail:</strong> <span id="v-email">tanvir.sales@email.com</span></p>
             </div>
           </div>
 
-          <!-- পাসপোর্ট সাইজ ছবি -->
-          <div id="sec-photo-view" class="w-28 h-32 border-2 border-slate-300 shadow-sm rounded-sm bg-slate-100 flex items-center justify-center overflow-hidden flex-shrink-0">
-            <img id="view-photo" src="" alt="ছবি" class="w-full h-full object-cover hidden">
-            <div id="photo-placeholder" class="text-center p-2 text-slate-400">
-              <i class="fa-solid fa-user text-3xl"></i>
-              <p class="text-[10px] mt-1">পাসপোর্ট ছবি</p>
+          <!-- পাসপোর্ট সাইজ ছবি (35mm x 45mm প্রপোরশন) -->
+          <div id="cv-photo-box" class="w-[30mm] h-[38mm] border border-slate-400 bg-blue-50/50 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm">
+            <img id="v-photo" src="" alt="Photo" class="w-full h-full object-cover hidden">
+            <div id="v-photo-placeholder" class="text-center text-slate-400">
+              <i class="fa-solid fa-user text-2xl"></i>
+              <div class="text-[9px] mt-1 font-semibold">পাসপোর্ট ছবি</div>
             </div>
           </div>
         </div>
 
-        <!-- DRAGGABLE SECTIONS CONTAINER -->
-        <div id="sortable-sections" class="space-y-3.5">
+        <!-- ড্র্যাগেবল সেকশনসমূহ (Drag & Drop Container) -->
+        <div id="drag-container" class="flex-1 flex flex-col justify-between">
           
           <!-- ১. ক্যারিয়ার অবজেক্টিভ -->
-          <div id="sec-objective" class="draggable-section" draggable="true">
-            <h2 class="theme-heading text-sm font-bold uppercase tracking-wider pb-1 mb-1.5 flex items-center gap-2">
-              <i class="fa-solid fa-grip-vertical text-slate-300 text-xs no-print cursor-grab"></i>
+          <div id="sec-obj-view" class="draggable-section" draggable="true">
+            <div class="section-bar">
               <span>ক্যারিয়ার অবজেক্টিভ (Career Objective)</span>
-            </h2>
-            <p id="view-objective" class="text-xs text-slate-700 leading-relaxed text-justify">
+              <i class="fa-solid fa-grip-vertical text-slate-400 no-print text-[10px]"></i>
+            </div>
+            <p id="v-obj" class="text-[10.5px] leading-relaxed text-slate-700 text-justify px-1">
               একজন উদ্যমী ও প্রযুক্তিপ্রেমী কর্মী হিসেবে কোনো স্বনামধন্য মোবাইল ও গ্যাজেট শপে সেলস অ্যাসিস্ট্যান্ট / শপ এক্সিকিউটিভ পদে কাজ করতে আগ্রহী। কাস্টমার সার্ভিস ও প্রডাক্ট প্রেজেন্টেশনে ১০ মাসের পূর্ব অভিজ্ঞতা কাজে লাগিয়ে প্রতিষ্ঠানের বিক্রয় বৃদ্ধি এবং গ্রাহক সন্তুষ্টি নিশ্চিত করাই আমার লক্ষ্য।
             </p>
           </div>
 
           <!-- ২. পেশাগত অভিজ্ঞতা -->
-          <div id="sec-experience" class="draggable-section" draggable="true">
-            <h2 class="theme-heading text-sm font-bold uppercase tracking-wider pb-1 mb-1.5 flex items-center gap-2">
-              <i class="fa-solid fa-grip-vertical text-slate-300 text-xs no-print cursor-grab"></i>
-              <span>পেশাগত অভিজ্ঞতা (Work Experience)</span>
-            </h2>
-            <div id="view-experience" class="space-y-2.5 text-xs text-slate-700">
-              <!-- Dynamically populated from JS -->
+          <div id="sec-exp-view" class="draggable-section" draggable="true">
+            <div class="section-bar">
+              <span>পেশাগত অভিজ্ঞতা (Employment History)</span>
+              <i class="fa-solid fa-grip-vertical text-slate-400 no-print text-[10px]"></i>
+            </div>
+            <div class="px-1 text-[10.5px]">
+              <div class="font-bold text-slate-900" id="v-exp-role">সেলস এক্সিকিউটিভ / শপ অ্যাসিস্ট্যান্ট (মোট ১০ মাস)</div>
+              <div class="text-slate-600 italic text-[10px]" id="v-exp-comp">প্রতিষ্ঠানের নাম: [এখানে পূর্বের দোকানের নাম লিখুন]</div>
+              <ul id="v-exp-desc" class="list-disc list-inside mt-0.5 space-y-0.5 text-slate-700 leading-tight">
+                <!-- JS দিয়ে লোড হবে -->
+              </ul>
             </div>
           </div>
 
-          <!-- ৩. শিক্ষাগত যোগ্যতা -->
-          <div id="sec-education" class="draggable-section" draggable="true">
-            <h2 class="theme-heading text-sm font-bold uppercase tracking-wider pb-1 mb-1.5 flex items-center gap-2">
-              <i class="fa-solid fa-grip-vertical text-slate-300 text-xs no-print cursor-grab"></i>
-              <span>শিক্ষাগত যোগ্যতা (Educational Qualification)</span>
-            </h2>
-            <div id="view-education" class="space-y-2 text-xs text-slate-700">
-              <!-- Dynamically populated from JS -->
+          <!-- ৩. শিক্ষাগত যোগ্যতা (ছবি ১ এর মতো হুবহু টেবিল) -->
+          <div id="sec-edu-view" class="draggable-section" draggable="true">
+            <div class="section-bar">
+              <span>শিক্ষাগত যোগ্যতা (Academic Qualification)</span>
+              <i class="fa-solid fa-grip-vertical text-slate-400 no-print text-[10px]"></i>
             </div>
+            <table class="cv-table">
+              <thead>
+                <tr>
+                  <th>পরীক্ষা (Exam)</th>
+                  <th>প্রতিষ্ঠান (Institute)</th>
+                  <th>বোর্ড (Board)</th>
+                  <th>সন (Year)</th>
+                  <th>ফলাফল (Result)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="font-semibold">উচ্চ মাধ্যমিক (HSC)</td>
+                  <td id="v-hsc-inst">Gopalpur Degree College</td>
+                  <td id="v-hsc-board">রাজশাহী বোর্ড</td>
+                  <td id="v-hsc-year">২০২৬</td>
+                  <td id="v-hsc-result">অপেক্ষমাণ</td>
+                </tr>
+                <tr>
+                  <td class="font-semibold">মাধ্যমিক (SSC)</td>
+                  <td id="v-ssc-inst">[আপনার স্কুলের নাম লিখুন]</td>
+                  <td id="v-ssc-board">রাজশাহী বোর্ড</td>
+                  <td id="v-ssc-year">২০২২</td>
+                  <td id="v-ssc-result">জিপিএ: ৪.৮৩</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
 
           <!-- ৪. বিশেষ দক্ষতা ও বৈশিষ্ট্য -->
-          <div id="sec-skills" class="draggable-section" draggable="true">
-            <h2 class="theme-heading text-sm font-bold uppercase tracking-wider pb-1 mb-1.5 flex items-center gap-2">
-              <i class="fa-solid fa-grip-vertical text-slate-300 text-xs no-print cursor-grab"></i>
+          <div id="sec-skills-view" class="draggable-section" draggable="true">
+            <div class="section-bar">
               <span>বিশেষ দক্ষতা ও বৈশিষ্ট্য (Key Skills & Competencies)</span>
-            </h2>
-            <ul id="view-skills" class="list-disc list-inside text-xs text-slate-700 space-y-1 leading-relaxed">
-              <!-- Dynamically populated from JS -->
+              <i class="fa-solid fa-grip-vertical text-slate-400 no-print text-[10px]"></i>
+            </div>
+            <ul id="v-skills" class="list-disc list-inside px-1 space-y-0.5 text-[10.5px] text-slate-700 leading-tight">
+              <!-- JS দিয়ে লোড হবে -->
             </ul>
           </div>
 
-          <!-- ৫. ভাষাগত দক্ষতা -->
-          <div id="sec-languages" class="draggable-section" draggable="true">
-            <h2 class="theme-heading text-sm font-bold uppercase tracking-wider pb-1 mb-1.5 flex items-center gap-2">
-              <i class="fa-solid fa-grip-vertical text-slate-300 text-xs no-print cursor-grab"></i>
+          <!-- ৫. ভাষাগত দক্ষতা (ছবি ২ এর মতো সুন্দর টেবিল) -->
+          <div id="sec-lang-view" class="draggable-section" draggable="true">
+            <div class="section-bar">
               <span>ভাষাগত দক্ষতা (Language Proficiency)</span>
-            </h2>
-            <ul id="view-languages" class="list-disc list-inside text-xs text-slate-700 space-y-1">
-              <!-- Dynamically populated from JS -->
-            </ul>
+              <i class="fa-solid fa-grip-vertical text-slate-400 no-print text-[10px]"></i>
+            </div>
+            <table class="cv-table">
+              <thead>
+                <tr>
+                  <th>ভাষা (Language)</th>
+                  <th>পড়া (Reading)</th>
+                  <th>লেখা (Writing)</th>
+                  <th>বলা (Speaking)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="font-semibold">বাংলা (Bangla)</td>
+                  <td>চমৎকার (Fluent)</td>
+                  <td>চমৎকার (Fluent)</td>
+                  <td>সাবলীল (Native)</td>
+                </tr>
+                <tr>
+                  <td class="font-semibold">ইংরেজি (English)</td>
+                  <td>ভালো (Good)</td>
+                  <td>ভালো (Good)</td>
+                  <td>দৈনন্দিন কথোপকথন ও পণ্যের বিবরণ</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
 
           <!-- ৬. ব্যক্তিগত তথ্যাবলী -->
-          <div id="sec-personal" class="draggable-section" draggable="true">
-            <h2 class="theme-heading text-sm font-bold uppercase tracking-wider pb-1 mb-1.5 flex items-center gap-2">
-              <i class="fa-solid fa-grip-vertical text-slate-300 text-xs no-print cursor-grab"></i>
+          <div id="sec-per-view" class="draggable-section" draggable="true">
+            <div class="section-bar">
               <span>ব্যক্তিগত তথ্যাবলী (Personal Details)</span>
-            </h2>
-            <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-slate-700">
-              <div><strong class="font-semibold text-slate-900">পিতার নাম:</strong> <span id="view-father">মো: রেজাউল করিম (Md Rezaul Karim)</span></div>
-              <div><strong class="font-semibold text-slate-900">মাতার নাম:</strong> <span id="view-mother">মোছা: আজমিরা বেগম (Mst Azmira Begum)</span></div>
-              <div><strong class="font-semibold text-slate-900">জন্ম তারিখ:</strong> <span id="view-dob">১০ অক্টোবর, ২০০৮</span></div>
-              <div><strong class="font-semibold text-slate-900">জাতীয়তা:</strong> <span id="view-nationality">বাংলাদেশি</span></div>
-              <div><strong class="font-semibold text-slate-900">ধর্ম:</strong> <span id="view-religion">ইসলাম (সুন্নি)</span></div>
-              <div><strong class="font-semibold text-slate-900">উচ্চতা:</strong> <span id="view-height">৫ ফুট ৯ ইঞ্চি</span></div>
-              <div><strong class="font-semibold text-slate-900">ওজন:</strong> <span id="view-weight">৬০+ কেজি</span></div>
-              <div><strong class="font-semibold text-slate-900">বৈবাহিক অবস্থা:</strong> <span id="view-marital">অবিবাহিত</span></div>
+              <i class="fa-solid fa-grip-vertical text-slate-400 no-print text-[10px]"></i>
+            </div>
+            <div class="grid grid-cols-2 gap-x-4 gap-y-0.5 px-1 text-[10px] leading-tight text-slate-700">
+              <div><strong class="text-slate-900">পিতার নাম:</strong> <span id="v-father">মো: রেজাউল করিম</span></div>
+              <div><strong class="text-slate-900">মাতার নাম:</strong> <span id="v-mother">মোছা: আজমিরা বেগম</span></div>
+              <div><strong class="text-slate-900">জন্ম তারিখ:</strong> <span id="v-dob">১০ অক্টোবর, ২০০৮</span></div>
+              <div><strong class="text-slate-900">জাতীয়তা:</strong> <span id="v-nation">বাংলাদেশি</span></div>
+              <div><strong class="text-slate-900">ধর্ম:</strong> <span id="v-rel">ইসলাম (সুন্নি)</span></div>
+              <div><strong class="text-slate-900">বৈবাহিক অবস্থা:</strong> <span id="v-marital">অবিবাহিত</span></div>
+              <div><strong class="text-slate-900">উচ্চতা:</strong> <span id="v-height">৫ ফুট ৯ ইঞ্চি</span></div>
+              <div><strong class="text-slate-900">ওজন:</strong> <span id="v-weight">৬০+ কেজি</span></div>
             </div>
           </div>
 
@@ -570,271 +476,127 @@
 
   <!-- JAVASCRIPT LOGIC -->
   <script>
-    // Tab Switcher
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      document.getElementById(tabId).classList.remove('hidden');
+    // রিয়েল টাইম রেন্ডারিং ফাংশন
+    function renderCV() {
+      // Header
+      document.getElementById('v-name').innerText = document.getElementById('inp-name').value;
+      document.getElementById('v-address').innerText = document.getElementById('inp-address').value;
+      document.getElementById('v-mobile').innerText = document.getElementById('inp-mobile').value;
+      document.getElementById('v-email').innerText = document.getElementById('inp-email').value;
 
-      document.querySelectorAll('.tab-btn').forEach(el => {
-        el.classList.remove('border-indigo-600', 'text-indigo-600', 'font-bold');
-        el.classList.add('border-transparent', 'text-slate-500');
-      });
+      // Objective
+      document.getElementById('v-obj').innerText = document.getElementById('inp-obj').value;
 
-      const activeBtn = document.getElementById('btn-' + tabId);
-      activeBtn.classList.remove('border-transparent', 'text-slate-500');
-      activeBtn.classList.add('border-indigo-600', 'text-indigo-600', 'font-bold');
+      // Experience
+      document.getElementById('v-exp-role').innerText = document.getElementById('inp-exp-role').value;
+      document.getElementById('v-exp-comp').innerText = document.getElementById('inp-exp-comp').value;
+      
+      const expList = document.getElementById('inp-exp-desc').value.split('\n').filter(i => i.trim() !== '');
+      document.getElementById('v-exp-desc').innerHTML = expList.map(item => `<li>${item.replace(/^[•\-\*]\s*/, '')}</li>`).join('');
+
+      // Education
+      document.getElementById('v-hsc-inst').innerText = document.getElementById('edu-hsc-inst').value;
+      document.getElementById('v-hsc-board').innerText = document.getElementById('edu-hsc-board').value;
+      document.getElementById('v-hsc-year').innerText = document.getElementById('edu-hsc-year').value;
+      document.getElementById('v-hsc-result').innerText = document.getElementById('edu-hsc-result').value;
+
+      document.getElementById('v-ssc-inst').innerText = document.getElementById('edu-ssc-inst').value;
+      document.getElementById('v-ssc-board').innerText = document.getElementById('edu-ssc-board').value;
+      document.getElementById('v-ssc-year').innerText = document.getElementById('edu-ssc-year').value;
+      document.getElementById('v-ssc-result').innerText = document.getElementById('edu-ssc-result').value;
+
+      // Skills
+      const skillList = document.getElementById('inp-skills').value.split('\n').filter(s => s.trim() !== '');
+      document.getElementById('v-skills').innerHTML = skillList.map(s => `<li>${s.replace(/^[•\-\*]\s*/, '')}</li>`).join('');
+
+      // Personal Details
+      document.getElementById('v-father').innerText = document.getElementById('p-father').value;
+      document.getElementById('v-mother').innerText = document.getElementById('p-mother').value;
+      document.getElementById('v-dob').innerText = document.getElementById('p-dob').value;
+      document.getElementById('v-nation').innerText = document.getElementById('p-nation').value;
+      document.getElementById('v-rel').innerText = document.getElementById('p-rel').value;
+      document.getElementById('v-marital').innerText = document.getElementById('p-marital').value;
+      document.getElementById('v-height').innerText = document.getElementById('p-height').value;
+      document.getElementById('v-weight').innerText = document.getElementById('p-weight').value;
     }
 
-    // Toggle Section Show / Hide
-    function toggleSectionVisibility(secId, isVisible) {
-      const target = document.getElementById(secId);
-      if (target) {
-        target.style.display = isVisible ? 'block' : 'none';
-      }
-    }
-
-    // Passport Photo Upload Handler
-    function handlePhotoUpload(event) {
+    // ছবি আপলোড
+    function uploadPhoto(event) {
       const file = event.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-          const viewPhoto = document.getElementById('view-photo');
-          const placeholder = document.getElementById('photo-placeholder');
-          viewPhoto.src = e.target.result;
-          viewPhoto.classList.remove('hidden');
+          const img = document.getElementById('v-photo');
+          const placeholder = document.getElementById('v-photo-placeholder');
+          img.src = e.target.result;
+          img.classList.remove('hidden');
           placeholder.classList.add('hidden');
         };
         reader.readAsDataURL(file);
       }
     }
 
-    // Dynamic Experience List Generator
-    function updateExperienceView() {
-      const container = document.getElementById('view-experience');
-      container.innerHTML = '';
-
-      const items = document.querySelectorAll('.exp-item');
-      items.forEach(item => {
-        const role = item.querySelector('.exp-role').value;
-        const company = item.querySelector('.exp-company').value;
-        const period = item.querySelector('.exp-period').value;
-        const desc = item.querySelector('.exp-desc').value;
-
-        const duties = desc.split('\n').filter(d => d.trim() !== '');
-
-        let dutiesHtml = '<ul class="list-disc list-inside mt-1 space-y-0.5">';
-        duties.forEach(d => {
-          dutiesHtml += `<li>${d.replace(/^[•\-\*]\s*/, '')}</li>`;
-        });
-        dutiesHtml += '</ul>';
-
-        const expDiv = document.createElement('div');
-        expDiv.className = 'border-l-2 border-slate-300 pl-3';
-        expDiv.innerHTML = `
-          <div class="flex justify-between items-baseline font-bold text-slate-800">
-            <span>${role}</span>
-            <span class="text-[11px] font-normal text-slate-500">${period}</span>
-          </div>
-          <div class="text-slate-600 font-medium">${company}</div>
-          ${dutiesHtml}
-        `;
-        container.appendChild(expDiv);
-      });
+    // সেকশন হাইড / শো টগল
+    function toggleElement(elementId, isVisible) {
+      const el = document.getElementById(elementId);
+      if (el) el.style.display = isVisible ? '' : 'none';
     }
 
-    function addExperienceField() {
-      const list = document.getElementById('experience-list');
-      const div = document.createElement('div');
-      div.className = 'exp-item p-3 border rounded-lg bg-white relative mt-3';
-      div.innerHTML = `
-        <button onclick="this.parentElement.remove(); updateLiveView();" class="absolute top-2 right-2 text-red-500 hover:text-red-700 text-xs">
-          <i class="fa-solid fa-trash"></i> মুছুন
-        </button>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-          <div>
-            <label class="font-semibold">পদবী:</label>
-            <input type="text" class="exp-role w-full border rounded p-1.5" value="নতুন পদবী" oninput="updateLiveView()">
-          </div>
-          <div>
-            <label class="font-semibold">প্রতিষ্ঠানের নাম:</label>
-            <input type="text" class="exp-company w-full border rounded p-1.5" value="কোম্পানির নাম" oninput="updateLiveView()">
-          </div>
-          <div class="md:col-span-2">
-            <label class="font-semibold">মেয়াদ / সময়কাল:</label>
-            <input type="text" class="exp-period w-full border rounded p-1.5" value="[সময়কাল]" oninput="updateLiveView()">
-          </div>
-          <div class="md:col-span-2">
-            <label class="font-semibold">দায়িত্বসমূহ (প্রতি লাইনে একটি):</label>
-            <textarea rows="3" class="exp-desc w-full border rounded p-1.5" oninput="updateLiveView()">দায়িত্ব ১&#10;দায়িত্ব ২</textarea>
-          </div>
-        </div>
-      `;
-      list.appendChild(div);
-      updateLiveView();
+    // টেমপ্লেট থিম পরিবর্তন
+    function changeTheme(themeClass) {
+      const page = document.getElementById('cv-preview-page');
+      page.classList.remove('theme-bdjobs', 'theme-classic', 'theme-darkbar');
+      page.classList.add(themeClass);
     }
 
-    // Dynamic Education List Generator
-    function updateEducationView() {
-      const container = document.getElementById('view-education');
-      container.innerHTML = '';
-
-      const items = document.querySelectorAll('.edu-item');
-      items.forEach(item => {
-        const degree = item.querySelector('.edu-degree').value;
-        const inst = item.querySelector('.edu-inst').value;
-        const board = item.querySelector('.edu-board').value;
-        const year = item.querySelector('.edu-year').value;
-        const result = item.querySelector('.edu-result').value;
-
-        const eduDiv = document.createElement('div');
-        eduDiv.className = 'flex justify-between items-start border-l-2 border-slate-300 pl-3';
-        eduDiv.innerHTML = `
-          <div>
-            <span class="font-bold text-slate-800">${degree}</span> — <span class="text-slate-700">${inst}</span>
-            <div class="text-[11px] text-slate-500">${board} | ${result}</div>
-          </div>
-          <span class="text-xs font-semibold text-slate-600">${year}</span>
-        `;
-        container.appendChild(eduDiv);
-      });
+    // ফন্ট স্কেল অ্যাডজাস্টমেন্ট (১ পেজে ফিট রাখার সুবিধার্থে)
+    let currentScale = 100;
+    function adjustPageScale(delta) {
+      currentScale += delta * 4;
+      if (currentScale < 80) currentScale = 80;
+      if (currentScale > 115) currentScale = 115;
+      document.getElementById('scale-label').innerText = currentScale + '%';
+      document.getElementById('cv-preview-page').style.fontSize = (currentScale / 100 * 12) + 'px';
     }
 
-    function addEducationField() {
-      const list = document.getElementById('education-list');
-      const div = document.createElement('div');
-      div.className = 'edu-item p-3 border rounded-lg bg-white text-xs grid grid-cols-2 gap-2 relative mt-2';
-      div.innerHTML = `
-        <button onclick="this.parentElement.remove(); updateLiveView();" class="absolute top-1 right-2 text-red-500 hover:text-red-700 text-xs">
-          <i class="fa-solid fa-trash"></i>
-        </button>
-        <div>
-          <label class="font-semibold">ডিগ্রি:</label>
-          <input type="text" class="edu-degree w-full border rounded p-1.5" value="ডিগ্রির নাম" oninput="updateLiveView()">
-        </div>
-        <div>
-          <label class="font-semibold">প্রতিষ্ঠান:</label>
-          <input type="text" class="edu-inst w-full border rounded p-1.5" value="প্রতিষ্ঠানের নাম" oninput="updateLiveView()">
-        </div>
-        <div>
-          <label class="font-semibold">বোর্ড / বিশ্ববিদ্যালয়:</label>
-          <input type="text" class="edu-board w-full border rounded p-1.5" value="বোর্ড" oninput="updateLiveView()">
-        </div>
-        <div>
-          <label class="font-semibold">পাসের সন:</label>
-          <input type="text" class="edu-year w-full border rounded p-1.5" value="সাল" oninput="updateLiveView()">
-        </div>
-        <div class="col-span-2">
-          <label class="font-semibold">ফলাফল:</label>
-          <input type="text" class="edu-result w-full border rounded p-1.5" value="ফলাফল" oninput="updateLiveView()">
-        </div>
-      `;
-      list.appendChild(div);
-      updateLiveView();
-    }
-
-    // Add Custom New Section
-    function addNewCustomSection() {
-      const title = document.getElementById('new-sec-title').value.trim();
-      const content = document.getElementById('new-sec-content').value.trim();
-
+    // নতুন কাস্টম ক্যাটাগরি তৈরি
+    function addCustomSection() {
+      const title = document.getElementById('custom-title').value.trim();
+      const body = document.getElementById('custom-body').value.trim();
       if (!title) {
-        alert('অনুগ্রহ করে সেকশনের নাম লিখুন।');
+        alert('ক্যাটাগরির নাম লিখুন');
         return;
       }
 
-      const secId = 'custom-sec-' + Date.now();
-      const container = document.getElementById('sortable-sections');
-
-      const newSection = document.createElement('div');
-      newSection.id = secId;
-      newSection.className = 'draggable-section';
-      newSection.setAttribute('draggable', 'true');
-      newSection.innerHTML = `
-        <h2 class="theme-heading text-sm font-bold uppercase tracking-wider pb-1 mb-1.5 flex items-center justify-between">
-          <span class="flex items-center gap-2">
-            <i class="fa-solid fa-grip-vertical text-slate-300 text-xs no-print cursor-grab"></i>
-            ${title}
-          </span>
-          <button onclick="document.getElementById('${secId}').remove()" class="no-print text-red-400 hover:text-red-600 text-xs font-normal">
+      const secId = 'custom-' + Date.now();
+      const container = document.getElementById('drag-container');
+      const div = document.createElement('div');
+      div.id = secId;
+      div.className = 'draggable-section';
+      div.setAttribute('draggable', 'true');
+      div.innerHTML = `
+        <div class="section-bar">
+          <span>${title}</span>
+          <button onclick="document.getElementById('${secId}').remove()" class="no-print text-red-500 hover:text-red-700 text-xs">
             <i class="fa-solid fa-trash"></i>
           </button>
-        </h2>
-        <p class="text-xs text-slate-700 leading-relaxed whitespace-pre-line">${content}</p>
+        </div>
+        <p class="text-[10.5px] px-1 text-slate-700 leading-tight whitespace-pre-line">${body}</p>
       `;
-
-      container.appendChild(newSection);
-      setupDragAndDrop();
-
-      // Reset Inputs
-      document.getElementById('new-sec-title').value = '';
-      document.getElementById('new-sec-content').value = '';
-      alert('নতুন সেকশন সিভিতে যুক্ত হয়েছে! আপনি ড্র্যাগ করে এটি সাজাতে পারেন।');
+      container.appendChild(div);
+      setupDragDrop();
+      document.getElementById('custom-title').value = '';
+      document.getElementById('custom-body').value = '';
     }
 
-    // Update entire Live Preview
-    function updateLiveView() {
-      document.getElementById('view-name').innerText = document.getElementById('inp-name').value;
-      document.getElementById('view-title').innerText = document.getElementById('inp-title').value;
-      document.getElementById('view-phone').innerText = document.getElementById('inp-phone').value;
-      document.getElementById('view-email').innerText = document.getElementById('inp-email').value;
-      document.getElementById('view-address').innerText = document.getElementById('inp-address').value;
-
-      document.getElementById('view-objective').innerText = document.getElementById('inp-objective').value;
-
-      // Update Lists
-      updateExperienceView();
-      updateEducationView();
-
-      // Skills
-      const skillsArr = document.getElementById('inp-skills').value.split('\n').filter(s => s.trim() !== '');
-      document.getElementById('view-skills').innerHTML = skillsArr.map(s => `<li>${s.replace(/^[•\-\*]\s*/, '')}</li>`).join('');
-
-      // Languages
-      const langArr = document.getElementById('inp-languages').value.split('\n').filter(l => l.trim() !== '');
-      document.getElementById('view-languages').innerHTML = langArr.map(l => `<li>${l.replace(/^[•\-\*]\s*/, '')}</li>`).join('');
-
-      // Personal Info
-      document.getElementById('view-father').innerText = document.getElementById('inp-father').value;
-      document.getElementById('view-mother').innerText = document.getElementById('inp-mother').value;
-      document.getElementById('view-dob').innerText = document.getElementById('inp-dob').value;
-      document.getElementById('view-nationality').innerText = document.getElementById('inp-nationality').value;
-      document.getElementById('view-religion').innerText = document.getElementById('inp-religion').value;
-      document.getElementById('view-height').innerText = document.getElementById('inp-height').value;
-      document.getElementById('view-weight').innerText = document.getElementById('inp-weight').value;
-      document.getElementById('view-marital').innerText = document.getElementById('inp-marital').value;
-    }
-
-    // Template Selector
-    function selectTemplate(templateClass) {
-      const preview = document.getElementById('cv-preview');
-      preview.classList.remove('template-modern', 'template-executive', 'template-creative', 'template-minimal');
-      preview.classList.add(templateClass);
-    }
-
-    // Font Sizing Adjuster
-    let baseFontSize = 14;
-    function changeFontSize(amount) {
-      baseFontSize += amount;
-      if (baseFontSize < 11) baseFontSize = 11;
-      if (baseFontSize > 18) baseFontSize = 18;
-      document.getElementById('cv-preview').style.fontSize = baseFontSize + 'px';
-      document.getElementById('font-size-label').innerText = baseFontSize + 'px';
-    }
-
-    // Drag and Drop implementation
-    function setupDragAndDrop() {
-      const container = document.getElementById('sortable-sections');
+    // ড্র্যাগ অ্যান্ড ড্রপ (Drag & Drop) পজিশন পরিবর্তন
+    function setupDragDrop() {
+      const container = document.getElementById('drag-container');
       const draggables = container.querySelectorAll('.draggable-section');
 
       draggables.forEach(draggable => {
-        draggable.addEventListener('dragstart', () => {
-          draggable.classList.add('dragging');
-        });
-
-        draggable.addEventListener('dragend', () => {
-          draggable.classList.remove('dragging');
-        });
+        draggable.addEventListener('dragstart', () => draggable.classList.add('dragging'));
+        draggable.addEventListener('dragend', () => draggable.classList.remove('dragging'));
       });
 
       container.addEventListener('dragover', e => {
@@ -853,7 +615,6 @@
 
     function getDragAfterElement(container, y) {
       const draggableElements = [...container.querySelectorAll('.draggable-section:not(.dragging)')];
-
       return draggableElements.reduce((closest, child) => {
         const box = child.getBoundingClientRect();
         const offset = y - box.top - box.height / 2;
@@ -865,34 +626,34 @@
       }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 
-    // PDF Download
+    // PDF এক্সপোর্ট
     function downloadPDF() {
-      const element = document.getElementById('cv-preview');
+      const element = document.getElementById('cv-preview-page');
       const opt = {
         margin: 0,
-        filename: 'my_curriculum_vitae.pdf',
+        filename: 'Curriculum_Vitae.pdf',
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
+        html2canvas: { scale: 2.5, useCORS: true },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
       html2pdf().set(opt).from(element).save();
     }
 
-    // PNG and JPG Download
+    // PNG & JPG এক্সপোর্ট
     function downloadImage(format) {
-      const element = document.getElementById('cv-preview');
-      html2canvas(element, { scale: 2, useCORS: true }).then(canvas => {
+      const element = document.getElementById('cv-preview-page');
+      html2canvas(element, { scale: 2.5, useCORS: true }).then(canvas => {
         const link = document.createElement('a');
-        link.download = `my_curriculum_vitae.${format}`;
+        link.download = `Curriculum_Vitae.${format}`;
         link.href = canvas.toDataURL(`image/${format}`, 0.95);
         link.click();
       });
     }
 
-    // Initialize default state
+    // শুরুতেই রেন্ডার ও ড্র্যাগ সেটআপ
     window.onload = function() {
-      updateLiveView();
-      setupDragAndDrop();
+      renderCV();
+      setupDragDrop();
     };
   </script>
 </body>
