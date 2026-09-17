@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Advanced Pro CV Maker</title>
+  <title>Ultra Pro CV Maker Studio</title>
   
   <!-- Fonts & FontAwesome -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Alex+Brush&family=Roboto:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Alex+Brush&family=Dancing+Script:wght@600&family=Inter:wght@400;600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <!-- SortableJS, html2canvas, jsPDF -->
@@ -26,23 +26,23 @@
 
     body {
       font-family: var(--font-family);
-      background-color: #343a40;
+      background-color: #334155;
       min-height: 100vh;
       overflow-x: hidden;
     }
 
-    /* Top Navigation Bar */
+    /* Top Navbar */
     .top-navbar {
       position: sticky;
       top: 0;
       z-index: 1000;
-      background: #1e293b;
+      background: #0f172a;
       color: #fff;
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 10px 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
     }
     .top-navbar .logo {
       font-size: 17px;
@@ -50,22 +50,60 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      color: #38bdf8;
     }
-    .menu-toggle-btn {
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .nav-btn {
       background: var(--primary-color);
       color: #fff;
-      border: 1px solid rgba(255,255,255,0.3);
-      padding: 8px 16px;
+      border: 1px solid rgba(255,255,255,0.25);
+      padding: 8px 14px;
       border-radius: 6px;
       cursor: pointer;
       font-weight: 600;
-      font-size: 14px;
+      font-size: 13px;
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    /* Backdrop overlay for outside click/touch */
+    /* Download Dropdown */
+    .dropdown-container { position: relative; }
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 115%;
+      background: #ffffff;
+      border-radius: 8px;
+      min-width: 220px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 1010;
+    }
+    .dropdown-menu.show { display: flex; }
+    .dropdown-item {
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: 0.2s;
+      border: none;
+      background: none;
+      text-align: left;
+      width: 100%;
+    }
+    .dropdown-item:hover { background: #f1f5f9; color: var(--primary-color); }
+
+    /* Side Settings Drawer */
     .drawer-backdrop {
       position: fixed;
       inset: 0;
@@ -74,50 +112,32 @@
       z-index: 1100;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.3s;
     }
-    .drawer-backdrop.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
+    .drawer-backdrop.active { opacity: 1; pointer-events: auto; }
 
-    /* Slide-over Drawer Menu */
     .editor-drawer {
       position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      width: 360px;
-      max-width: 88vw;
+      top: 0; left: 0; bottom: 0;
+      width: 340px;
+      max-width: 85vw;
       background: #ffffff;
       z-index: 1200;
-      box-shadow: 5px 0 25px rgba(0,0,0,0.4);
+      box-shadow: 5px 0 25px rgba(0,0,0,0.5);
       transform: translateX(-100%);
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 0.3s ease;
       display: flex;
       flex-direction: column;
     }
-    .editor-drawer.active {
-      transform: translateX(0);
-    }
-
+    .editor-drawer.active { transform: translateX(0); }
     .drawer-header {
-      padding: 16px 20px;
-      background: #1e293b;
-      color: white;
+      padding: 15px 20px;
+      background: #0f172a;
+      color: #fff;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .drawer-header h3 { font-size: 16px; font-weight: 600; }
-    .close-drawer-btn {
-      background: none;
-      border: none;
-      color: #fff;
-      font-size: 20px;
-      cursor: pointer;
-    }
-
     .drawer-body {
       flex: 1;
       overflow-y: auto;
@@ -126,55 +146,32 @@
       flex-direction: column;
       gap: 16px;
     }
-
-    .tool-group {
-      background: #f8f9fa;
-      border: 1px solid #e9ecef;
+    .drawer-group {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
       border-radius: 8px;
       padding: 12px;
     }
-    .tool-group-title {
+    .drawer-group-title {
       font-size: 12px;
       font-weight: 700;
-      color: #495057;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      color: #475569;
+      margin-bottom: 8px;
     }
-
-    /* Quick rich-text formatting buttons */
-    .fmt-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .fmt-btn {
-      background: #fff;
-      border: 1px solid #ced4da;
-      padding: 6px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: bold;
-    }
-    .fmt-btn:hover { background: #e2e8f0; }
-
-    .control-row {
+    .drawer-field {
       display: flex;
       flex-direction: column;
       gap: 5px;
       margin-bottom: 8px;
     }
-    .control-row label { font-size: 11px; font-weight: 600; color: #6c757d; }
-    .control-row input, .control-row select {
+    .drawer-field label { font-size: 11px; font-weight: 600; color: #64748b; }
+    .drawer-field input, .drawer-field select {
       padding: 7px;
-      border: 1px solid #ced4da;
+      border: 1px solid #cbd5e1;
       border-radius: 5px;
       font-size: 12px;
     }
-
-    .action-btn {
+    .btn-block {
       width: 100%;
       padding: 9px;
       border: none;
@@ -188,32 +185,28 @@
       gap: 6px;
       margin-bottom: 6px;
     }
-    .btn-blue { background: var(--primary-color); color: #fff; }
-    .btn-green { background: #198754; color: #fff; }
-    .btn-red { background: #dc3545; color: #fff; }
 
     /* Workspace / Preview Wrapper */
     .workspace {
       display: flex;
       justify-content: center;
-      padding: 25px 15px;
+      padding: 30px 15px;
       overflow-x: auto;
     }
-
     .pages-container {
       display: flex;
       flex-direction: column;
-      gap: 30px;
+      gap: 35px;
       align-items: center;
     }
 
-    /* Strict A4 Page Scaled to 794px x 1123px (Aspect Ratio matches 2480x3508px) */
+    /* Fixed A4 Scaled Page (794px x 1123px => 2480px x 3508px on export) */
     .cv-page {
       width: 794px;
       height: 1123px;
       background: #ffffff;
       padding: 25px 45px 35px 45px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
       position: relative;
       font-size: var(--base-font-size);
       color: var(--text-color);
@@ -221,9 +214,8 @@
       flex-direction: column;
       justify-content: space-between;
       overflow: hidden;
-      transform-origin: top center;
+      cursor: pointer;
     }
-
     .top-decorative-bar {
       height: 14px;
       background: var(--primary-color);
@@ -231,7 +223,7 @@
       top: 0; left: 0; right: 0;
     }
 
-    /* Header Profile with Clickable Photo */
+    /* Header Profile */
     .cv-header {
       display: flex;
       align-items: center;
@@ -245,6 +237,7 @@
       width: 110px;
       height: 110px;
       cursor: pointer;
+      flex-shrink: 0;
     }
     .profile-photo {
       width: 100%;
@@ -275,14 +268,14 @@
       font-weight: 700;
       color: var(--primary-color);
       text-transform: uppercase;
-      outline: none;
+      cursor: pointer;
     }
     .resume-subtitle {
       font-size: 13px;
       letter-spacing: 2px;
       color: #555;
       margin-bottom: 8px;
-      outline: none;
+      cursor: pointer;
     }
     .contact-item {
       display: flex;
@@ -290,7 +283,7 @@
       gap: 8px;
       font-size: 11px;
       margin-bottom: 4px;
-      color: #333;
+      cursor: pointer;
     }
     .contact-item i {
       color: var(--primary-color);
@@ -298,7 +291,7 @@
       width: 12px;
     }
 
-    /* Sections & Items */
+    /* Sections */
     .sortable-section-list {
       flex: 1;
       display: flex;
@@ -308,10 +301,7 @@
     }
     .cv-section {
       position: relative;
-      outline: none;
     }
-
-    /* Contextual action toolbar above each section */
     .section-hover-bar {
       position: absolute;
       right: 0;
@@ -347,7 +337,6 @@
       margin-bottom: 6px;
       cursor: grab;
     }
-    .section-badge i { font-size: 12px; }
 
     .section-content {
       font-size: 11.5px;
@@ -355,11 +344,15 @@
       padding: 2px 4px;
     }
 
+    /* Data Table / List Rows with Delete Button */
     .data-table {
       width: 100%;
       border-collapse: collapse;
     }
-    .data-table tr:hover { background: rgba(0,0,0,0.02); }
+    .table-row {
+      position: relative;
+    }
+    .table-row:hover .row-del-btn { display: inline-block; }
     .data-table td {
       padding: 2px 0;
       vertical-align: top;
@@ -367,28 +360,101 @@
     }
     .data-table .label { width: 140px; font-weight: 500; }
     .data-table .separator { width: 15px; text-align: center; }
+    .row-del-btn {
+      display: none;
+      background: #ef4444;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 15px;
+      height: 15px;
+      font-size: 8px;
+      line-height: 15px;
+      text-align: center;
+      cursor: pointer;
+      margin-left: 6px;
+    }
 
-    .grid-2-col {
+    /* Skills Grid with Modern Stars & Emoji */
+    .skills-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 6px 20px;
+      gap: 6px 16px;
       font-size: 11px;
     }
-    .grid-item {
+    .skill-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8fafc;
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid #e2e8f0;
+    }
+    .skill-item:hover .row-del-btn { display: inline-block; }
+    .skill-name {
       display: flex;
       align-items: center;
       gap: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .stars-group {
+      display: flex;
+      gap: 2px;
+      color: #f59e0b;
+      cursor: pointer;
     }
 
+    /* Habits Box Grid */
+    .habits-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 14px;
+      font-size: 11px;
+    }
+    .habit-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f1f5f9;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+    }
+    .habit-box:hover .row-del-btn { display: inline-block; }
+    .habit-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .habit-left i { color: var(--primary-color); }
+
+    /* Signature Area */
     .signature-container {
       margin-top: 15px;
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
     }
+    .sig-clickable {
+      cursor: pointer;
+      min-width: 140px;
+      min-height: 35px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-end;
+    }
     .signature-font {
       font-family: 'Alex Brush', cursive;
       font-size: 24px;
+    }
+    .signature-img {
+      max-height: 45px;
+      max-width: 140px;
+      object-fit: contain;
     }
 
     .cv-footer {
@@ -419,66 +485,91 @@
       z-index: 2;
     }
 
-    /* Modal for Image Editing (Crop, Filter, Rotate) */
-    .img-editor-modal {
+    /* Modal Layer: Text Field Editor */
+    .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.8);
+      background: rgba(0,0,0,0.65);
       z-index: 2000;
       display: none;
       align-items: center;
       justify-content: center;
       padding: 15px;
     }
-    .img-editor-modal.active { display: flex; }
-    .editor-modal-card {
+    .modal-overlay.active { display: flex; }
+    .modal-card {
       background: #ffffff;
-      width: 500px;
+      width: 440px;
       max-width: 95vw;
       border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    .modal-header {
+    .modal-head {
       padding: 12px 18px;
-      background: #1e293b;
+      background: #0f172a;
       color: #fff;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      font-size: 14px;
+      font-weight: 600;
     }
     .modal-body {
-      padding: 18px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      align-items: center;
       gap: 12px;
-      max-height: 75vh;
-      overflow-y: auto;
     }
-    .canvas-crop-frame {
-      width: 200px;
-      height: 200px;
-      border-radius: 50%;
-      border: 3px dashed var(--primary-color);
-      overflow: hidden;
-      position: relative;
-      background: #f1f5f9;
+    .text-edit-area {
+      width: 100%;
+      height: 90px;
+      padding: 8px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+    }
+    .quick-style-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .style-btn {
+      padding: 6px 10px;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .style-btn.active { background: #0284c7; color: #fff; border-color: #0284c7; }
+
+    /* Modal Layer: Advanced Image Studio (Profile & Signature) */
+    .crop-box-container {
+      width: 220px;
+      height: 220px;
+      margin: 0 auto;
+      border: 2px dashed #0284c7;
       display: flex;
       align-items: center;
       justify-content: center;
+      overflow: hidden;
+      background: #f8fafc;
+      position: relative;
     }
-    #editorCanvas { max-width: 100%; max-height: 100%; }
+    .crop-box-container.circle { border-radius: 50%; }
+    .crop-box-container.square { border-radius: 4px; }
+    .crop-box-container.passport { width: 175px; height: 225px; border-radius: 4px; }
+    #canvasImagePreview { max-width: 100%; max-height: 100%; }
 
-    .modal-controls { width: 100%; display: flex; flex-direction: column; gap: 8px; }
-    .slider-item { display: flex; align-items: center; justify-content: space-between; font-size: 12px; gap: 10px; }
-    .slider-item input { flex: 1; }
-
+    /* Non-printable rules */
     @media print {
       body { background: none; }
-      .top-navbar, .editor-drawer, .drawer-backdrop, .section-hover-bar { display: none !important; }
+      .top-navbar, .editor-drawer, .drawer-backdrop, .modal-overlay, .section-hover-bar, .row-del-btn { display: none !important; }
       .workspace { padding: 0; }
       .cv-page {
         box-shadow: none;
@@ -492,145 +583,128 @@
 </head>
 <body>
 
-  <!-- Hidden Photo Input -->
-  <input type="file" id="realPhotoInput" accept="image/*" style="display:none;">
-
-  <!-- Top Navbar with Drawer Button -->
+  <!-- Top Navigation Bar -->
   <div class="top-navbar">
     <div class="logo">
-      <i class="fa-solid fa-file-invoice" style="color: #38bdf8;"></i>
-      <span>Pro CV Studio</span>
-    </div>
-    <button class="menu-toggle-btn" onclick="toggleDrawer()">
-      <i class="fa-solid fa-bars"></i>
-      <span>এডিটর মেনু</span>
-    </button>
-  </div>
-
-  <!-- Outside touch backdrop -->
-  <div class="drawer-backdrop" id="drawerBackdrop" onclick="toggleDrawer()"></div>
-
-  <!-- Slide-over Drawer Menu -->
-  <div class="editor-drawer" id="editorDrawer">
-    <div class="drawer-header">
-      <h3><i class="fa-solid fa-sliders"></i> এডিটিং ও সেটিংস টুলস</h3>
-      <button class="close-drawer-btn" onclick="toggleDrawer()">&times;</button>
+      <i class="fa-solid fa-graduation-cap"></i>
+      <span>CV Studio</span>
     </div>
 
-    <div class="drawer-body">
-
-      <!-- Text Formatting Tools -->
-      <div class="tool-group">
-        <div class="tool-group-title"><i class="fa-solid fa-font"></i> টেক্সট ফরম্যাটিং (যেকোনো লেখা সিলেক্ট করুন)</div>
-        <div class="fmt-buttons">
-          <button class="fmt-btn" onclick="formatText('bold')"><i class="fa-solid fa-bold"></i></button>
-          <button class="fmt-btn" onclick="formatText('italic')"><i class="fa-solid fa-italic"></i></button>
-          <button class="fmt-btn" onclick="formatText('underline')"><i class="fa-solid fa-underline"></i></button>
-          <button class="fmt-btn" onclick="formatText('justifyLeft')"><i class="fa-solid fa-align-left"></i></button>
-          <button class="fmt-btn" onclick="formatText('justifyCenter')"><i class="fa-solid fa-align-center"></i></button>
-          <button class="fmt-btn" onclick="formatText('justifyRight')"><i class="fa-solid fa-align-right"></i></button>
-        </div>
-        <div class="control-row" style="margin-top: 8px;">
-          <label>টেক্সটের কালার বদলান</label>
-          <input type="color" onchange="formatTextColor(this.value)" value="#000000" style="height: 32px; width: 100%;">
+    <div class="nav-actions">
+      <!-- Download Dropdown -->
+      <div class="dropdown-container">
+        <button class="nav-btn" onclick="toggleDropdown()" style="background:#059669;">
+          <i class="fa-solid fa-download"></i> ডাউনলোড <i class="fa-solid fa-chevron-down" style="font-size:10px;"></i>
+        </button>
+        <div class="dropdown-menu" id="downloadDropdown">
+          <button class="dropdown-item" onclick="exportDocument('png')"><i class="fa-solid fa-file-image"></i> PNG (300 DPI - 2480×3508)</button>
+          <button class="dropdown-item" onclick="exportDocument('jpeg')"><i class="fa-solid fa-image"></i> JPEG (300 DPI - 2480×3508)</button>
+          <button class="dropdown-item" onclick="exportToPDF()"><i class="fa-solid fa-file-pdf"></i> PDF Document (Multi-Page)</button>
+          <button class="dropdown-item" onclick="window.print()"><i class="fa-solid fa-print"></i> সরাসরি প্রিন্ট (Print)</button>
         </div>
       </div>
 
-      <!-- Global Theme & Size -->
-      <div class="tool-group">
-        <div class="tool-group-title"><i class="fa-solid fa-palette"></i> গ্লোবাল স্টাইল ও ফ্রন্ট সাইজ</div>
-        <div class="control-row">
-          <label>মূল থিম কালার (Primary Color)</label>
-          <input type="color" id="themeColorPicker" value="#113b63" style="height: 32px; width: 100%;">
+      <!-- Settings Menu Button -->
+      <button class="nav-btn" onclick="toggleDrawer()">
+        <i class="fa-solid fa-sliders"></i> সাইট সেটিংস
+      </button>
+    </div>
+  </div>
+
+  <!-- Outside click backdrop -->
+  <div class="drawer-backdrop" id="drawerBackdrop" onclick="toggleDrawer()"></div>
+
+  <!-- Settings Drawer Menu -->
+  <div class="editor-drawer" id="editorDrawer">
+    <div class="drawer-header">
+      <h4><i class="fa-solid fa-sliders"></i> সেটিংস কন্ট্রোল</h4>
+      <button onclick="toggleDrawer()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;">&times;</button>
+    </div>
+    <div class="drawer-body">
+      
+      <div class="drawer-group">
+        <div class="drawer-group-title"><i class="fa-solid fa-palette"></i> গ্লোবাল ডিজাইন সেটিংস</div>
+        <div class="drawer-field">
+          <label>মূল থিম কালার (Theme Color)</label>
+          <input type="color" id="globalColorPicker" value="#113b63" style="width:100%;height:35px;border:none;cursor:pointer;">
         </div>
-        <div class="control-row">
-          <label>ফ্রন্ট সাইজ অ্যাডজাস্ট</label>
-          <input type="range" id="fontSizeSlider" min="10" max="16" value="13">
+        <div class="drawer-field">
+          <label>বেস ফ্রন্ট সাইজ</label>
+          <input type="range" id="globalFontSize" min="10" max="16" value="13">
         </div>
-        <div class="control-row">
-          <label>ফন্ট স্টাইল নির্বাচন করুন</label>
-          <select id="fontFamilySelect" onchange="changeFontFamily(this.value)">
-            <option value="'Poppins', sans-serif">Poppins (Default)</option>
-            <option value="'Inter', sans-serif">Inter</option>
-            <option value="'Roboto', sans-serif">Roboto</option>
-            <option value="Arial, sans-serif">Arial</option>
+        <div class="drawer-field">
+          <label>ফন্ট স্টাইল</label>
+          <select onchange="changeGlobalFont(this.value)">
+            <option value="'Poppins', sans-serif">Poppins (Clean)</option>
+            <option value="'Inter', sans-serif">Inter (Modern)</option>
+            <option value="'Roboto', sans-serif">Roboto (Formal)</option>
           </select>
         </div>
       </div>
 
-      <!-- Section Creator -->
-      <div class="tool-group">
-        <div class="tool-group-title"><i class="fa-solid fa-square-plus"></i> নতুন সেকশন যোগ করুন</div>
-        <div class="control-row">
-          <label>সেকশন নাম</label>
-          <input type="text" id="newSecTitle" placeholder="উদা: PROJECTS">
+      <div class="drawer-group">
+        <div class="drawer-group-title"><i class="fa-solid fa-folder-plus"></i> সেকশন ও পেজ ম্যানেজার</div>
+        <div class="drawer-field">
+          <label>নতুন সেকশনের নাম</label>
+          <input type="text" id="newSecName" placeholder="উদা: PROJECTS">
         </div>
-        <div class="control-row">
+        <div class="drawer-field">
           <label>FontAwesome Icon ক্লাস</label>
-          <input type="text" id="newSecIcon" placeholder="fa-circle-check" value="fa-award">
+          <input type="text" id="newSecIcon" value="fa-circle-check">
         </div>
-        <button class="action-btn btn-blue" onclick="addNewSection()"><i class="fa-solid fa-plus"></i> অ্যাড সেকশন</button>
-        <button class="action-btn" style="background:#64748b; color:#fff;" onclick="addNewPage()"><i class="fa-solid fa-file-circle-plus"></i> নতুন পেজ যুক্ত করুন</button>
-      </div>
-
-      <!-- Export Buttons -->
-      <div class="tool-group">
-        <div class="tool-group-title"><i class="fa-solid fa-cloud-arrow-down"></i> এক্সপোর্ট (2480 × 3508 px)</div>
-        <button class="action-btn btn-green" onclick="exportDocument('png')"><i class="fa-solid fa-file-image"></i> PNG (300 DPI) ডাউনলোড</button>
-        <button class="action-btn btn-green" onclick="exportDocument('jpeg')"><i class="fa-solid fa-image"></i> JPEG (300 DPI) ডাউনলোড</button>
-        <button class="action-btn btn-red" onclick="exportToPDF()"><i class="fa-solid fa-file-pdf"></i> সম্পূর্ণ PDF ডাউনলোড</button>
-        <button class="action-btn btn-blue" onclick="window.print()"><i class="fa-solid fa-print"></i> সরাসরি প্রিন্ট করুন</button>
+        <button class="btn-block" style="background:var(--primary-color); color:#fff;" onclick="addNewSection()"><i class="fa-solid fa-plus"></i> নতুন সেকশন যোগ করুন</button>
+        <button class="btn-block" style="background:#475569; color:#fff;" onclick="addNewPage()"><i class="fa-solid fa-file-circle-plus"></i> নতুন পেজ যুক্ত করুন</button>
       </div>
 
     </div>
   </div>
 
   <!-- Workspace Area -->
-  <div class="workspace">
-    <div class="pages-container" id="cvPagesContainer">
+  <div class="workspace" onclick="handleOutsidePageClick(event)">
+    <div class="pages-container" id="pagesContainer">
 
       <!-- PAGE 1 -->
-      <div class="cv-page" id="page-1">
+      <div class="cv-page" id="page-1" onclick="handlePageBackgroundClick(event, this)">
         <div class="top-decorative-bar"></div>
 
         <!-- Header Profile -->
         <div class="cv-header">
-          <div class="profile-photo-wrapper" onclick="triggerPhotoUpload()" title="ছবি পরিবর্তন ও এডিট করতে টাচ করুন">
-            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400" alt="Profile" class="profile-photo" id="mainProfilePic">
-            <div class="photo-overlay-hint"><i class="fa-solid fa-camera"></i> এডিট</div>
+          <div class="profile-photo-wrapper" onclick="openPhotoEditor('profile')" title="ছবি পরিবর্তন ও এডিট করতে চাপ দিন">
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400" alt="Profile" class="profile-photo" id="mainProfileImg">
+            <div class="photo-overlay-hint"><i class="fa-solid fa-crop-simple"></i> এডিট</div>
           </div>
           <div class="header-details">
-            <div class="name-title" contenteditable="true">MD. SUHANUR RAHMAN</div>
-            <div class="resume-subtitle" contenteditable="true">RESUME</div>
+            <div class="name-title" onclick="openTextEditor(this)">MD. SUHANUR RAHMAN</div>
+            <div class="resume-subtitle" onclick="openTextEditor(this)">RESUME</div>
             <div class="contact-item">
               <i class="fa-solid fa-location-dot"></i>
-              <span contenteditable="true">Vill- Chwoor, P.O: Hatishail, P.S. Tanore, Dist- Rajshahi</span>
+              <span onclick="openTextEditor(this)">Vill- Chwoor, P.O: Hatishail, P.S. Tanore, Dist- Rajshahi</span>
             </div>
             <div class="contact-item">
               <i class="fa-solid fa-phone"></i>
-              <span contenteditable="true">01309-166843</span>
+              <span onclick="openTextEditor(this)">01309-166843</span>
             </div>
             <div class="contact-item">
               <i class="fa-solid fa-envelope"></i>
-              <span contenteditable="true">suhanurrohman2009@gmail.com</span>
+              <span onclick="openTextEditor(this)">suhanurrohman2009@gmail.com</span>
             </div>
           </div>
         </div>
 
-        <!-- Page 1 Sortable Sections -->
+        <!-- Sortable Sections List -->
         <div class="sortable-section-list">
           
           <!-- Career Objective -->
           <div class="cv-section">
             <div class="section-hover-bar">
-              <input type="color" onchange="changeSectionColor(this)" title="হেডার রং" style="width:20px;height:20px;border:none;cursor:pointer;">
+              <input type="color" onchange="changeSecColor(this)" title="কালার" style="width:18px;height:18px;border:none;">
               <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕</button>
             </div>
             <div class="section-badge">
               <i class="fa-solid fa-bullseye"></i>
-              <span contenteditable="true">CAREER OBJECTIVE</span>
+              <span onclick="openTextEditor(this)">CAREER OBJECTIVE</span>
             </div>
-            <div class="section-content" contenteditable="true">
+            <div class="section-content" onclick="openTextEditor(this)">
               Looking for a challenging job where I will have the scope to utilize my potentiality, adaptability and skills to do something innovative and from where I will be able to enhance my knowledge. I am a fast learner and can easily learn new tasks, skills, and responsibilities.
             </div>
           </div>
@@ -639,21 +713,41 @@
           <div class="cv-section">
             <div class="section-hover-bar">
               <button class="sec-btn" onclick="addTableRow(this)">+ সারি</button>
-              <input type="color" onchange="changeSectionColor(this)" title="হেডার রং" style="width:20px;height:20px;border:none;cursor:pointer;">
+              <input type="color" onchange="changeSecColor(this)" title="কালার" style="width:18px;height:18px;border:none;">
               <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕</button>
             </div>
             <div class="section-badge">
               <i class="fa-solid fa-graduation-cap"></i>
-              <span contenteditable="true">EDUCATIONAL QUALIFICATION</span>
+              <span onclick="openTextEditor(this)">EDUCATIONAL QUALIFICATION</span>
             </div>
             <div class="section-content">
-              <div style="font-weight: 600; margin-bottom: 3px;" contenteditable="true">| S.S.C — Secondary School Certificate</div>
+              <div style="font-weight: 600; margin-bottom: 3px;" onclick="openTextEditor(this)">| S.S.C — Secondary School Certificate</div>
               <table class="data-table">
-                <tr><td class="label" contenteditable="true">Name of the School</td><td class="separator">:</td><td contenteditable="true">Talanda Ananda Mohan High School</td></tr>
-                <tr><td class="label" contenteditable="true">Group</td><td class="separator">:</td><td contenteditable="true">Humanities</td></tr>
-                <tr><td class="label" contenteditable="true">Passing Year</td><td class="separator">:</td><td contenteditable="true">Running</td></tr>
-                <tr><td class="label" contenteditable="true">Result</td><td class="separator">:</td><td contenteditable="true">Running</td></tr>
-                <tr><td class="label" contenteditable="true">Board</td><td class="separator">:</td><td contenteditable="true">Rajshahi</td></tr>
+                <tr class="table-row">
+                  <td class="label" onclick="openTextEditor(this)">Name of the School</td>
+                  <td class="separator">:</td>
+                  <td><span onclick="openTextEditor(this)">Talanda Ananda Mohan High School</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
+                </tr>
+                <tr class="table-row">
+                  <td class="label" onclick="openTextEditor(this)">Group</td>
+                  <td class="separator">:</td>
+                  <td><span onclick="openTextEditor(this)">Humanities</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
+                </tr>
+                <tr class="table-row">
+                  <td class="label" onclick="openTextEditor(this)">Passing Year</td>
+                  <td class="separator">:</td>
+                  <td><span onclick="openTextEditor(this)">Running</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
+                </tr>
+                <tr class="table-row">
+                  <td class="label" onclick="openTextEditor(this)">Result</td>
+                  <td class="separator">:</td>
+                  <td><span onclick="openTextEditor(this)">Running</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
+                </tr>
+                <tr class="table-row">
+                  <td class="label" onclick="openTextEditor(this)">Board</td>
+                  <td class="separator">:</td>
+                  <td><span onclick="openTextEditor(this)">Rajshahi</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
+                </tr>
               </table>
             </div>
           </div>
@@ -662,80 +756,115 @@
           <div class="cv-section">
             <div class="section-hover-bar">
               <button class="sec-btn" onclick="addTableRow(this)">+ সারি</button>
-              <input type="color" onchange="changeSectionColor(this)" title="হেডার রং" style="width:20px;height:20px;border:none;cursor:pointer;">
+              <input type="color" onchange="changeSecColor(this)" title="কালার" style="width:18px;height:18px;border:none;">
               <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕</button>
             </div>
             <div class="section-badge">
               <i class="fa-solid fa-briefcase"></i>
-              <span contenteditable="true">WORK EXPERIENCE</span>
+              <span onclick="openTextEditor(this)">WORK EXPERIENCE</span>
             </div>
             <div class="section-content">
               <div style="margin-bottom: 6px;">
-                <div style="font-weight: 600;" contenteditable="true">o The Hideout Cafe</div>
+                <div style="font-weight: 600;" onclick="openTextEditor(this)">o The Hideout Cafe</div>
                 <table class="data-table" style="margin-left: 12px; width: calc(100% - 12px);">
-                  <tr><td class="label" contenteditable="true">Position</td><td class="separator">:</td><td contenteditable="true">Waiter</td></tr>
-                  <tr><td class="label" contenteditable="true">Location</td><td class="separator">:</td><td contenteditable="true">Rajshahi</td></tr>
-                  <tr><td class="label" contenteditable="true">Duration</td><td class="separator">:</td><td contenteditable="true">1 Month</td></tr>
+                  <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Position</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">Waiter</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                  <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Location</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">Rajshahi</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                  <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Duration</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">1 Month</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
                 </table>
               </div>
               <div>
-                <div style="font-weight: 600;" contenteditable="true">o MIM Computer & Studio</div>
+                <div style="font-weight: 600;" onclick="openTextEditor(this)">o MIM Computer & Studio</div>
                 <table class="data-table" style="margin-left: 12px; width: calc(100% - 12px);">
-                  <tr><td class="label" contenteditable="true">Position</td><td class="separator">:</td><td contenteditable="true">Computer Operator</td></tr>
-                  <tr><td class="label" contenteditable="true">Work</td><td class="separator">:</td><td contenteditable="true">Land Office</td></tr>
-                  <tr><td class="label" contenteditable="true">Location</td><td class="separator">:</td><td contenteditable="true">Tanore</td></tr>
-                  <tr><td class="label" contenteditable="true">Duration</td><td class="separator">:</td><td contenteditable="true">7 Months</td></tr>
+                  <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Position</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">Computer Operator</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                  <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Work</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">Land Office</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                  <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Location</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">Tanore</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                  <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Duration</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">7 Months</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
                 </table>
               </div>
             </div>
           </div>
 
-          <!-- Computer Knowledge -->
+          <!-- Computer Knowledge (No row limits) -->
           <div class="cv-section">
             <div class="section-hover-bar">
-              <input type="color" onchange="changeSectionColor(this)" title="হেডার রং" style="width:20px;height:20px;border:none;cursor:pointer;">
+              <button class="sec-btn" onclick="addComputerRow(this)">+ সারি</button>
+              <input type="color" onchange="changeSecColor(this)" title="কালার" style="width:18px;height:18px;border:none;">
               <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕</button>
             </div>
             <div class="section-badge">
               <i class="fa-solid fa-laptop"></i>
-              <span contenteditable="true">COMPUTER KNOWLEDGE</span>
+              <span onclick="openTextEditor(this)">COMPUTER KNOWLEDGE</span>
             </div>
-            <div class="section-content" contenteditable="true">
-              <strong>Knowledge on Operating System / Software:</strong>
-              <div style="display:flex; gap: 20px; margin-top: 4px;">
-                <span>• MS Word</span>
-                <span>• MS Excel</span>
-                <span>• MS PowerPoint</span>
-              </div>
+            <div class="section-content">
+              <div style="font-weight: 600; margin-bottom: 4px;" onclick="openTextEditor(this)">Knowledge on Operating System / Software:</div>
+              <table class="data-table comp-table">
+                <tr class="table-row">
+                  <td style="width:25px;"><i class="fa-solid fa-check" style="color:var(--primary-color);"></i></td>
+                  <td><span onclick="openTextEditor(this)">MS Word, MS Excel, MS PowerPoint</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
+                </tr>
+                <tr class="table-row">
+                  <td style="width:25px;"><i class="fa-solid fa-check" style="color:var(--primary-color);"></i></td>
+                  <td><span onclick="openTextEditor(this)">Adobe Photoshop, Illustrator Basic & Internet Browsing</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
+                </tr>
+              </table>
             </div>
           </div>
 
-          <!-- Skills -->
+          <!-- Skills Section (5-Star Rating & Emojis) -->
           <div class="cv-section">
             <div class="section-hover-bar">
-              <input type="color" onchange="changeSectionColor(this)" title="হেডার রং" style="width:20px;height:20px;border:none;cursor:pointer;">
+              <button class="sec-btn" onclick="addSkillRow(this)">+ স্কিল</button>
+              <input type="color" onchange="changeSecColor(this)" title="কালার" style="width:18px;height:18px;border:none;">
               <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕</button>
             </div>
             <div class="section-badge">
               <i class="fa-solid fa-gear"></i>
-              <span contenteditable="true">SKILLS</span>
+              <span onclick="openTextEditor(this)">SKILLS</span>
             </div>
             <div class="section-content">
-              <div class="grid-2-col" contenteditable="true">
-                <div class="grid-item"><span>Cybersecurity</span></div>
-                <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Networking (Completed)</span></div>
-                <div class="grid-item"><span>Sales</span></div>
-                <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Sales (Intermediate)</span></div>
-                <div class="grid-item"><span>Negotiation</span></div>
-                <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Negotiation (Advanced)</span></div>
-                <div class="grid-item"><span>Communication</span></div>
-                <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Communication (Advanced)</span></div>
-                <div class="grid-item"><span>Teamwork</span></div>
-                <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Teamwork (Advanced)</span></div>
-                <div class="grid-item"><span>Time Management</span></div>
-                <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Time Management (Advanced)</span></div>
-                <div class="grid-item"><span>Video Editing</span></div>
-                <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Video Editing (Basic)</span></div>
+              <div class="skills-grid" id="skillsGridContainer">
+                <div class="skill-item">
+                  <div class="skill-name" onclick="openTextEditor(this)">🛡️ Cybersecurity</div>
+                  <div class="stars-group" onclick="rateSkill(this)" title="ক্লিক করে স্টার পরিবর্তন করুন">
+                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>
+                  </div>
+                  <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
+                </div>
+                <div class="skill-item">
+                  <div class="skill-name" onclick="openTextEditor(this)">🌐 Networking</div>
+                  <div class="stars-group" onclick="rateSkill(this)" title="ক্লিক করে স্টার পরিবর্তন করুন">
+                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                  </div>
+                  <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
+                </div>
+                <div class="skill-item">
+                  <div class="skill-name" onclick="openTextEditor(this)">🤝 Negotiation</div>
+                  <div class="stars-group" onclick="rateSkill(this)" title="ক্লিক করে স্টার পরিবর্তন করুন">
+                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>
+                  </div>
+                  <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
+                </div>
+                <div class="skill-item">
+                  <div class="skill-name" onclick="openTextEditor(this)">👥 Teamwork</div>
+                  <div class="stars-group" onclick="rateSkill(this)" title="ক্লিক করে স্টার পরিবর্তন করুন">
+                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                  </div>
+                  <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
+                </div>
+                <div class="skill-item">
+                  <div class="skill-name" onclick="openTextEditor(this)">🎬 Video Editing</div>
+                  <div class="stars-group" onclick="rateSkill(this)" title="ক্লিক করে স্টার পরিবর্তন করুন">
+                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i>
+                  </div>
+                  <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
+                </div>
+                <div class="skill-item">
+                  <div class="skill-name" onclick="openTextEditor(this)">⏱️ Time Management</div>
+                  <div class="stars-group" onclick="rateSkill(this)" title="ক্লিক করে স্টার পরিবর্তন করুন">
+                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                  </div>
+                  <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
+                </div>
               </div>
             </div>
           </div>
@@ -748,31 +877,48 @@
       </div>
 
       <!-- PAGE 2 -->
-      <div class="cv-page" id="page-2">
+      <div class="cv-page" id="page-2" onclick="handlePageBackgroundClick(event, this)">
         <div class="top-decorative-bar"></div>
 
         <div class="sortable-section-list" style="margin-top: 25px;">
           
-          <!-- Habits -->
+          <!-- Habits in Card/Box Layout -->
           <div class="cv-section">
             <div class="section-hover-bar">
-              <input type="color" onchange="changeSectionColor(this)" title="হেডার রং" style="width:20px;height:20px;border:none;cursor:pointer;">
+              <button class="sec-btn" onclick="addHabitRow(this)">+ হ্যাবিট</button>
+              <input type="color" onchange="changeSecColor(this)" title="কালার" style="width:18px;height:18px;border:none;">
               <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕</button>
             </div>
             <div class="section-badge">
               <i class="fa-solid fa-star"></i>
-              <span contenteditable="true">HABITS</span>
+              <span onclick="openTextEditor(this)">HABITS</span>
             </div>
             <div class="section-content">
-              <div class="grid-2-col" contenteditable="true">
-                <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Workout</span></div>
-                <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Building a Network</span></div>
-                <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Learning New Tasks</span></div>
-                <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Building Relationships</span></div>
-                <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Learning New Skills</span></div>
-                <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Curiosity for Learning & Knowledge</span></div>
-                <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Meeting New People</span></div>
-                <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Hard Work</span></div>
+              <div class="habits-grid" id="habitsGridContainer">
+                <div class="habit-box">
+                  <div class="habit-left"><i class="fa-solid fa-star"></i> <span onclick="openTextEditor(this)">Workout & Fitness</span></div>
+                  <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
+                </div>
+                <div class="habit-box">
+                  <div class="habit-left"><i class="fa-solid fa-star"></i> <span onclick="openTextEditor(this)">Building a Network</span></div>
+                  <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
+                </div>
+                <div class="habit-box">
+                  <div class="habit-left"><i class="fa-solid fa-star"></i> <span onclick="openTextEditor(this)">Learning New Tasks</span></div>
+                  <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
+                </div>
+                <div class="habit-box">
+                  <div class="habit-left"><i class="fa-solid fa-star"></i> <span onclick="openTextEditor(this)">Building Relationships</span></div>
+                  <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
+                </div>
+                <div class="habit-box">
+                  <div class="habit-left"><i class="fa-solid fa-star"></i> <span onclick="openTextEditor(this)">Curiosity & Knowledge</span></div>
+                  <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
+                </div>
+                <div class="habit-box">
+                  <div class="habit-left"><i class="fa-solid fa-star"></i> <span onclick="openTextEditor(this)">Hard Work & Dedication</span></div>
+                  <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
+                </div>
               </div>
             </div>
           </div>
@@ -781,17 +927,17 @@
           <div class="cv-section">
             <div class="section-hover-bar">
               <button class="sec-btn" onclick="addTableRow(this)">+ সারি</button>
-              <input type="color" onchange="changeSectionColor(this)" title="হেডার রং" style="width:20px;height:20px;border:none;cursor:pointer;">
+              <input type="color" onchange="changeSecColor(this)" title="কালার" style="width:18px;height:18px;border:none;">
               <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕</button>
             </div>
             <div class="section-badge">
               <i class="fa-solid fa-comments"></i>
-              <span contenteditable="true">LANGUAGE SKILL</span>
+              <span onclick="openTextEditor(this)">LANGUAGE SKILL</span>
             </div>
             <div class="section-content">
               <table class="data-table">
-                <tr><td class="label" contenteditable="true">Bengali</td><td class="separator">:</td><td contenteditable="true">Mother Language</td></tr>
-                <tr><td class="label" contenteditable="true">English</td><td class="separator">:</td><td contenteditable="true">Writing and Reading Ability</td></tr>
+                <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Bengali</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">Mother Language</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                <tr class="table-row"><td class="label" onclick="openTextEditor(this)">English</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">Writing and Reading Ability</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
               </table>
             </div>
           </div>
@@ -800,53 +946,51 @@
           <div class="cv-section">
             <div class="section-hover-bar">
               <button class="sec-btn" onclick="addTableRow(this)">+ সারি</button>
-              <input type="color" onchange="changeSectionColor(this)" title="হেডার রং" style="width:20px;height:20px;border:none;cursor:pointer;">
+              <input type="color" onchange="changeSecColor(this)" title="কালার" style="width:18px;height:18px;border:none;">
               <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕</button>
             </div>
             <div class="section-badge">
               <i class="fa-solid fa-user"></i>
-              <span contenteditable="true">PERSONAL INFORMATION</span>
+              <span onclick="openTextEditor(this)">PERSONAL INFORMATION</span>
             </div>
             <div class="section-content">
               <table class="data-table">
-                <tr><td class="label" contenteditable="true">Name</td><td class="separator">:</td><td contenteditable="true">Md. Suhanur Rahman</td></tr>
-                <tr><td class="label" contenteditable="true">Father's Name</td><td class="separator">:</td><td contenteditable="true">Md. Baccu Rohman</td></tr>
-                <tr><td class="label" contenteditable="true">Mother's Name</td><td class="separator">:</td><td contenteditable="true">Mst Sabana Begum</td></tr>
-                <tr><td class="label" contenteditable="true">Present Address</td><td class="separator">:</td><td contenteditable="true">Vill- Chwoor, P.O: Hatishail, P.S. Tanore, Dist- Rajshahi</td></tr>
-                <tr><td class="label" contenteditable="true">Permanent Address</td><td class="separator">:</td><td contenteditable="true">Vill- Chwoor, P.O: Hatishail, P.S. Tanore, Dist- Rajshahi</td></tr>
-                <tr><td class="label" contenteditable="true">Date of Birth</td><td class="separator">:</td><td contenteditable="true">14-03-2009</td></tr>
-                <tr><td class="label" contenteditable="true">Sex</td><td class="separator">:</td><td contenteditable="true">Male</td></tr>
-                <tr><td class="label" contenteditable="true">Religion</td><td class="separator">:</td><td contenteditable="true">Islam</td></tr>
-                <tr><td class="label" contenteditable="true">Nationality</td><td class="separator">:</td><td contenteditable="true">Bangladeshi (by birth)</td></tr>
-                <tr><td class="label" contenteditable="true">Marital Status</td><td class="separator">:</td><td contenteditable="true">Unmarried</td></tr>
-                <tr><td class="label" contenteditable="true">Contact No.</td><td class="separator">:</td><td contenteditable="true">01338-834038</td></tr>
-                <tr><td class="label" contenteditable="true">National ID No.</td><td class="separator">:</td><td contenteditable="true">6032906429</td></tr>
-                <tr><td class="label" contenteditable="true">Email</td><td class="separator">:</td><td contenteditable="true">suhanurrohman2009@gmail.com</td></tr>
+                <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Name</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">Md. Suhanur Rahman</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Father's Name</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">Md. Baccu Rohman</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Mother's Name</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">Mst Sabana Begum</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Present Address</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">Vill- Chwoor, P.O: Hatishail, P.S. Tanore, Dist- Rajshahi</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Date of Birth</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">14-03-2009</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Nationality</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">Bangladeshi (by birth)</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Contact No.</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">01338-834038</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Email</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">suhanurrohman2009@gmail.com</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
               </table>
             </div>
           </div>
 
-          <!-- Declaration -->
+          <!-- Declaration & Signature Switch -->
           <div class="cv-section">
             <div class="section-hover-bar">
-              <input type="color" onchange="changeSectionColor(this)" title="হেডার রং" style="width:20px;height:20px;border:none;cursor:pointer;">
+              <input type="color" onchange="changeSecColor(this)" title="কালার" style="width:18px;height:18px;border:none;">
               <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕</button>
             </div>
             <div class="section-badge">
               <i class="fa-solid fa-file-invoice"></i>
-              <span contenteditable="true">DECLARATION</span>
+              <span onclick="openTextEditor(this)">DECLARATION</span>
             </div>
             <div class="section-content">
-              <p contenteditable="true">
+              <p onclick="openTextEditor(this)">
                 I declare that all the information included here is true to my knowledge. If required and where applicable, this document can be supported by appropriate authentic certificates.<br><br>
                 Thanking you in anticipation.
               </p>
               <div class="signature-container">
                 <div>
-                  <div class="signature-font" contenteditable="true">Md. Suhanur Rahman</div>
-                  <div style="border-top: 1px dotted #555; margin-top: 2px; padding-top: 2px;" contenteditable="true">Md. Suhanur Rahman</div>
+                  <div class="sig-clickable" id="signatureTarget" onclick="openSignatureOptions()">
+                    <span class="signature-font" id="sigTextDisplay">Md. Suhanur Rahman</span>
+                    <img src="" class="signature-img" id="sigImgDisplay" style="display:none;" alt="Signature">
+                  </div>
+                  <div style="border-top: 1px dotted #555; margin-top: 2px; padding-top: 2px;" onclick="openTextEditor(this)">Md. Suhanur Rahman</div>
                 </div>
-                <div style="font-size: 11px;" contenteditable="true">
+                <div style="font-size: 11px;" onclick="openTextEditor(this)">
                   Date: ........................
                 </div>
               </div>
@@ -863,117 +1007,279 @@
     </div>
   </div>
 
-  <!-- Image Editor Modal Layer -->
-  <div class="img-editor-modal" id="imageModal">
-    <div class="editor-modal-card">
-      <div class="modal-header">
-        <h4><i class="fa-solid fa-crop-simple"></i> ছবি ক্রপ ও কালার এডিটর</h4>
-        <button onclick="closeImageModal()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;">✕</button>
+  <!-- MODAL LAYER: TEXT INPUT & STYLING -->
+  <div class="modal-overlay" id="textEditorModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span><i class="fa-solid fa-pen-to-square"></i> ফিল্ড ডাটা এডিটর</span>
+        <button onclick="closeModal('textEditorModal')" style="background:none;border:none;color:#fff;font-size:16px;cursor:pointer;">✕</button>
       </div>
       <div class="modal-body">
-        <div class="canvas-crop-frame">
-          <canvas id="editorCanvas" width="300" height="300"></canvas>
-        </div>
+        <textarea id="modalTextInput" class="text-edit-area"></textarea>
         
-        <div class="modal-controls">
-          <div class="slider-item">
+        <div class="quick-style-row">
+          <button class="style-btn" id="mBtnBold" onclick="toggleStyle('bold')"><b>B</b></button>
+          <button class="style-btn" id="mBtnItalic" onclick="toggleStyle('italic')"><i>I</i></button>
+          <button class="style-btn" id="mBtnUnderline" onclick="toggleStyle('underline')"><u>U</u></button>
+          
+          <input type="color" id="mTextColor" value="#222222" style="width:32px;height:30px;border:1px solid #cbd5e1;cursor:pointer;">
+          
+          <select id="mFontSize" style="padding:4px; font-size:12px;">
+            <option value="">সাইজ ডিফল্ট</option>
+            <option value="10px">১০ px</option>
+            <option value="12px">১২ px</option>
+            <option value="14px">১৪ px</option>
+            <option value="16px">১৬ px</option>
+            <option value="18px">১৮ px</option>
+            <option value="22px">২২ px</option>
+          </select>
+
+          <select id="mFontStyle" style="padding:4px; font-size:12px;">
+            <option value="">ফন্ট ডিফল্ট</option>
+            <option value="'Poppins', sans-serif">Poppins</option>
+            <option value="'Roboto', sans-serif">Roboto</option>
+            <option value="'Alex Brush', cursive">Alex Brush (Signature)</option>
+          </select>
+        </div>
+
+        <button class="btn-block" style="background:#0284c7; color:#fff; margin-top:8px;" onclick="applyTextChanges()"><i class="fa-solid fa-check"></i> সেভ করুন</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL LAYER: ADVANCED IMAGE STUDIO (Profile & Signature) -->
+  <input type="file" id="generalFileInput" accept="image/*" style="display:none;">
+  <div class="modal-overlay" id="imageStudioModal">
+    <div class="modal-card" style="width:480px;">
+      <div class="modal-head">
+        <span id="imgModalTitle"><i class="fa-solid fa-crop-simple"></i> ইমেজ ক্রপ ও কালার স্টুডিও</span>
+        <button onclick="closeModal('imageStudioModal')" style="background:none;border:none;color:#fff;font-size:16px;cursor:pointer;">✕</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="quick-style-row" id="cropAspectButtons">
+          <label style="font-size:11px; font-weight:600;">রেশিও ক্রপ:</label>
+          <button class="style-btn active" onclick="setCropFrame('circle')">বৃত্তাকার</button>
+          <button class="style-btn" onclick="setCropFrame('square')">স্কয়ার (1:1)</button>
+          <button class="style-btn" onclick="setCropFrame('passport')">পাসপোর্ট সাইজ</button>
+          <button class="style-btn" onclick="setCropFrame('original')">অরিজিনাল</button>
+        </div>
+
+        <div class="crop-box-container circle" id="cropContainer">
+          <canvas id="canvasImagePreview" width="320" height="320"></canvas>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:6px; width:100%;">
+          <div style="display:flex; justify-content:space-between; font-size:11px;">
             <span>জুম / সাইজ:</span>
-            <input type="range" id="zoomSlider" min="0.5" max="2.5" step="0.05" value="1">
+            <input type="range" id="imgZoom" min="0.4" max="2.5" step="0.05" value="1" style="width:70%;">
           </div>
-          <div class="slider-item">
+          <div style="display:flex; justify-content:space-between; font-size:11px;">
             <span>উজ্জ্বলতা (Brightness):</span>
-            <input type="range" id="brightSlider" min="50" max="180" value="100">
+            <input type="range" id="imgBright" min="40" max="180" value="100" style="width:70%;">
           </div>
-          <div class="slider-item">
+          <div style="display:flex; justify-content:space-between; font-size:11px;">
             <span>কন্ট্রাস্ট (Contrast):</span>
-            <input type="range" id="contrastSlider" min="50" max="180" value="100">
+            <input type="range" id="imgContrast" min="40" max="180" value="100" style="width:70%;">
           </div>
-          <div class="slider-item">
+          <div style="display:flex; justify-content:space-between; font-size:11px;">
             <span>স্যাচুরেশন (Saturation):</span>
-            <input type="range" id="saturateSlider" min="0" max="200" value="100">
+            <input type="range" id="imgSaturate" min="0" max="200" value="100" style="width:70%;">
           </div>
           
-          <div style="display:flex; gap:8px; margin-top: 5px;">
-            <button class="action-btn" style="background:#e2e8f0; color:#333;" onclick="rotateImage(-90)"><i class="fa-solid fa-rotate-left"></i> বামে ঘোরান</button>
-            <button class="action-btn" style="background:#e2e8f0; color:#333;" onclick="rotateImage(90)"><i class="fa-solid fa-rotate-right"></i> ডানে ঘোরান</button>
+          <div style="display:flex; gap:8px; margin-top:4px;">
+            <button class="style-btn" style="flex:1;" onclick="rotateCurrentImg(-90)"><i class="fa-solid fa-rotate-left"></i> বামে ৯০°</button>
+            <button class="style-btn" style="flex:1;" onclick="rotateCurrentImg(90)"><i class="fa-solid fa-rotate-right"></i> ডানে ৯০°</button>
           </div>
         </div>
 
-        <button class="action-btn btn-green" style="margin-top: 10px;" onclick="applyCroppedImage()"><i class="fa-solid fa-check"></i> সেভ এবং সিভিতে যুক্ত করুন</button>
+        <button class="btn-block" style="background:#059669; color:#fff; margin-top:6px;" onclick="applyCroppedImageResult()"><i class="fa-solid fa-check"></i> সিভিতে যুক্ত করুন</button>
       </div>
     </div>
   </div>
 
   <script>
-    // 1. Drawer Toggle (Outside Click / Touch close)
+    // 1. Data Reset Warning on Reload
+    window.addEventListener('beforeunload', function (e) {
+      e.preventDefault();
+      e.returnValue = 'আপনার তৈরি করা সিভির তথ্য রিসেট হয়ে যেতে পারে। আপনি কি নিশ্চিত?';
+    });
+
+    // 2. Dropdown & Drawer Toggles
+    function toggleDropdown() {
+      document.getElementById('downloadDropdown').classList.toggle('show');
+    }
     function toggleDrawer() {
       document.getElementById('editorDrawer').classList.toggle('active');
       document.getElementById('drawerBackdrop').classList.toggle('active');
     }
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
 
-    // 2. Drag and Drop with SortableJS
+    // Close Dropdown when clicking outside
+    window.addEventListener('click', function(e) {
+      if (!e.target.closest('.dropdown-container')) {
+        document.getElementById('downloadDropdown').classList.remove('show');
+      }
+    });
+
+    // 3. SortableJS Drag and Drop
     function initSortables() {
       document.querySelectorAll('.sortable-section-list').forEach(list => {
         new Sortable(list, {
           group: 'shared-sections',
           animation: 200,
           handle: '.section-badge',
-          ghostClass: 'sortable-ghost',
-          touchStartThreshold: 4
+          ghostClass: 'sortable-ghost'
         });
       });
     }
     initSortables();
 
-    // 3. Text Formatting (Bold, Italic, Color, etc.)
-    function formatText(command) {
-      document.execCommand(command, false, null);
-    }
-    function formatTextColor(color) {
-      document.execCommand('foreColor', false, color);
-    }
-    function changeFontFamily(font) {
-      document.documentElement.style.setProperty('--font-family', font);
+    // 4. Modal Text Editor Layer
+    let currentTargetElement = null;
+    function openTextEditor(el) {
+      currentTargetElement = el;
+      const modal = document.getElementById('textEditorModal');
+      const input = document.getElementById('modalTextInput');
+      input.value = el.innerText.trim();
+
+      // Reset format buttons
+      document.getElementById('mBtnBold').classList.toggle('active', el.style.fontWeight === 'bold');
+      document.getElementById('mBtnItalic').classList.toggle('active', el.style.fontStyle === 'italic');
+      document.getElementById('mBtnUnderline').classList.toggle('active', el.style.textDecoration === 'underline');
+      document.getElementById('mTextColor').value = rgbToHex(el.style.color) || '#222222';
+      document.getElementById('mFontSize').value = el.style.fontSize || '';
+      document.getElementById('mFontStyle').value = el.style.fontFamily || '';
+
+      modal.classList.add('active');
     }
 
-    // 4. Global Settings Listeners
-    document.getElementById('themeColorPicker').addEventListener('input', (e) => {
-      document.documentElement.style.setProperty('--primary-color', e.target.value);
-    });
-    document.getElementById('fontSizeSlider').addEventListener('input', (e) => {
-      document.documentElement.style.setProperty('--base-font-size', e.target.value + 'px');
-    });
-
-    // 5. Section Operations
-    function changeSectionColor(colorInput) {
-      const section = colorInput.closest('.cv-section');
-      const badge = section.querySelector('.section-badge');
-      if (badge) badge.style.backgroundColor = colorInput.value;
+    function toggleStyle(type) {
+      if (type === 'bold') document.getElementById('mBtnBold').classList.toggle('active');
+      if (type === 'italic') document.getElementById('mBtnItalic').classList.toggle('active');
+      if (type === 'underline') document.getElementById('mBtnUnderline').classList.toggle('active');
     }
 
-    function addTableRow(btn) {
-      const section = btn.closest('.cv-section');
-      const table = section.querySelector('.data-table');
-      if (table) {
-        const newRow = `
-          <tr>
-            <td class="label" contenteditable="true">নতুন ফিল্ড</td>
-            <td class="separator">:</td>
-            <td contenteditable="true">বিবরণ লিখুন</td>
-          </tr>
-        `;
-        table.insertAdjacentHTML('beforeend', newRow);
-      }
+    function applyTextChanges() {
+      if (!currentTargetElement) return;
+      currentTargetElement.innerText = document.getElementById('modalTextInput').value;
+
+      currentTargetElement.style.fontWeight = document.getElementById('mBtnBold').classList.contains('active') ? 'bold' : 'normal';
+      currentTargetElement.style.fontStyle = document.getElementById('mBtnItalic').classList.contains('active') ? 'italic' : 'normal';
+      currentTargetElement.style.textDecoration = document.getElementById('mBtnUnderline').classList.contains('active') ? 'underline' : 'none';
+      currentTargetElement.style.color = document.getElementById('mTextColor').value;
+      if (document.getElementById('mFontSize').value) currentTargetElement.style.fontSize = document.getElementById('mFontSize').value;
+      if (document.getElementById('mFontStyle').value) currentTargetElement.style.fontFamily = document.getElementById('mFontStyle').value;
+
+      closeModal('textEditorModal');
+    }
+
+    function rgbToHex(rgb) {
+      if (!rgb || rgb.indexOf('rgb') === -1) return '#000000';
+      const rgbValues = rgb.match(/\d+/g);
+      return "#" + ((1 << 24) + (parseInt(rgbValues[0]) << 16) + (parseInt(rgbValues[1]) << 8) + parseInt(rgbValues[2])).toString(16).slice(1);
+    }
+
+    // 5. Section Operations & Unlimited Adding
+    function changeSecColor(input) {
+      const badge = input.closest('.cv-section').querySelector('.section-badge');
+      if (badge) badge.style.backgroundColor = input.value;
     }
 
     function deleteSection(btn) {
-      if (confirm('আপনি কি নিশ্চিত যে এই সেকশনটি মুছে ফেলতে চান?')) {
+      if (confirm('আপনি কি এই সেকশনটি পুরোপুরি মুছে ফেলতে চান?')) {
         btn.closest('.cv-section').remove();
       }
     }
 
+    function deleteRow(btn) {
+      btn.closest('.table-row, .skill-item, .habit-box').remove();
+    }
+
+    function addTableRow(btn) {
+      const table = btn.closest('.cv-section').querySelector('.data-table');
+      if (table) {
+        const row = `
+          <tr class="table-row">
+            <td class="label" onclick="openTextEditor(this)">নতুন ফিল্ড</td>
+            <td class="separator">:</td>
+            <td><span onclick="openTextEditor(this)">তথ্য যুক্ত করুন</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
+          </tr>
+        `;
+        table.insertAdjacentHTML('beforeend', row);
+      }
+    }
+
+    function addComputerRow(btn) {
+      const table = btn.closest('.cv-section').querySelector('.comp-table');
+      if (table) {
+        const row = `
+          <tr class="table-row">
+            <td style="width:25px;"><i class="fa-solid fa-check" style="color:var(--primary-color);"></i></td>
+            <td><span onclick="openTextEditor(this)">সফটওয়্যার বা আইটি দক্ষতা লিখুন</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
+          </tr>
+        `;
+        table.insertAdjacentHTML('beforeend', row);
+      }
+    }
+
+    function addSkillRow(btn) {
+      const grid = document.getElementById('skillsGridContainer');
+      const item = `
+        <div class="skill-item">
+          <div class="skill-name" onclick="openTextEditor(this)">⭐ নতুন স্কিল</div>
+          <div class="stars-group" onclick="rateSkill(this)" title="ক্লিক করে স্টার পরিবর্তন করুন">
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i>
+          </div>
+          <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
+        </div>
+      `;
+      grid.insertAdjacentHTML('beforeend', item);
+    }
+
+    function rateSkill(container) {
+      const stars = container.querySelectorAll('i');
+      let currentRating = 0;
+      stars.forEach(s => { if (s.classList.contains('fa-solid')) currentRating++; });
+      let nextRating = (currentRating % 5) + 1;
+
+      stars.forEach((star, idx) => {
+        if (idx < nextRating) {
+          star.className = 'fa-solid fa-star';
+        } else {
+          star.className = 'fa-regular fa-star';
+        }
+      });
+    }
+
+    function addHabitRow(btn) {
+      const grid = document.getElementById('habitsGridContainer');
+      const habit = `
+        <div class="habit-box">
+          <div class="habit-left"><i class="fa-solid fa-star"></i> <span onclick="openTextEditor(this)">নতুন অভ্যাস</span></div>
+          <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
+        </div>
+      `;
+      grid.insertAdjacentHTML('beforeend', habit);
+    }
+
+    // 6. Delete Page upon Clicking Empty Area
+    function handlePageBackgroundClick(e, pageElement) {
+      if (e.target === pageElement) {
+        if (confirm('আপনি কি এই সম্পূর্ণ পেজটি ডিলিট করে দিতে চান?')) {
+          if (document.querySelectorAll('.cv-page').length > 1) {
+            pageElement.remove();
+          } else {
+            alert('সিভিতে কমপক্ষে একটি পেজ থাকা আবশ্যক!');
+          }
+        }
+      }
+    }
+
     function addNewSection() {
-      const title = document.getElementById('newSecTitle').value.trim() || 'NEW SECTION';
+      const title = document.getElementById('newSecName').value.trim() || 'NEW SECTION';
       let icon = document.getElementById('newSecIcon').value.trim() || 'fa-star';
       if (!icon.startsWith('fa-')) icon = 'fa-' + icon;
 
@@ -981,20 +1287,16 @@
         <div class="cv-section">
           <div class="section-hover-bar">
             <button class="sec-btn" onclick="addTableRow(this)">+ সারি</button>
-            <input type="color" onchange="changeSectionColor(this)" style="width:20px;height:20px;border:none;cursor:pointer;">
+            <input type="color" onchange="changeSecColor(this)" title="কালার" style="width:18px;height:18px;border:none;">
             <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕</button>
           </div>
           <div class="section-badge">
             <i class="fa-solid ${icon}"></i>
-            <span contenteditable="true">${title.toUpperCase()}</span>
+            <span onclick="openTextEditor(this)">${title.toUpperCase()}</span>
           </div>
           <div class="section-content">
             <table class="data-table">
-              <tr>
-                <td class="label" contenteditable="true">আইটেম ১</td>
-                <td class="separator">:</td>
-                <td contenteditable="true">তথ্য দিন</td>
-              </tr>
+              <tr class="table-row"><td class="label" onclick="openTextEditor(this)">ফিল্ড</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">বিবরণ দিন</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
             </table>
           </div>
         </div>
@@ -1006,7 +1308,7 @@
     function addNewPage() {
       const count = document.querySelectorAll('.cv-page').length + 1;
       const html = `
-        <div class="cv-page" id="page-${count}">
+        <div class="cv-page" id="page-${count}" onclick="handlePageBackgroundClick(event, this)">
           <div class="top-decorative-bar"></div>
           <div class="sortable-section-list" style="margin-top: 25px;"></div>
           <div class="cv-footer">
@@ -1014,98 +1316,135 @@
           </div>
         </div>
       `;
-      document.getElementById('cvPagesContainer').insertAdjacentHTML('beforeend', html);
+      document.getElementById('pagesContainer').insertAdjacentHTML('beforeend', html);
       initSortables();
       toggleDrawer();
     }
 
-    // 6. Image Studio: Upload, Crop Canvas, Filters & Rotate
-    const realPhotoInput = document.getElementById('realPhotoInput');
-    const imageModal = document.getElementById('imageModal');
-    const canvas = document.getElementById('editorCanvas');
-    const ctx = canvas.getContext('2d');
-    let loadedImage = new Image();
-    let currentRotation = 0;
-
-    function triggerPhotoUpload() {
-      realPhotoInput.click();
+    // 7. Signature Handling (Toggle Text or Image)
+    function openSignatureOptions() {
+      const choice = confirm("স্বাক্ষর হিসেবে কি ছবি আপলোড করতে চান?\n(Cancel চাপলে নাম বা টেক্সট এডিট হবে)");
+      if (choice) {
+        openPhotoEditor('signature');
+      } else {
+        document.getElementById('sigImgDisplay').style.display = 'none';
+        document.getElementById('sigTextDisplay').style.display = 'block';
+        openTextEditor(document.getElementById('sigTextDisplay'));
+      }
     }
 
-    realPhotoInput.addEventListener('change', function(e) {
+    // 8. Image Studio (Crop Aspect, Filters, Rotate)
+    let currentImageMode = 'profile'; // 'profile' or 'signature'
+    let rawLoadedImg = new Image();
+    let currentRotation = 0;
+    const fileInput = document.getElementById('generalFileInput');
+    const canvas = document.getElementById('canvasImagePreview');
+    const ctx = canvas.getContext('2d');
+
+    function openPhotoEditor(mode) {
+      currentImageMode = mode;
+      document.getElementById('imgModalTitle').innerText = (mode === 'profile') ? 'প্রোফাইল ছবি এডিটর' : 'স্বাক্ষর ছবি এডিটর';
+      
+      // Signature defaults to original ratio
+      if (mode === 'signature') {
+        setCropFrame('original');
+      } else {
+        setCropFrame('circle');
+      }
+
+      fileInput.click();
+    }
+
+    fileInput.addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = function(event) {
-          loadedImage.onload = () => {
+        reader.onload = function(evt) {
+          rawLoadedImg.onload = function() {
             currentRotation = 0;
-            document.getElementById('zoomSlider').value = 1;
-            document.getElementById('brightSlider').value = 100;
-            document.getElementById('contrastSlider').value = 100;
-            document.getElementById('saturateSlider').value = 100;
-            imageModal.classList.add('active');
-            renderCanvasImage();
+            document.getElementById('imgZoom').value = 1;
+            document.getElementById('imgBright').value = 100;
+            document.getElementById('imgContrast').value = 100;
+            document.getElementById('imgSaturate').value = 100;
+            document.getElementById('imageStudioModal').classList.add('active');
+            drawCanvasFrame();
           };
-          loadedImage.src = event.target.result;
+          rawLoadedImg.src = evt.target.result;
         };
         reader.readAsDataURL(file);
       }
     });
 
-    function closeImageModal() {
-      imageModal.classList.remove('active');
+    function setCropFrame(type) {
+      const container = document.getElementById('cropContainer');
+      container.className = 'crop-box-container ' + type;
+      
+      document.querySelectorAll('#cropAspectButtons .style-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      if (currentImageMode === 'profile') {
+        const img = document.getElementById('mainProfileImg');
+        if (type === 'circle') img.style.borderRadius = '50%';
+        if (type === 'square' || type === 'passport' || type === 'original') img.style.borderRadius = '4px';
+      }
     }
 
-    function rotateImage(deg) {
+    function rotateCurrentImg(deg) {
       currentRotation = (currentRotation + deg) % 360;
-      renderCanvasImage();
+      drawCanvasFrame();
     }
 
-    ['zoomSlider', 'brightSlider', 'contrastSlider', 'saturateSlider'].forEach(id => {
-      document.getElementById(id).addEventListener('input', renderCanvasImage);
+    ['imgZoom', 'imgBright', 'imgContrast', 'imgSaturate'].forEach(id => {
+      document.getElementById(id).addEventListener('input', drawCanvasFrame);
     });
 
-    function renderCanvasImage() {
-      if (!loadedImage.src) return;
+    function drawCanvasFrame() {
+      if (!rawLoadedImg.src) return;
 
-      const zoom = parseFloat(document.getElementById('zoomSlider').value);
-      const bright = document.getElementById('brightSlider').value;
-      const contrast = document.getElementById('contrastSlider').value;
-      const saturate = document.getElementById('saturateSlider').value;
+      const zoom = parseFloat(document.getElementById('imgZoom').value);
+      const bright = document.getElementById('imgBright').value;
+      const contrast = document.getElementById('imgContrast').value;
+      const saturate = document.getElementById('imgSaturate').value;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.save();
 
-      // Apply CSS Filters directly to canvas drawing
       ctx.filter = `brightness(${bright}%) contrast(${contrast}%) saturate(${saturate}%)`;
-
       ctx.translate(canvas.width / 2, canvas.height / 2);
       ctx.rotate((currentRotation * Math.PI) / 180);
       ctx.scale(zoom, zoom);
 
-      // Center image
-      const aspect = loadedImage.width / loadedImage.height;
-      let drawW = canvas.width;
-      let drawH = canvas.height;
+      const aspect = rawLoadedImg.width / rawLoadedImg.height;
+      let w = canvas.width;
+      let h = canvas.height;
       if (aspect > 1) {
-        drawW = canvas.height * aspect;
+        w = canvas.height * aspect;
       } else {
-        drawH = canvas.width / aspect;
+        h = canvas.width / aspect;
       }
 
-      ctx.drawImage(loadedImage, -drawW / 2, -drawH / 2, drawW, drawH);
+      ctx.drawImage(rawLoadedImg, -w / 2, -h / 2, w, h);
       ctx.restore();
     }
 
-    function applyCroppedImage() {
-      const finalImageURL = canvas.toDataURL('image/png');
-      document.getElementById('mainProfilePic').src = finalImageURL;
-      closeImageModal();
+    function applyCroppedImageResult() {
+      const finalURL = canvas.toDataURL('image/png');
+      if (currentImageMode === 'profile') {
+        document.getElementById('mainProfileImg').src = finalURL;
+      } else {
+        const sigImg = document.getElementById('sigImgDisplay');
+        sigImg.src = finalURL;
+        sigImg.style.display = 'block';
+        document.getElementById('sigTextDisplay').style.display = 'none';
+      }
+      closeModal('imageStudioModal');
     }
 
-    // 7. High-Res Export (2480 x 3508 px scale: 2480 / 794 ≈ 3.1234)
+    // 9. High-Res Export (2480 × 3508 px)
     const TARGET_SCALE = 2480 / 794;
 
     async function exportDocument(type) {
+      document.getElementById('downloadDropdown').classList.remove('show');
       const pages = document.querySelectorAll('.cv-page');
       for (let i = 0; i < pages.length; i++) {
         const page = pages[i];
@@ -1122,6 +1461,7 @@
     }
 
     async function exportToPDF() {
+      document.getElementById('downloadDropdown').classList.remove('show');
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF('p', 'pt', [2480, 3508]);
       const pages = document.querySelectorAll('.cv-page');
@@ -1137,6 +1477,17 @@
         pdf.addImage(imgData, 'JPEG', 0, 0, 2480, 3508);
       }
       pdf.save('CV_Document_2480x3508.pdf');
+    }
+
+    // Global settings handlers
+    document.getElementById('globalColorPicker').addEventListener('input', (e) => {
+      document.documentElement.style.setProperty('--primary-color', e.target.value);
+    });
+    document.getElementById('globalFontSize').addEventListener('input', (e) => {
+      document.documentElement.style.setProperty('--base-font-size', e.target.value + 'px');
+    });
+    function changeGlobalFont(f) {
+      document.documentElement.style.setProperty('--font-family', f);
     }
   </script>
 </body>
