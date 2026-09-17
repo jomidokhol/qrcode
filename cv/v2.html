@@ -1,0 +1,797 @@
+he<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Professional CV Maker</title>
+  
+  <!-- Google Fonts & FontAwesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Alex+Brush&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Drag-and-Drop & Export Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    :root {
+      --primary-color: #113b63;
+      --text-color: #222222;
+      --font-family: 'Poppins', sans-serif;
+      --base-font-size: 13px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: #e9ecef;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Side Control Panel */
+    .editor-sidebar {
+      width: 360px;
+      background: #ffffff;
+      border-right: 1px solid #ced4da;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+      z-index: 10;
+    }
+
+    .editor-sidebar h2 {
+      font-size: 18px;
+      color: var(--primary-color);
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 8px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .control-group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #495057;
+    }
+
+    input[type="text"], input[type="file"], select {
+      padding: 8px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    .btn {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: 0.2s;
+    }
+    .btn-primary { background: var(--primary-color); color: #fff; }
+    .btn-success { background: #28a745; color: #fff; }
+    .btn-danger { background: #dc3545; color: #fff; }
+    .btn:hover { opacity: 0.9; }
+
+    /* Canvas / Preview Container */
+    .preview-container {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+      background: #525659;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+    }
+
+    /* Fixed Aspect Ratio Page: A4 Scale (794px x 1123px on screen, exports to 2480 x 3508 px) */
+    .cv-page {
+      width: 794px;
+      height: 1123px;
+      background: #ffffff;
+      padding: 25px 45px 35px 45px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      position: relative;
+      font-size: var(--base-font-size);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    .top-decorative-bar {
+      height: 14px;
+      background: var(--primary-color);
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+    }
+
+    /* Header Profile Info */
+    .cv-header {
+      display: flex;
+      align-items: center;
+      gap: 25px;
+      margin-top: 15px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--primary-color);
+    }
+
+    .profile-photo-wrapper {
+      position: relative;
+      width: 110px;
+      height: 110px;
+    }
+
+    .profile-photo {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--primary-color);
+    }
+
+    .header-details {
+      flex: 1;
+    }
+
+    .name-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary-color);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .resume-subtitle {
+      font-size: 13px;
+      letter-spacing: 2px;
+      color: #555;
+      margin-bottom: 8px;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 11px;
+      margin-bottom: 4px;
+      color: #333;
+    }
+
+    .contact-item i {
+      color: var(--primary-color);
+      margin-top: 2px;
+      width: 12px;
+    }
+
+    /* Sections / Badges */
+    .sortable-section-list {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .cv-section {
+      position: relative;
+      cursor: grab;
+    }
+
+    .cv-section:hover .section-tools {
+      display: flex;
+    }
+
+    .section-tools {
+      position: absolute;
+      right: 0;
+      top: -12px;
+      display: none;
+      gap: 5px;
+      z-index: 100;
+    }
+
+    .section-tools button {
+      background: #e63946;
+      border: none;
+      color: #fff;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      cursor: pointer;
+      font-size: 10px;
+    }
+
+    .section-badge {
+      background: var(--primary-color);
+      color: #ffffff;
+      padding: 4px 14px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .section-content {
+      font-size: 11.5px;
+      line-height: 1.45;
+      padding: 2px 4px;
+    }
+
+    /* Detail lists / grids */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table td {
+      padding: 2px 0;
+      vertical-align: top;
+      font-size: 11px;
+    }
+
+    .data-table .label {
+      width: 140px;
+      font-weight: 500;
+    }
+
+    .data-table .separator {
+      width: 15px;
+      text-align: center;
+    }
+
+    /* Two Column lists */
+    .grid-2-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 20px;
+      font-size: 11px;
+    }
+
+    .grid-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Declaration */
+    .declaration-text {
+      font-size: 11px;
+      text-align: justify;
+    }
+
+    .signature-container {
+      margin-top: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .signature-font {
+      font-family: 'Alex Brush', cursive;
+      font-size: 24px;
+      color: #111;
+    }
+
+    /* Footer */
+    .cv-footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding-top: 10px;
+      margin-top: auto;
+    }
+
+    .cv-footer::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--primary-color);
+      z-index: 1;
+    }
+
+    .footer-badge {
+      background: var(--primary-color);
+      color: #fff;
+      padding: 2px 25px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Print styles */
+    @media print {
+      body { background: none; overflow: visible; }
+      .editor-sidebar, .section-tools { display: none !important; }
+      .preview-container { padding: 0; background: none; }
+      .cv-page {
+        box-shadow: none;
+        margin: 0;
+        page-break-after: always;
+        width: 100vw;
+        height: 100vh;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Controls Sidebar -->
+  <div class="editor-sidebar">
+    <h2><i class="fa-solid fa-sliders"></i> CV Maker Settings</h2>
+    
+    <div class="control-group">
+      <label>প্রোফাইল ছবি পরিবর্তন করুন</label>
+      <input type="file" id="photoInput" accept="image/*">
+    </div>
+
+    <div class="control-group">
+      <label>থিম কালার (Primary Color)</label>
+      <input type="color" id="themeColor" value="#113b63" style="width: 100%; height: 36px; border:none; cursor:pointer;">
+    </div>
+
+    <div class="control-group">
+      <label>ফ্রন্ট সাইজ অ্যাডজাস্ট</label>
+      <input type="range" id="fontSizeSlider" min="10" max="15" value="13">
+    </div>
+
+    <hr style="border: 0.5px solid #dee2e6;">
+
+    <div class="control-group">
+      <label>নতুন সেকশন যোগ করুন</label>
+      <input type="text" id="newSectionTitle" placeholder="উদা: PROJECTS">
+      <input type="text" id="newSectionIcon" placeholder="FontAwesome Icon (উদা: fa-laptop-code)" value="fa-circle-check">
+      <button class="btn btn-primary" onclick="addNewSection()"><i class="fa-solid fa-plus"></i> Add Section</button>
+    </div>
+
+    <button class="btn btn-primary" onclick="addNewPage()" style="background:#4a5568;"><i class="fa-solid fa-file-circle-plus"></i> Add New Page</button>
+
+    <hr style="border: 0.5px solid #dee2e6;">
+
+    <label style="font-size: 12px; font-weight: 600;">এক্সপোর্ট অপশন (2480 × 3508 px):</label>
+    <button class="btn btn-success" onclick="exportToImage('png')"><i class="fa-solid fa-file-image"></i> Export PNG (300 DPI)</button>
+    <button class="btn btn-success" onclick="exportToImage('jpeg')"><i class="fa-solid fa-image"></i> Export JPEG (300 DPI)</button>
+    <button class="btn btn-danger" onclick="exportToPDF()"><i class="fa-solid fa-file-pdf"></i> Export Multi-Page PDF</button>
+    <button class="btn btn-primary" onclick="window.print()"><i class="fa-solid fa-print"></i> Print CV</button>
+  </div>
+
+  <!-- Main CV Live Preview -->
+  <div class="preview-container" id="printableArea">
+
+    <!-- PAGE 1 -->
+    <div class="cv-page" id="page-1">
+      <div class="top-decorative-bar"></div>
+
+      <!-- Header Information -->
+      <div class="cv-header">
+        <div class="profile-photo-wrapper">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400" alt="Profile" class="profile-photo" id="profileImgPreview">
+        </div>
+        <div class="header-details">
+          <div class="name-title" contenteditable="true">MD. SUHANUR RAHMAN</div>
+          <div class="resume-subtitle" contenteditable="true">RESUME</div>
+          <div class="contact-item">
+            <i class="fa-solid fa-location-dot"></i>
+            <span contenteditable="true">Vill- Chwoor, P.O: Hatishail, P.S. Tanore, Dist- Rajshahi</span>
+          </div>
+          <div class="contact-item">
+            <i class="fa-solid fa-phone"></i>
+            <span contenteditable="true">01309-166843</span>
+          </div>
+          <div class="contact-item">
+            <i class="fa-solid fa-envelope"></i>
+            <span contenteditable="true">suhanurrohman2009@gmail.com</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Page 1 Drag-and-Drop Content -->
+      <div class="sortable-section-list">
+        
+        <!-- Career Objective -->
+        <div class="cv-section">
+          <div class="section-tools"><button onclick="removeSection(this)">✕</button></div>
+          <div class="section-badge">
+            <i class="fa-solid fa-bullseye"></i>
+            <span contenteditable="true">CAREER OBJECTIVE</span>
+          </div>
+          <div class="section-content" contenteditable="true">
+            Looking for a challenging job where I will have the scope to utilize my potentiality, adaptability and skills to do something innovative and from where I will be able to enhance my knowledge. I am a fast learner and can easily learn new tasks, skills, and responsibilities.
+          </div>
+        </div>
+
+        <!-- Educational Qualification -->
+        <div class="cv-section">
+          <div class="section-tools"><button onclick="removeSection(this)">✕</button></div>
+          <div class="section-badge">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <span contenteditable="true">EDUCATIONAL QUALIFICATION</span>
+          </div>
+          <div class="section-content">
+            <div style="font-weight: 600; margin-bottom: 3px;" contenteditable="true">| S.S.C — Secondary School Certificate</div>
+            <table class="data-table">
+              <tr>
+                <td class="label" contenteditable="true">Name of the School</td>
+                <td class="separator">:</td>
+                <td contenteditable="true">Talanda Ananda Mohan High School</td>
+              </tr>
+              <tr>
+                <td class="label" contenteditable="true">Group</td>
+                <td class="separator">:</td>
+                <td contenteditable="true">Humanities</td>
+              </tr>
+              <tr>
+                <td class="label" contenteditable="true">Passing Year</td>
+                <td class="separator">:</td>
+                <td contenteditable="true">Running</td>
+              </tr>
+              <tr>
+                <td class="label" contenteditable="true">Result</td>
+                <td class="separator">:</td>
+                <td contenteditable="true">Running</td>
+              </tr>
+              <tr>
+                <td class="label" contenteditable="true">Board</td>
+                <td class="separator">:</td>
+                <td contenteditable="true">Rajshahi</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Work Experience -->
+        <div class="cv-section">
+          <div class="section-tools"><button onclick="removeSection(this)">✕</button></div>
+          <div class="section-badge">
+            <i class="fa-solid fa-briefcase"></i>
+            <span contenteditable="true">WORK EXPERIENCE</span>
+          </div>
+          <div class="section-content">
+            <div style="margin-bottom: 8px;">
+              <div style="font-weight: 600;" contenteditable="true">o The Hideout Cafe</div>
+              <table class="data-table" style="margin-left: 15px; width: calc(100% - 15px);">
+                <tr><td class="label" contenteditable="true">Position</td><td class="separator">:</td><td contenteditable="true">Waiter</td></tr>
+                <tr><td class="label" contenteditable="true">Location</td><td class="separator">:</td><td contenteditable="true">Rajshahi</td></tr>
+                <tr><td class="label" contenteditable="true">Duration</td><td class="separator">:</td><td contenteditable="true">1 Month</td></tr>
+              </table>
+            </div>
+            <div>
+              <div style="font-weight: 600;" contenteditable="true">o MIM Computer & Studio</div>
+              <table class="data-table" style="margin-left: 15px; width: calc(100% - 15px);">
+                <tr><td class="label" contenteditable="true">Position</td><td class="separator">:</td><td contenteditable="true">Computer Operator</td></tr>
+                <tr><td class="label" contenteditable="true">Work</td><td class="separator">:</td><td contenteditable="true">Land Office</td></tr>
+                <tr><td class="label" contenteditable="true">Location</td><td class="separator">:</td><td contenteditable="true">Tanore</td></tr>
+                <tr><td class="label" contenteditable="true">Duration</td><td class="separator">:</td><td contenteditable="true">7 Months</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Computer Knowledge -->
+        <div class="cv-section">
+          <div class="section-tools"><button onclick="removeSection(this)">✕</button></div>
+          <div class="section-badge">
+            <i class="fa-solid fa-laptop"></i>
+            <span contenteditable="true">COMPUTER KNOWLEDGE</span>
+          </div>
+          <div class="section-content" contenteditable="true">
+            <strong>Knowledge on Operating System / Software:</strong>
+            <div style="display:flex; gap: 25px; margin-top: 4px;">
+              <span>• MS Word</span>
+              <span>• MS Excel</span>
+              <span>• MS PowerPoint</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Skills -->
+        <div class="cv-section">
+          <div class="section-tools"><button onclick="removeSection(this)">✕</button></div>
+          <div class="section-badge">
+            <i class="fa-solid fa-gear"></i>
+            <span contenteditable="true">SKILLS</span>
+          </div>
+          <div class="section-content">
+            <div class="grid-2-col" contenteditable="true">
+              <div class="grid-item"><span>Cybersecurity</span></div>
+              <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Networking (Completed)</span></div>
+              <div class="grid-item"><span>Sales</span></div>
+              <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Sales (Intermediate)</span></div>
+              <div class="grid-item"><span>Negotiation</span></div>
+              <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Negotiation (Advanced)</span></div>
+              <div class="grid-item"><span>Communication</span></div>
+              <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Communication (Advanced)</span></div>
+              <div class="grid-item"><span>Teamwork</span></div>
+              <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Teamwork (Advanced)</span></div>
+              <div class="grid-item"><span>Time Management</span></div>
+              <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Time Management (Advanced)</span></div>
+              <div class="grid-item"><span>Video Editing</span></div>
+              <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Video Editing (Basic)</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="cv-footer">
+        <div class="footer-badge">Page 1</div>
+      </div>
+    </div>
+
+    <!-- PAGE 2 -->
+    <div class="cv-page" id="page-2">
+      <div class="top-decorative-bar"></div>
+
+      <div class="sortable-section-list" style="margin-top: 25px;">
+        
+        <!-- Habits -->
+        <div class="cv-section">
+          <div class="section-tools"><button onclick="removeSection(this)">✕</button></div>
+          <div class="section-badge">
+            <i class="fa-solid fa-star"></i>
+            <span contenteditable="true">HABITS</span>
+          </div>
+          <div class="section-content">
+            <div class="grid-2-col" contenteditable="true">
+              <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Workout</span></div>
+              <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Building a Network</span></div>
+              <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Learning New Tasks</span></div>
+              <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Building Relationships</span></div>
+              <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Learning New Skills</span></div>
+              <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Curiosity for Learning & Knowledge</span></div>
+              <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Meeting New People</span></div>
+              <div class="grid-item"><i class="fa-solid fa-star" style="font-size:10px;"></i> <span>Hard Work</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Language Skill -->
+        <div class="cv-section">
+          <div class="section-tools"><button onclick="removeSection(this)">✕</button></div>
+          <div class="section-badge">
+            <i class="fa-solid fa-comments"></i>
+            <span contenteditable="true">LANGUAGE SKILL</span>
+          </div>
+          <div class="section-content">
+            <table class="data-table">
+              <tr>
+                <td class="label" contenteditable="true">Bengali</td>
+                <td class="separator">:</td>
+                <td contenteditable="true">Mother Language</td>
+              </tr>
+              <tr>
+                <td class="label" contenteditable="true">English</td>
+                <td class="separator">:</td>
+                <td contenteditable="true">Writing and Reading Ability</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Personal Information -->
+        <div class="cv-section">
+          <div class="section-tools"><button onclick="removeSection(this)">✕</button></div>
+          <div class="section-badge">
+            <i class="fa-solid fa-user"></i>
+            <span contenteditable="true">PERSONAL INFORMATION</span>
+          </div>
+          <div class="section-content">
+            <table class="data-table">
+              <tr><td class="label" contenteditable="true">Name</td><td class="separator">:</td><td contenteditable="true">Md. Suhanur Rahman</td></tr>
+              <tr><td class="label" contenteditable="true">Father's Name</td><td class="separator">:</td><td contenteditable="true">Md. Baccu Rohman</td></tr>
+              <tr><td class="label" contenteditable="true">Mother's Name</td><td class="separator">:</td><td contenteditable="true">Mst Sabana Begum</td></tr>
+              <tr><td class="label" contenteditable="true">Present Address</td><td class="separator">:</td><td contenteditable="true">Vill- Chwoor, P.O: Hatishail, P.S. Tanore, Dist- Rajshahi</td></tr>
+              <tr><td class="label" contenteditable="true">Permanent Address</td><td class="separator">:</td><td contenteditable="true">Vill- Chwoor, P.O: Hatishail, P.S. Tanore, Dist- Rajshahi</td></tr>
+              <tr><td class="label" contenteditable="true">Date of Birth</td><td class="separator">:</td><td contenteditable="true">14-03-2009</td></tr>
+              <tr><td class="label" contenteditable="true">Sex</td><td class="separator">:</td><td contenteditable="true">Male</td></tr>
+              <tr><td class="label" contenteditable="true">Religion</td><td class="separator">:</td><td contenteditable="true">Islam</td></tr>
+              <tr><td class="label" contenteditable="true">Nationality</td><td class="separator">:</td><td contenteditable="true">Bangladeshi (by birth)</td></tr>
+              <tr><td class="label" contenteditable="true">Marital Status</td><td class="separator">:</td><td contenteditable="true">Unmarried</td></tr>
+              <tr><td class="label" contenteditable="true">Contact No.</td><td class="separator">:</td><td contenteditable="true">01338-834038</td></tr>
+              <tr><td class="label" contenteditable="true">National ID No.</td><td class="separator">:</td><td contenteditable="true">6032906429</td></tr>
+              <tr><td class="label" contenteditable="true">Email</td><td class="separator">:</td><td contenteditable="true">suhanurrohman2009@gmail.com</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Declaration -->
+        <div class="cv-section">
+          <div class="section-tools"><button onclick="removeSection(this)">✕</button></div>
+          <div class="section-badge">
+            <i class="fa-solid fa-file-invoice"></i>
+            <span contenteditable="true">DECLARATION</span>
+          </div>
+          <div class="section-content">
+            <p class="declaration-text" contenteditable="true">
+              I declare that all the information included here is true to my knowledge. If required and where applicable, this document can be supported by appropriate authentic certificates.<br><br>
+              Thanking you in anticipation.
+            </p>
+            <div class="signature-container">
+              <div>
+                <div class="signature-font" contenteditable="true">Md. Suhanur Rahman</div>
+                <div style="border-top: 1px dotted #555; margin-top: 2px; padding-top: 2px;" contenteditable="true">Md. Suhanur Rahman</div>
+              </div>
+              <div style="font-size: 11px;" contenteditable="true">
+                Date: ........................
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="cv-footer">
+        <div class="footer-badge">Page 2</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Initialize Sortable for Drag and Drop on all sections
+    function initSortables() {
+      document.querySelectorAll('.sortable-section-list').forEach(list => {
+        new Sortable(list, {
+          group: 'shared-sections',
+          animation: 150,
+          ghostClass: 'sortable-ghost',
+          handle: '.section-badge'
+        });
+      });
+    }
+    initSortables();
+
+    // Change Theme Color
+    document.getElementById('themeColor').addEventListener('input', (e) => {
+      document.documentElement.style.setProperty('--primary-color', e.target.value);
+    });
+
+    // Font Size Adjust
+    document.getElementById('fontSizeSlider').addEventListener('input', (e) => {
+      document.documentElement.style.setProperty('--base-font-size', e.target.value + 'px');
+    });
+
+    // Profile Photo Upload
+    document.getElementById('photoInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          document.getElementById('profileImgPreview').src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Add New Section
+    function addNewSection() {
+      const title = document.getElementById('newSectionTitle').value || 'NEW SECTION';
+      let icon = document.getElementById('newSectionIcon').value || 'fa-star';
+      if(!icon.startsWith('fa-')) icon = 'fa-' + icon;
+
+      const newSectionHTML = `
+        <div class="cv-section">
+          <div class="section-tools"><button onclick="removeSection(this)">✕</button></div>
+          <div class="section-badge">
+            <i class="fa-solid ${icon}"></i>
+            <span contenteditable="true">${title.toUpperCase()}</span>
+          </div>
+          <div class="section-content" contenteditable="true">
+            এখানে আপনার নতুন সেকশনের বিবরণ লিখুন...
+          </div>
+        </div>
+      `;
+
+      // Append to the first page by default
+      document.querySelector('.sortable-section-list').insertAdjacentHTML('beforeend', newSectionHTML);
+    }
+
+    // Remove Section
+    function removeSection(button) {
+      if(confirm('আপনি কি এই সেকশনটি মুছে ফেলতে চান?')) {
+        button.closest('.cv-section').remove();
+      }
+    }
+
+    // Add New Page
+    function addNewPage() {
+      const totalPages = document.querySelectorAll('.cv-page').length + 1;
+      const pageHTML = `
+        <div class="cv-page" id="page-${totalPages}">
+          <div class="top-decorative-bar"></div>
+          <div class="sortable-section-list" style="margin-top: 25px;"></div>
+          <div class="cv-footer">
+            <div class="footer-badge">Page ${totalPages}</div>
+          </div>
+        </div>
+      `;
+      document.getElementById('printableArea').insertAdjacentHTML('beforeend', pageHTML);
+      initSortables();
+    }
+
+    // Accurate 2480 x 3508 Export Scale Calculation
+    // Screen width = 794px, 2480 / 794 ≈ 3.1234
+    const TARGET_SCALE = 2480 / 794;
+
+    // Export Page to Image (PNG / JPEG)
+    async function exportToImage(format) {
+      const pages = document.querySelectorAll('.cv-page');
+      for (let i = 0; i < pages.length; i++) {
+        const page = pages[i];
+        
+        const canvas = await html2canvas(page, {
+          scale: TARGET_SCALE,
+          useCORS: true,
+          logging: false
+        });
+
+        const image = canvas.toDataURL(`image/${format}`, 1.0);
+        const link = document.createElement('a');
+        link.download = `CV_Page_${i + 1}_2480x3508.${format}`;
+        link.href = image;
+        link.click();
+      }
+    }
+
+    // Multi-page PDF Export
+    async function exportToPDF() {
+      const { jsPDF } = window.jspdf;
+      // 2480 x 3508 px representation in jsPDF
+      const pdf = new jsPDF('p', 'pt', [2480, 3508]);
+      const pages = document.querySelectorAll('.cv-page');
+
+      for (let i = 0; i < pages.length; i++) {
+        const canvas = await html2canvas(pages[i], {
+          scale: TARGET_SCALE,
+          useCORS: true,
+          logging: false
+        });
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        if (i > 0) pdf.addPage([2480, 3508], 'p');
+        pdf.addImage(imgData, 'JPEG', 0, 0, 2480, 3508);
+      }
+
+      pdf.save('CV_Document_2480x3508.pdf');
+    }
+  </script>
+</body>
+</html>
