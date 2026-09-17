@@ -2,7 +2,7 @@
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Ultra Pro CV Maker Studio</title>
   
   <!-- Fonts & FontAwesome -->
@@ -20,56 +20,64 @@
       --text-color: #222222;
       --font-family: 'Poppins', sans-serif;
       --base-font-size: 13px;
+      --bg-dark: #0f172a;
+      --panel-bg: #1e293b;
+      --accent-color: #38bdf8;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: var(--font-family);
-      background-color: #334155;
+      background-color: #1e293b;
+      color: #f8fafc;
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
       overflow-x: hidden;
     }
 
-    /* Top Navbar */
+    /* Top Navigation Bar */
     .top-navbar {
       position: sticky;
       top: 0;
       z-index: 1000;
-      background: #0f172a;
-      color: #fff;
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 20px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      padding: 10px 18px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     }
     .top-navbar .logo {
       font-size: 17px;
       font-weight: 700;
       display: flex;
       align-items: center;
-      gap: 10px;
-      color: #38bdf8;
+      gap: 8px;
+      color: var(--accent-color);
+      letter-spacing: 0.5px;
     }
-    .nav-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    .nav-actions { display: flex; align-items: center; gap: 10px; }
+    
     .nav-btn {
       background: var(--primary-color);
       color: #fff;
-      border: 1px solid rgba(255,255,255,0.25);
-      padding: 8px 14px;
-      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 7px 14px;
+      border-radius: 8px;
       cursor: pointer;
       font-weight: 600;
       font-size: 13px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
+    .nav-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
 
     /* Download Dropdown */
     .dropdown-container { position: relative; }
@@ -77,19 +85,21 @@
       display: none;
       position: absolute;
       right: 0;
-      top: 115%;
+      top: calc(100% + 8px);
       background: #ffffff;
-      border-radius: 8px;
-      min-width: 220px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      border-radius: 10px;
+      min-width: 240px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.35);
       flex-direction: column;
       overflow: hidden;
       z-index: 1010;
+      border: 1px solid rgba(0,0,0,0.05);
+      animation: fadeIn 0.2s ease;
     }
     .dropdown-menu.show { display: flex; }
     .dropdown-item {
-      padding: 10px 14px;
-      font-size: 13px;
+      padding: 11px 16px;
+      font-size: 12.5px;
       color: #1e293b;
       display: flex;
       align-items: center;
@@ -100,43 +110,48 @@
       background: none;
       text-align: left;
       width: 100%;
+      font-weight: 500;
     }
     .dropdown-item:hover { background: #f1f5f9; color: var(--primary-color); }
+    .dropdown-item i { width: 16px; color: var(--primary-color); font-size: 14px; }
 
     /* Side Settings Drawer */
     .drawer-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(2px);
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
       z-index: 1100;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.3s;
+      transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .drawer-backdrop.active { opacity: 1; pointer-events: auto; }
 
     .editor-drawer {
       position: fixed;
       top: 0; left: 0; bottom: 0;
-      width: 340px;
+      width: 320px;
       max-width: 85vw;
       background: #ffffff;
+      color: #1e293b;
       z-index: 1200;
-      box-shadow: 5px 0 25px rgba(0,0,0,0.5);
+      box-shadow: 10px 0 30px rgba(0,0,0,0.4);
       transform: translateX(-100%);
-      transition: transform 0.3s ease;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       flex-direction: column;
     }
     .editor-drawer.active { transform: translateX(0); }
+    
     .drawer-header {
-      padding: 15px 20px;
-      background: #0f172a;
+      padding: 16px 20px;
+      background: var(--bg-dark);
       color: #fff;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
     }
     .drawer-body {
       flex: 1;
@@ -157,6 +172,9 @@
       font-weight: 700;
       color: #475569;
       margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
     .drawer-field {
       display: flex;
@@ -168,14 +186,15 @@
     .drawer-field input, .drawer-field select {
       padding: 7px;
       border: 1px solid #cbd5e1;
-      border-radius: 5px;
+      border-radius: 6px;
       font-size: 12px;
+      outline: none;
     }
     .btn-block {
       width: 100%;
       padding: 9px;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
@@ -186,27 +205,30 @@
       margin-bottom: 6px;
     }
 
-    /* Workspace / Preview Wrapper */
+    /* Workspace & Mobile Viewport Protection */
     .workspace {
+      flex: 1;
       display: flex;
       justify-content: center;
-      padding: 30px 15px;
+      padding: 24px 10px;
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
-    .pages-container {
+    .pages-scaler {
       display: flex;
       flex-direction: column;
-      gap: 35px;
+      gap: 30px;
       align-items: center;
+      margin: 0 auto;
     }
 
-    /* Fixed A4 Scaled Page (794px x 1123px => 2480px x 3508px on export) */
+    /* Strict A4 Document (794px x 1123px on screen -> 2480px x 3508px on export) */
     .cv-page {
       width: 794px;
       height: 1123px;
       background: #ffffff;
       padding: 25px 45px 35px 45px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.5);
       position: relative;
       font-size: var(--base-font-size);
       color: var(--text-color);
@@ -214,7 +236,8 @@
       flex-direction: column;
       justify-content: space-between;
       overflow: hidden;
-      cursor: pointer;
+      cursor: default;
+      user-select: none;
     }
     .top-decorative-bar {
       height: 14px;
@@ -222,6 +245,40 @@
       position: absolute;
       top: 0; left: 0; right: 0;
     }
+
+    /* Floating Page Toolbar (Click empty space or hold) */
+    .page-quick-bar {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(8px);
+      padding: 5px 8px;
+      border-radius: 30px;
+      display: none;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      z-index: 100;
+      border: 1px solid rgba(255,255,255,0.15);
+      animation: fadeIn 0.2s ease;
+    }
+    .page-quick-bar.show { display: flex; }
+    .page-bar-btn {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .page-bar-btn:hover { background: rgba(255,255,255,0.25); }
+    .page-bar-btn.del { background: #ef4444; }
 
     /* Header Profile */
     .cv-header {
@@ -249,7 +306,7 @@
     .photo-overlay-hint {
       position: absolute;
       inset: 0;
-      background: rgba(0,0,0,0.45);
+      background: rgba(0,0,0,0.5);
       border-radius: 50%;
       display: flex;
       flex-direction: column;
@@ -298,6 +355,7 @@
       flex-direction: column;
       gap: 12px;
       margin-top: 10px;
+      min-height: 80px;
     }
     .cv-section {
       position: relative;
@@ -312,7 +370,7 @@
     }
     .cv-section:hover .section-hover-bar { display: flex; }
     .sec-btn {
-      background: #1e293b;
+      background: #0f172a;
       color: #fff;
       border: none;
       font-size: 10px;
@@ -320,7 +378,7 @@
       border-radius: 4px;
       cursor: pointer;
     }
-    .sec-btn-del { background: #dc3545; }
+    .sec-btn-del { background: #ef4444; }
 
     .section-badge {
       background: var(--primary-color);
@@ -344,22 +402,21 @@
       padding: 2px 4px;
     }
 
-    /* Data Table / List Rows with Delete Button */
+    /* Data Table / List Rows */
     .data-table {
       width: 100%;
       border-collapse: collapse;
     }
-    .table-row {
-      position: relative;
-    }
+    .table-row { position: relative; }
     .table-row:hover .row-del-btn { display: inline-block; }
     .data-table td {
       padding: 2px 0;
       vertical-align: top;
       font-size: 11px;
     }
-    .data-table .label { width: 140px; font-weight: 500; }
+    .data-table .label { width: 140px; font-weight: 500; cursor: pointer; }
     .data-table .separator { width: 15px; text-align: center; }
+    
     .row-del-btn {
       display: none;
       background: #ef4444;
@@ -375,7 +432,7 @@
       margin-left: 6px;
     }
 
-    /* Skills Grid with Modern Stars & Emoji */
+    /* Skills Grid */
     .skills-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -441,7 +498,7 @@
     .sig-clickable {
       cursor: pointer;
       min-width: 140px;
-      min-height: 35px;
+      min-height: 40px;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
@@ -453,7 +510,7 @@
     }
     .signature-img {
       max-height: 45px;
-      max-width: 140px;
+      max-width: 170px;
       object-fit: contain;
     }
 
@@ -485,44 +542,61 @@
       z-index: 2;
     }
 
-    /* Modal Layer: Text Field Editor */
-    .modal-overlay {
+    /* CUSTOM CSS POPUPS / MODALS */
+    .custom-modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.65);
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(5px);
       z-index: 2000;
       display: none;
       align-items: center;
       justify-content: center;
       padding: 15px;
+      animation: fadeIn 0.2s ease;
     }
-    .modal-overlay.active { display: flex; }
-    .modal-card {
+    .custom-modal-overlay.active { display: flex; }
+    
+    .custom-modal-card {
       background: #ffffff;
+      color: #1e293b;
       width: 440px;
       max-width: 95vw;
-      border-radius: 10px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      border-radius: 12px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      border: 1px solid rgba(0,0,0,0.08);
     }
     .modal-head {
-      padding: 12px 18px;
-      background: #0f172a;
+      padding: 13px 18px;
+      background: var(--bg-dark);
       color: #fff;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 600;
     }
+    .modal-head button { background: none; border: none; color: #94a3b8; font-size: 16px; cursor: pointer; }
+    .modal-head button:hover { color: #fff; }
+    
     .modal-body {
-      padding: 16px;
+      padding: 18px;
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+
+    /* Modal Text Input & Formatting */
     .text-edit-area {
       width: 100%;
       height: 90px;
@@ -530,7 +604,7 @@
       border: 1px solid #cbd5e1;
       border-radius: 6px;
       font-size: 13px;
-      font-family: inherit;
+      outline: none;
     }
     .quick-style-row {
       display: flex;
@@ -546,14 +620,12 @@
       cursor: pointer;
       font-size: 12px;
     }
-    .style-btn.active { background: #0284c7; color: #fff; border-color: #0284c7; }
+    .style-btn.active { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
 
-    /* Modal Layer: Advanced Image Studio (Profile & Signature) */
+    /* Image Studio Crop Containers */
     .crop-box-container {
-      width: 220px;
-      height: 220px;
       margin: 0 auto;
-      border: 2px dashed #0284c7;
+      border: 2px dashed var(--accent-color);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -561,15 +633,62 @@
       background: #f8fafc;
       position: relative;
     }
-    .crop-box-container.circle { border-radius: 50%; }
-    .crop-box-container.square { border-radius: 4px; }
+    .crop-box-container.circle { width: 200px; height: 200px; border-radius: 50%; }
+    .crop-box-container.square { width: 200px; height: 200px; border-radius: 6px; }
     .crop-box-container.passport { width: 175px; height: 225px; border-radius: 4px; }
+    .crop-box-container.signature-ratio { width: 300px; height: 80px; border-radius: 4px; }
+    .crop-box-container.original { width: 260px; height: 160px; border-radius: 4px; }
+
     #canvasImagePreview { max-width: 100%; max-height: 100%; }
 
-    /* Non-printable rules */
+    /* Section Target Selection List */
+    .target-section-list {
+      max-height: 180px;
+      overflow-y: auto;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 5px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .target-item {
+      padding: 8px 10px;
+      border-radius: 5px;
+      background: #f8fafc;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    .target-item:hover, .target-item.active {
+      border-color: var(--accent-color);
+      background: #eff6ff;
+      color: var(--primary-color);
+    }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Mobile Scaling Fix: Keeps full A4 width on small screens */
+    @media screen and (max-width: 820px) {
+      .workspace {
+        justify-content: flex-start;
+        padding: 15px 5px;
+      }
+      .pages-scaler {
+        margin: 0 auto;
+        transform-origin: top center;
+      }
+    }
+
+    /* Print settings */
     @media print {
       body { background: none; }
-      .top-navbar, .editor-drawer, .drawer-backdrop, .modal-overlay, .section-hover-bar, .row-del-btn { display: none !important; }
+      .top-navbar, .editor-drawer, .drawer-backdrop, .custom-modal-overlay, .section-hover-bar, .row-del-btn, .page-quick-bar { display: none !important; }
       .workspace { padding: 0; }
       .cv-page {
         box-shadow: none;
@@ -583,11 +702,14 @@
 </head>
 <body>
 
-  <!-- Top Navigation Bar -->
+  <!-- Hidden Photo Inputs -->
+  <input type="file" id="generalFileInput" accept="image/*" style="display:none;">
+
+  <!-- Top Navbar -->
   <div class="top-navbar">
     <div class="logo">
       <i class="fa-solid fa-graduation-cap"></i>
-      <span>CV Studio</span>
+      <span>Pro CV Studio</span>
     </div>
 
     <div class="nav-actions">
@@ -611,17 +733,16 @@
     </div>
   </div>
 
-  <!-- Outside click backdrop -->
+  <!-- Outside click backdrop for Drawer -->
   <div class="drawer-backdrop" id="drawerBackdrop" onclick="toggleDrawer()"></div>
 
-  <!-- Settings Drawer Menu -->
+  <!-- Side Settings Drawer -->
   <div class="editor-drawer" id="editorDrawer">
     <div class="drawer-header">
-      <h4><i class="fa-solid fa-sliders"></i> সেটিংস কন্ট্রোল</h4>
+      <h4><i class="fa-solid fa-sliders"></i> সাইট সেটিংস</h4>
       <button onclick="toggleDrawer()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;">&times;</button>
     </div>
     <div class="drawer-body">
-      
       <div class="drawer-group">
         <div class="drawer-group-title"><i class="fa-solid fa-palette"></i> গ্লোবাল ডিজাইন সেটিংস</div>
         <div class="drawer-field">
@@ -643,29 +764,25 @@
       </div>
 
       <div class="drawer-group">
-        <div class="drawer-group-title"><i class="fa-solid fa-folder-plus"></i> সেকশন ও পেজ ম্যানেজার</div>
-        <div class="drawer-field">
-          <label>নতুন সেকশনের নাম</label>
-          <input type="text" id="newSecName" placeholder="উদা: PROJECTS">
-        </div>
-        <div class="drawer-field">
-          <label>FontAwesome Icon ক্লাস</label>
-          <input type="text" id="newSecIcon" value="fa-circle-check">
-        </div>
-        <button class="btn-block" style="background:var(--primary-color); color:#fff;" onclick="addNewSection()"><i class="fa-solid fa-plus"></i> নতুন সেকশন যোগ করুন</button>
-        <button class="btn-block" style="background:#475569; color:#fff;" onclick="addNewPage()"><i class="fa-solid fa-file-circle-plus"></i> নতুন পেজ যুক্ত করুন</button>
+        <div class="drawer-group-title"><i class="fa-solid fa-file-circle-plus"></i> পেজ কনফিগারেশন</div>
+        <button class="btn-block" style="background:#475569; color:#fff;" onclick="addNewPage()"><i class="fa-solid fa-plus"></i> নতুন পেজ যুক্ত করুন</button>
       </div>
-
     </div>
   </div>
 
   <!-- Workspace Area -->
-  <div class="workspace" onclick="handleOutsidePageClick(event)">
-    <div class="pages-container" id="pagesContainer">
+  <div class="workspace">
+    <div class="pages-scaler" id="pagesContainer">
 
       <!-- PAGE 1 -->
-      <div class="cv-page" id="page-1" onclick="handlePageBackgroundClick(event, this)">
+      <div class="cv-page" id="page-1" onpointerdown="handlePointerDown(event, this)" onpointerup="handlePointerUp(event, this)" oncontextmenu="return false;">
         <div class="top-decorative-bar"></div>
+
+        <!-- Floating Quick Page Bar (Appears on click/hold) -->
+        <div class="page-quick-bar" id="pageBar-1">
+          <button class="page-bar-btn" onclick="openAddSectionModal('page-1')"><i class="fa-solid fa-plus"></i> নতুন সেকশন</button>
+          <button class="page-bar-btn del" onclick="confirmDeletePage('page-1')"><i class="fa-solid fa-trash"></i> পেজ মুছুন</button>
+        </div>
 
         <!-- Header Profile -->
         <div class="cv-header">
@@ -695,7 +812,7 @@
         <div class="sortable-section-list">
           
           <!-- Career Objective -->
-          <div class="cv-section">
+          <div class="cv-section" data-title="CAREER OBJECTIVE">
             <div class="section-hover-bar">
               <input type="color" onchange="changeSecColor(this)" title="কালার" style="width:18px;height:18px;border:none;">
               <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕</button>
@@ -710,7 +827,7 @@
           </div>
 
           <!-- Educational Qualification -->
-          <div class="cv-section">
+          <div class="cv-section" data-title="EDUCATIONAL QUALIFICATION">
             <div class="section-hover-bar">
               <button class="sec-btn" onclick="addTableRow(this)">+ সারি</button>
               <input type="color" onchange="changeSecColor(this)" title="কালার" style="width:18px;height:18px;border:none;">
@@ -753,7 +870,7 @@
           </div>
 
           <!-- Work Experience -->
-          <div class="cv-section">
+          <div class="cv-section" data-title="WORK EXPERIENCE">
             <div class="section-hover-bar">
               <button class="sec-btn" onclick="addTableRow(this)">+ সারি</button>
               <input type="color" onchange="changeSecColor(this)" title="কালার" style="width:18px;height:18px;border:none;">
@@ -784,8 +901,8 @@
             </div>
           </div>
 
-          <!-- Computer Knowledge (No row limits) -->
-          <div class="cv-section">
+          <!-- Computer Knowledge -->
+          <div class="cv-section" data-title="COMPUTER KNOWLEDGE">
             <div class="section-hover-bar">
               <button class="sec-btn" onclick="addComputerRow(this)">+ সারি</button>
               <input type="color" onchange="changeSecColor(this)" title="কালার" style="width:18px;height:18px;border:none;">
@@ -810,8 +927,8 @@
             </div>
           </div>
 
-          <!-- Skills Section (5-Star Rating & Emojis) -->
-          <div class="cv-section">
+          <!-- Skills Section -->
+          <div class="cv-section" data-title="SKILLS">
             <div class="section-hover-bar">
               <button class="sec-btn" onclick="addSkillRow(this)">+ স্কিল</button>
               <input type="color" onchange="changeSecColor(this)" title="কালার" style="width:18px;height:18px;border:none;">
@@ -825,42 +942,42 @@
               <div class="skills-grid" id="skillsGridContainer">
                 <div class="skill-item">
                   <div class="skill-name" onclick="openTextEditor(this)">🛡️ Cybersecurity</div>
-                  <div class="stars-group" onclick="rateSkill(this)" title="ক্লিক করে স্টার পরিবর্তন করুন">
+                  <div class="stars-group" onclick="rateSkill(this)" title="ক্লিক করে রেটিং পরিবর্তন করুন">
                     <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>
                   </div>
                   <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
                 </div>
                 <div class="skill-item">
                   <div class="skill-name" onclick="openTextEditor(this)">🌐 Networking</div>
-                  <div class="stars-group" onclick="rateSkill(this)" title="ক্লিক করে স্টার পরিবর্তন করুন">
+                  <div class="stars-group" onclick="rateSkill(this)" title="ক্লিক করে রেটিং পরিবর্তন করুন">
                     <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
                   </div>
                   <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
                 </div>
                 <div class="skill-item">
                   <div class="skill-name" onclick="openTextEditor(this)">🤝 Negotiation</div>
-                  <div class="stars-group" onclick="rateSkill(this)" title="ক্লিক করে স্টার পরিবর্তন করুন">
+                  <div class="stars-group" onclick="rateSkill(this)" title="ক্লিক করে রেটিং পরিবর্তন করুন">
                     <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>
                   </div>
                   <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
                 </div>
                 <div class="skill-item">
                   <div class="skill-name" onclick="openTextEditor(this)">👥 Teamwork</div>
-                  <div class="stars-group" onclick="rateSkill(this)" title="ক্লিক করে স্টার পরিবর্তন করুন">
+                  <div class="stars-group" onclick="rateSkill(this)" title="ক্লিক করে রেটিং পরিবর্তন করুন">
                     <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
                   </div>
                   <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
                 </div>
                 <div class="skill-item">
                   <div class="skill-name" onclick="openTextEditor(this)">🎬 Video Editing</div>
-                  <div class="stars-group" onclick="rateSkill(this)" title="ক্লিক করে স্টার পরিবর্তন করুন">
+                  <div class="stars-group" onclick="rateSkill(this)" title="ক্লিক করে রেটিং পরিবর্তন করুন">
                     <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i>
                   </div>
                   <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
                 </div>
                 <div class="skill-item">
                   <div class="skill-name" onclick="openTextEditor(this)">⏱️ Time Management</div>
-                  <div class="stars-group" onclick="rateSkill(this)" title="ক্লিক করে স্টার পরিবর্তন করুন">
+                  <div class="stars-group" onclick="rateSkill(this)" title="ক্লিক করে রেটিং পরিবর্তন করুন">
                     <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
                   </div>
                   <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
@@ -877,13 +994,18 @@
       </div>
 
       <!-- PAGE 2 -->
-      <div class="cv-page" id="page-2" onclick="handlePageBackgroundClick(event, this)">
+      <div class="cv-page" id="page-2" onpointerdown="handlePointerDown(event, this)" onpointerup="handlePointerUp(event, this)" oncontextmenu="return false;">
         <div class="top-decorative-bar"></div>
+
+        <div class="page-quick-bar" id="pageBar-2">
+          <button class="page-bar-btn" onclick="openAddSectionModal('page-2')"><i class="fa-solid fa-plus"></i> নতুন সেকশন</button>
+          <button class="page-bar-btn del" onclick="confirmDeletePage('page-2')"><i class="fa-solid fa-trash"></i> পেজ মুছুন</button>
+        </div>
 
         <div class="sortable-section-list" style="margin-top: 25px;">
           
-          <!-- Habits in Card/Box Layout -->
-          <div class="cv-section">
+          <!-- Habits -->
+          <div class="cv-section" data-title="HABITS">
             <div class="section-hover-bar">
               <button class="sec-btn" onclick="addHabitRow(this)">+ হ্যাবিট</button>
               <input type="color" onchange="changeSecColor(this)" title="কালার" style="width:18px;height:18px;border:none;">
@@ -924,7 +1046,7 @@
           </div>
 
           <!-- Language Skill -->
-          <div class="cv-section">
+          <div class="cv-section" data-title="LANGUAGE SKILL">
             <div class="section-hover-bar">
               <button class="sec-btn" onclick="addTableRow(this)">+ সারি</button>
               <input type="color" onchange="changeSecColor(this)" title="কালার" style="width:18px;height:18px;border:none;">
@@ -943,7 +1065,7 @@
           </div>
 
           <!-- Personal Information -->
-          <div class="cv-section">
+          <div class="cv-section" data-title="PERSONAL INFORMATION">
             <div class="section-hover-bar">
               <button class="sec-btn" onclick="addTableRow(this)">+ সারি</button>
               <input type="color" onchange="changeSecColor(this)" title="কালার" style="width:18px;height:18px;border:none;">
@@ -967,8 +1089,8 @@
             </div>
           </div>
 
-          <!-- Declaration & Signature Switch -->
-          <div class="cv-section">
+          <!-- Declaration -->
+          <div class="cv-section" data-title="DECLARATION">
             <div class="section-hover-bar">
               <input type="color" onchange="changeSecColor(this)" title="কালার" style="width:18px;height:18px;border:none;">
               <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕</button>
@@ -984,7 +1106,7 @@
               </p>
               <div class="signature-container">
                 <div>
-                  <div class="sig-clickable" id="signatureTarget" onclick="openSignatureOptions()">
+                  <div class="sig-clickable" id="signatureTarget" onclick="openSignatureChoiceModal()">
                     <span class="signature-font" id="sigTextDisplay">Md. Suhanur Rahman</span>
                     <img src="" class="signature-img" id="sigImgDisplay" style="display:none;" alt="Signature">
                   </div>
@@ -1007,12 +1129,12 @@
     </div>
   </div>
 
-  <!-- MODAL LAYER: TEXT INPUT & STYLING -->
-  <div class="modal-overlay" id="textEditorModal">
-    <div class="modal-card">
+  <!-- CUSTOM MODAL: TEXT INPUT & STYLING -->
+  <div class="custom-modal-overlay" id="textEditorModal">
+    <div class="custom-modal-card">
       <div class="modal-head">
         <span><i class="fa-solid fa-pen-to-square"></i> ফিল্ড ডাটা এডিটর</span>
-        <button onclick="closeModal('textEditorModal')" style="background:none;border:none;color:#fff;font-size:16px;cursor:pointer;">✕</button>
+        <button onclick="closeCustomModal('textEditorModal')">✕</button>
       </div>
       <div class="modal-body">
         <textarea id="modalTextInput" class="text-edit-area"></textarea>
@@ -1038,31 +1160,109 @@
             <option value="">ফন্ট ডিফল্ট</option>
             <option value="'Poppins', sans-serif">Poppins</option>
             <option value="'Roboto', sans-serif">Roboto</option>
-            <option value="'Alex Brush', cursive">Alex Brush (Signature)</option>
+            <option value="'Alex Brush', cursive">Alex Brush</option>
           </select>
         </div>
 
-        <button class="btn-block" style="background:#0284c7; color:#fff; margin-top:8px;" onclick="applyTextChanges()"><i class="fa-solid fa-check"></i> সেভ করুন</button>
+        <div class="modal-actions">
+          <button class="nav-btn" style="background:#64748b;" onclick="closeCustomModal('textEditorModal')">বাতিল</button>
+          <button class="nav-btn" style="background:#0284c7;" onclick="applyTextChanges()"><i class="fa-solid fa-check"></i> সেভ করুন</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL LAYER: ADVANCED IMAGE STUDIO (Profile & Signature) -->
-  <input type="file" id="generalFileInput" accept="image/*" style="display:none;">
-  <div class="modal-overlay" id="imageStudioModal">
-    <div class="modal-card" style="width:480px;">
+  <!-- CUSTOM MODAL: SIGNATURE SELECTION POPUP -->
+  <div class="custom-modal-overlay" id="sigChoiceModal">
+    <div class="custom-modal-card" style="width:380px;">
+      <div class="modal-head">
+        <span><i class="fa-solid fa-signature"></i> স্বাক্ষর নির্বাচন করুন</span>
+        <button onclick="closeCustomModal('sigChoiceModal')">✕</button>
+      </div>
+      <div class="modal-body" style="text-align:center; padding: 25px 20px;">
+        <p style="font-size:13px; color:#475569; margin-bottom: 18px;">আপনি স্বাক্ষর হিসেবে কোনটি ব্যবহার করতে চান?</p>
+        <div style="display:flex; gap:12px; justify-content:center;">
+          <button class="nav-btn" style="background:#0284c7; flex:1;" onclick="chooseSignatureType('image')">
+            <i class="fa-solid fa-image"></i> ছবি আপলোড (৩০০×৮০)
+          </button>
+          <button class="nav-btn" style="background:#059669; flex:1;" onclick="chooseSignatureType('text')">
+            <i class="fa-solid fa-font"></i> টেক্সট লিখুন
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOM MODAL: DELETE PAGE CONFIRMATION -->
+  <div class="custom-modal-overlay" id="deletePageModal">
+    <div class="custom-modal-card" style="width:360px;">
+      <div class="modal-head" style="background:#ef4444;">
+        <span><i class="fa-solid fa-triangle-exclamation"></i> পেজ ডিলিট সতর্কতা</span>
+        <button onclick="closeCustomModal('deletePageModal')">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        <p style="font-size:13px; color:#334155;" id="deletePageModalMsg">আপনি কি নিশ্চিত যে এই পেজটি এবং এর সকল সেকশন মুছে ফেলতে চান?</p>
+        <div class="modal-actions">
+          <button class="nav-btn" style="background:#64748b;" onclick="closeCustomModal('deletePageModal')">বাতিল</button>
+          <button class="nav-btn" style="background:#ef4444;" id="confirmDeletePageBtn">ডিলিট করুন</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOM MODAL: ADD SECTION WITH INSERT TARGET -->
+  <div class="custom-modal-overlay" id="addSectionModal">
+    <div class="custom-modal-card" style="width:440px;">
+      <div class="modal-head">
+        <span><i class="fa-solid fa-layer-group"></i> নতুন সেকশন যোগ করুন</span>
+        <button onclick="closeCustomModal('addSectionModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="drawer-field">
+          <label>সেকশন নাম</label>
+          <input type="text" id="modalNewSecTitle" placeholder="উদা: PROJECTS & AWARDS">
+        </div>
+        <div class="drawer-field">
+          <label>FontAwesome Icon ক্লাস</label>
+          <input type="text" id="modalNewSecIcon" value="fa-award">
+        </div>
+
+        <label style="font-size: 11px; font-weight: 600; color:#64748b;">কোন সেকশনের ঠিক উপরে বসাতে চান তা নির্বাচন করুন:</label>
+        <div class="target-section-list" id="targetSectionContainer">
+          <!-- Dynamic Target Section items loaded here -->
+        </div>
+
+        <div class="modal-actions">
+          <button class="nav-btn" style="background:#64748b;" onclick="closeCustomModal('addSectionModal')">বাতিল</button>
+          <button class="nav-btn" style="background:#0284c7;" onclick="executeAddSection()"><i class="fa-solid fa-plus"></i> যোগ করুন</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOM MODAL: IMAGE & SIGNATURE CROP STUDIO -->
+  <div class="custom-modal-overlay" id="imageStudioModal">
+    <div class="custom-modal-card" style="width:480px;">
       <div class="modal-head">
         <span id="imgModalTitle"><i class="fa-solid fa-crop-simple"></i> ইমেজ ক্রপ ও কালার স্টুডিও</span>
-        <button onclick="closeModal('imageStudioModal')" style="background:none;border:none;color:#fff;font-size:16px;cursor:pointer;">✕</button>
+        <button onclick="closeCustomModal('imageStudioModal')">✕</button>
       </div>
       <div class="modal-body">
         
-        <div class="quick-style-row" id="cropAspectButtons">
+        <!-- Profile Ratio Switchers -->
+        <div class="quick-style-row" id="profileCropButtons">
           <label style="font-size:11px; font-weight:600;">রেশিও ক্রপ:</label>
           <button class="style-btn active" onclick="setCropFrame('circle')">বৃত্তাকার</button>
           <button class="style-btn" onclick="setCropFrame('square')">স্কয়ার (1:1)</button>
           <button class="style-btn" onclick="setCropFrame('passport')">পাসপোর্ট সাইজ</button>
           <button class="style-btn" onclick="setCropFrame('original')">অরিজিনাল</button>
+        </div>
+
+        <!-- Signature Fixed 300x80 Switchers -->
+        <div class="quick-style-row" id="signatureCropButtons" style="display:none;">
+          <label style="font-size:11px; font-weight:600;">স্বাক্ষর রেশিও:</label>
+          <button class="style-btn active" onclick="setCropFrame('signature-ratio')">৩০০ × ৮০ পিক্সেল</button>
+          <button class="style-btn" onclick="setCropFrame('original')">অরিজিনাল সাইজ</button>
         </div>
 
         <div class="crop-box-container circle" id="cropContainer">
@@ -1072,7 +1272,7 @@
         <div style="display:flex; flex-direction:column; gap:6px; width:100%;">
           <div style="display:flex; justify-content:space-between; font-size:11px;">
             <span>জুম / সাইজ:</span>
-            <input type="range" id="imgZoom" min="0.4" max="2.5" step="0.05" value="1" style="width:70%;">
+            <input type="range" id="imgZoom" min="0.3" max="2.8" step="0.05" value="1" style="width:70%;">
           </div>
           <div style="display:flex; justify-content:space-between; font-size:11px;">
             <span>উজ্জ্বলতা (Brightness):</span>
@@ -1093,7 +1293,10 @@
           </div>
         </div>
 
-        <button class="btn-block" style="background:#059669; color:#fff; margin-top:6px;" onclick="applyCroppedImageResult()"><i class="fa-solid fa-check"></i> সিভিতে যুক্ত করুন</button>
+        <div class="modal-actions">
+          <button class="nav-btn" style="background:#64748b;" onclick="closeCustomModal('imageStudioModal')">বাতিল</button>
+          <button class="nav-btn" style="background:#059669;" onclick="applyCroppedImageResult()"><i class="fa-solid fa-check"></i> সিভিতে যুক্ত করুন</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1102,10 +1305,10 @@
     // 1. Data Reset Warning on Reload
     window.addEventListener('beforeunload', function (e) {
       e.preventDefault();
-      e.returnValue = 'আপনার তৈরি করা সিভির তথ্য রিসেট হয়ে যেতে পারে। আপনি কি নিশ্চিত?';
+      e.returnValue = 'আপনার তৈরি করা সিভির ডাটা রিসেট হয়ে যেতে পারে।';
     });
 
-    // 2. Dropdown & Drawer Toggles
+    // 2. Dropdown & Drawer Navigation
     function toggleDropdown() {
       document.getElementById('downloadDropdown').classList.toggle('show');
     }
@@ -1113,31 +1316,214 @@
       document.getElementById('editorDrawer').classList.toggle('active');
       document.getElementById('drawerBackdrop').classList.toggle('active');
     }
-    function closeModal(id) {
+    function closeCustomModal(id) {
       document.getElementById(id).classList.remove('active');
     }
 
-    // Close Dropdown when clicking outside
     window.addEventListener('click', function(e) {
       if (!e.target.closest('.dropdown-container')) {
         document.getElementById('downloadDropdown').classList.remove('show');
       }
+      // Hide quick action bar when clicked outside pages
+      if (!e.target.closest('.cv-page')) {
+        document.querySelectorAll('.page-quick-bar').forEach(bar => bar.classList.remove('show'));
+      }
     });
 
-    // 3. SortableJS Drag and Drop
+    // 3. Responsive Mobile Scaling Setup
+    function fitPagesToMobile() {
+      const scaler = document.getElementById('pagesContainer');
+      const windowWidth = window.innerWidth;
+      if (windowWidth < 815) {
+        const scale = (windowWidth - 20) / 794;
+        scaler.style.transform = `scale(${scale})`;
+        scaler.style.transformOrigin = 'top center';
+        
+        // Adjust container height to compensate transform scale
+        const pages = document.querySelectorAll('.cv-page');
+        const totalHeight = (1123 * pages.length + 30 * (pages.length - 1)) * scale;
+        document.querySelector('.workspace').style.height = `${totalHeight + 40}px`;
+      } else {
+        scaler.style.transform = 'none';
+        document.querySelector('.workspace').style.height = 'auto';
+      }
+    }
+    window.addEventListener('resize', fitPagesToMobile);
+    window.addEventListener('DOMContentLoaded', fitPagesToMobile);
+
+    // 4. Drag and Drop with SortableJS
     function initSortables() {
       document.querySelectorAll('.sortable-section-list').forEach(list => {
         new Sortable(list, {
           group: 'shared-sections',
           animation: 200,
           handle: '.section-badge',
-          ghostClass: 'sortable-ghost'
+          ghostClass: 'sortable-ghost',
+          touchStartThreshold: 5
         });
       });
     }
     initSortables();
 
-    // 4. Modal Text Editor Layer
+    // 5. Tap and Hold / Click on Empty Space for Quick Page Bar
+    let pressTimer = null;
+    function handlePointerDown(e, page) {
+      // If clicked on editable item, button or photo, do not trigger
+      if (e.target.closest('.cv-section, .cv-header, .cv-footer, .sec-btn, .page-quick-bar')) return;
+      
+      pressTimer = setTimeout(() => {
+        showQuickBar(page);
+      }, 550); // 550ms for Hold detection
+    }
+
+    function handlePointerUp(e, page) {
+      clearTimeout(pressTimer);
+      if (e.target === page || e.target.classList.contains('sortable-section-list')) {
+        showQuickBar(page);
+      }
+    }
+
+    function showQuickBar(page) {
+      document.querySelectorAll('.page-quick-bar').forEach(b => b.classList.remove('show'));
+      const bar = page.querySelector('.page-quick-bar');
+      if (bar) bar.classList.add('show');
+    }
+
+    // 6. Delete Page with Custom Modal
+    let pendingDeletePageId = null;
+    function confirmDeletePage(pageId) {
+      const allPages = document.querySelectorAll('.cv-page');
+      if (allPages.length <= 1) {
+        alert('সিভিতে কমপক্ষে একটি পেজ থাকা আবশ্যক!');
+        return;
+      }
+      pendingDeletePageId = pageId;
+      document.getElementById('deletePageModal').classList.add('active');
+    }
+
+    document.getElementById('confirmDeletePageBtn').addEventListener('click', function() {
+      if (pendingDeletePageId) {
+        const page = document.getElementById(pendingDeletePageId);
+        if (page) page.remove();
+        closeCustomModal('deletePageModal');
+        fitPagesToMobile();
+      }
+    });
+
+    // 7. Insert New Section Before a Chosen Target Section
+    let activeTargetPageId = 'page-1';
+    let selectedInsertTarget = 'end'; // 'end' or section element index
+
+    function openAddSectionModal(pageId) {
+      activeTargetPageId = pageId;
+      const targetContainer = document.getElementById('targetSectionContainer');
+      targetContainer.innerHTML = '';
+
+      // Find all sections in the target page
+      const page = document.getElementById(pageId);
+      const sections = page.querySelectorAll('.cv-section');
+
+      // Option to place at top
+      targetContainer.innerHTML += `
+        <div class="target-item active" onclick="selectTargetSection(this, 'top')">
+          <span><i class="fa-solid fa-arrow-up"></i> পেজের সর্বপ্রথমে (At the top)</span>
+          <i class="fa-solid fa-check" style="color:var(--primary-color);"></i>
+        </div>
+      `;
+
+      sections.forEach((sec, idx) => {
+        const title = sec.getAttribute('data-title') || sec.querySelector('.section-badge span').innerText;
+        targetContainer.innerHTML += `
+          <div class="target-item" onclick="selectTargetSection(this, '${idx}')">
+            <span>এর উপরে: <b>${title}</b></span>
+          </div>
+        `;
+      });
+
+      // Option to place at end
+      targetContainer.innerHTML += `
+        <div class="target-item" onclick="selectTargetSection(this, 'end')">
+          <span><i class="fa-solid fa-arrow-down"></i> পেজের সর্বশেষে (At the bottom)</span>
+        </div>
+      `;
+
+      selectedInsertTarget = 'top';
+      document.getElementById('addSectionModal').classList.add('active');
+    }
+
+    function selectTargetSection(element, targetKey) {
+      document.querySelectorAll('.target-item').forEach(item => item.classList.remove('active'));
+      element.classList.add('active');
+      selectedInsertTarget = targetKey;
+    }
+
+    function executeAddSection() {
+      const title = document.getElementById('modalNewSecTitle').value.trim() || 'NEW SECTION';
+      let icon = document.getElementById('modalNewSecIcon').value.trim() || 'fa-star';
+      if (!icon.startsWith('fa-')) icon = 'fa-' + icon;
+
+      const newSectionHTML = `
+        <div class="cv-section" data-title="${title.toUpperCase()}">
+          <div class="section-hover-bar">
+            <button class="sec-btn" onclick="addTableRow(this)">+ সারি</button>
+            <input type="color" onchange="changeSecColor(this)" title="কালার" style="width:18px;height:18px;border:none;">
+            <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕</button>
+          </div>
+          <div class="section-badge">
+            <i class="fa-solid ${icon}"></i>
+            <span onclick="openTextEditor(this)">${title.toUpperCase()}</span>
+          </div>
+          <div class="section-content">
+            <table class="data-table">
+              <tr class="table-row"><td class="label" onclick="openTextEditor(this)">আইটেম</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">বিবরণ লিখুন</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+            </table>
+          </div>
+        </div>
+      `;
+
+      const targetPage = document.getElementById(activeTargetPageId);
+      const listContainer = targetPage.querySelector('.sortable-section-list');
+      const sections = listContainer.querySelectorAll('.cv-section');
+
+      if (selectedInsertTarget === 'top' || sections.length === 0) {
+        listContainer.insertAdjacentHTML('afterbegin', newSectionHTML);
+      } else if (selectedInsertTarget === 'end') {
+        listContainer.insertAdjacentHTML('beforeend', newSectionHTML);
+      } else {
+        const targetIndex = parseInt(selectedInsertTarget);
+        if (sections[targetIndex]) {
+          sections[targetIndex].insertAdjacentHTML('beforebegin', newSectionHTML);
+        } else {
+          listContainer.insertAdjacentHTML('beforeend', newSectionHTML);
+        }
+      }
+
+      closeCustomModal('addSectionModal');
+      document.querySelectorAll('.page-quick-bar').forEach(b => b.classList.remove('show'));
+    }
+
+    function addNewPage() {
+      const count = document.querySelectorAll('.cv-page').length + 1;
+      const html = `
+        <div class="cv-page" id="page-${count}" onpointerdown="handlePointerDown(event, this)" onpointerup="handlePointerUp(event, this)" oncontextmenu="return false;">
+          <div class="top-decorative-bar"></div>
+          <div class="page-quick-bar" id="pageBar-${count}">
+            <button class="page-bar-btn" onclick="openAddSectionModal('page-${count}')"><i class="fa-solid fa-plus"></i> নতুন সেকশন</button>
+            <button class="page-bar-btn del" onclick="confirmDeletePage('page-${count}')"><i class="fa-solid fa-trash"></i> পেজ মুছুন</button>
+          </div>
+          <div class="sortable-section-list" style="margin-top: 25px;"></div>
+          <div class="cv-footer">
+            <div class="footer-badge">Page ${count}</div>
+          </div>
+        </div>
+      `;
+      document.getElementById('pagesContainer').insertAdjacentHTML('beforeend', html);
+      initSortables();
+      toggleDrawer();
+      fitPagesToMobile();
+    }
+
+    // 8. Text Formatting & Modal Editor
     let currentTargetElement = null;
     function openTextEditor(el) {
       currentTargetElement = el;
@@ -1145,7 +1531,6 @@
       const input = document.getElementById('modalTextInput');
       input.value = el.innerText.trim();
 
-      // Reset format buttons
       document.getElementById('mBtnBold').classList.toggle('active', el.style.fontWeight === 'bold');
       document.getElementById('mBtnItalic').classList.toggle('active', el.style.fontStyle === 'italic');
       document.getElementById('mBtnUnderline').classList.toggle('active', el.style.textDecoration === 'underline');
@@ -1165,7 +1550,6 @@
     function applyTextChanges() {
       if (!currentTargetElement) return;
       currentTargetElement.innerText = document.getElementById('modalTextInput').value;
-
       currentTargetElement.style.fontWeight = document.getElementById('mBtnBold').classList.contains('active') ? 'bold' : 'normal';
       currentTargetElement.style.fontStyle = document.getElementById('mBtnItalic').classList.contains('active') ? 'italic' : 'normal';
       currentTargetElement.style.textDecoration = document.getElementById('mBtnUnderline').classList.contains('active') ? 'underline' : 'none';
@@ -1173,7 +1557,7 @@
       if (document.getElementById('mFontSize').value) currentTargetElement.style.fontSize = document.getElementById('mFontSize').value;
       if (document.getElementById('mFontStyle').value) currentTargetElement.style.fontFamily = document.getElementById('mFontStyle').value;
 
-      closeModal('textEditorModal');
+      closeCustomModal('textEditorModal');
     }
 
     function rgbToHex(rgb) {
@@ -1182,149 +1566,14 @@
       return "#" + ((1 << 24) + (parseInt(rgbValues[0]) << 16) + (parseInt(rgbValues[1]) << 8) + parseInt(rgbValues[2])).toString(16).slice(1);
     }
 
-    // 5. Section Operations & Unlimited Adding
-    function changeSecColor(input) {
-      const badge = input.closest('.cv-section').querySelector('.section-badge');
-      if (badge) badge.style.backgroundColor = input.value;
+    // 9. Signature Choice Logic
+    function openSignatureChoiceModal() {
+      document.getElementById('sigChoiceModal').classList.add('active');
     }
 
-    function deleteSection(btn) {
-      if (confirm('আপনি কি এই সেকশনটি পুরোপুরি মুছে ফেলতে চান?')) {
-        btn.closest('.cv-section').remove();
-      }
-    }
-
-    function deleteRow(btn) {
-      btn.closest('.table-row, .skill-item, .habit-box').remove();
-    }
-
-    function addTableRow(btn) {
-      const table = btn.closest('.cv-section').querySelector('.data-table');
-      if (table) {
-        const row = `
-          <tr class="table-row">
-            <td class="label" onclick="openTextEditor(this)">নতুন ফিল্ড</td>
-            <td class="separator">:</td>
-            <td><span onclick="openTextEditor(this)">তথ্য যুক্ত করুন</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
-          </tr>
-        `;
-        table.insertAdjacentHTML('beforeend', row);
-      }
-    }
-
-    function addComputerRow(btn) {
-      const table = btn.closest('.cv-section').querySelector('.comp-table');
-      if (table) {
-        const row = `
-          <tr class="table-row">
-            <td style="width:25px;"><i class="fa-solid fa-check" style="color:var(--primary-color);"></i></td>
-            <td><span onclick="openTextEditor(this)">সফটওয়্যার বা আইটি দক্ষতা লিখুন</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
-          </tr>
-        `;
-        table.insertAdjacentHTML('beforeend', row);
-      }
-    }
-
-    function addSkillRow(btn) {
-      const grid = document.getElementById('skillsGridContainer');
-      const item = `
-        <div class="skill-item">
-          <div class="skill-name" onclick="openTextEditor(this)">⭐ নতুন স্কিল</div>
-          <div class="stars-group" onclick="rateSkill(this)" title="ক্লিক করে স্টার পরিবর্তন করুন">
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i>
-          </div>
-          <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
-        </div>
-      `;
-      grid.insertAdjacentHTML('beforeend', item);
-    }
-
-    function rateSkill(container) {
-      const stars = container.querySelectorAll('i');
-      let currentRating = 0;
-      stars.forEach(s => { if (s.classList.contains('fa-solid')) currentRating++; });
-      let nextRating = (currentRating % 5) + 1;
-
-      stars.forEach((star, idx) => {
-        if (idx < nextRating) {
-          star.className = 'fa-solid fa-star';
-        } else {
-          star.className = 'fa-regular fa-star';
-        }
-      });
-    }
-
-    function addHabitRow(btn) {
-      const grid = document.getElementById('habitsGridContainer');
-      const habit = `
-        <div class="habit-box">
-          <div class="habit-left"><i class="fa-solid fa-star"></i> <span onclick="openTextEditor(this)">নতুন অভ্যাস</span></div>
-          <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
-        </div>
-      `;
-      grid.insertAdjacentHTML('beforeend', habit);
-    }
-
-    // 6. Delete Page upon Clicking Empty Area
-    function handlePageBackgroundClick(e, pageElement) {
-      if (e.target === pageElement) {
-        if (confirm('আপনি কি এই সম্পূর্ণ পেজটি ডিলিট করে দিতে চান?')) {
-          if (document.querySelectorAll('.cv-page').length > 1) {
-            pageElement.remove();
-          } else {
-            alert('সিভিতে কমপক্ষে একটি পেজ থাকা আবশ্যক!');
-          }
-        }
-      }
-    }
-
-    function addNewSection() {
-      const title = document.getElementById('newSecName').value.trim() || 'NEW SECTION';
-      let icon = document.getElementById('newSecIcon').value.trim() || 'fa-star';
-      if (!icon.startsWith('fa-')) icon = 'fa-' + icon;
-
-      const html = `
-        <div class="cv-section">
-          <div class="section-hover-bar">
-            <button class="sec-btn" onclick="addTableRow(this)">+ সারি</button>
-            <input type="color" onchange="changeSecColor(this)" title="কালার" style="width:18px;height:18px;border:none;">
-            <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕</button>
-          </div>
-          <div class="section-badge">
-            <i class="fa-solid ${icon}"></i>
-            <span onclick="openTextEditor(this)">${title.toUpperCase()}</span>
-          </div>
-          <div class="section-content">
-            <table class="data-table">
-              <tr class="table-row"><td class="label" onclick="openTextEditor(this)">ফিল্ড</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">বিবরণ দিন</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
-            </table>
-          </div>
-        </div>
-      `;
-      document.querySelector('.sortable-section-list').insertAdjacentHTML('beforeend', html);
-      toggleDrawer();
-    }
-
-    function addNewPage() {
-      const count = document.querySelectorAll('.cv-page').length + 1;
-      const html = `
-        <div class="cv-page" id="page-${count}" onclick="handlePageBackgroundClick(event, this)">
-          <div class="top-decorative-bar"></div>
-          <div class="sortable-section-list" style="margin-top: 25px;"></div>
-          <div class="cv-footer">
-            <div class="footer-badge">Page ${count}</div>
-          </div>
-        </div>
-      `;
-      document.getElementById('pagesContainer').insertAdjacentHTML('beforeend', html);
-      initSortables();
-      toggleDrawer();
-    }
-
-    // 7. Signature Handling (Toggle Text or Image)
-    function openSignatureOptions() {
-      const choice = confirm("স্বাক্ষর হিসেবে কি ছবি আপলোড করতে চান?\n(Cancel চাপলে নাম বা টেক্সট এডিট হবে)");
-      if (choice) {
+    function chooseSignatureType(type) {
+      closeCustomModal('sigChoiceModal');
+      if (type === 'image') {
         openPhotoEditor('signature');
       } else {
         document.getElementById('sigImgDisplay').style.display = 'none';
@@ -1333,7 +1582,7 @@
       }
     }
 
-    // 8. Image Studio (Crop Aspect, Filters, Rotate)
+    // 10. Image Studio: Distinct 300x80 for Signature & Ratios for Profile
     let currentImageMode = 'profile'; // 'profile' or 'signature'
     let rawLoadedImg = new Image();
     let currentRotation = 0;
@@ -1343,12 +1592,19 @@
 
     function openPhotoEditor(mode) {
       currentImageMode = mode;
-      document.getElementById('imgModalTitle').innerText = (mode === 'profile') ? 'প্রোফাইল ছবি এডিটর' : 'স্বাক্ষর ছবি এডিটর';
-      
-      // Signature defaults to original ratio
+      const title = document.getElementById('imgModalTitle');
+      const profileBtns = document.getElementById('profileCropButtons');
+      const sigBtns = document.getElementById('signatureCropButtons');
+
       if (mode === 'signature') {
-        setCropFrame('original');
+        title.innerHTML = '<i class="fa-solid fa-signature"></i> স্বাক্ষর ছবি এডিটর (৩০০ × ৮০)';
+        profileBtns.style.display = 'none';
+        sigBtns.style.display = 'flex';
+        setCropFrame('signature-ratio');
       } else {
+        title.innerHTML = '<i class="fa-solid fa-crop-simple"></i> প্রোফাইল ছবি এডিটর';
+        profileBtns.style.display = 'flex';
+        sigBtns.style.display = 'none';
         setCropFrame('circle');
       }
 
@@ -1379,13 +1635,14 @@
       const container = document.getElementById('cropContainer');
       container.className = 'crop-box-container ' + type;
       
-      document.querySelectorAll('#cropAspectButtons .style-btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
+      const parent = (currentImageMode === 'signature') ? '#signatureCropButtons' : '#profileCropButtons';
+      document.querySelectorAll(`${parent} .style-btn`).forEach(btn => btn.classList.remove('active'));
+      if (event && event.target && event.target.classList) event.target.classList.add('active');
 
       if (currentImageMode === 'profile') {
         const img = document.getElementById('mainProfileImg');
         if (type === 'circle') img.style.borderRadius = '50%';
-        if (type === 'square' || type === 'passport' || type === 'original') img.style.borderRadius = '4px';
+        if (type === 'square' || type === 'passport' || type === 'original') img.style.borderRadius = '6px';
       }
     }
 
@@ -1437,14 +1694,99 @@
         sigImg.style.display = 'block';
         document.getElementById('sigTextDisplay').style.display = 'none';
       }
-      closeModal('imageStudioModal');
+      closeCustomModal('imageStudioModal');
     }
 
-    // 9. High-Res Export (2480 × 3508 px)
+    // 11. Section Rows Management
+    function changeSecColor(input) {
+      const badge = input.closest('.cv-section').querySelector('.section-badge');
+      if (badge) badge.style.backgroundColor = input.value;
+    }
+
+    function deleteSection(btn) {
+      if (confirm('আপনি কি এই সেকশনটি মুছে ফেলতে চান?')) {
+        btn.closest('.cv-section').remove();
+      }
+    }
+
+    function deleteRow(btn) {
+      btn.closest('.table-row, .skill-item, .habit-box').remove();
+    }
+
+    function addTableRow(btn) {
+      const table = btn.closest('.cv-section').querySelector('.data-table');
+      if (table) {
+        const row = `
+          <tr class="table-row">
+            <td class="label" onclick="openTextEditor(this)">নতুন ফিল্ড</td>
+            <td class="separator">:</td>
+            <td><span onclick="openTextEditor(this)">তথ্য দিন</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
+          </tr>
+        `;
+        table.insertAdjacentHTML('beforeend', row);
+      }
+    }
+
+    function addComputerRow(btn) {
+      const table = btn.closest('.cv-section').querySelector('.comp-table');
+      if (table) {
+        const row = `
+          <tr class="table-row">
+            <td style="width:25px;"><i class="fa-solid fa-check" style="color:var(--primary-color);"></i></td>
+            <td><span onclick="openTextEditor(this)">নতুন সফটওয়্যার স্কিল</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
+          </tr>
+        `;
+        table.insertAdjacentHTML('beforeend', row);
+      }
+    }
+
+    function addSkillRow(btn) {
+      const grid = document.getElementById('skillsGridContainer');
+      const item = `
+        <div class="skill-item">
+          <div class="skill-name" onclick="openTextEditor(this)">⭐ নতুন দক্ষতা</div>
+          <div class="stars-group" onclick="rateSkill(this)" title="ক্লিক করে রেটিং পরিবর্তন করুন">
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i>
+          </div>
+          <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
+        </div>
+      `;
+      grid.insertAdjacentHTML('beforeend', item);
+    }
+
+    function rateSkill(container) {
+      const stars = container.querySelectorAll('i');
+      let currentRating = 0;
+      stars.forEach(s => { if (s.classList.contains('fa-solid')) currentRating++; });
+      let nextRating = (currentRating % 5) + 1;
+
+      stars.forEach((star, idx) => {
+        if (idx < nextRating) {
+          star.className = 'fa-solid fa-star';
+        } else {
+          star.className = 'fa-regular fa-star';
+        }
+      });
+    }
+
+    function addHabitRow(btn) {
+      const grid = document.getElementById('habitsGridContainer');
+      const habit = `
+        <div class="habit-box">
+          <div class="habit-left"><i class="fa-solid fa-star"></i> <span onclick="openTextEditor(this)">নতুন অভ্যাস</span></div>
+          <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
+        </div>
+      `;
+      grid.insertAdjacentHTML('beforeend', habit);
+    }
+
+    // 12. Export 2480 x 3508 px (300 DPI)
     const TARGET_SCALE = 2480 / 794;
 
     async function exportDocument(type) {
       document.getElementById('downloadDropdown').classList.remove('show');
+      document.querySelectorAll('.page-quick-bar').forEach(b => b.classList.remove('show'));
+
       const pages = document.querySelectorAll('.cv-page');
       for (let i = 0; i < pages.length; i++) {
         const page = pages[i];
@@ -1462,6 +1804,8 @@
 
     async function exportToPDF() {
       document.getElementById('downloadDropdown').classList.remove('show');
+      document.querySelectorAll('.page-quick-bar').forEach(b => b.classList.remove('show'));
+
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF('p', 'pt', [2480, 3508]);
       const pages = document.querySelectorAll('.cv-page');
@@ -1479,7 +1823,7 @@
       pdf.save('CV_Document_2480x3508.pdf');
     }
 
-    // Global settings handlers
+    // Global Settings
     document.getElementById('globalColorPicker').addEventListener('input', (e) => {
       document.documentElement.style.setProperty('--primary-color', e.target.value);
     });
