@@ -285,7 +285,7 @@
     }
     .sec-btn-del { background: #ef4444; }
 
-    /* SECTION BADGE - FIXED TO PREVENT EXPORT TEXT LOSS */
+    /* SECTION BADGE */
     .section-badge {
       background-color: #113b63;
       background: var(--primary-color);
@@ -321,6 +321,30 @@
       font-size: 11.5px;
       line-height: 1.45;
       padding: 2px 0;
+    }
+
+    /* Degree / Sub-block Container */
+    .sub-block {
+      position: relative;
+      margin-bottom: 8px;
+    }
+    .sub-block:hover .block-del-btn { display: inline-block; }
+    .sub-block-header {
+      font-weight: 600;
+      margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .block-del-btn {
+      display: none;
+      background: #ef4444;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 9px;
+      cursor: pointer;
     }
 
     /* Tables */
@@ -480,7 +504,7 @@
     .custom-modal-card {
       background: #ffffff;
       color: #1e293b;
-      width: 440px;
+      width: 450px;
       max-width: 95vw;
       border-radius: 12px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.4);
@@ -538,7 +562,7 @@
     .crop-box-container.original { width: 260px; height: 160px; border-radius: 4px; }
 
     .target-section-list {
-      max-height: 180px;
+      max-height: 160px;
       overflow-y: auto;
       border: 1px solid #e2e8f0;
       border-radius: 6px;
@@ -559,10 +583,35 @@
     }
     .target-item.active { background: #eff6ff; color: var(--primary-color); font-weight: bold; }
 
+    /* Layout Type Picker Box in Modal */
+    .layout-picker {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .layout-opt {
+      border: 1.5px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 8px 4px;
+      text-align: center;
+      cursor: pointer;
+      background: #f8fafc;
+      transition: 0.2s;
+    }
+    .layout-opt i { font-size: 16px; margin-bottom: 4px; display: block; color: #64748b; }
+    .layout-opt span { font-size: 11px; font-weight: 500; display: block; }
+    .layout-opt.active {
+      border-color: #0284c7;
+      background: #f0f9ff;
+    }
+    .layout-opt.active i, .layout-opt.active span {
+      color: #0284c7;
+    }
+
     /* Print settings */
     @media print {
       body { background: none; }
-      .top-navbar, .custom-modal-overlay, .section-hover-bar, .row-del-btn, .page-quick-bar, .export-loader { display: none !important; }
+      .top-navbar, .custom-modal-overlay, .section-hover-bar, .row-del-btn, .block-del-btn, .page-quick-bar, .export-loader { display: none !important; }
       .workspace { padding: 0; }
       .cv-page {
         box-shadow: none;
@@ -664,9 +713,10 @@
             </div>
           </div>
 
-          <!-- Educational Qualification -->
+          <!-- Educational Qualification (With Sub-blocks / Multi-degree Support) -->
           <div class="cv-section" data-title="EDUCATIONAL QUALIFICATION">
             <div class="section-hover-bar">
+              <button class="sec-btn" onclick="addDegreeBlock(this)">+ Degree</button>
               <button class="sec-btn" onclick="addTableRow(this)">+ Row</button>
               <input type="color" onchange="changeSecColor(this)" title="Color" style="width:18px;height:18px;border:none;">
               <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕</button>
@@ -676,40 +726,48 @@
               <span onclick="openTextEditor(this)">EDUCATIONAL QUALIFICATION</span>
             </div>
             <div class="section-content">
-              <div style="font-weight: 600; margin-bottom: 3px;" onclick="openTextEditor(this)">| S.S.C — Secondary School Certificate</div>
-              <table class="data-table">
-                <tr class="table-row">
-                  <td class="label" onclick="openTextEditor(this)">Name of the School</td>
-                  <td class="separator">:</td>
-                  <td><span onclick="openTextEditor(this)">Talanda Ananda Mohan High School</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
-                </tr>
-                <tr class="table-row">
-                  <td class="label" onclick="openTextEditor(this)">Group</td>
-                  <td class="separator">:</td>
-                  <td><span onclick="openTextEditor(this)">Humanities</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
-                </tr>
-                <tr class="table-row">
-                  <td class="label" onclick="openTextEditor(this)">Passing Year</td>
-                  <td class="separator">:</td>
-                  <td><span onclick="openTextEditor(this)">Running</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
-                </tr>
-                <tr class="table-row">
-                  <td class="label" onclick="openTextEditor(this)">Result</td>
-                  <td class="separator">:</td>
-                  <td><span onclick="openTextEditor(this)">Running</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
-                </tr>
-                <tr class="table-row">
-                  <td class="label" onclick="openTextEditor(this)">Board</td>
-                  <td class="separator">:</td>
-                  <td><span onclick="openTextEditor(this)">Rajshahi</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
-                </tr>
-              </table>
+              
+              <div class="sub-block">
+                <div class="sub-block-header">
+                  <span onclick="openTextEditor(this)">| S.S.C — Secondary School Certificate</span>
+                  <button class="block-del-btn" onclick="deleteSubBlock(this)" title="Delete degree block">✕</button>
+                </div>
+                <table class="data-table">
+                  <tr class="table-row">
+                    <td class="label" onclick="openTextEditor(this)">Name of the School</td>
+                    <td class="separator">:</td>
+                    <td><span onclick="openTextEditor(this)">Talanda Ananda Mohan High School</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
+                  </tr>
+                  <tr class="table-row">
+                    <td class="label" onclick="openTextEditor(this)">Group</td>
+                    <td class="separator">:</td>
+                    <td><span onclick="openTextEditor(this)">Humanities</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
+                  </tr>
+                  <tr class="table-row">
+                    <td class="label" onclick="openTextEditor(this)">Passing Year</td>
+                    <td class="separator">:</td>
+                    <td><span onclick="openTextEditor(this)">Running</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
+                  </tr>
+                  <tr class="table-row">
+                    <td class="label" onclick="openTextEditor(this)">Result</td>
+                    <td class="separator">:</td>
+                    <td><span onclick="openTextEditor(this)">Running</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
+                  </tr>
+                  <tr class="table-row">
+                    <td class="label" onclick="openTextEditor(this)">Board</td>
+                    <td class="separator">:</td>
+                    <td><span onclick="openTextEditor(this)">Rajshahi</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
+                  </tr>
+                </table>
+              </div>
+
             </div>
           </div>
 
-          <!-- Work Experience -->
+          <!-- Work Experience (With Experience Sub-blocks) -->
           <div class="cv-section" data-title="WORK EXPERIENCE">
             <div class="section-hover-bar">
+              <button class="sec-btn" onclick="addExperienceBlock(this)">+ Company</button>
               <button class="sec-btn" onclick="addTableRow(this)">+ Row</button>
               <input type="color" onchange="changeSecColor(this)" title="Color" style="width:18px;height:18px;border:none;">
               <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕</button>
@@ -719,16 +777,24 @@
               <span onclick="openTextEditor(this)">WORK EXPERIENCE</span>
             </div>
             <div class="section-content">
-              <div style="margin-bottom: 6px;">
-                <div style="font-weight: 600;" onclick="openTextEditor(this)">o The Hideout Cafe</div>
+              
+              <div class="sub-block">
+                <div class="sub-block-header">
+                  <span onclick="openTextEditor(this)">o The Hideout Cafe</span>
+                  <button class="block-del-btn" onclick="deleteSubBlock(this)">✕</button>
+                </div>
                 <table class="data-table" style="margin-left: 12px; width: calc(100% - 12px);">
                   <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Position</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">Waiter</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
                   <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Location</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">Rajshahi</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
                   <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Duration</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">1 Month</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
                 </table>
               </div>
-              <div>
-                <div style="font-weight: 600;" onclick="openTextEditor(this)">o MIM Computer & Studio</div>
+
+              <div class="sub-block">
+                <div class="sub-block-header">
+                  <span onclick="openTextEditor(this)">o MIM Computer & Studio</span>
+                  <button class="block-del-btn" onclick="deleteSubBlock(this)">✕</button>
+                </div>
                 <table class="data-table" style="margin-left: 12px; width: calc(100% - 12px);">
                   <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Position</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">Computer Operator</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
                   <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Work</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">Land Office</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
@@ -736,6 +802,7 @@
                   <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Duration</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">7 Months</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
                 </table>
               </div>
+
             </div>
           </div>
 
@@ -777,7 +844,7 @@
               <span onclick="openTextEditor(this)">SKILLS</span>
             </div>
             <div class="section-content">
-              <div class="skills-grid" id="skillsGridContainer">
+              <div class="skills-grid">
                 <div class="skill-item">
                   <div class="skill-name" onclick="openTextEditor(this)">🛡️ Cybersecurity</div>
                   <div class="stars-group" onclick="rateSkill(this)" title="Click to change rating">
@@ -854,7 +921,7 @@
               <span onclick="openTextEditor(this)">HABITS</span>
             </div>
             <div class="section-content">
-              <div class="habits-grid" id="habitsGridContainer">
+              <div class="habits-grid">
                 <div class="habit-box">
                   <div class="habit-left"><i class="fa-solid fa-star"></i> <span onclick="openTextEditor(this)">Workout & Fitness</span></div>
                   <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
@@ -1030,9 +1097,9 @@
     </div>
   </div>
 
-  <!-- ADD SECTION MODAL -->
+  <!-- ADD SECTION MODAL WITH CUSTOM LAYOUT SELECTOR -->
   <div class="custom-modal-overlay" id="addSectionModal">
-    <div class="custom-modal-card" style="width:440px;">
+    <div class="custom-modal-card" style="width:460px;">
       <div class="modal-head">
         <span><i class="fa-solid fa-layer-group"></i> Add New Section</span>
         <button onclick="closeCustomModal('addSectionModal')">✕</button>
@@ -1040,11 +1107,28 @@
       <div class="modal-body">
         <div style="display:flex; flex-direction:column; gap:5px;">
           <label style="font-size:11px; font-weight:600; color:#64748b;">Section Title</label>
-          <input type="text" id="modalNewSecTitle" placeholder="e.g., PROJECTS & AWARDS" style="padding:7px; border:1px solid #cbd5e1; border-radius:5px;">
+          <input type="text" id="modalNewSecTitle" placeholder="e.g., PROJECTS / CERTIFICATIONS / HOBBIES" style="padding:7px; border:1px solid #cbd5e1; border-radius:5px;">
         </div>
         <div style="display:flex; flex-direction:column; gap:5px;">
           <label style="font-size:11px; font-weight:600; color:#64748b;">FontAwesome Icon Class</label>
           <input type="text" id="modalNewSecIcon" value="fa-award" style="padding:7px; border:1px solid #cbd5e1; border-radius:5px;">
+        </div>
+
+        <!-- Layout Style Chooser -->
+        <label style="font-size: 11px; font-weight: 600; color:#64748b; margin-top:3px;">Select Section Layout Style:</label>
+        <div class="layout-picker">
+          <div class="layout-opt active" onclick="selectLayoutStyle('table', this)">
+            <i class="fa-solid fa-table-list"></i>
+            <span>Table List</span>
+          </div>
+          <div class="layout-opt" onclick="selectLayoutStyle('skills', this)">
+            <i class="fa-solid fa-star-half-stroke"></i>
+            <span>5-Star Rating</span>
+          </div>
+          <div class="layout-opt" onclick="selectLayoutStyle('habits', this)">
+            <i class="fa-solid fa-square-check"></i>
+            <span>Badge Cards</span>
+          </div>
         </div>
 
         <label style="font-size: 11px; font-weight: 600; color:#64748b; margin-top:5px;">Choose position (Insert above):</label>
@@ -1204,9 +1288,16 @@
       }
     });
 
-    // 6. Section & Page Management
+    // 6. Add Section with Multiple Layout Styles (Table, Skills, Habits)
     let activeTargetPageId = 'page-1';
     let selectedInsertTarget = 'top';
+    let currentSelectedLayout = 'table';
+
+    function selectLayoutStyle(styleName, element) {
+      currentSelectedLayout = styleName;
+      document.querySelectorAll('.layout-opt').forEach(opt => opt.classList.remove('active'));
+      element.classList.add('active');
+    }
 
     function openAddSectionModal(pageId) {
       activeTargetPageId = pageId;
@@ -1252,9 +1343,12 @@
       let icon = document.getElementById('modalNewSecIcon').value.trim() || 'fa-award';
       if (!icon.startsWith('fa-')) icon = 'fa-' + icon;
 
-      const newSectionHTML = `
-        <div class="cv-section" data-title="${title.toUpperCase()}">
+      let sectionInnerContent = '';
+
+      if (currentSelectedLayout === 'table') {
+        sectionInnerContent = `
           <div class="section-hover-bar">
+            <button class="sec-btn" onclick="addDegreeBlock(this)">+ Sub-header</button>
             <button class="sec-btn" onclick="addTableRow(this)">+ Row</button>
             <input type="color" onchange="changeSecColor(this)" title="Color" style="width:18px;height:18px;border:none;">
             <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕</button>
@@ -1268,9 +1362,53 @@
               <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Item</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">Enter details here</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
             </table>
           </div>
-        </div>
-      `;
+        `;
+      } else if (currentSelectedLayout === 'skills') {
+        sectionInnerContent = `
+          <div class="section-hover-bar">
+            <button class="sec-btn" onclick="addSkillRow(this)">+ Skill</button>
+            <input type="color" onchange="changeSecColor(this)" title="Color" style="width:18px;height:18px;border:none;">
+            <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕</button>
+          </div>
+          <div class="section-badge">
+            <i class="fa-solid ${icon}"></i>
+            <span onclick="openTextEditor(this)">${title.toUpperCase()}</span>
+          </div>
+          <div class="section-content">
+            <div class="skills-grid">
+              <div class="skill-item">
+                <div class="skill-name" onclick="openTextEditor(this)">⭐ Skill Name</div>
+                <div class="stars-group" onclick="rateSkill(this)" title="Click to rate">
+                  <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i>
+                </div>
+                <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (currentSelectedLayout === 'habits') {
+        sectionInnerContent = `
+          <div class="section-hover-bar">
+            <button class="sec-btn" onclick="addHabitRow(this)">+ Badge</button>
+            <input type="color" onchange="changeSecColor(this)" title="Color" style="width:18px;height:18px;border:none;">
+            <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕</button>
+          </div>
+          <div class="section-badge">
+            <i class="fa-solid ${icon}"></i>
+            <span onclick="openTextEditor(this)">${title.toUpperCase()}</span>
+          </div>
+          <div class="section-content">
+            <div class="habits-grid">
+              <div class="habit-box">
+                <div class="habit-left"><i class="fa-solid fa-star"></i> <span onclick="openTextEditor(this)">Badge Item</span></div>
+                <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
 
+      const newSectionHTML = `<div class="cv-section" data-title="${title.toUpperCase()}">${sectionInnerContent}</div>`;
       const targetPage = document.getElementById(activeTargetPageId);
       const listContainer = targetPage.querySelector('.sortable-section-list');
       const sections = listContainer.querySelectorAll('.cv-section');
@@ -1460,7 +1598,7 @@
       closeCustomModal('imageStudioModal');
     }
 
-    // 10. Table & List Row Management
+    // 10. Table & List Row Management + Sub-blocks (Degree / Company)
     function changeSecColor(input) {
       const badge = input.closest('.cv-section').querySelector('.section-badge');
       if (badge) badge.style.backgroundColor = input.value;
@@ -1471,8 +1609,63 @@
     function deleteRow(btn) {
       btn.closest('.table-row, .skill-item, .habit-box').remove();
     }
+    function deleteSubBlock(btn) {
+      btn.closest('.sub-block').remove();
+    }
+
+    // Add Degree / Certificate Sub-block in Education
+    function addDegreeBlock(btn) {
+      const sectionContent = btn.closest('.cv-section').querySelector('.section-content');
+      const newBlock = `
+        <div class="sub-block">
+          <div class="sub-block-header">
+            <span onclick="openTextEditor(this)">| Degree — Major / Certificate Title</span>
+            <button class="block-del-btn" onclick="deleteSubBlock(this)">✕</button>
+          </div>
+          <table class="data-table">
+            <tr class="table-row">
+              <td class="label" onclick="openTextEditor(this)">Institute</td>
+              <td class="separator">:</td>
+              <td><span onclick="openTextEditor(this)">University / College / School Name</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
+            </tr>
+            <tr class="table-row">
+              <td class="label" onclick="openTextEditor(this)">Passing Year</td>
+              <td class="separator">:</td>
+              <td><span onclick="openTextEditor(this)">2024</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
+            </tr>
+            <tr class="table-row">
+              <td class="label" onclick="openTextEditor(this)">Result</td>
+              <td class="separator">:</td>
+              <td><span onclick="openTextEditor(this)">GPA / CGPA</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
+            </tr>
+          </table>
+        </div>
+      `;
+      sectionContent.insertAdjacentHTML('beforeend', newBlock);
+    }
+
+    // Add Experience / Company Sub-block
+    function addExperienceBlock(btn) {
+      const sectionContent = btn.closest('.cv-section').querySelector('.section-content');
+      const newBlock = `
+        <div class="sub-block">
+          <div class="sub-block-header">
+            <span onclick="openTextEditor(this)">o Company or Organization Name</span>
+            <button class="block-del-btn" onclick="deleteSubBlock(this)">✕</button>
+          </div>
+          <table class="data-table" style="margin-left: 12px; width: calc(100% - 12px);">
+            <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Position</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">Designation</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+            <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Location</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">City, Country</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+            <tr class="table-row"><td class="label" onclick="openTextEditor(this)">Duration</td><td class="separator">:</td><td><span onclick="openTextEditor(this)">Jan 2023 - Present</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+          </table>
+        </div>
+      `;
+      sectionContent.insertAdjacentHTML('beforeend', newBlock);
+    }
+
     function addTableRow(btn) {
-      const table = btn.closest('.cv-section').querySelector('.data-table');
+      const section = btn.closest('.cv-section');
+      const table = section.querySelector('.data-table');
       if (table) {
         const row = `
           <tr class="table-row">
@@ -1484,6 +1677,7 @@
         table.insertAdjacentHTML('beforeend', row);
       }
     }
+
     function addComputerRow(btn) {
       const table = btn.closest('.cv-section').querySelector('.comp-table');
       if (table) {
@@ -1496,8 +1690,9 @@
         table.insertAdjacentHTML('beforeend', row);
       }
     }
+
     function addSkillRow(btn) {
-      const grid = document.getElementById('skillsGridContainer');
+      const grid = btn.closest('.cv-section').querySelector('.skills-grid') || document.querySelector('.skills-grid');
       const item = `
         <div class="skill-item">
           <div class="skill-name" onclick="openTextEditor(this)">⭐ New Skill</div>
@@ -1509,6 +1704,7 @@
       `;
       grid.insertAdjacentHTML('beforeend', item);
     }
+
     function rateSkill(container) {
       const stars = container.querySelectorAll('i');
       let currentRating = 0;
@@ -1518,11 +1714,12 @@
         star.className = (idx < nextRating) ? 'fa-solid fa-star' : 'fa-regular fa-star';
       });
     }
+
     function addHabitRow(btn) {
-      const grid = document.getElementById('habitsGridContainer');
+      const grid = btn.closest('.cv-section').querySelector('.habits-grid') || document.querySelector('.habits-grid');
       const habit = `
         <div class="habit-box">
-          <div class="habit-left"><i class="fa-solid fa-star"></i> <span onclick="openTextEditor(this)">New Habit</span></div>
+          <div class="habit-left"><i class="fa-solid fa-star"></i> <span onclick="openTextEditor(this)">New Item</span></div>
           <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
         </div>
       `;
@@ -1530,12 +1727,12 @@
     }
 
     // ================================================================
-    // 11. 100% CLEAN EXPORT (HD RENDER + PRESERVES SECTION BADGE TEXT)
+    // 11. CLEAN EXPORT (HD RENDER + PRESERVES SECTION BADGE TEXT)
     // ================================================================
     const TARGET_WIDTH = 2480;
     const TARGET_HEIGHT = 3508;
     const SCREEN_WIDTH = 794;
-    const EXPORT_SCALE = TARGET_WIDTH / SCREEN_WIDTH; // 3.1234
+    const EXPORT_SCALE = TARGET_WIDTH / SCREEN_WIDTH;
 
     async function captureCleanCanvas(pageElement) {
       const offscreenContainer = document.createElement('div');
@@ -1548,7 +1745,7 @@
       offscreenContainer.style.zIndex = '-9999';
 
       const clone = pageElement.cloneNode(true);
-      clone.querySelectorAll('.page-quick-bar, .section-hover-bar, .row-del-btn').forEach(el => el.remove());
+      clone.querySelectorAll('.page-quick-bar, .section-hover-bar, .row-del-btn, .block-del-btn').forEach(el => el.remove());
       
       clone.style.transform = 'none';
       clone.style.margin = '0';
@@ -1556,7 +1753,6 @@
       clone.style.width = '794px';
       clone.style.height = '1123px';
 
-      // Ensure explicit colors and text visibility on cloned badges
       clone.querySelectorAll('.section-badge').forEach(badge => {
         badge.style.display = 'inline-block';
         badge.style.color = '#ffffff';
