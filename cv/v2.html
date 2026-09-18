@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>One CV Maker - Template #2 (v2)</title>
+  
+  <!-- Google Fonts & FontAwesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Alex+Brush&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Libraries: Sortable, html2canvas, jsPDF, JSZip -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <style>
+    :root {
+      --sidebar-bg: #001f3f;
+      --primary-color: #0b3c68;
+      --accent-cyan: #38bdf8;
+      --text-main: #1e293b;
+      --font-family: 'Plus Jakarta Sans', sans-serif;
+      --base-font-size: 13px;
+      --ios-blur: blur(24px);
+      --glass-bg: rgba(255, 255, 255, 0.82);
+      --glass-border: rgba(255, 255, 255, 0.35);
+      --dark-glass-bg: rgba(15, 23, 42, 0.78);
+      --dark-glass-border: rgba(255, 255, 255, 0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: var(--font-family);
+      background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Fixed Top Navbar */
+    .top-navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      background: var(--dark-glass-bg);
+      backdrop-filter: var(--ios-blur);
+      -webkit-backdrop-filter: var(--ios-blur);
+      border-bottom: 1px solid var(--dark-glass-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    }
+    .brand-group { display: flex; align-items: center; gap: 12px; }
+    .brand-title {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-title i { -webkit-text-fill-color: #38bdf8; }
+    .brand-badge {
+      background: rgba(56, 189, 248, 0.12);
+      color: #38bdf8;
+      font-size: 11px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      font-weight: 600;
+    }
+
+    .nav-actions { display: flex; align-items: center; gap: 10px; }
+    .nav-btn {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      padding: 8px 15px;
+      border-radius: 24px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 12.5px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      text-decoration: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(10px);
+    }
+    .nav-btn:hover { background: rgba(255, 255, 255, 0.16); transform: translateY(-1px); }
+    .nav-btn.v1-link {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 4px 15px rgba(2, 132, 199, 0.35);
+    }
+
+    .desktop-tools { display: flex; align-items: center; gap: 10px; }
+
+    /* Dropdown */
+    .dropdown-container { position: relative; }
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: calc(100% + 12px);
+      background: var(--glass-bg);
+      backdrop-filter: var(--ios-blur);
+      -webkit-backdrop-filter: var(--ios-blur);
+      border-radius: 18px;
+      min-width: 270px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.28);
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 1010;
+      border: 1px solid var(--glass-border);
+      animation: popIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .dropdown-menu.show { display: flex; }
+    .dropdown-item {
+      padding: 13px 18px;
+      font-size: 13px;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      text-align: left;
+      width: 100%;
+      font-weight: 600;
+      transition: 0.15s;
+    }
+    .dropdown-item:hover {
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--primary-color);
+      transform: translateX(4px);
+    }
+    .dropdown-item i { width: 18px; color: var(--primary-color); font-size: 15px; }
+
+    .zoom-pill {
+      position: fixed;
+      top: 75px; right: 20px;
+      background: var(--dark-glass-bg);
+      backdrop-filter: var(--ios-blur);
+      color: #38bdf8;
+      border: 1px solid var(--dark-glass-border);
+      border-radius: 30px;
+      padding: 7px 14px;
+      font-size: 11.5px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      z-index: 800;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      transition: 0.2s;
+    }
+    .zoom-pill:hover { transform: scale(1.04); }
+
+    /* Workspace */
+    .workspace {
+      flex: 1;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+      cursor: grab;
+      touch-action: none;
+    }
+    .workspace:active { cursor: grabbing; }
+
+    .canvas-viewport {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 85px;
+      padding-bottom: 120px;
+      transform-origin: center top;
+      will-change: transform;
+    }
+
+    .pages-scaler {
+      display: flex;
+      flex-direction: column;
+      gap: 35px;
+      align-items: center;
+      margin: 0 auto;
+      width: 794px;
+    }
+
+    /* CV Page Layout - Template #2 (A4 794px x 1123px => 2480x3508 Export) */
+    .cv-page {
+      width: 794px;
+      min-width: 794px;
+      max-width: 794px;
+      height: 1123px;
+      min-height: 1123px;
+      max-height: 1123px;
+      background: #ffffff;
+      border-radius: 6px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
+      position: relative;
+      font-size: 12px;
+      color: var(--text-main);
+      display: flex;
+      overflow: hidden;
+      box-sizing: border-box;
+      line-height: normal;
+    }
+
+    /* Left Sidebar Column */
+    .cv-left-col {
+      width: 285px;
+      min-width: 285px;
+      background: var(--sidebar-bg);
+      color: #ffffff;
+      padding: 24px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+      box-sizing: border-box;
+    }
+
+    /* Profile Photo (Square frame with rounded border) */
+    .v2-photo-wrapper {
+      width: 150px;
+      height: 185px;
+      margin: 0 auto;
+      border: 3.5px solid #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      background: #fff;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      position: relative;
+    }
+    .v2-photo-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .photo-overlay-tag {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 11px;
+      opacity: 0;
+      transition: 0.2s;
+    }
+    .v2-photo-wrapper:hover .photo-overlay-tag { opacity: 1; }
+
+    /* Name & Title in Left Column */
+    .v2-header-name {
+      text-align: center;
+      margin-top: -4px;
+    }
+    .v2-main-name {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #ffffff;
+      text-transform: uppercase;
+      line-height: 1.15;
+    }
+    .v2-cursive-name {
+      font-family: 'Alex Brush', cursive;
+      font-size: 38px;
+      color: #38bdf8;
+      margin: -6px 0 -4px 0;
+      display: block;
+    }
+    .v2-title-tag {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #93c5fd;
+      border-top: 1px solid rgba(255,255,255,0.2);
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      padding: 3px 0;
+      display: inline-block;
+      width: 100%;
+    }
+
+    /* Left Column Badge Titles */
+    .v2-side-badge {
+      background: #09345e;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #ffffff !important;
+      padding: 4px 14px;
+      border-radius: 18px;
+      display: inline-block;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      white-space: nowrap;
+      cursor: grab;
+    }
+    .v2-side-badge i { margin-right: 6px; color: #38bdf8; }
+
+    /* Left Contact List (Pill icons) */
+    .v2-contact-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .v2-contact-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 10.5px;
+      color: #e2e8f0;
+      cursor: pointer;
+    }
+    .v2-contact-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #ffffff;
+      color: var(--sidebar-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      flex-shrink: 0;
+    }
+
+    /* Left Details Table */
+    .v2-side-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .v2-side-table td {
+      padding: 2px 0;
+      font-size: 10.5px;
+      color: #e2e8f0;
+      vertical-align: top;
+    }
+    .v2-side-table .s-label { width: 90px; color: #94a3b8; font-weight: 500; }
+    .v2-side-table .s-sep { width: 12px; text-align: center; }
+
+    /* Language Progress Bars */
+    .v2-lang-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .v2-lang-item { font-size: 10.5px; cursor: pointer; }
+    .v2-lang-header { display: flex; justify-content: space-between; margin-bottom: 2px; }
+    .v2-bar-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .v2-bar-fill {
+      height: 100%;
+      background: #38bdf8;
+      border-radius: 4px;
+    }
+
+    /* Skills List */
+    .v2-skill-bullets {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .v2-skill-bullets li {
+      font-size: 10.5px;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .v2-skill-bullets li::before {
+      content: "•";
+      color: #38bdf8;
+      font-size: 14px;
+    }
+
+    .v2-motive-quote {
+      font-family: 'Caveat', cursive;
+      font-size: 26px;
+      color: #93c5fd;
+      text-align: center;
+      line-height: 1.1;
+      margin-top: auto;
+      padding-top: 10px;
+      transform: rotate(-4deg);
+      cursor: pointer;
+    }
+
+    /* Right Main Column */
+    .cv-right-col {
+      flex: 1;
+      background: #ffffff;
+      padding: 24px 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    /* Slogan at top right */
+    .v2-top-slogan {
+      text-align: right;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #475569;
+      text-transform: uppercase;
+      font-style: italic;
+    }
+
+    /* Section Badge Main */
+    .v2-main-badge {
+      background: var(--primary-color);
+      color: #ffffff !important;
+      padding: 4px 18px 4px 12px;
+      border-radius: 4px 20px 20px 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 12.5px;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      position: relative;
+      cursor: grab;
+    }
+    .v2-main-badge i {
+      font-size: 13px;
+      color: #38bdf8;
+    }
+
+    /* Education Grid Table */
+    .v2-edu-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 4px;
+    }
+    .v2-edu-table th {
+      background: #e0f2fe;
+      color: #0369a1;
+      font-weight: 700;
+      font-size: 11px;
+      padding: 5px 8px;
+      text-align: left;
+      border: 1px solid #cbd5e1;
+    }
+    .v2-edu-table td {
+      border: 1px solid #e2e8f0;
+      padding: 5px 8px;
+      font-size: 11px;
+      vertical-align: top;
+      cursor: pointer;
+    }
+
+    /* Experience Content */
+    .v2-exp-block {
+      margin-top: 4px;
+    }
+    .v2-exp-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .v2-exp-role {
+      font-size: 13px;
+      font-weight: 800;
+      color: #0b3c68;
+    }
+    .v2-exp-time {
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+    }
+    .v2-exp-bullets {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .v2-exp-bullets li {
+      font-size: 11px;
+      color: #334155;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      line-height: 1.35;
+      cursor: pointer;
+    }
+    .v2-exp-bullets li::before {
+      content: "•";
+      color: #0b3c68;
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    /* Key Strengths 4-Box Grid */
+    .v2-strengths-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 6px;
+      text-align: center;
+    }
+    .v2-strength-box {
+      border-right: 1px solid #cbd5e1;
+      padding: 0 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+    .v2-strength-box:last-child { border-right: none; }
+    .v2-strength-icon {
+      font-size: 24px;
+      color: #0b3c68;
+      margin-bottom: 2px;
+    }
+    .v2-strength-title {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #1e293b;
+      line-height: 1.2;
+    }
+
+    /* Declaration & Signature */
+    .v2-declaration-text {
+      font-size: 11px;
+      color: #334155;
+      line-height: 1.4;
+      text-align: justify;
+      cursor: pointer;
+    }
+    .v2-signature-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-top: 14px;
+    }
+    .v2-date-box {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #334155;
+      border-bottom: 1px solid #475569;
+      padding-bottom: 2px;
+      min-width: 140px;
+    }
+    .v2-sig-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      min-width: 140px;
+    }
+    .v2-sig-font {
+      font-family: 'Alex Brush', cursive;
+      font-size: 26px;
+      color: #0b3c68;
+      line-height: 1;
+    }
+    .v2-sig-img {
+      max-height: 40px;
+      max-width: 150px;
+      object-fit: contain;
+    }
+    .v2-sig-label {
+      border-top: 1px solid #475569;
+      width: 100%;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 600;
+      color: #475569;
+      margin-top: 3px;
+      padding-top: 2px;
+    }
+
+    /* Hover tools */
+    .section-hover-bar {
+      position: absolute;
+      right: 0;
+      top: -15px;
+      display: none;
+      gap: 5px;
+      z-index: 50;
+    }
+    .cv-section:hover .section-hover-bar { display: flex; }
+    .sec-btn {
+      background: #0f172a;
+      color: #fff;
+      border: none;
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .sec-btn-del { background: #ef4444; }
+
+    /* Page Quick Bar */
+    .page-quick-bar {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: var(--dark-glass-bg);
+      backdrop-filter: var(--ios-blur);
+      padding: 6px 10px;
+      border-radius: 30px;
+      display: none;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      z-index: 100;
+      border: 1px solid var(--dark-glass-border);
+    }
+    .page-quick-bar.show { display: flex; }
+    .page-bar-btn {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Mobile Bottom Navigation Bar */
+    .mobile-bottom-bar {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      height: 64px;
+      background: var(--dark-glass-bg);
+      backdrop-filter: var(--ios-blur);
+      border: 1px solid var(--dark-glass-border);
+      border-radius: 36px;
+      z-index: 950;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 8px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    }
+    .mob-action-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 10.5px;
+      font-weight: 600;
+      gap: 4px;
+      cursor: pointer;
+    }
+    .mob-action-btn i { font-size: 18px; }
+    .mob-action-btn:hover, .mob-action-btn.active { color: #38bdf8; }
+
+    .mobile-export-popup {
+      display: none;
+      position: fixed;
+      bottom: 96px;
+      right: 25px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--ios-blur);
+      border-radius: 20px;
+      min-width: 260px;
+      box-shadow: 0 20px 45px rgba(0,0,0,0.3);
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 1020;
+      border: 1px solid var(--glass-border);
+    }
+    .mobile-export-popup.show { display: flex; }
+
+    @media screen and (max-width: 820px) {
+      .desktop-tools { display: none !important; }
+      .mobile-bottom-bar { display: flex; }
+      .section-hover-bar { display: flex; }
+      .zoom-pill { top: auto; bottom: 95px; right: 20px; }
+    }
+
+    /* Modals */
+    .custom-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(12px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .custom-modal-overlay.active { display: flex; }
+    .custom-modal-card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--ios-blur);
+      color: #0f172a;
+      width: 460px;
+      max-width: 92vw;
+      border-radius: 24px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.35);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--glass-border);
+    }
+    .modal-head {
+      padding: 16px 22px;
+      background: rgba(15, 23, 42, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14.5px;
+      font-weight: 700;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .modal-head button { background: none; border: none; color: #64748b; font-size: 18px; cursor: pointer; }
+    .modal-body { padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px; }
+
+    .text-edit-area {
+      width: 100%;
+      height: 95px;
+      padding: 12px;
+      border: 1.5px solid rgba(0,0,0,0.1);
+      border-radius: 14px;
+      font-size: 13.5px;
+      font-family: inherit;
+      background: rgba(255,255,255,0.7);
+      outline: none;
+    }
+    .quick-style-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .style-btn {
+      padding: 7px 12px;
+      border: 1px solid rgba(0,0,0,0.12);
+      background: rgba(255,255,255,0.7);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .style-btn.active { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
+
+    .crop-box-container {
+      margin: 0 auto;
+      border: 2px dashed #0284c7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: rgba(255,255,255,0.5);
+      position: relative;
+    }
+    .crop-box-container.circle { width: 200px; height: 200px; border-radius: 50%; }
+    .crop-box-container.square { width: 180px; height: 220px; border-radius: 12px; }
+    .crop-box-container.signature-ratio { width: 300px; height: 80px; border-radius: 8px; }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.95) translateY(6px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* Print rules */
+    @media print {
+      body { background: none; }
+      .top-navbar, .custom-modal-overlay, .section-hover-bar, .page-quick-bar, .mobile-bottom-bar, .zoom-pill, .mobile-export-popup { display: none !important; }
+      .workspace { padding: 0; width: 100vw; height: auto; position: static; }
+      .canvas-viewport { position: static; padding: 0; transform: none !important; }
+      .cv-page {
+        box-shadow: none;
+        margin: 0;
+        page-break-after: always;
+        width: 100vw;
+        height: 100vh;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Export Progress Overlay -->
+  <div class="export-loader" id="exportLoader">
+    <i class="fa-solid fa-spinner fa-spin fa-2x" style="color: #38bdf8;"></i>
+    <span id="exportLoaderMsg" style="margin-top:10px;">Processing document, please wait...</span>
+  </div>
+
+  <input type="file" id="generalFileInput" accept="image/*" style="display:none;">
+
+  <!-- iOS Floating Zoom Indicator & Reset Pill -->
+  <div class="zoom-pill" id="zoomResetBtn" onclick="resetZoomScale()">
+    <i class="fa-solid fa-magnifying-glass"></i> <span id="zoomLevelText">100% (Reset)</span>
+  </div>
+
+  <!-- Top Navbar -->
+  <div class="top-navbar">
+    <div class="brand-group">
+      <div class="brand-title">
+        <i class="fa-solid fa-file-invoice"></i>
+        <span>One CV Maker</span>
+      </div>
+      <span class="brand-badge">Template #2</span>
+    </div>
+
+    <div class="nav-actions">
+      <!-- Navigate back to Template 1 -->
+      <a href="/" class="nav-btn v1-link" title="Switch to Template 1">
+        <i class="fa-solid fa-arrow-left"></i> <span>Template 1</span>
+      </a>
+
+      <!-- Desktop Only Controls -->
+      <div class="desktop-tools">
+        <div class="dropdown-container">
+          <button class="nav-btn" onclick="toggleDropdown()" style="background:#059669;">
+            <i class="fa-solid fa-download"></i> Download <i class="fa-solid fa-chevron-down" style="font-size:10px;"></i>
+          </button>
+          <div class="dropdown-menu" id="downloadDropdown">
+            <button class="dropdown-item" onclick="exportToZipImages('png')"><i class="fa-solid fa-file-zipper"></i> PNG Bundle (.ZIP) — 2480×3508</button>
+            <button class="dropdown-item" onclick="exportToZipImages('jpeg')"><i class="fa-solid fa-file-zipper"></i> JPEG Bundle (.ZIP) — 2480×3508</button>
+            <button class="dropdown-item" onclick="exportToCleanPDF()"><i class="fa-solid fa-file-pdf"></i> PDF Document (Multi-Page HD)</button>
+            <button class="dropdown-item" onclick="window.print()"><i class="fa-solid fa-print"></i> Print Document</button>
+          </div>
+        </div>
+
+        <button class="nav-btn" onclick="addNewPage()">
+          <i class="fa-solid fa-file-circle-plus"></i> Add Page
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Workspace Area with Touch Engine (1-Finger Pan + 2-Finger Zoom) -->
+  <div class="workspace" id="workspaceContainer">
+    <div class="canvas-viewport" id="canvasViewport">
+      <div class="pages-scaler" id="pagesContainer">
+
+        <!-- PAGE 1 (TEMPLATE #2 DUAL COLUMN) -->
+        <div class="cv-page" id="page-1" onpointerdown="handlePointerDown(event, this)" onpointerup="handlePointerUp(event, this)">
+          
+          <!-- LEFT SIDEBAR COLUMN -->
+          <div class="cv-left-col sortable-section-list">
+            
+            <!-- Photo & Name block -->
+            <div class="cv-section" data-title="PROFILE HEADER">
+              <div class="v2-photo-wrapper" onclick="openPhotoEditor('profile')" title="Click to edit profile photo">
+                <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=400" alt="Profile" id="mainProfileImg">
+                <div class="photo-overlay-tag"><i class="fa-solid fa-camera"></i> Edit Photo</div>
+              </div>
+
+              <div class="v2-header-name" style="margin-top: 14px;">
+                <div class="v2-main-name" onclick="openTextEditor(this)">TANVIR AHAMED</div>
+                <div class="v2-cursive-name" onclick="openTextEditor(this)">Shahed</div>
+                <div class="v2-title-tag" onclick="openTextEditor(this)">STUDENT & ASPIRING PROFESSIONAL</div>
+              </div>
+            </div>
+
+            <!-- Contact Section -->
+            <div class="cv-section" data-title="CONTACT">
+              <div class="v2-side-badge"><i class="fa-solid fa-user"></i> <span onclick="openTextEditor(this)">CONTACT</span></div>
+              <div class="v2-contact-list">
+                <div class="v2-contact-item">
+                  <div class="v2-contact-icon"><i class="fa-solid fa-phone"></i></div>
+                  <span onclick="openTextEditor(this)">01827607566</span>
+                </div>
+                <div class="v2-contact-item">
+                  <div class="v2-contact-icon"><i class="fa-solid fa-envelope"></i></div>
+                  <span onclick="openTextEditor(this)">tanvirahamedshahed14@gmail.com</span>
+                </div>
+                <div class="v2-contact-item">
+                  <div class="v2-contact-icon"><i class="fa-solid fa-location-dot"></i></div>
+                  <span onclick="openTextEditor(this)">HATIL HAZIPARA, JOYPURHAT</span>
+                </div>
+                <div class="v2-contact-item">
+                  <div class="v2-contact-icon"><i class="fa-solid fa-cake-candles"></i></div>
+                  <span onclick="openTextEditor(this)">Date of Birth: 22-12-2007</span>
+                </div>
+                <div class="v2-contact-item">
+                  <div class="v2-contact-icon"><i class="fa-solid fa-flag"></i></div>
+                  <span onclick="openTextEditor(this)">Nationality: Bangladeshi</span>
+                </div>
+                <div class="v2-contact-item">
+                  <div class="v2-contact-icon"><i class="fa-solid fa-moon"></i></div>
+                  <span onclick="openTextEditor(this)">Religion: Islam</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Personal Information -->
+            <div class="cv-section" data-title="PERSONAL INFORMATION">
+              <div class="v2-side-badge"><i class="fa-solid fa-id-card"></i> <span onclick="openTextEditor(this)">PERSONAL INFORMATION</span></div>
+              <table class="v2-side-table">
+                <tr><td class="s-label" onclick="openTextEditor(this)">Father's Name</td><td class="s-sep">:</td><td><span onclick="openTextEditor(this)">MD Ruhul Karim</span></td></tr>
+                <tr><td class="s-label" onclick="openTextEditor(this)">Mother's Name</td><td class="s-sep">:</td><td><span onclick="openTextEditor(this)">Mrs Razia Sultana</span></td></tr>
+                <tr><td class="s-label" onclick="openTextEditor(this)">Date of Birth</td><td class="s-sep">:</td><td><span onclick="openTextEditor(this)">22-12-2007</span></td></tr>
+                <tr><td class="s-label" onclick="openTextEditor(this)">Nationality</td><td class="s-sep">:</td><td><span onclick="openTextEditor(this)">Bangladeshi</span></td></tr>
+                <tr><td class="s-label" onclick="openTextEditor(this)">Religion</td><td class="s-sep">:</td><td><span onclick="openTextEditor(this)">Islam</span></td></tr>
+              </table>
+            </div>
+
+            <!-- Languages -->
+            <div class="cv-section" data-title="LANGUAGES">
+              <div class="v2-side-badge"><i class="fa-solid fa-comments"></i> <span onclick="openTextEditor(this)">LANGUAGES</span></div>
+              <div class="v2-lang-group">
+                <div class="v2-lang-item">
+                  <div class="v2-lang-header"><span onclick="openTextEditor(this)">English</span><span onclick="openTextEditor(this)">(Fluent)</span></div>
+                  <div class="v2-bar-track"><div class="v2-bar-fill" style="width: 85%;"></div></div>
+                </div>
+                <div class="v2-lang-item">
+                  <div class="v2-lang-header"><span onclick="openTextEditor(this)">Bengali</span><span onclick="openTextEditor(this)">(Native)</span></div>
+                  <div class="v2-bar-track"><div class="v2-bar-fill" style="width: 100%;"></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Additional Skills -->
+            <div class="cv-section" data-title="ADDITIONAL SKILLS">
+              <div class="v2-side-badge"><i class="fa-solid fa-gear"></i> <span onclick="openTextEditor(this)">ADDITIONAL SKILLS</span></div>
+              <ul class="v2-skill-bullets">
+                <li onclick="openTextEditor(this)">Microsoft Word (Basic to Intermediate)</li>
+                <li onclick="openTextEditor(this)">Canva (Design & Poster)</li>
+                <li onclick="openTextEditor(this)">Facebook Page Management</li>
+                <li onclick="openTextEditor(this)">Basic Computer Skills</li>
+                <li onclick="openTextEditor(this)">Customer Service</li>
+                <li onclick="openTextEditor(this)">Communication</li>
+                <li onclick="openTextEditor(this)">Teamwork</li>
+              </ul>
+            </div>
+
+            <!-- Bottom Motive Text -->
+            <div class="v2-motive-quote" onclick="openTextEditor(this)">
+              Better Skills<br>Brighter Future
+            </div>
+
+          </div>
+
+          <!-- RIGHT MAIN CONTENT COLUMN -->
+          <div class="cv-right-col sortable-section-list">
+            
+            <div class="v2-top-slogan" onclick="openTextEditor(this)">
+              LEARN &nbsp;|&nbsp; IMPROVE &nbsp;|&nbsp; GROW
+            </div>
+
+            <!-- Career Objective -->
+            <div class="cv-section" data-title="CAREER OBJECTIVE">
+              <div class="v2-main-badge">
+                <i class="fa-solid fa-bullseye"></i>
+                <span onclick="openTextEditor(this)">CAREER OBJECTIVE</span>
+              </div>
+              <p style="font-size: 11.5px; line-height: 1.45; color: #334155; text-align: justify;" onclick="openTextEditor(this)">
+                I am a responsible and dedicated person, currently a Class 12 student, looking for a suitable job in a showroom or agency where I can apply my communication skills, learn new things and contribute to the growth of the organization. I am always eager to work hard, take responsibility and improve my skills for a better future.
+              </p>
+            </div>
+
+            <!-- Education -->
+            <div class="cv-section" data-title="EDUCATION">
+              <div class="v2-main-badge">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <span onclick="openTextEditor(this)">EDUCATION</span>
+              </div>
+              <table class="v2-edu-table">
+                <thead>
+                  <tr>
+                    <th>Degree / Exam</th>
+                    <th>Institution Name</th>
+                    <th>Result / GPA</th>
+                    <th>Passing Year</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><b onclick="openTextEditor(this)">SSC</b><br><span style="font-size:10px; color:#64748b;" onclick="openTextEditor(this)">(Secondary School Certificate)</span></td>
+                    <td onclick="openTextEditor(this)">R.B Government High School</td>
+                    <td><b onclick="openTextEditor(this)">GPA 5.00</b></td>
+                    <td onclick="openTextEditor(this)">2024</td>
+                  </tr>
+                  <tr>
+                    <td><b onclick="openTextEditor(this)">HSC</b><br><span style="font-size:10px; color:#64748b;" onclick="openTextEditor(this)">(Class 12)</span></td>
+                    <td onclick="openTextEditor(this)">Joypurhat Government College</td>
+                    <td onclick="openTextEditor(this)">-</td>
+                    <td><b onclick="openTextEditor(this)">(2026)</b><br><span style="font-size:10px; color:#64748b;" onclick="openTextEditor(this)">(Exam Year)</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Work Experience -->
+            <div class="cv-section" data-title="WORK EXPERIENCE">
+              <div class="v2-main-badge">
+                <i class="fa-solid fa-briefcase"></i>
+                <span onclick="openTextEditor(this)">WORK EXPERIENCE</span>
+              </div>
+              <div class="v2-exp-block">
+                <div class="v2-exp-title-row">
+                  <span class="v2-exp-role" onclick="openTextEditor(this)">Page Operator</span>
+                  <span class="v2-exp-time" onclick="openTextEditor(this)">(2024 — Present)</span>
+                </div>
+                <ul class="v2-exp-bullets">
+                  <li onclick="openTextEditor(this)">Managed social media pages and handled customer inquiries.</li>
+                  <li onclick="openTextEditor(this)">Created and posted content to increase engagement.</li>
+                  <li onclick="openTextEditor(this)">Responded to customer messages and solved their queries.</li>
+                  <li onclick="openTextEditor(this)">Helped in basic marketing and promotion of products/services.</li>
+                  <li onclick="openTextEditor(this)">Maintained a positive and professional communication style with customers.</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Key Strengths (4 Pillars) -->
+            <div class="cv-section" data-title="KEY STRENGTHS">
+              <div class="v2-main-badge">
+                <i class="fa-solid fa-star"></i>
+                <span onclick="openTextEditor(this)">KEY STRENGTHS</span>
+              </div>
+              <div class="v2-strengths-grid">
+                <div class="v2-strength-box">
+                  <i class="fa-solid fa-hand-holding-hand v2-strength-icon"></i>
+                  <span class="v2-strength-title" onclick="openTextEditor(this)">Hard Working</span>
+                </div>
+                <div class="v2-strength-box">
+                  <i class="fa-solid fa-users-gear v2-strength-icon"></i>
+                  <span class="v2-strength-title" onclick="openTextEditor(this)">Quick Learner</span>
+                </div>
+                <div class="v2-strength-box">
+                  <i class="fa-solid fa-comments v2-strength-icon"></i>
+                  <span class="v2-strength-title" onclick="openTextEditor(this)">Good Communication</span>
+                </div>
+                <div class="v2-strength-box">
+                  <i class="fa-solid fa-circle-check v2-strength-icon"></i>
+                  <span class="v2-strength-title" onclick="openTextEditor(this)">Responsible & Honest</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Declaration -->
+            <div class="cv-section" data-title="DECLARATION" style="margin-top:auto;">
+              <div class="v2-main-badge">
+                <i class="fa-solid fa-file-invoice"></i>
+                <span onclick="openTextEditor(this)">DECLARATION</span>
+              </div>
+              <p class="v2-declaration-text" onclick="openTextEditor(this)">
+                I hereby declare that all the information provided above is true, complete and correct to the best of my knowledge and belief.
+              </p>
+              
+              <div class="v2-signature-footer">
+                <div class="v2-date-box" onclick="openTextEditor(this)">Date: </div>
+                <div class="v2-sig-area" onclick="openSignatureChoiceModal()">
+                  <div class="v2-sig-font" id="sigTextDisplay">Tanvir Ahamed Shahed</div>
+                  <img src="" class="v2-sig-img" id="sigImgDisplay" style="display:none;" alt="Signature">
+                  <div class="v2-sig-label">(Signature)</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Action Bar -->
+  <div class="mobile-bottom-bar">
+    <button class="mob-action-btn active" onclick="resetZoomScale()">
+      <i class="fa-solid fa-compress"></i>
+      <span>Fit View</span>
+    </button>
+    <button class="mob-action-btn" onclick="openMobilePhotoChoiceModal()">
+      <i class="fa-solid fa-camera"></i>
+      <span>Photo</span>
+    </button>
+    <button class="mob-action-btn" onclick="addNewPage()">
+      <i class="fa-solid fa-file-circle-plus"></i>
+      <span>Add Page</span>
+    </button>
+    <button class="mob-action-btn" onclick="toggleMobileExportPopup(event)">
+      <i class="fa-solid fa-download"></i>
+      <span>Export</span>
+    </button>
+  </div>
+
+  <!-- Mobile Export Popup -->
+  <div class="mobile-export-popup" id="mobileExportPopup">
+    <button class="dropdown-item" onclick="exportToZipImages('png')"><i class="fa-solid fa-file-zipper"></i> PNG Bundle (.ZIP) — 2480×3508</button>
+    <button class="dropdown-item" onclick="exportToZipImages('jpeg')"><i class="fa-solid fa-file-zipper"></i> JPEG Bundle (.ZIP) — 2480×3508</button>
+    <button class="dropdown-item" onclick="exportToCleanPDF()"><i class="fa-solid fa-file-pdf"></i> PDF Document (Multi-Page HD)</button>
+    <button class="dropdown-item" onclick="window.print()"><i class="fa-solid fa-print"></i> Print Document</button>
+  </div>
+
+  <!-- MODAL: MOBILE PHOTO / SIGNATURE CHOOSER -->
+  <div class="custom-modal-overlay" id="mobilePhotoChoiceModal">
+    <div class="custom-modal-card" style="width:380px;">
+      <div class="modal-head">
+        <span><i class="fa-solid fa-images"></i> Select Image To Edit</span>
+        <button onclick="closeCustomModal('mobilePhotoChoiceModal')">✕</button>
+      </div>
+      <div class="modal-body" style="text-align:center; padding: 25px 20px;">
+        <p style="font-size:13px; color:#475569; margin-bottom: 18px;">Which image would you like to update?</p>
+        <div style="display:flex; gap:12px; justify-content:center;">
+          <button class="nav-btn" style="background:#0284c7; flex:1; justify-content:center;" onclick="closeCustomModal('mobilePhotoChoiceModal'); openPhotoEditor('profile')">
+            <i class="fa-solid fa-user"></i> Profile Photo
+          </button>
+          <button class="nav-btn" style="background:#8b5cf6; flex:1; justify-content:center;" onclick="closeCustomModal('mobilePhotoChoiceModal'); openPhotoEditor('signature')">
+            <i class="fa-solid fa-signature"></i> Signature
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEXT EDITOR MODAL -->
+  <div class="custom-modal-overlay" id="textEditorModal">
+    <div class="custom-modal-card">
+      <div class="modal-head">
+        <span><i class="fa-solid fa-pen-to-square"></i> Field Data Editor</span>
+        <button onclick="closeCustomModal('textEditorModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <textarea id="modalTextInput" class="text-edit-area"></textarea>
+        
+        <div class="quick-style-row">
+          <button class="style-btn" id="mBtnBold" onclick="toggleStyle('bold')"><b>B</b></button>
+          <button class="style-btn" id="mBtnItalic" onclick="toggleStyle('italic')"><i>I</i></button>
+          <button class="style-btn" id="mBtnUnderline" onclick="toggleStyle('underline')"><u>U</u></button>
+          <input type="color" id="mTextColor" value="#222222" style="width:34px;height:32px;border:1px solid rgba(0,0,0,0.1);border-radius:6px;cursor:pointer;">
+        </div>
+
+        <div class="modal-actions">
+          <button class="nav-btn" style="background:#64748b;" onclick="closeCustomModal('textEditorModal')">Cancel</button>
+          <button class="nav-btn" style="background:#0284c7;" onclick="applyTextChanges()"><i class="fa-solid fa-check"></i> Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIGNATURE CHOICE MODAL -->
+  <div class="custom-modal-overlay" id="sigChoiceModal">
+    <div class="custom-modal-card" style="width:380px;">
+      <div class="modal-head">
+        <span><i class="fa-solid fa-signature"></i> Signature Option</span>
+        <button onclick="closeCustomModal('sigChoiceModal')">✕</button>
+      </div>
+      <div class="modal-body" style="text-align:center; padding: 25px 20px;">
+        <p style="font-size:13px; color:#475569; margin-bottom: 18px;">How would you like to add your signature?</p>
+        <div style="display:flex; gap:12px; justify-content:center;">
+          <button class="nav-btn" style="background:#0284c7; flex:1; justify-content:center;" onclick="chooseSignatureType('image')">
+            <i class="fa-solid fa-image"></i> Upload (300×80)
+          </button>
+          <button class="nav-btn" style="background:#059669; flex:1; justify-content:center;" onclick="chooseSignatureType('text')">
+            <i class="fa-solid fa-font"></i> Type Text
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMAGE & SIGNATURE CROP MODAL -->
+  <div class="custom-modal-overlay" id="imageStudioModal">
+    <div class="custom-modal-card" style="width:480px;">
+      <div class="modal-head">
+        <span id="imgModalTitle"><i class="fa-solid fa-crop-simple"></i> Image Crop & Studio</span>
+        <button onclick="closeCustomModal('imageStudioModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="crop-box-container square" id="cropContainer">
+          <canvas id="canvasImagePreview" width="180" height="220"></canvas>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:8px; width:100%;">
+          <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:600;">
+            <span>Zoom / Size:</span>
+            <input type="range" id="imgZoom" min="0.3" max="2.8" step="0.05" value="1" style="width:70%;">
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:600;">
+            <span>Brightness:</span>
+            <input type="range" id="imgBright" min="40" max="180" value="100" style="width:70%;">
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:600;">
+            <span>Contrast:</span>
+            <input type="range" id="imgContrast" min="40" max="180" value="100" style="width:70%;">
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:600;">
+            <span>Saturation:</span>
+            <input type="range" id="imgSaturate" min="0" max="200" value="100" style="width:70%;">
+          </div>
+          
+          <div style="display:flex; gap:8px; margin-top:4px;">
+            <button class="style-btn" style="flex:1;" onclick="rotateCurrentImg(-90)"><i class="fa-solid fa-rotate-left"></i> Rotate -90°</button>
+            <button class="style-btn" style="flex:1;" onclick="rotateCurrentImg(90)"><i class="fa-solid fa-rotate-right"></i> Rotate +90°</button>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="nav-btn" style="background:#64748b;" onclick="closeCustomModal('imageStudioModal')">Cancel</button>
+          <button class="nav-btn" style="background:#059669;" onclick="applyCroppedImageResult()"><i class="fa-solid fa-check"></i> Apply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 1. TOUCH & GESTURE ENGINE
+    let scale = 1.0;
+    let panX = 0, panY = 0;
+    let isDragging = false, isSortingActive = false;
+    let startX = 0, startY = 0;
+    let initialPinchDist = null, initialScale = 1.0;
+
+    const viewport = document.getElementById('canvasViewport');
+    const workspaceContainer = document.getElementById('workspaceContainer');
+    const zoomLevelText = document.getElementById('zoomLevelText');
+
+    function updateTransform() {
+      viewport.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+      zoomLevelText.innerText = `${Math.round(scale * 100)}% (Reset)`;
+    }
+
+    function resetZoomScale() {
+      const windowWidth = window.innerWidth;
+      if (windowWidth < 820) {
+        scale = (windowWidth - 24) / 794;
+      } else {
+        scale = 1.0;
+      }
+      panX = 0; panY = 0;
+      updateTransform();
+    }
+
+    workspaceContainer.addEventListener('touchstart', (e) => {
+      if (isSortingActive) return;
+      if (e.target.closest('button, input, .modal-actions, .dropdown-item')) return;
+
+      if (e.touches.length === 1) {
+        isDragging = true;
+        startX = e.touches[0].clientX - panX;
+        startY = e.touches[0].clientY - panY;
+      } else if (e.touches.length === 2) {
+        isDragging = false;
+        initialPinchDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        initialScale = scale;
+      }
+    }, { passive: false });
+
+    workspaceContainer.addEventListener('touchmove', (e) => {
+      if (isSortingActive) return;
+
+      if (e.touches.length === 1 && isDragging) {
+        panX = e.touches[0].clientX - startX;
+        panY = e.touches[0].clientY - startY;
+        updateTransform();
+      } else if (e.touches.length === 2 && initialPinchDist) {
+        e.preventDefault();
+        const currentDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        const factor = currentDist / initialPinchDist;
+        scale = Math.min(Math.max(0.35, initialScale * factor), 2.8);
+        updateTransform();
+      }
+    }, { passive: false });
+
+    workspaceContainer.addEventListener('touchend', (e) => {
+      if (e.touches.length < 2) initialPinchDist = null;
+      if (e.touches.length === 0) isDragging = false;
+    });
+
+    workspaceContainer.addEventListener('mousedown', (e) => {
+      if (isSortingActive) return;
+      if (e.target.closest('button, input, .v2-side-badge, .v2-main-badge')) return;
+      isDragging = true;
+      startX = e.clientX - panX;
+      startY = e.clientY - panY;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging || isSortingActive) return;
+      panX = e.clientX - startX;
+      panY = e.clientY - startY;
+      updateTransform();
+    });
+
+    window.addEventListener('mouseup', () => { isDragging = false; });
+
+    workspaceContainer.addEventListener('wheel', (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const delta = e.deltaY * -0.002;
+        scale = Math.min(Math.max(0.35, scale + delta), 2.8);
+        updateTransform();
+      }
+    }, { passive: false });
+
+    window.addEventListener('resize', resetZoomScale);
+    window.addEventListener('DOMContentLoaded', () => {
+      resetZoomScale();
+      initAllSortables();
+    });
+
+    // 2. SORTABLE ENGINE
+    function getSortableOptions(handleSelector) {
+      return {
+        group: 'shared-sections',
+        animation: 150,
+        handle: handleSelector,
+        ghostClass: 'sortable-ghost',
+        onStart: () => { isSortingActive = true; isDragging = false; },
+        onEnd: () => { setTimeout(() => { isSortingActive = false; }, 100); }
+      };
+    }
+
+    function initAllSortables() {
+      document.querySelectorAll('.cv-left-col').forEach(col => {
+        new Sortable(col, getSortableOptions('.v2-side-badge'));
+      });
+      document.querySelectorAll('.cv-right-col').forEach(col => {
+        new Sortable(col, getSortableOptions('.v2-main-badge'));
+      });
+    }
+
+    // 3. UI HANDLERS & MODALS
+    function toggleDropdown() { document.getElementById('downloadDropdown').classList.toggle('show'); }
+    function toggleMobileExportPopup(e) { e.stopPropagation(); document.getElementById('mobileExportPopup').classList.toggle('show'); }
+    function openMobilePhotoChoiceModal() { document.getElementById('mobilePhotoChoiceModal').classList.add('active'); }
+    function closeCustomModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    window.addEventListener('click', (e) => {
+      if (!e.target.closest('.dropdown-container')) {
+        const dd = document.getElementById('downloadDropdown');
+        if (dd) dd.classList.remove('show');
+      }
+      if (!e.target.closest('.mob-action-btn') && !e.target.closest('.mobile-export-popup')) {
+        const mep = document.getElementById('mobileExportPopup');
+        if (mep) mep.classList.remove('show');
+      }
+    });
+
+    // Modal Text Editor
+    let currentTargetElement = null;
+    function openTextEditor(el) {
+      currentTargetElement = el;
+      const modal = document.getElementById('textEditorModal');
+      const input = document.getElementById('modalTextInput');
+      input.value = el.innerText.trim();
+
+      document.getElementById('mBtnBold').classList.toggle('active', el.style.fontWeight === 'bold');
+      document.getElementById('mBtnItalic').classList.toggle('active', el.style.fontStyle === 'italic');
+      document.getElementById('mBtnUnderline').classList.toggle('active', el.style.textDecoration === 'underline');
+      modal.classList.add('active');
+    }
+
+    function toggleStyle(type) {
+      if (type === 'bold') document.getElementById('mBtnBold').classList.toggle('active');
+      if (type === 'italic') document.getElementById('mBtnItalic').classList.toggle('active');
+      if (type === 'underline') document.getElementById('mBtnUnderline').classList.toggle('active');
+    }
+
+    function applyTextChanges() {
+      if (!currentTargetElement) return;
+      currentTargetElement.innerText = document.getElementById('modalTextInput').value;
+      currentTargetElement.style.fontWeight = document.getElementById('mBtnBold').classList.contains('active') ? 'bold' : 'normal';
+      currentTargetElement.style.fontStyle = document.getElementById('mBtnItalic').classList.contains('active') ? 'italic' : 'normal';
+      currentTargetElement.style.textDecoration = document.getElementById('mBtnUnderline').classList.contains('active') ? 'underline' : 'none';
+      currentTargetElement.style.color = document.getElementById('mTextColor').value;
+      closeCustomModal('textEditorModal');
+    }
+
+    // Signature Option
+    function openSignatureChoiceModal() { document.getElementById('sigChoiceModal').classList.add('active'); }
+    function chooseSignatureType(type) {
+      closeCustomModal('sigChoiceModal');
+      if (type === 'image') {
+        openPhotoEditor('signature');
+      } else {
+        document.getElementById('sigImgDisplay').style.display = 'none';
+        document.getElementById('sigTextDisplay').style.display = 'block';
+        openTextEditor(document.getElementById('sigTextDisplay'));
+      }
+    }
+
+    // Image Studio
+    let currentImageMode = 'profile';
+    let rawLoadedImg = new Image();
+    let currentRotation = 0;
+    const fileInput = document.getElementById('generalFileInput');
+    const canvas = document.getElementById('canvasImagePreview');
+    const ctx = canvas.getContext('2d');
+
+    function openPhotoEditor(mode) {
+      currentImageMode = mode;
+      const title = document.getElementById('imgModalTitle');
+      const container = document.getElementById('cropContainer');
+
+      if (mode === 'signature') {
+        title.innerHTML = '<i class="fa-solid fa-signature"></i> Signature Editor (300 × 80)';
+        container.className = 'crop-box-container signature-ratio';
+        canvas.width = 300; canvas.height = 80;
+      } else {
+        title.innerHTML = '<i class="fa-solid fa-crop-simple"></i> Profile Photo Editor (Square Frame)';
+        container.className = 'crop-box-container square';
+        canvas.width = 180; canvas.height = 220;
+      }
+      fileInput.click();
+    }
+
+    fileInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          rawLoadedImg.onload = function() {
+            currentRotation = 0;
+            document.getElementById('imgZoom').value = 1;
+            document.getElementById('imgBright').value = 100;
+            document.getElementById('imgContrast').value = 100;
+            document.getElementById('imgSaturate').value = 100;
+            document.getElementById('imageStudioModal').classList.add('active');
+            drawCanvasFrame();
+          };
+          rawLoadedImg.src = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    function rotateCurrentImg(deg) { currentRotation = (currentRotation + deg) % 360; drawCanvasFrame(); }
+
+    ['imgZoom', 'imgBright', 'imgContrast', 'imgSaturate'].forEach(id => {
+      document.getElementById(id).addEventListener('input', drawCanvasFrame);
+    });
+
+    function drawCanvasFrame() {
+      if (!rawLoadedImg.src) return;
+      const zoom = parseFloat(document.getElementById('imgZoom').value);
+      const bright = document.getElementById('imgBright').value;
+      const contrast = document.getElementById('imgContrast').value;
+      const saturate = document.getElementById('imgSaturate').value;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+      ctx.filter = `brightness(${bright}%) contrast(${contrast}%) saturate(${saturate}%)`;
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate((currentRotation * Math.PI) / 180);
+      ctx.scale(zoom, zoom);
+
+      const aspectImg = rawLoadedImg.width / rawLoadedImg.height;
+      const aspectCanvas = canvas.width / canvas.height;
+      let drawW, drawH;
+
+      if (aspectImg > aspectCanvas) {
+        drawH = canvas.height;
+        drawW = canvas.height * aspectImg;
+      } else {
+        drawW = canvas.width;
+        drawH = canvas.width / aspectImg;
+      }
+
+      ctx.drawImage(rawLoadedImg, -drawW / 2, -drawH / 2, drawW, drawH);
+      ctx.restore();
+    }
+
+    function applyCroppedImageResult() {
+      const finalURL = canvas.toDataURL('image/png');
+      if (currentImageMode === 'profile') {
+        document.getElementById('mainProfileImg').src = finalURL;
+      } else {
+        const sigImg = document.getElementById('sigImgDisplay');
+        sigImg.src = finalURL;
+        sigImg.style.display = 'block';
+        document.getElementById('sigTextDisplay').style.display = 'none';
+      }
+      closeCustomModal('imageStudioModal');
+    }
+
+    function addNewPage() {
+      alert("Template 2 is designed as a specialized Single-Page Executive Resume.");
+    }
+
+    // 4. CLEAN EXPORT ENGINE (2480x3508 HD)
+    const TARGET_WIDTH = 2480;
+    const TARGET_HEIGHT = 3508;
+    const SCREEN_WIDTH = 794;
+    const EXPORT_SCALE = TARGET_WIDTH / SCREEN_WIDTH;
+
+    async function captureCleanCanvas(pageElement) {
+      const offscreenContainer = document.createElement('div');
+      offscreenContainer.style.position = 'fixed';
+      offscreenContainer.style.top = '-10000px';
+      offscreenContainer.style.left = '-10000px';
+      offscreenContainer.style.width = '794px';
+      offscreenContainer.style.height = '1123px';
+      offscreenContainer.style.overflow = 'hidden';
+      offscreenContainer.style.zIndex = '-9999';
+
+      const clone = pageElement.cloneNode(true);
+      clone.style.transform = 'none';
+      clone.style.margin = '0';
+      clone.style.boxShadow = 'none';
+      clone.style.width = '794px';
+      clone.style.height = '1123px';
+
+      offscreenContainer.appendChild(clone);
+      document.body.appendChild(offscreenContainer);
+
+      await new Promise(r => setTimeout(r, 180));
+
+      const canvas = await html2canvas(clone, {
+        scale: EXPORT_SCALE,
+        width: 794,
+        height: 1123,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      });
+
+      document.body.removeChild(offscreenContainer);
+      return canvas;
+    }
+
+    async function exportToZipImages(format) {
+      const dd = document.getElementById('downloadDropdown');
+      if (dd) dd.classList.remove('show');
+      document.getElementById('mobileExportPopup').classList.remove('show');
+      
+      const loader = document.getElementById('exportLoader');
+      loader.classList.add('active');
+
+      try {
+        const zip = new JSZip();
+        const pages = document.querySelectorAll('.cv-page');
+        
+        for (let i = 0; i < pages.length; i++) {
+          document.getElementById('exportLoaderMsg').innerText = `Generating Page ${i + 1} (${format.toUpperCase()})...`;
+          const canvas = await captureCleanCanvas(pages[i]);
+          const dataUrl = canvas.toDataURL(`image/${format}`, 1.0);
+          const base64Data = dataUrl.replace(/^data:image\/(png|jpeg);base64,/, "");
+          zip.file(`One_CV_Template2_Page_${i + 1}.${format}`, base64Data, { base64: true });
+        }
+
+        document.getElementById('exportLoaderMsg').innerText = 'Creating ZIP bundle...';
+        const zipContent = await zip.generateAsync({ type: "blob" });
+        
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(zipContent);
+        link.download = `One_CV_Template2_${format.toUpperCase()}_Bundle.zip`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+      } catch (err) {
+        console.error(err);
+        alert('Export failed, please try again!');
+      } finally {
+        loader.classList.remove('active');
+      }
+    }
+
+    async function exportToCleanPDF() {
+      const dd = document.getElementById('downloadDropdown');
+      if (dd) dd.classList.remove('show');
+      document.getElementById('mobileExportPopup').classList.remove('show');
+
+      const loader = document.getElementById('exportLoader');
+      loader.classList.add('active');
+
+      try {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'pt', [TARGET_WIDTH, TARGET_HEIGHT]);
+        const pages = document.querySelectorAll('.cv-page');
+
+        for (let i = 0; i < pages.length; i++) {
+          document.getElementById('exportLoaderMsg').innerText = `Generating PDF Page ${i + 1}...`;
+          const canvas = await captureCleanCanvas(pages[i]);
+          const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+          if (i > 0) pdf.addPage([TARGET_WIDTH, TARGET_HEIGHT], 'p');
+          pdf.addImage(imgData, 'JPEG', 0, 0, TARGET_WIDTH, TARGET_HEIGHT);
+        }
+
+        pdf.save('One_CV_Template2_Document.pdf');
+      } catch (err) {
+        console.error(err);
+        alert('PDF generation failed!');
+      } finally {
+        loader.classList.remove('active');
+      }
+    }
+  </script>
+</body>
+</html>
