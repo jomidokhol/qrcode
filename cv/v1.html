@@ -2266,4 +2266,17 @@
           const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
           if (i > 0) pdf.addPage([TARGET_WIDTH, TARGET_HEIGHT], 'p');
-          pdf.addImage(imgData, 'JPEG', 0, 0, TARGET_
+          pdf.addImage(imgData, 'JPEG', 0, 0, TARGET_WIDTH, TARGET_HEIGHT);
+        }
+
+        pdf.save('One_CV_Maker_Document.pdf');
+      } catch (err) {
+        console.error(err);
+        alert('PDF generation failed!');
+      } finally {
+        loader.classList.remove('active');
+      }
+    }
+  </script>
+</body>
+</html>
