@@ -116,7 +116,7 @@
       box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
     }
 
-    /* Desktop Navigation Controls (Hidden on Mobile) */
+    /* Desktop Navigation Controls */
     .desktop-tools { display: flex; align-items: center; gap: 10px; }
 
     /* Download Dropdown (Desktop) */
@@ -185,7 +185,7 @@
     }
     .zoom-pill:hover { transform: scale(1.04); }
 
-    /* Touch Workspace (Supports 1-Finger Pan & 2-Finger Pinch) */
+    /* Perfectly Centered Touch Workspace */
     .workspace {
       flex: 1;
       width: 100vw;
@@ -206,9 +206,9 @@
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      padding-top: 90px;
+      padding-top: 85px;
       padding-bottom: 120px;
-      transform-origin: 0 0;
+      transform-origin: center top;
       will-change: transform;
     }
 
@@ -218,6 +218,7 @@
       gap: 35px;
       align-items: center;
       margin: 0 auto;
+      width: 794px;
     }
 
     /* A4 Screen Dimensions (794px x 1123px => 2480x3508 Export) */
@@ -603,7 +604,7 @@
       z-index: 2;
     }
 
-    /* iOS Glossy Bottom Navigation Bar (Mobile Native UI) */
+    /* iOS Glossy Bottom Navigation Bar */
     .mobile-bottom-bar {
       display: none;
       position: fixed;
@@ -639,7 +640,7 @@
     .mob-action-btn i { font-size: 18px; }
     .mob-action-btn:hover, .mob-action-btn.active { color: #38bdf8; }
 
-    /* Mobile Export Popup Menu (Opens directly above Export button) */
+    /* Mobile Export Popup Menu */
     .mobile-export-popup {
       display: none;
       position: fixed;
@@ -736,6 +737,7 @@
     }
     .style-btn.active { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
 
+    /* Accurate Pixel-Matched Image Frame */
     .crop-box-container {
       margin: 0 auto;
       border: 2px dashed #0284c7;
@@ -744,6 +746,7 @@
       justify-content: center;
       overflow: hidden;
       background: rgba(255,255,255,0.5);
+      position: relative;
     }
     .crop-box-container.circle { width: 200px; height: 200px; border-radius: 50%; }
     .crop-box-container.square { width: 200px; height: 200px; border-radius: 12px; }
@@ -863,7 +866,7 @@
     </div>
   </div>
 
-  <!-- Workspace Area with Touch Engine (1-Finger Pan + 2-Finger Zoom) -->
+  <!-- Workspace Area (Centering Fixed + Drag Collision Free) -->
   <div class="workspace" id="workspaceContainer">
     <div class="canvas-viewport" id="canvasViewport">
       <div class="pages-scaler" id="pagesContainer">
@@ -1067,7 +1070,7 @@
                   <div class="skill-item">
                     <div class="skill-name" onclick="openTextEditor(this)">🌐 Networking</div>
                     <div class="stars-group" onclick="rateSkill(this)" title="Click to change rating">
-                      <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                      <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>
                     </div>
                     <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
                   </div>
@@ -1247,7 +1250,7 @@
     </div>
   </div>
 
-  <!-- Mobile Quick Action Navigation Bar (iOS Frosted Glass Style) -->
+  <!-- Mobile Bottom Bar -->
   <div class="mobile-bottom-bar">
     <button class="mob-action-btn active" onclick="resetZoomScale()">
       <i class="fa-solid fa-compress"></i>
@@ -1271,7 +1274,7 @@
     </button>
   </div>
 
-  <!-- Mobile Export Popup Menu (Directly above Export button) -->
+  <!-- Mobile Export Popup -->
   <div class="mobile-export-popup" id="mobileExportPopup">
     <button class="dropdown-item" onclick="exportToZipImages('png')"><i class="fa-solid fa-file-zipper"></i> PNG Bundle (.ZIP) — 2480×3508</button>
     <button class="dropdown-item" onclick="exportToZipImages('jpeg')"><i class="fa-solid fa-file-zipper"></i> JPEG Bundle (.ZIP) — 2480×3508</button>
@@ -1279,7 +1282,7 @@
     <button class="dropdown-item" onclick="window.print()"><i class="fa-solid fa-print"></i> Print Document</button>
   </div>
 
-  <!-- CUSTOM MODAL: MOBILE PHOTO / SIGNATURE CHOOSER -->
+  <!-- MODAL: MOBILE PHOTO / SIGNATURE CHOOSER -->
   <div class="custom-modal-overlay" id="mobilePhotoChoiceModal">
     <div class="custom-modal-card" style="width:380px;">
       <div class="modal-head">
@@ -1363,7 +1366,7 @@
     </div>
   </div>
 
-  <!-- ADD SECTION MODAL WITH CUSTOM LAYOUT SELECTOR -->
+  <!-- ADD SECTION MODAL -->
   <div class="custom-modal-overlay" id="addSectionModal">
     <div class="custom-modal-card" style="width:460px;">
       <div class="modal-head">
@@ -1407,7 +1410,7 @@
     </div>
   </div>
 
-  <!-- IMAGE & SIGNATURE CROP MODAL -->
+  <!-- IMAGE & SIGNATURE CROP MODAL (Accurate Resolution & Scale Matching) -->
   <div class="custom-modal-overlay" id="imageStudioModal">
     <div class="custom-modal-card" style="width:480px;">
       <div class="modal-head">
@@ -1430,7 +1433,7 @@
         </div>
 
         <div class="crop-box-container circle" id="cropContainer">
-          <canvas id="canvasImagePreview" width="320" height="320"></canvas>
+          <canvas id="canvasImagePreview" width="200" height="200"></canvas>
         </div>
 
         <div style="display:flex; flex-direction:column; gap:8px; width:100%;">
@@ -1467,12 +1470,13 @@
 
   <script>
     // =========================================================================
-    // 1. TOUCH & GESTURE ENGINE (1-FINGER PAN + 2-FINGER ZOOM + MOUSE SUPPORT)
+    // 1. TOUCH & GESTURE ENGINE (1-FINGER PAN + 2-FINGER ZOOM + PERFECT CENTERING)
     // =========================================================================
     let scale = 1.0;
     let panX = 0;
     let panY = 0;
     let isDragging = false;
+    let isSortingActive = false; // Flag to stop pan when dragging a section/row
     let startX = 0, startY = 0;
     let initialPinchDist = null;
     let initialScale = 1.0;
@@ -1490,19 +1494,18 @@
       const windowWidth = window.innerWidth;
       if (windowWidth < 820) {
         scale = (windowWidth - 24) / 794;
-        panX = (windowWidth - (794 * scale)) / 2;
-        panY = 10;
       } else {
         scale = 1.0;
-        panX = 0;
-        panY = 0;
       }
+      // Center the viewport horizontally
+      panX = 0;
+      panY = 0;
       updateTransform();
     }
 
-    // Touch Event Handling
+    // Touch Handling (Smooth Pan without breaking Sortable Drag)
     workspaceContainer.addEventListener('touchstart', (e) => {
-      // Don't drag if tapping interactive buttons/inputs
+      if (isSortingActive) return; // Prevent page pan if a section is being dragged
       if (e.target.closest('button, input, .sub-block-actions, .section-hover-bar, .modal-actions, .dropdown-item')) return;
 
       if (e.touches.length === 1) {
@@ -1520,6 +1523,8 @@
     }, { passive: false });
 
     workspaceContainer.addEventListener('touchmove', (e) => {
+      if (isSortingActive) return;
+
       if (e.touches.length === 1 && isDragging) {
         panX = e.touches[0].clientX - startX;
         panY = e.touches[0].clientY - startY;
@@ -1541,8 +1546,9 @@
       if (e.touches.length === 0) isDragging = false;
     });
 
-    // Mouse Drag/Pan Support for Desktop
+    // Desktop Mouse Drag/Pan Support
     workspaceContainer.addEventListener('mousedown', (e) => {
+      if (isSortingActive) return;
       if (e.target.closest('button, input, .label, .section-badge, .sub-block-actions, .section-hover-bar')) return;
       isDragging = true;
       startX = e.clientX - panX;
@@ -1550,7 +1556,7 @@
     });
 
     window.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
+      if (!isDragging || isSortingActive) return;
       panX = e.clientX - startX;
       panY = e.clientY - startY;
       updateTransform();
@@ -1558,7 +1564,7 @@
 
     window.addEventListener('mouseup', () => { isDragging = false; });
 
-    // Desktop Mouse Wheel Zoom
+    // Mouse Wheel Zoom
     workspaceContainer.addEventListener('wheel', (e) => {
       if (e.ctrlKey || e.metaKey) {
         e.preventDefault();
@@ -1575,72 +1581,44 @@
     });
 
     // =========================================================================
-    // 2. MOBILE POPUPS (EXPORT & PHOTO OPTIONS)
+    // 2. SORTABLE ENGINE WITH DRAG COLLISION PREVENTION
     // =========================================================================
-    function toggleMobileExportPopup(e) {
-      e.stopPropagation();
-      document.getElementById('mobileExportPopup').classList.toggle('show');
+    function getSortableOptions(handleSelector, groupName) {
+      return {
+        group: groupName,
+        animation: 150,
+        handle: handleSelector,
+        ghostClass: 'sortable-ghost',
+        onStart: function() {
+          isSortingActive = true;
+          isDragging = false;
+        },
+        onEnd: function() {
+          setTimeout(() => { isSortingActive = false; }, 100);
+        }
+      };
     }
 
-    function openMobilePhotoChoiceModal() {
-      document.getElementById('mobilePhotoChoiceModal').classList.add('active');
-    }
-
-    window.addEventListener('click', (e) => {
-      if (!e.target.closest('.dropdown-container')) {
-        const dd = document.getElementById('downloadDropdown');
-        if (dd) dd.classList.remove('show');
-      }
-      if (!e.target.closest('.mob-action-btn') && !e.target.closest('.mobile-export-popup')) {
-        document.getElementById('mobileExportPopup').classList.remove('show');
-      }
-      if (!e.target.closest('.cv-page')) {
-        document.querySelectorAll('.page-quick-bar').forEach(bar => bar.classList.remove('show'));
-      }
-    });
-
-    // =========================================================================
-    // 3. SORTABLE ENGINE FOR SECTIONS, BLOCKS, AND ROWS
-    // =========================================================================
     function initAllSortables() {
       document.querySelectorAll('.sortable-section-list').forEach(list => {
-        new Sortable(list, {
-          group: 'shared-sections',
-          animation: 150,
-          handle: '.section-badge',
-          ghostClass: 'sortable-ghost'
-        });
+        new Sortable(list, getSortableOptions('.section-badge', 'shared-sections'));
       });
 
       document.querySelectorAll('.sub-blocks-container').forEach(list => {
-        new Sortable(list, {
-          group: 'sub-blocks-group',
-          animation: 150,
-          handle: '.sub-block-header',
-          ghostClass: 'sortable-ghost'
-        });
+        new Sortable(list, getSortableOptions('.sub-block-header', 'sub-blocks-group'));
       });
 
       document.querySelectorAll('.sortable-rows').forEach(tableBody => {
-        new Sortable(tableBody, {
-          group: 'table-rows-group',
-          animation: 150,
-          handle: '.label',
-          ghostClass: 'sortable-ghost'
-        });
+        new Sortable(tableBody, getSortableOptions('.label', 'table-rows-group'));
       });
 
       document.querySelectorAll('.sortable-cards').forEach(grid => {
-        new Sortable(grid, {
-          group: 'cards-group',
-          animation: 150,
-          ghostClass: 'sortable-ghost'
-        });
+        new Sortable(grid, getSortableOptions(null, 'cards-group'));
       });
     }
 
     // =========================================================================
-    // 4. PRECISE TARGETED ROW & COMPANY/DEGREE CREATION
+    // 3. TARGETED ROW & COMPANY/DEGREE CREATION
     // =========================================================================
     function addTableRowInBlock(btn) {
       const block = btn.closest('.sub-block');
@@ -1782,17 +1760,39 @@
     }
 
     // =========================================================================
-    // 5. GENERAL MODALS & SECTIONS MANAGEMENT
+    // 4. GENERAL UI HANDLERS & MODALS
     // =========================================================================
     function toggleDropdown() {
       document.getElementById('downloadDropdown').classList.toggle('show');
+    }
+    function toggleMobileExportPopup(e) {
+      e.stopPropagation();
+      document.getElementById('mobileExportPopup').classList.toggle('show');
+    }
+    function openMobilePhotoChoiceModal() {
+      document.getElementById('mobilePhotoChoiceModal').classList.add('active');
     }
     function closeCustomModal(id) {
       document.getElementById(id).classList.remove('active');
     }
 
+    window.addEventListener('click', (e) => {
+      if (!e.target.closest('.dropdown-container')) {
+        const dd = document.getElementById('downloadDropdown');
+        if (dd) dd.classList.remove('show');
+      }
+      if (!e.target.closest('.mob-action-btn') && !e.target.closest('.mobile-export-popup')) {
+        const mep = document.getElementById('mobileExportPopup');
+        if (mep) mep.classList.remove('show');
+      }
+      if (!e.target.closest('.cv-page')) {
+        document.querySelectorAll('.page-quick-bar').forEach(bar => bar.classList.remove('show'));
+      }
+    });
+
     let pressTimer = null;
     function handlePointerDown(e, page) {
+      if (isSortingActive) return;
       if (e.target.closest('.cv-section, .cv-header, .cv-footer, .sec-btn, .page-quick-bar, .sub-block')) return;
       pressTimer = setTimeout(() => { showQuickBar(page); }, 500);
     }
@@ -2031,7 +2031,9 @@
       }
     }
 
-    // Image & Signature Cropper Studio
+    // =========================================================================
+    // 5. ACCURATE IMAGE & SIGNATURE CROPPER (WYSIWYG MATCH)
+    // =========================================================================
     let currentImageMode = 'profile';
     let rawLoadedImg = new Image();
     let currentRotation = 0;
@@ -2082,10 +2084,28 @@
     function setCropFrame(type) {
       const container = document.getElementById('cropContainer');
       container.className = 'crop-box-container ' + type;
+      
+      // Update canvas logical size to match CSS container exactly
+      if (type === 'signature-ratio') {
+        canvas.width = 300;
+        canvas.height = 80;
+      } else if (type === 'passport') {
+        canvas.width = 175;
+        canvas.height = 225;
+      } else if (type === 'original') {
+        canvas.width = 260;
+        canvas.height = 160;
+      } else {
+        canvas.width = 200;
+        canvas.height = 200;
+      }
+
       if (currentImageMode === 'profile') {
         const img = document.getElementById('mainProfileImg');
         img.style.borderRadius = (type === 'circle') ? '50%' : '6px';
       }
+
+      drawCanvasFrame();
     }
 
     function rotateCurrentImg(deg) {
@@ -2111,13 +2131,20 @@
       ctx.rotate((currentRotation * Math.PI) / 180);
       ctx.scale(zoom, zoom);
 
-      const aspect = rawLoadedImg.width / rawLoadedImg.height;
-      let w = canvas.width;
-      let h = canvas.height;
-      if (aspect > 1) w = canvas.height * aspect;
-      else h = canvas.width / aspect;
+      // Scale to cover frame perfectly without overcropping
+      const aspectImg = rawLoadedImg.width / rawLoadedImg.height;
+      const aspectCanvas = canvas.width / canvas.height;
+      let drawW, drawH;
 
-      ctx.drawImage(rawLoadedImg, -w / 2, -h / 2, w, h);
+      if (aspectImg > aspectCanvas) {
+        drawH = canvas.height;
+        drawW = canvas.height * aspectImg;
+      } else {
+        drawW = canvas.width;
+        drawH = canvas.width / aspectImg;
+      }
+
+      ctx.drawImage(rawLoadedImg, -drawW / 2, -drawH / 2, drawW, drawH);
       ctx.restore();
     }
 
