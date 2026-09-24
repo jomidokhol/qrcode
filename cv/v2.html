@@ -24,9 +24,9 @@
       --font-family: 'Plus Jakarta Sans', sans-serif;
       --base-font-size: 13px;
       --ios-blur: blur(24px);
-      --glass-bg: rgba(255, 255, 255, 0.82);
+      --glass-bg: rgba(255, 255, 255, 0.85);
       --glass-border: rgba(255, 255, 255, 0.35);
-      --dark-glass-bg: rgba(15, 23, 42, 0.78);
+      --dark-glass-bg: rgba(15, 23, 42, 0.82);
       --dark-glass-border: rgba(255, 255, 255, 0.12);
     }
 
@@ -100,7 +100,6 @@
     }
     .nav-btn:hover { background: rgba(255, 255, 255, 0.16); transform: translateY(-1px); }
     
-    /* Template 3 Button (Replaced Template 1) */
     .nav-btn.v3-link {
       background: linear-gradient(135deg, #009fe3 0%, #0284c7 100%);
       border: 1px solid rgba(255, 255, 255, 0.25);
@@ -238,6 +237,7 @@
       gap: 16px;
       position: relative;
       box-sizing: border-box;
+      overflow-y: auto;
     }
 
     /* Profile Photo */
@@ -307,7 +307,15 @@
       width: 100%;
     }
 
-    /* Left Column Badge Titles */
+    /* Section Header Row with Permanent, Clean Controls */
+    .section-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
     .v2-side-badge {
       background: #09345e;
       border: 1px solid rgba(56, 189, 248, 0.4);
@@ -319,11 +327,49 @@
       font-size: 11px;
       letter-spacing: 0.8px;
       text-transform: uppercase;
-      margin-bottom: 8px;
       white-space: nowrap;
       cursor: grab;
     }
     .v2-side-badge i { margin-right: 6px; color: #38bdf8; }
+
+    /* Permanent Visible Section Controls Bar */
+    .sec-tools-bar {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      flex-wrap: wrap;
+    }
+    .sec-tool-btn {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .sec-tool-btn:hover { background: #38bdf8; color: #001f3f; }
+    .sec-tool-btn.del { background: #ef4444; border-color: #ef4444; }
+    .sec-tool-btn.del:hover { background: #dc2626; color: #fff; }
+
+    /* Right Column Badge */
+    .v2-main-badge {
+      background: var(--primary-color);
+      color: #ffffff !important;
+      padding: 4px 18px 4px 12px;
+      border-radius: 4px 20px 20px 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 12.5px;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      cursor: grab;
+    }
+    .v2-main-badge i { font-size: 13px; color: #38bdf8; }
 
     /* Left Contact List */
     .v2-contact-list {
@@ -371,7 +417,7 @@
     .v2-side-table .s-label { width: 90px; color: #94a3b8; font-weight: 500; }
     .v2-side-table .s-sep { width: 12px; text-align: center; }
 
-    /* Language Progress Bars */
+    /* Languages Container (Multiple Styles: Bar, Tag, Star) */
     .v2-lang-group {
       display: flex;
       flex-direction: column;
@@ -394,6 +440,24 @@
       border-radius: 4px;
       transition: width 0.3s ease;
     }
+    /* Tag & Star Style Languages */
+    .v2-lang-tag {
+      background: rgba(56, 189, 248, 0.18);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      padding: 3px 8px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #fff;
+    }
+    .v2-lang-star-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2px 0;
+    }
+    .v2-lang-stars { color: #f59e0b; cursor: pointer; }
 
     /* Skills List */
     .v2-skill-bullets {
@@ -440,9 +504,9 @@
       gap: 14px;
       box-sizing: border-box;
       position: relative;
+      overflow-y: auto;
     }
 
-    /* Slogan at top right */
     .v2-top-slogan {
       text-align: right;
       font-size: 10.5px;
@@ -453,30 +517,15 @@
       font-style: italic;
     }
 
-    /* Section Badge Main */
-    .v2-main-badge {
-      background: var(--primary-color);
-      color: #ffffff !important;
-      padding: 4px 18px 4px 12px;
-      border-radius: 4px 20px 20px 4px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 800;
-      font-size: 12.5px;
-      letter-spacing: 0.6px;
-      text-transform: uppercase;
-      margin-bottom: 6px;
-      position: relative;
-      cursor: grab;
+    /* Education Grid Table (Fully Expandable with Rows & Columns) */
+    .v2-edu-table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      margin-top: 4px;
     }
-    .v2-main-badge i { font-size: 13px; color: #38bdf8; }
-
-    /* Education Grid Table */
     .v2-edu-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 4px;
     }
     .v2-edu-table th {
       background: #e0f2fe;
@@ -497,17 +546,16 @@
       cursor: pointer;
     }
 
-    /* Experience Content */
+    /* Experience Content (Sub-Blocks with Dedicated Bullet Controls) */
     .v2-exp-block {
       margin-top: 8px;
       position: relative;
-      padding: 4px;
+      padding: 8px 10px;
       border-radius: 6px;
       background: #fafafa;
-      border: 1px dashed #e2e8f0;
+      border: 1px dashed #cbd5e1;
       cursor: grab;
     }
-    .v2-exp-block:hover .block-actions { display: flex; }
     .v2-exp-title-row {
       display: flex;
       justify-content: space-between;
@@ -541,26 +589,24 @@
       line-height: 1;
     }
 
-    .block-actions {
-      display: none;
+    .sub-block-tools {
+      display: flex;
       gap: 4px;
-      position: absolute;
-      right: 4px;
-      top: 4px;
+      margin-bottom: 6px;
     }
     .sub-btn {
       background: #0284c7;
       color: #fff;
       border: none;
       border-radius: 4px;
-      padding: 1px 6px;
-      font-size: 9px;
-      font-weight: 600;
+      padding: 2px 7px;
+      font-size: 9.5px;
+      font-weight: 700;
       cursor: pointer;
     }
     .sub-btn-del { background: #ef4444; }
 
-    /* Key Strengths Grid (Flex wrap with dynamic cards) */
+    /* Key Strengths Grid (Dynamic Box Addition, FontAwesome Icon, and Delete) */
     .v2-strengths-grid {
       display: flex;
       flex-wrap: wrap;
@@ -649,7 +695,7 @@
       padding-top: 2px;
     }
 
-    /* In-Row Delete Button */
+    /* Universal Delete Button for Items */
     .row-del-btn {
       display: none;
       background: #ef4444;
@@ -665,28 +711,6 @@
       margin-left: 6px;
       vertical-align: middle;
     }
-
-    /* Section Floating Controls */
-    .section-hover-bar {
-      position: absolute;
-      right: 0;
-      top: -15px;
-      display: none;
-      gap: 4px;
-      z-index: 50;
-    }
-    .cv-section:hover .section-hover-bar { display: flex; }
-    .sec-btn {
-      background: #0f172a;
-      color: #fff;
-      border: none;
-      font-size: 9.5px;
-      padding: 2px 7px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    .sec-btn-del { background: #ef4444; }
 
     /* Mobile Bottom Navigation Bar */
     .mobile-bottom-bar {
@@ -738,8 +762,7 @@
     @media screen and (max-width: 820px) {
       .desktop-tools { display: none !important; }
       .mobile-bottom-bar { display: flex; }
-      .section-hover-bar { display: flex; }
-      .row-del-btn, .block-actions { display: inline-block; }
+      .row-del-btn, .sub-block-tools { display: inline-block; }
       .zoom-pill { top: auto; bottom: 95px; right: 20px; }
     }
 
@@ -760,7 +783,7 @@
       background: var(--glass-bg);
       backdrop-filter: var(--ios-blur);
       color: #0f172a;
-      width: 460px;
+      width: 480px;
       max-width: 92vw;
       border-radius: 24px;
       box-shadow: 0 25px 50px rgba(0,0,0,0.35);
@@ -780,7 +803,7 @@
       border-bottom: 1px solid rgba(0,0,0,0.06);
     }
     .modal-head button { background: none; border: none; color: #64748b; font-size: 18px; cursor: pointer; }
-    .modal-body { padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+    .modal-body { padding: 22px; display: flex; flex-direction: column; gap: 14px; max-height: 75vh; overflow-y: auto; }
     .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px; }
 
     .text-edit-area {
@@ -819,7 +842,6 @@
     .crop-box-container.square { width: 180px; height: 220px; border-radius: 12px; }
     .crop-box-container.signature-ratio { width: 300px; height: 80px; border-radius: 8px; }
 
-    /* Quick Icon Grid in Modal */
     .quick-icons-grid {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
@@ -843,6 +865,21 @@
     }
     .quick-icon-btn:hover { background: #e0f2fe; border-color: #0284c7; transform: scale(1.1); }
 
+    .layout-picker { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .layout-opt {
+      border: 1.5px solid rgba(0,0,0,0.1);
+      border-radius: 10px;
+      padding: 8px 4px;
+      text-align: center;
+      cursor: pointer;
+      background: rgba(255,255,255,0.6);
+      transition: 0.2s;
+    }
+    .layout-opt i { font-size: 16px; margin-bottom: 4px; display: block; color: #64748b; }
+    .layout-opt span { font-size: 10.5px; font-weight: 600; display: block; }
+    .layout-opt.active { border-color: #0284c7; background: #e0f2fe; }
+    .layout-opt.active i, .layout-opt.active span { color: #0284c7; }
+
     @keyframes popIn {
       from { opacity: 0; transform: scale(0.95) translateY(6px); }
       to { opacity: 1; transform: scale(1) translateY(0); }
@@ -851,7 +888,7 @@
     /* Print rules */
     @media print {
       body { background: none; }
-      .top-navbar, .custom-modal-overlay, .section-hover-bar, .row-del-btn, .block-actions, .mobile-bottom-bar, .zoom-pill, .mobile-export-popup { display: none !important; }
+      .top-navbar, .custom-modal-overlay, .sec-tools-bar, .sub-block-tools, .row-del-btn, .mobile-bottom-bar, .zoom-pill, .mobile-export-popup { display: none !important; }
       .workspace { padding: 0; width: 100vw; height: auto; position: static; }
       .canvas-viewport { position: static; padding: 0; transform: none !important; }
       .cv-page {
@@ -890,13 +927,17 @@
     </div>
 
     <div class="nav-actions">
-      <!-- Navigate to Template 3 (Replaced Template 1) -->
+      <!-- Navigate to Template 3 -->
       <a href="/cv/v3.html" class="nav-btn v3-link" title="Switch to Template 3">
         <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Template 3</span>
       </a>
 
       <!-- Desktop Only Controls -->
       <div class="desktop-tools">
+        <button class="nav-btn" onclick="openAddSectionModal()" style="background:#0284c7;">
+          <i class="fa-solid fa-layer-group"></i> Add Section
+        </button>
+
         <div class="dropdown-container">
           <button class="nav-btn" onclick="toggleDropdown()" style="background:#059669;">
             <i class="fa-solid fa-download"></i> Download <i class="fa-solid fa-chevron-down" style="font-size:10px;"></i>
@@ -921,7 +962,7 @@
         <div class="cv-page" id="page-1">
           
           <!-- LEFT SIDEBAR COLUMN -->
-          <div class="cv-left-col sortable-left-sections">
+          <div class="cv-left-col sortable-left-sections" id="leftColumnContainer">
             
             <!-- Profile Header -->
             <div class="cv-section" data-title="PROFILE HEADER">
@@ -937,54 +978,59 @@
               </div>
             </div>
 
-            <!-- Contact Section (With + Item and Delete) -->
+            <!-- Contact Section -->
             <div class="cv-section" data-title="CONTACT">
-              <div class="section-hover-bar">
-                <button class="sec-btn" onclick="addContactItem(this)">+ Item</button>
-                <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕ Del</button>
+              <div class="section-header-row">
+                <div class="v2-side-badge"><i class="fa-solid fa-user"></i> <span onclick="openTextEditor(this)">CONTACT</span></div>
+                <div class="sec-tools-bar">
+                  <button class="sec-tool-btn" onclick="addContactItem(this)">+ Item</button>
+                  <button class="sec-tool-btn del" onclick="deleteSection(this)">✕ Del Sec</button>
+                </div>
               </div>
-              <div class="v2-side-badge"><i class="fa-solid fa-user"></i> <span onclick="openTextEditor(this)">CONTACT</span></div>
+              
               <div class="v2-contact-list sortable-items">
                 <div class="v2-contact-item">
-                  <div class="v2-contact-icon" onclick="changeIcon(this)"><i class="fa-solid fa-phone"></i></div>
+                  <div class="v2-contact-icon" onclick="openIconPicker(this)"><i class="fa-solid fa-phone"></i></div>
                   <span onclick="openTextEditor(this)">01827607566</span>
                   <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
                 </div>
                 <div class="v2-contact-item">
-                  <div class="v2-contact-icon" onclick="changeIcon(this)"><i class="fa-solid fa-envelope"></i></div>
+                  <div class="v2-contact-icon" onclick="openIconPicker(this)"><i class="fa-solid fa-envelope"></i></div>
                   <span onclick="openTextEditor(this)">tanvirahamedshahed14@gmail.com</span>
                   <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
                 </div>
                 <div class="v2-contact-item">
-                  <div class="v2-contact-icon" onclick="changeIcon(this)"><i class="fa-solid fa-location-dot"></i></div>
+                  <div class="v2-contact-icon" onclick="openIconPicker(this)"><i class="fa-solid fa-location-dot"></i></div>
                   <span onclick="openTextEditor(this)">HATIL HAZIPARA, JOYPURHAT</span>
                   <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
                 </div>
                 <div class="v2-contact-item">
-                  <div class="v2-contact-icon" onclick="changeIcon(this)"><i class="fa-solid fa-cake-candles"></i></div>
+                  <div class="v2-contact-icon" onclick="openIconPicker(this)"><i class="fa-solid fa-cake-candles"></i></div>
                   <span onclick="openTextEditor(this)">Date of Birth: 22-12-2007</span>
                   <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
                 </div>
                 <div class="v2-contact-item">
-                  <div class="v2-contact-icon" onclick="changeIcon(this)"><i class="fa-solid fa-flag"></i></div>
+                  <div class="v2-contact-icon" onclick="openIconPicker(this)"><i class="fa-solid fa-flag"></i></div>
                   <span onclick="openTextEditor(this)">Nationality: Bangladeshi</span>
                   <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
                 </div>
                 <div class="v2-contact-item">
-                  <div class="v2-contact-icon" onclick="changeIcon(this)"><i class="fa-solid fa-moon"></i></div>
+                  <div class="v2-contact-icon" onclick="openIconPicker(this)"><i class="fa-solid fa-moon"></i></div>
                   <span onclick="openTextEditor(this)">Religion: Islam</span>
                   <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
                 </div>
               </div>
             </div>
 
-            <!-- Personal Information (With + Row and Delete) -->
+            <!-- Personal Information -->
             <div class="cv-section" data-title="PERSONAL INFORMATION">
-              <div class="section-hover-bar">
-                <button class="sec-btn" onclick="addSideTableRow(this)">+ Row</button>
-                <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕ Del</button>
+              <div class="section-header-row">
+                <div class="v2-side-badge"><i class="fa-solid fa-id-card"></i> <span onclick="openTextEditor(this)">PERSONAL INFORMATION</span></div>
+                <div class="sec-tools-bar">
+                  <button class="sec-tool-btn" onclick="addSideTableRow(this)">+ Row</button>
+                  <button class="sec-tool-btn del" onclick="deleteSection(this)">✕ Del Sec</button>
+                </div>
               </div>
-              <div class="v2-side-badge"><i class="fa-solid fa-id-card"></i> <span onclick="openTextEditor(this)">PERSONAL INFORMATION</span></div>
               <table class="v2-side-table sortable-items">
                 <tr><td class="s-label" onclick="openTextEditor(this)">Father's Name</td><td class="s-sep">:</td><td><span onclick="openTextEditor(this)">MD Ruhul Karim</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
                 <tr><td class="s-label" onclick="openTextEditor(this)">Mother's Name</td><td class="s-sep">:</td><td><span onclick="openTextEditor(this)">Mrs Razia Sultana</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
@@ -994,13 +1040,17 @@
               </table>
             </div>
 
-            <!-- Languages (With + Lang and Progress Edit) -->
+            <!-- Languages (With 3 Type Add Buttons: Bar, Tag, Star) -->
             <div class="cv-section" data-title="LANGUAGES">
-              <div class="section-hover-bar">
-                <button class="sec-btn" onclick="addLanguageItem(this)">+ Lang</button>
-                <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕ Del</button>
+              <div class="section-header-row">
+                <div class="v2-side-badge"><i class="fa-solid fa-comments"></i> <span onclick="openTextEditor(this)">LANGUAGES</span></div>
+                <div class="sec-tools-bar">
+                  <button class="sec-tool-btn" onclick="addLanguageItem(this, 'bar')" title="Add Bar Style">+ Bar</button>
+                  <button class="sec-tool-btn" onclick="addLanguageItem(this, 'tag')" title="Add Tag Style">+ Tag</button>
+                  <button class="sec-tool-btn" onclick="addLanguageItem(this, 'star')" title="Add Star Style">+ Star</button>
+                  <button class="sec-tool-btn del" onclick="deleteSection(this)">✕ Del Sec</button>
+                </div>
               </div>
-              <div class="v2-side-badge"><i class="fa-solid fa-comments"></i> <span onclick="openTextEditor(this)">LANGUAGES</span></div>
               <div class="v2-lang-group sortable-items">
                 <div class="v2-lang-item">
                   <div class="v2-lang-header">
@@ -1023,13 +1073,15 @@
               </div>
             </div>
 
-            <!-- Additional Skills (With + Bullet and Delete) -->
+            <!-- Additional Skills -->
             <div class="cv-section" data-title="ADDITIONAL SKILLS">
-              <div class="section-hover-bar">
-                <button class="sec-btn" onclick="addSkillBullet(this)">+ Bullet</button>
-                <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕ Del</button>
+              <div class="section-header-row">
+                <div class="v2-side-badge"><i class="fa-solid fa-gear"></i> <span onclick="openTextEditor(this)">ADDITIONAL SKILLS</span></div>
+                <div class="sec-tools-bar">
+                  <button class="sec-tool-btn" onclick="addSkillBullet(this)">+ Bullet</button>
+                  <button class="sec-tool-btn del" onclick="deleteSection(this)">✕ Del Sec</button>
+                </div>
               </div>
-              <div class="v2-side-badge"><i class="fa-solid fa-gear"></i> <span onclick="openTextEditor(this)">ADDITIONAL SKILLS</span></div>
               <ul class="v2-skill-bullets sortable-items">
                 <li><span onclick="openTextEditor(this)">Microsoft Word (Basic to Intermediate)</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></li>
                 <li><span onclick="openTextEditor(this)">Canva (Design & Poster)</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></li>
@@ -1049,7 +1101,7 @@
           </div>
 
           <!-- RIGHT MAIN CONTENT COLUMN -->
-          <div class="cv-right-col sortable-right-sections">
+          <div class="cv-right-col sortable-right-sections" id="rightColumnContainer">
             
             <div class="v2-top-slogan" onclick="openTextEditor(this)">
               LEARN &nbsp;|&nbsp; IMPROVE &nbsp;|&nbsp; GROW
@@ -1057,71 +1109,80 @@
 
             <!-- Career Objective -->
             <div class="cv-section" data-title="CAREER OBJECTIVE">
-              <div class="section-hover-bar">
-                <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕ Del</button>
-              </div>
-              <div class="v2-main-badge">
-                <i class="fa-solid fa-bullseye"></i>
-                <span onclick="openTextEditor(this)">CAREER OBJECTIVE</span>
+              <div class="section-header-row">
+                <div class="v2-main-badge">
+                  <i class="fa-solid fa-bullseye"></i>
+                  <span onclick="openTextEditor(this)">CAREER OBJECTIVE</span>
+                </div>
+                <div class="sec-tools-bar">
+                  <button class="sec-tool-btn del" onclick="deleteSection(this)">✕ Del Sec</button>
+                </div>
               </div>
               <p style="font-size: 11.5px; line-height: 1.45; color: #334155; text-align: justify;" onclick="openTextEditor(this)">
                 I am a responsible and dedicated person, currently a Class 12 student, looking for a suitable job in a showroom or agency where I can apply my communication skills, learn new things and contribute to the growth of the organization. I am always eager to work hard, take responsibility and improve my skills for a better future.
               </p>
             </div>
 
-            <!-- Education (With + Row and Row Del) -->
+            <!-- Education (Complete Row & Column Tools) -->
             <div class="cv-section" data-title="EDUCATION">
-              <div class="section-hover-bar">
-                <button class="sec-btn" onclick="addEduRow(this)">+ Degree</button>
-                <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕ Del</button>
+              <div class="section-header-row">
+                <div class="v2-main-badge">
+                  <i class="fa-solid fa-graduation-cap"></i>
+                  <span onclick="openTextEditor(this)">EDUCATION</span>
+                </div>
+                <div class="sec-tools-bar">
+                  <button class="sec-tool-btn" onclick="addEduRow(this)">+ Row</button>
+                  <button class="sec-tool-btn" onclick="addEduColumn(this)">+ Column</button>
+                  <button class="sec-tool-btn" onclick="removeEduColumn(this)">- Column</button>
+                  <button class="sec-tool-btn del" onclick="deleteSection(this)">✕ Del Sec</button>
+                </div>
               </div>
-              <div class="v2-main-badge">
-                <i class="fa-solid fa-graduation-cap"></i>
-                <span onclick="openTextEditor(this)">EDUCATION</span>
+              <div class="v2-edu-table-wrapper">
+                <table class="v2-edu-table">
+                  <thead>
+                    <tr id="eduHeaderRow">
+                      <th onclick="openTextEditor(this)">Degree / Exam</th>
+                      <th onclick="openTextEditor(this)">Institution Name</th>
+                      <th onclick="openTextEditor(this)">Result / GPA</th>
+                      <th onclick="openTextEditor(this)">Passing Year</th>
+                    </tr>
+                  </thead>
+                  <tbody class="sortable-items">
+                    <tr>
+                      <td><b onclick="openTextEditor(this)">SSC</b><br><span style="font-size:10px; color:#64748b;" onclick="openTextEditor(this)">(Secondary School Certificate)</span></td>
+                      <td onclick="openTextEditor(this)">R.B Government High School</td>
+                      <td><b onclick="openTextEditor(this)">GPA 5.00</b></td>
+                      <td><span onclick="openTextEditor(this)">2024</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
+                    </tr>
+                    <tr>
+                      <td><b onclick="openTextEditor(this)">HSC</b><br><span style="font-size:10px; color:#64748b;" onclick="openTextEditor(this)">(Class 12)</span></td>
+                      <td onclick="openTextEditor(this)">Joypurhat Government College</td>
+                      <td onclick="openTextEditor(this)">-</td>
+                      <td><b onclick="openTextEditor(this)">(2026)</b><br><span style="font-size:10px; color:#64748b;" onclick="openTextEditor(this)">(Exam Year)</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
-              <table class="v2-edu-table">
-                <thead>
-                  <tr>
-                    <th>Degree / Exam</th>
-                    <th>Institution Name</th>
-                    <th>Result / GPA</th>
-                    <th>Passing Year</th>
-                  </tr>
-                </thead>
-                <tbody class="sortable-items">
-                  <tr>
-                    <td><b onclick="openTextEditor(this)">SSC</b><br><span style="font-size:10px; color:#64748b;" onclick="openTextEditor(this)">(Secondary School Certificate)</span></td>
-                    <td onclick="openTextEditor(this)">R.B Government High School</td>
-                    <td><b onclick="openTextEditor(this)">GPA 5.00</b></td>
-                    <td><span onclick="openTextEditor(this)">2024</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
-                  </tr>
-                  <tr>
-                    <td><b onclick="openTextEditor(this)">HSC</b><br><span style="font-size:10px; color:#64748b;" onclick="openTextEditor(this)">(Class 12)</span></td>
-                    <td onclick="openTextEditor(this)">Joypurhat Government College</td>
-                    <td onclick="openTextEditor(this)">-</td>
-                    <td><b onclick="openTextEditor(this)">(2026)</b><br><span style="font-size:10px; color:#64748b;" onclick="openTextEditor(this)">(Exam Year)</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
-                  </tr>
-                </tbody>
-              </table>
             </div>
 
-            <!-- Work Experience (With + Job Block, + Bullet, Delete Block/Bullet) -->
+            <!-- Work Experience (Sub-Blocks with Dedicated Bullet Controls) -->
             <div class="cv-section" data-title="WORK EXPERIENCE">
-              <div class="section-hover-bar">
-                <button class="sec-btn" onclick="addJobBlock(this)">+ Job Block</button>
-                <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕ Del</button>
-              </div>
-              <div class="v2-main-badge">
-                <i class="fa-solid fa-briefcase"></i>
-                <span onclick="openTextEditor(this)">WORK EXPERIENCE</span>
+              <div class="section-header-row">
+                <div class="v2-main-badge">
+                  <i class="fa-solid fa-briefcase"></i>
+                  <span onclick="openTextEditor(this)">WORK EXPERIENCE</span>
+                </div>
+                <div class="sec-tools-bar">
+                  <button class="sec-tool-btn" onclick="addJobBlock(this)">+ Job Block</button>
+                  <button class="sec-tool-btn del" onclick="deleteSection(this)">✕ Del Sec</button>
+                </div>
               </div>
 
               <div class="v2-exp-container sortable-items">
-                <!-- Job Sub-Block 1 -->
                 <div class="v2-exp-block">
-                  <div class="block-actions">
+                  <div class="sub-block-tools">
                     <button class="sub-btn" onclick="addExpBullet(this)">+ Bullet</button>
-                    <button class="sub-btn sub-btn-del" onclick="deleteSubBlock(this)">✕</button>
+                    <button class="sub-btn sub-btn-del" onclick="deleteSubBlock(this)">✕ Del Job</button>
                   </div>
                   <div class="v2-exp-title-row">
                     <span class="v2-exp-role" onclick="openTextEditor(this)">Page Operator</span>
@@ -1138,15 +1199,17 @@
               </div>
             </div>
 
-            <!-- Key Strengths (Dynamic Box Addition, Icon Change & Delete) -->
-            <div class="cv-section" data-title="KEY STRENGTHS">
-              <div class="section-hover-bar">
-                <button class="sec-btn" onclick="addStrengthBox(this)">+ Strength</button>
-                <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕ Del</button>
-              </div>
-              <div class="v2-main-badge">
-                <i class="fa-solid fa-star"></i>
-                <span onclick="openTextEditor(this)">KEY STRENGTHS</span>
+            <!-- Key Strengths (Card Addition, Icon Change & Delete) -->
+            <div class="cv-section" id="keyStrengthsSection" data-title="KEY STRENGTHS">
+              <div class="section-header-row">
+                <div class="v2-main-badge">
+                  <i class="fa-solid fa-star"></i>
+                  <span onclick="openTextEditor(this)">KEY STRENGTHS</span>
+                </div>
+                <div class="sec-tools-bar">
+                  <button class="sec-tool-btn" onclick="addStrengthBox(this)">+ Strength</button>
+                  <button class="sec-tool-btn del" onclick="deleteSection(this)">✕ Del Sec</button>
+                </div>
               </div>
               
               <div class="v2-strengths-grid sortable-items">
@@ -1173,11 +1236,19 @@
               </div>
             </div>
 
+            <!-- Dynamic Sections Insert Here (Right below Key Strengths) -->
+            <div id="dynamicInsertedSections"></div>
+
             <!-- Declaration -->
-            <div class="cv-section" data-title="DECLARATION" style="margin-top:auto;">
-              <div class="v2-main-badge">
-                <i class="fa-solid fa-file-invoice"></i>
-                <span onclick="openTextEditor(this)">DECLARATION</span>
+            <div class="cv-section" id="declarationSection" data-title="DECLARATION" style="margin-top:auto;">
+              <div class="section-header-row">
+                <div class="v2-main-badge">
+                  <i class="fa-solid fa-file-invoice"></i>
+                  <span onclick="openTextEditor(this)">DECLARATION</span>
+                </div>
+                <div class="sec-tools-bar">
+                  <button class="sec-tool-btn del" onclick="deleteSection(this)">✕ Del Sec</button>
+                </div>
               </div>
               <p class="v2-declaration-text" onclick="openTextEditor(this)">
                 I hereby declare that all the information provided above is true, complete and correct to the best of my knowledge and belief.
@@ -1211,6 +1282,10 @@
       <i class="fa-solid fa-camera"></i>
       <span>Photo</span>
     </button>
+    <button class="mob-action-btn" onclick="openAddSectionModal()">
+      <i class="fa-solid fa-layer-group"></i>
+      <span>Add Sec</span>
+    </button>
     <button class="mob-action-btn" onclick="toggleMobileExportPopup(event)">
       <i class="fa-solid fa-download"></i>
       <span>Export</span>
@@ -1223,6 +1298,52 @@
     <button class="dropdown-item" onclick="exportToZipImages('jpeg')"><i class="fa-solid fa-file-zipper"></i> JPEG Bundle (.ZIP) — 2480×3508</button>
     <button class="dropdown-item" onclick="exportToCleanPDF()"><i class="fa-solid fa-file-pdf"></i> PDF Document (Multi-Page HD)</button>
     <button class="dropdown-item" onclick="window.print()"><i class="fa-solid fa-print"></i> Print Document</button>
+  </div>
+
+  <!-- MODAL: ADD CUSTOM SECTION (INSERTS BELOW KEY STRENGTHS) -->
+  <div class="custom-modal-overlay" id="addSectionModal">
+    <div class="custom-modal-card">
+      <div class="modal-head">
+        <span><i class="fa-solid fa-layer-group"></i> Add New Section (Below Key Strengths)</span>
+        <button onclick="closeCustomModal('addSectionModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex; flex-direction:column; gap:5px;">
+          <label style="font-size:11px; font-weight:700; color:#475569;">Section Title</label>
+          <input type="text" id="newSectionTitleInput" placeholder="e.g., PROJECTS / CERTIFICATIONS / AWARDS" style="padding:9px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px; outline:none;">
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:5px;">
+          <label style="font-size:11px; font-weight:700; color:#475569;">FontAwesome Icon Class</label>
+          <input type="text" id="newSectionIconInput" value="fa-award" style="padding:9px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px; outline:none;">
+        </div>
+
+        <label style="font-size:11px; font-weight:700; color:#475569; margin-top:2px;">Select Field Style:</label>
+        <div class="layout-picker">
+          <div class="layout-opt active" onclick="selectSectionStyle('bullets', this)">
+            <i class="fa-solid fa-list-ul"></i>
+            <span>Bullets</span>
+          </div>
+          <div class="layout-opt" onclick="selectSectionStyle('table', this)">
+            <i class="fa-solid fa-table"></i>
+            <span>Table</span>
+          </div>
+          <div class="layout-opt" onclick="selectSectionStyle('card', this)">
+            <i class="fa-solid fa-grip"></i>
+            <span>Icon Card</span>
+          </div>
+          <div class="layout-opt" onclick="selectSectionStyle('paragraph', this)">
+            <i class="fa-solid fa-align-left"></i>
+            <span>Paragraph</span>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="nav-btn" style="background:#64748b;" onclick="closeCustomModal('addSectionModal')">Cancel</button>
+          <button class="nav-btn" style="background:#0284c7;" onclick="executeAddCustomSection()"><i class="fa-solid fa-plus"></i> Add Below Strengths</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- MODAL: MOBILE PHOTO / SIGNATURE CHOOSER -->
@@ -1403,7 +1524,7 @@
 
     workspaceContainer.addEventListener('touchstart', (e) => {
       if (isSortingActive) return;
-      if (e.target.closest('button, input, .modal-actions, .dropdown-item, .sec-btn, .sub-btn')) return;
+      if (e.target.closest('button, input, .modal-actions, .dropdown-item, .sec-tool-btn, .sub-btn')) return;
 
       if (e.touches.length === 1) {
         isDragging = true;
@@ -1445,7 +1566,7 @@
 
     workspaceContainer.addEventListener('mousedown', (e) => {
       if (isSortingActive) return;
-      if (e.target.closest('button, input, .v2-side-badge, .v2-main-badge, .sec-btn, .sub-btn')) return;
+      if (e.target.closest('button, input, .v2-side-badge, .v2-main-badge, .sec-tool-btn, .sub-btn')) return;
       isDragging = true;
       startX = e.clientX - panX;
       startY = e.clientY - panY;
@@ -1488,26 +1609,188 @@
     }
 
     function initAllSortables() {
-      // Sections
       document.querySelectorAll('.sortable-left-sections').forEach(col => {
         new Sortable(col, getSortableOptions('.v2-side-badge', 'left-sections'));
       });
       document.querySelectorAll('.sortable-right-sections').forEach(col => {
         new Sortable(col, getSortableOptions('.v2-main-badge', 'right-sections'));
       });
-
-      // In-section items
       document.querySelectorAll('.sortable-items').forEach(list => {
         new Sortable(list, getSortableOptions(null, 'inner-items'));
       });
     }
 
-    // 3. DYNAMIC FIELD ADDITIONS & DELETIONS
+    // 3. EDUCATION DYNAMIC COLUMN & ROW MANAGEMENT
+    function addEduRow(btn) {
+      const table = btn.closest('.cv-section').querySelector('.v2-edu-table');
+      const tbody = table.querySelector('tbody');
+      const colCount = table.querySelectorAll('thead th').length;
+      
+      let rowCells = '';
+      for (let i = 0; i < colCount; i++) {
+        if (i === 0) {
+          rowCells += `<td><b onclick="openTextEditor(this)">Degree Title</b><br><span style="font-size:10px; color:#64748b;" onclick="openTextEditor(this)">(Department/Major)</span></td>`;
+        } else if (i === colCount - 1) {
+          rowCells += `<td><span onclick="openTextEditor(this)">Year / Detail</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>`;
+        } else {
+          rowCells += `<td onclick="openTextEditor(this)">Detail info</td>`;
+        }
+      }
+
+      tbody.insertAdjacentHTML('beforeend', `<tr>${rowCells}</tr>`);
+      initAllSortables();
+      checkPageFit();
+    }
+
+    function addEduColumn(btn) {
+      const table = btn.closest('.cv-section').querySelector('.v2-edu-table');
+      const headerRow = table.querySelector('thead tr');
+      const colName = prompt('Enter New Column Heading:', 'New Column');
+      if (!colName) return;
+
+      // Add Header Cell
+      const th = document.createElement('th');
+      th.innerText = colName;
+      th.onclick = function() { openTextEditor(this); };
+      headerRow.appendChild(th);
+
+      // Add Body Cells
+      table.querySelectorAll('tbody tr').forEach(tr => {
+        const td = document.createElement('td');
+        td.innerText = '-';
+        td.onclick = function() { openTextEditor(this); };
+        tr.appendChild(td);
+      });
+    }
+
+    function removeEduColumn(btn) {
+      const table = btn.closest('.cv-section').querySelector('.v2-edu-table');
+      const ths = table.querySelectorAll('thead th');
+      if (ths.length <= 2) {
+        alert('Table must have at least 2 columns!');
+        return;
+      }
+      // Remove last column
+      ths[ths.length - 1].remove();
+      table.querySelectorAll('tbody tr').forEach(tr => {
+        const tds = tr.querySelectorAll('td');
+        if (tds.length > 0) tds[tds.length - 1].remove();
+      });
+    }
+
+    // 4. LANGUAGES 3-STYLE ADDITION (Bar, Tag, Star)
+    function addLanguageItem(btn, style) {
+      const group = btn.closest('.cv-section').querySelector('.v2-lang-group');
+      let itemHTML = '';
+
+      if (style === 'bar') {
+        itemHTML = `
+          <div class="v2-lang-item">
+            <div class="v2-lang-header">
+              <span onclick="openTextEditor(this)">Language</span>
+              <div><span onclick="openTextEditor(this)">(Fluent)</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></div>
+            </div>
+            <div class="v2-bar-track" onclick="editLangProgress(this)" title="Click to adjust progress percentage">
+              <div class="v2-bar-fill" style="width: 80%;"></div>
+            </div>
+          </div>
+        `;
+      } else if (style === 'tag') {
+        itemHTML = `
+          <div class="v2-lang-item">
+            <div class="v2-lang-tag">
+              <span onclick="openTextEditor(this)">Language (Proficient)</span>
+              <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
+            </div>
+          </div>
+        `;
+      } else if (style === 'star') {
+        itemHTML = `
+          <div class="v2-lang-item">
+            <div class="v2-lang-star-row">
+              <span onclick="openTextEditor(this)">Language</span>
+              <div class="v2-lang-stars" onclick="rateLanguage(this)" title="Click to change rating">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>
+              </div>
+              <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
+            </div>
+          </div>
+        `;
+      }
+
+      group.insertAdjacentHTML('beforeend', itemHTML);
+      initAllSortables();
+    }
+
+    function editLangProgress(track) {
+      const currentWidth = track.querySelector('.v2-bar-fill').style.width || '75%';
+      const percent = prompt('Enter percentage (10 to 100):', parseInt(currentWidth));
+      if (percent && !isNaN(percent)) {
+        const val = Math.min(Math.max(10, parseInt(percent)), 100);
+        track.querySelector('.v2-bar-fill').style.width = val + '%';
+      }
+    }
+
+    function rateLanguage(starsWrap) {
+      const stars = starsWrap.querySelectorAll('i');
+      let currentRating = 0;
+      stars.forEach(s => { if (s.classList.contains('fa-solid')) currentRating++; });
+      let nextRating = (currentRating % 5) + 1;
+      stars.forEach((star, idx) => {
+        star.className = (idx < nextRating) ? 'fa-solid fa-star' : 'fa-regular fa-star';
+      });
+    }
+
+    // 5. WORK EXPERIENCE, STRENGTHS & BASIC FIELD ADDITIONS
+    function addJobBlock(btn) {
+      const container = btn.closest('.cv-section').querySelector('.v2-exp-container');
+      const block = `
+        <div class="v2-exp-block">
+          <div class="sub-block-tools">
+            <button class="sub-btn" onclick="addExpBullet(this)">+ Bullet</button>
+            <button class="sub-btn sub-btn-del" onclick="deleteSubBlock(this)">✕ Del Job</button>
+          </div>
+          <div class="v2-exp-title-row">
+            <span class="v2-exp-role" onclick="openTextEditor(this)">Job Title / Role</span>
+            <span class="v2-exp-time" onclick="openTextEditor(this)">(2023 — Present)</span>
+          </div>
+          <ul class="v2-exp-bullets sortable-items">
+            <li><span onclick="openTextEditor(this)">Responsibilities and achievement details here.</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></li>
+          </ul>
+        </div>
+      `;
+      container.insertAdjacentHTML('beforeend', block);
+      initAllSortables();
+      checkPageFit();
+    }
+
+    function addExpBullet(btn) {
+      const ul = btn.closest('.v2-exp-block').querySelector('.v2-exp-bullets');
+      const li = `<li><span onclick="openTextEditor(this)">Key responsibility or task performed</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></li>`;
+      ul.insertAdjacentHTML('beforeend', li);
+      initAllSortables();
+      checkPageFit();
+    }
+
+    function addStrengthBox(btn) {
+      const grid = btn.closest('.cv-section').querySelector('.v2-strengths-grid');
+      const box = `
+        <div class="v2-strength-box">
+          <button class="row-del-btn" style="position:absolute; top:2px; right:2px;" onclick="deleteStrengthBox(this)">✕</button>
+          <i class="fa-solid fa-star v2-strength-icon" onclick="openIconPicker(this)" title="Click to change FontAwesome icon"></i>
+          <span class="v2-strength-title" onclick="openTextEditor(this)">New Strength</span>
+        </div>
+      `;
+      grid.insertAdjacentHTML('beforeend', box);
+      initAllSortables();
+      checkPageFit();
+    }
+
     function addContactItem(btn) {
       const list = btn.closest('.cv-section').querySelector('.v2-contact-list');
       const item = `
         <div class="v2-contact-item">
-          <div class="v2-contact-icon" onclick="changeIcon(this)"><i class="fa-solid fa-link"></i></div>
+          <div class="v2-contact-icon" onclick="openIconPicker(this)"><i class="fa-solid fa-link"></i></div>
           <span onclick="openTextEditor(this)">New Contact Detail</span>
           <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
         </div>
@@ -1529,91 +1812,10 @@
       initAllSortables();
     }
 
-    function addLanguageItem(btn) {
-      const group = btn.closest('.cv-section').querySelector('.v2-lang-group');
-      const item = `
-        <div class="v2-lang-item">
-          <div class="v2-lang-header">
-            <span onclick="openTextEditor(this)">Language</span>
-            <div><span onclick="openTextEditor(this)">(Fluent)</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></div>
-          </div>
-          <div class="v2-bar-track" onclick="editLangProgress(this)" title="Click to adjust progress percentage">
-            <div class="v2-bar-fill" style="width: 75%;"></div>
-          </div>
-        </div>
-      `;
-      group.insertAdjacentHTML('beforeend', item);
-      initAllSortables();
-    }
-
-    function editLangProgress(track) {
-      const currentWidth = track.querySelector('.v2-bar-fill').style.width || '75%';
-      const percent = prompt('Enter language skill percentage (10 to 100):', parseInt(currentWidth));
-      if (percent && !isNaN(percent)) {
-        const val = Math.min(Math.max(10, parseInt(percent)), 100);
-        track.querySelector('.v2-bar-fill').style.width = val + '%';
-      }
-    }
-
     function addSkillBullet(btn) {
       const list = btn.closest('.cv-section').querySelector('.v2-skill-bullets');
       const li = `<li><span onclick="openTextEditor(this)">New Skill Description</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></li>`;
       list.insertAdjacentHTML('beforeend', li);
-      initAllSortables();
-    }
-
-    function addEduRow(btn) {
-      const tbody = btn.closest('.cv-section').querySelector('.v2-edu-table tbody');
-      const row = `
-        <tr>
-          <td><b onclick="openTextEditor(this)">Degree Title</b><br><span style="font-size:10px; color:#64748b;" onclick="openTextEditor(this)">(Department/Major)</span></td>
-          <td onclick="openTextEditor(this)">Institution Name</td>
-          <td><b onclick="openTextEditor(this)">Result</b></td>
-          <td><span onclick="openTextEditor(this)">Year</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
-        </tr>
-      `;
-      tbody.insertAdjacentHTML('beforeend', row);
-      initAllSortables();
-    }
-
-    function addJobBlock(btn) {
-      const container = btn.closest('.cv-section').querySelector('.v2-exp-container');
-      const block = `
-        <div class="v2-exp-block">
-          <div class="block-actions">
-            <button class="sub-btn" onclick="addExpBullet(this)">+ Bullet</button>
-            <button class="sub-btn sub-btn-del" onclick="deleteSubBlock(this)">✕</button>
-          </div>
-          <div class="v2-exp-title-row">
-            <span class="v2-exp-role" onclick="openTextEditor(this)">Job Title</span>
-            <span class="v2-exp-time" onclick="openTextEditor(this)">(2023 — Present)</span>
-          </div>
-          <ul class="v2-exp-bullets sortable-items">
-            <li><span onclick="openTextEditor(this)">Responsibilities and achievement details here.</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></li>
-          </ul>
-        </div>
-      `;
-      container.insertAdjacentHTML('beforeend', block);
-      initAllSortables();
-    }
-
-    function addExpBullet(btn) {
-      const ul = btn.closest('.v2-exp-block').querySelector('.v2-exp-bullets');
-      const li = `<li><span onclick="openTextEditor(this)">Key responsibility or task performed</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></li>`;
-      ul.insertAdjacentHTML('beforeend', li);
-      initAllSortables();
-    }
-
-    function addStrengthBox(btn) {
-      const grid = btn.closest('.cv-section').querySelector('.v2-strengths-grid');
-      const box = `
-        <div class="v2-strength-box">
-          <button class="row-del-btn" style="position:absolute; top:2px; right:2px;" onclick="deleteStrengthBox(this)">✕</button>
-          <i class="fa-solid fa-star v2-strength-icon" onclick="openIconPicker(this)" title="Click to change FontAwesome icon"></i>
-          <span class="v2-strength-title" onclick="openTextEditor(this)">New Strength</span>
-        </div>
-      `;
-      grid.insertAdjacentHTML('beforeend', box);
       initAllSortables();
     }
 
@@ -1624,7 +1826,67 @@
       if (confirm('Are you sure you want to delete this section?')) btn.closest('.cv-section').remove();
     }
 
-    // 4. FONTAWESOME ICON PICKER
+    // 6. ADD SECTION (INSERTED DIRECTLY BELOW KEY STRENGTHS)
+    let selectedStyleType = 'bullets';
+    function selectSectionStyle(type, el) {
+      selectedStyleType = type;
+      document.querySelectorAll('.layout-opt').forEach(opt => opt.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    function openAddSectionModal() {
+      document.getElementById('addSectionModal').classList.add('active');
+    }
+
+    function executeAddCustomSection() {
+      const title = document.getElementById('newSectionTitleInput').value.trim() || 'NEW SECTION';
+      let icon = document.getElementById('newSectionIconInput').value.trim() || 'fa-award';
+      if (!icon.startsWith('fa-')) icon = 'fa-' + icon;
+
+      let innerContent = '';
+      let toolButtons = `<button class="sec-tool-btn del" onclick="deleteSection(this)">✕ Del Sec</button>`;
+
+      if (selectedStyleType === 'bullets') {
+        toolButtons = `<button class="sec-tool-btn" onclick="addSkillBullet(this)">+ Bullet</button>` + toolButtons;
+        innerContent = `<ul class="v2-skill-bullets sortable-items" style="margin-top:6px;"><li><span onclick="openTextEditor(this)">New bullet description item</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></li></ul>`;
+      } else if (selectedStyleType === 'table') {
+        toolButtons = `<button class="sec-tool-btn" onclick="addSideTableRow(this)">+ Row</button>` + toolButtons;
+        innerContent = `<table class="v2-side-table sortable-items" style="margin-top:6px;"><tr><td class="s-label" onclick="openTextEditor(this)">Field</td><td class="s-sep">:</td><td><span onclick="openTextEditor(this)">Details</span><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr></table>`;
+      } else if (selectedStyleType === 'card') {
+        toolButtons = `<button class="sec-tool-btn" onclick="addStrengthBox(this)">+ Card</button>` + toolButtons;
+        innerContent = `<div class="v2-strengths-grid sortable-items"><div class="v2-strength-box"><button class="row-del-btn" style="position:absolute; top:2px; right:2px;" onclick="deleteStrengthBox(this)">✕</button><i class="fa-solid ${icon} v2-strength-icon" onclick="openIconPicker(this)"></i><span class="v2-strength-title" onclick="openTextEditor(this)">Key Feature</span></div></div>`;
+      } else {
+        innerContent = `<p style="font-size: 11.5px; line-height: 1.45; color: #334155; text-align: justify; margin-top:4px;" onclick="openTextEditor(this)">Enter descriptive paragraph here.</p>`;
+      }
+
+      const sectionHTML = `
+        <div class="cv-section" data-title="${title.toUpperCase()}" style="margin-top:8px;">
+          <div class="section-header-row">
+            <div class="v2-main-badge"><i class="fa-solid ${icon}"></i> <span onclick="openTextEditor(this)">${title.toUpperCase()}</span></div>
+            <div class="sec-tools-bar">${toolButtons}</div>
+          </div>
+          ${innerContent}
+        </div>
+      `;
+
+      // Inserts right below Key Strengths section
+      const targetContainer = document.getElementById('dynamicInsertedSections');
+      targetContainer.insertAdjacentHTML('beforeend', sectionHTML);
+
+      initAllSortables();
+      closeCustomModal('addSectionModal');
+      checkPageFit();
+    }
+
+    // Check if Page Content Overflows A4 Capacity
+    function checkPageFit() {
+      const page = document.getElementById('page-1');
+      if (page.scrollHeight > page.clientHeight + 15) {
+        alert('Note: Content has reached the A4 page limit. Consider shortening descriptions or deleting unused items for a clean single-page layout.');
+      }
+    }
+
+    // 7. FONTAWESOME ICON PICKER
     let targetIconElement = null;
     function openIconPicker(el) {
       const icon = el.tagName === 'I' ? el : el.querySelector('i');
@@ -1632,11 +1894,7 @@
       document.getElementById('iconClassInput').value = icon.className;
       document.getElementById('iconPickerModal').classList.add('active');
     }
-
-    function selectQuickIcon(cls) {
-      document.getElementById('iconClassInput').value = cls;
-    }
-
+    function selectQuickIcon(cls) { document.getElementById('iconClassInput').value = cls; }
     function applyChosenIcon() {
       if (targetIconElement) {
         let cls = document.getElementById('iconClassInput').value.trim();
@@ -1646,7 +1904,7 @@
       closeCustomModal('iconPickerModal');
     }
 
-    // 5. UI HANDLERS & MODALS
+    // 8. GENERAL UI HANDLERS & MODALS
     function toggleDropdown() { document.getElementById('downloadDropdown').classList.toggle('show'); }
     function toggleMobileExportPopup(e) { e.stopPropagation(); document.getElementById('mobileExportPopup').classList.toggle('show'); }
     function openMobilePhotoChoiceModal() { document.getElementById('mobilePhotoChoiceModal').classList.add('active'); }
@@ -1798,7 +2056,7 @@
       closeCustomModal('imageStudioModal');
     }
 
-    // 6. CLEAN EXPORT ENGINE (2480x3508 HD)
+    // 9. CLEAN EXPORT ENGINE (2480x3508 HD)
     const TARGET_WIDTH = 2480;
     const TARGET_HEIGHT = 3508;
     const SCREEN_WIDTH = 794;
@@ -1815,6 +2073,8 @@
       offscreenContainer.style.zIndex = '-9999';
 
       const clone = pageElement.cloneNode(true);
+      clone.querySelectorAll('.sec-tools-bar, .sub-block-tools, .row-del-btn').forEach(el => el.remove());
+      
       clone.style.transform = 'none';
       clone.style.margin = '0';
       clone.style.boxShadow = 'none';
