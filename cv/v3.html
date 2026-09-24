@@ -17,7 +17,7 @@
 
   <style>
     :root {
-      --primary-color: #009fe3; /* Vivid Sky Blue from Image */
+      --primary-color: #009fe3; /* Vivid Sky Blue Stripe from Image */
       --text-color: #1e293b;
       --font-family: 'Plus Jakarta Sans', sans-serif;
       --base-font-size: 13px;
@@ -102,10 +102,14 @@
       border: 1px solid rgba(255, 255, 255, 0.25);
       box-shadow: 0 4px 15px rgba(2, 132, 199, 0.35);
     }
+    .nav-btn.v2-link {
+      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
 
     .desktop-tools { display: flex; align-items: center; gap: 10px; }
 
-    /* Dropdown */
+    /* Download Dropdown */
     .dropdown-container { position: relative; }
     .dropdown-menu {
       display: none;
@@ -168,7 +172,7 @@
     }
     .zoom-pill:hover { transform: scale(1.04); }
 
-    /* Workspace */
+    /* Centered Workspace */
     .workspace {
       flex: 1;
       width: 100vw;
@@ -214,28 +218,28 @@
       border-radius: 6px;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
       position: relative;
-      font-size: 12.5px;
+      font-size: 12px;
       color: #000000;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       overflow: hidden;
       box-sizing: border-box;
-      padding: 40px 50px 35px 50px;
+      padding: 38px 48px 30px 48px;
       line-height: normal;
     }
 
     /* Template 3 Header */
     .t3-header {
       position: relative;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
     .t3-center-titles {
       text-align: center;
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
     .t3-main-title {
-      font-size: 18px;
+      font-size: 19px;
       font-weight: 800;
       letter-spacing: 1px;
       text-transform: uppercase;
@@ -243,9 +247,9 @@
       cursor: pointer;
     }
     .t3-sub-title {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
-      margin-top: 2px;
+      margin-top: 1px;
       cursor: pointer;
     }
 
@@ -263,13 +267,13 @@
     .t3-contact-heading {
       font-weight: 700;
       text-decoration: underline;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
       font-size: 13px;
       cursor: pointer;
     }
     .t3-contact-name {
       font-weight: 800;
-      font-size: 13px;
+      font-size: 13.5px;
       margin-bottom: 2px;
       cursor: pointer;
     }
@@ -309,11 +313,11 @@
 
     /* Template 3 Section Header with Sky-Blue Stripe */
     .t3-section-wrapper {
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       position: relative;
     }
     .t3-sec-title {
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -323,14 +327,14 @@
       margin-bottom: 2px;
     }
     .t3-blue-bar {
-      height: 5px;
+      height: 4.5px;
       background: #009fe3;
       width: 100%;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       border-radius: 1px;
     }
 
-    /* Bullet Items & Lists */
+    /* Section Content & Universal Child Styles */
     .t3-content {
       font-size: 11.5px;
       line-height: 1.45;
@@ -341,27 +345,58 @@
       align-items: flex-start;
       gap: 7px;
       margin-bottom: 4px;
-      cursor: pointer;
+      position: relative;
+      cursor: grab;
     }
+    .t3-bullet-item:hover .row-del-btn { display: inline-block; }
     .t3-diamond {
       color: #009fe3;
-      font-size: 11px;
+      font-size: 10.5px;
       flex-shrink: 0;
       margin-top: 2px;
     }
 
-    /* Degree / Job Block */
+    /* Sub-Blocks (Degrees / Companies) */
     .t3-sub-block {
       margin-bottom: 8px;
-      padding-left: 5px;
+      padding: 4px 6px;
+      background: #fbfdff;
+      border-radius: 4px;
+      border: 1px dashed #e2e8f0;
+      position: relative;
+      cursor: grab;
     }
     .t3-sub-title-row {
       display: flex;
       align-items: center;
-      gap: 6px;
+      justify-content: space-between;
       font-weight: 700;
-      font-size: 12px;
+      font-size: 11.5px;
       margin-bottom: 4px;
+    }
+    .sub-block-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .sub-add-btn {
+      background: #009fe3;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      padding: 1px 6px;
+      font-size: 9px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .sub-del-btn {
+      background: #ef4444;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      padding: 1px 6px;
+      font-size: 9px;
+      font-weight: 600;
       cursor: pointer;
     }
 
@@ -369,27 +404,46 @@
     .t3-data-table {
       width: 100%;
       border-collapse: collapse;
-      margin-left: 12px;
-      width: calc(100% - 12px);
     }
-    .t3-data-table tr:hover { background: rgba(0,0,0,0.02); }
+    .t3-data-table tr {
+      position: relative;
+      cursor: grab;
+    }
+    .t3-data-table tr:hover .row-del-btn { display: inline-block; }
     .t3-data-table td {
-      padding: 2px 0;
+      padding: 1.5px 0;
       font-size: 11.5px;
       vertical-align: top;
     }
-    .t3-data-table .t-icon { width: 22px; text-align: left; }
-    .t3-data-table .t-label { width: 190px; font-weight: 500; cursor: pointer; }
-    .t3-data-table .t-sep { width: 18px; text-align: center; }
+    .t3-data-table .t-icon { width: 20px; text-align: left; color: #009fe3; }
+    .t3-data-table .t-label { width: 190px; font-weight: 500; cursor: pointer; color: #222; }
+    .t3-data-table .t-sep { width: 16px; text-align: center; }
     .t3-data-table .t-val { cursor: pointer; }
 
-    /* Hover tools */
+    /* In-Row Delete Button */
+    .row-del-btn {
+      display: none;
+      background: #ef4444;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 14px;
+      height: 14px;
+      font-size: 8px;
+      line-height: 14px;
+      text-align: center;
+      cursor: pointer;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    /* Section Floating Controls Bar */
     .section-hover-bar {
       position: absolute;
       right: 0;
-      top: -15px;
+      top: -14px;
       display: none;
-      gap: 5px;
+      gap: 4px;
       z-index: 50;
     }
     .t3-section-wrapper:hover .section-hover-bar { display: flex; }
@@ -397,33 +451,57 @@
       background: #0f172a;
       color: #fff;
       border: none;
-      font-size: 10px;
-      padding: 3px 8px;
-      border-radius: 6px;
+      font-size: 9.5px;
+      padding: 2px 7px;
+      border-radius: 4px;
       cursor: pointer;
       font-weight: 600;
     }
     .sec-btn-del { background: #ef4444; }
 
-    /* Signature Section */
-    .t3-signature-area {
+    /* Fixed & Corrected Formal Signature Area */
+    .t3-signature-container {
       margin-top: 25px;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      gap: 6px;
+      gap: 3px;
     }
-    .t3-sig-line {
-      border-top: 1px dotted #333;
-      width: 160px;
-      margin-top: 20px;
-      padding-top: 3px;
+    .t3-sig-title {
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 2px;
+      cursor: pointer;
+    }
+    .t3-signature-box {
+      min-height: 38px;
+      display: flex;
+      align-items: flex-end;
+      cursor: pointer;
+      padding-left: 10px;
     }
     .t3-sig-font {
       font-family: 'Alex Brush', cursive;
       font-size: 26px;
       color: #000;
+      line-height: 1;
+    }
+    .t3-sig-img {
+      max-height: 40px;
+      max-width: 140px;
+      object-fit: contain;
+    }
+    .t3-sig-line {
+      border-top: 1px dotted #222;
+      width: 160px;
+      margin: 2px 0;
+    }
+    .t3-sig-name {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #222;
       cursor: pointer;
+      padding-left: 10px;
     }
 
     /* Page Quick Bar */
@@ -504,6 +582,7 @@
       .desktop-tools { display: none !important; }
       .mobile-bottom-bar { display: flex; }
       .section-hover-bar { display: flex; }
+      .row-del-btn { display: inline-block; }
       .zoom-pill { top: auto; bottom: 95px; right: 20px; }
     }
 
@@ -591,7 +670,7 @@
     /* Print rules */
     @media print {
       body { background: none; }
-      .top-navbar, .custom-modal-overlay, .section-hover-bar, .page-quick-bar, .mobile-bottom-bar, .zoom-pill, .mobile-export-popup { display: none !important; }
+      .top-navbar, .custom-modal-overlay, .section-hover-bar, .page-quick-bar, .mobile-bottom-bar, .zoom-pill, .mobile-export-popup, .row-del-btn, .sub-add-btn, .sub-del-btn { display: none !important; }
       .workspace { padding: 0; width: 100vw; height: auto; position: static; }
       .canvas-viewport { position: static; padding: 0; transform: none !important; }
       .cv-page {
@@ -614,7 +693,7 @@
 
   <input type="file" id="generalFileInput" accept="image/*" style="display:none;">
 
-  <!-- iOS Floating Zoom Indicator & Reset Pill -->
+  <!-- Floating Zoom Indicator Pill -->
   <div class="zoom-pill" id="zoomResetBtn" onclick="resetZoomScale()">
     <i class="fa-solid fa-magnifying-glass"></i> <span id="zoomLevelText">100% (Reset)</span>
   </div>
@@ -630,9 +709,13 @@
     </div>
 
     <div class="nav-actions">
-      <!-- Link back to Template 1 -->
+      <!-- Navigate to Template 1 (/cv/v1.html) -->
       <a href="/cv/v1.html" class="nav-btn v1-link" title="Switch to Template 1">
         <i class="fa-solid fa-arrow-left"></i> <span>Template 1</span>
+      </a>
+      <!-- Navigate to Template 2 (/cv/v2) -->
+      <a href="/cv/v2" class="nav-btn v2-link" title="Switch to Template 2">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Template 2</span>
       </a>
 
       <!-- Desktop Only Controls -->
@@ -671,7 +754,7 @@
 
           <div class="sortable-section-list">
             
-            <!-- Top Header (Title + Contact + Passport Photo) -->
+            <!-- Top Header -->
             <div class="t3-header">
               <div class="t3-center-titles">
                 <div class="t3-main-title" onclick="openTextEditor(this)">CURRICULUM VITÆ</div>
@@ -697,11 +780,12 @@
             <!-- Career Objective -->
             <div class="t3-section-wrapper" data-title="CAREER OBJECTIVE">
               <div class="section-hover-bar">
-                <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕</button>
+                <button class="sec-btn" onclick="addBulletItem(this)">+ Bullet</button>
+                <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕ Del</button>
               </div>
               <div class="t3-sec-title" onclick="openTextEditor(this)">CAREER OBJECTIVE</div>
               <div class="t3-blue-bar"></div>
-              <div class="t3-content" onclick="openTextEditor(this)">
+              <div class="t3-content content-box" onclick="openTextEditor(this)">
                 Looking for hard and challenging job where I will have the scope to utilize my potentiality, creativity, adaptability and skill to do something innovative and from where I will be able to enhance my knowledge.
               </div>
             </div>
@@ -709,82 +793,132 @@
             <!-- Educational Qualification -->
             <div class="t3-section-wrapper" data-title="EDUCATIONAL QUALIFICATION">
               <div class="section-hover-bar">
-                <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕</button>
+                <button class="sec-btn" onclick="addDegreeSubBlock(this)">+ Sub-Block</button>
+                <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕ Del</button>
               </div>
               <div class="t3-sec-title" onclick="openTextEditor(this)">EDUCATIONAL QUALIFICATION</div>
               <div class="t3-blue-bar"></div>
 
-              <div class="t3-content">
+              <div class="t3-content sub-blocks-container">
                 <!-- HSC Block -->
                 <div class="t3-sub-block">
                   <div class="t3-sub-title-row">
-                    <i class="fa-solid fa-folder-open" style="color:#009fe3; font-size:12px;"></i>
-                    <span onclick="openTextEditor(this)">Higher Secondary Certificate (HSC)</span>
+                    <span onclick="openTextEditor(this)">📁 Higher Secondary Certificate (HSC)</span>
+                    <div class="sub-block-actions">
+                      <button class="sub-add-btn" onclick="addTableRowToBlock(this)">+ Row</button>
+                      <button class="sub-del-btn" onclick="deleteSubBlock(this)">✕</button>
+                    </div>
                   </div>
-                  <table class="t3-data-table">
-                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Institution</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Gopalpur Degree College</td></tr>
-                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Board</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Rajshahi</td></tr>
-                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Group</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Science</td></tr>
-                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Result</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Appeared</td></tr>
-                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Year of Passing</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">2026</td></tr>
+                  <table class="t3-data-table sortable-rows">
+                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Institution</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Gopalpur Degree College</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Board</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Rajshahi</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Group</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Science</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Result</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Appeared</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Year of Passing</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">2026</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
                   </table>
                 </div>
 
                 <!-- SSC Block -->
                 <div class="t3-sub-block">
                   <div class="t3-sub-title-row">
-                    <i class="fa-solid fa-folder-open" style="color:#009fe3; font-size:12px;"></i>
-                    <span onclick="openTextEditor(this)">Secondary School Certificate (SSC)</span>
+                    <span onclick="openTextEditor(this)">📁 Secondary School Certificate (SSC)</span>
+                    <div class="sub-block-actions">
+                      <button class="sub-add-btn" onclick="addTableRowToBlock(this)">+ Row</button>
+                      <button class="sub-del-btn" onclick="deleteSubBlock(this)">✕</button>
+                    </div>
                   </div>
-                  <table class="t3-data-table">
-                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Institution</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Lalpur Srisundori Pilot Model High School</td></tr>
-                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Board</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Rajshahi</td></tr>
-                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Group</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Science</td></tr>
-                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Result</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">GPA 4.44 (Out of 5.00)</td></tr>
-                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Year of Passing</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">2024</td></tr>
+                  <table class="t3-data-table sortable-rows">
+                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Institution</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Lalpur Srisundori Pilot Model High School</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Board</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Rajshahi</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Group</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Science</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Result</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">GPA 4.44 (Out of 5.00)</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Year of Passing</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">2024</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
                   </table>
                 </div>
               </div>
             </div>
 
-            <!-- Computer Literacy & Work Experience (Part 1) -->
+            <!-- Computer Literacy & Skills -->
             <div class="t3-section-wrapper" data-title="COMPUTER LITERACY (ICT) AND OTHER SKILL">
               <div class="section-hover-bar">
-                <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕</button>
+                <button class="sec-btn" onclick="addBulletItem(this)">+ Bullet</button>
+                <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕ Del</button>
               </div>
               <div class="t3-sec-title" onclick="openTextEditor(this)">COMPUTER LITERACY (ICT) AND OTHER SKILL</div>
               <div class="t3-blue-bar"></div>
 
-              <div class="t3-content">
+              <div class="t3-content bullet-items-container">
                 <div class="t3-bullet-item">
                   <span class="t3-diamond">❖</span>
                   <div>
-                    <span onclick="openTextEditor(this)">Office Application Course,, Gmail and Internet Browsing.</span><br>
-                    <span style="font-size:11px; color:#555;" onclick="openTextEditor(this)">(Computer Knowledge is good)</span>
+                    <span onclick="openTextEditor(this)">Office Application Course,, Gmail and Internet Browsing.</span>
+                    <div style="font-size:11px; color:#555;" onclick="openTextEditor(this)">(Computer Knowledge is good)</div>
                   </div>
+                  <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Work Experience (All 3 Fit Comfortably on Page 1) -->
+            <div class="t3-section-wrapper" data-title="WORK EXPERIENCE">
+              <div class="section-hover-bar">
+                <button class="sec-btn" onclick="addOrgSubBlock(this)">+ Org Block</button>
+                <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕ Del</button>
+              </div>
+              <div class="t3-sec-title" onclick="openTextEditor(this)">WORK EXPERIENCE</div>
+              <div class="t3-blue-bar"></div>
+
+              <div class="t3-content sub-blocks-container">
+                <!-- Org 1 -->
+                <div class="t3-sub-block">
+                  <div class="t3-sub-title-row">
+                    <span onclick="openTextEditor(this)">🏢 Organization Name: 6 Forty Restaurant</span>
+                    <div class="sub-block-actions">
+                      <button class="sub-add-btn" onclick="addTableRowToBlock(this)">+ Row</button>
+                      <button class="sub-del-btn" onclick="deleteSubBlock(this)">✕</button>
+                    </div>
+                  </div>
+                  <table class="t3-data-table sortable-rows">
+                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Designation</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Assistant Manager</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Duration</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">1 Month</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                  </table>
                 </div>
 
-                <div style="margin-top: 10px;">
-                  <div style="font-weight:700; font-size:12px; margin-bottom:4px;" onclick="openTextEditor(this)">Organization Name: 6 Forty Restaurant</div>
-                  <div style="margin-left: 14px;">
-                    <div onclick="openTextEditor(this)">Designation: Assistant Manager</div>
-                    <div onclick="openTextEditor(this)">Duration: 1 Month</div>
+                <!-- Org 2 -->
+                <div class="t3-sub-block">
+                  <div class="t3-sub-title-row">
+                    <span onclick="openTextEditor(this)">🏢 Organization Name: Robi Axiata Ltd.</span>
+                    <div class="sub-block-actions">
+                      <button class="sub-add-btn" onclick="addTableRowToBlock(this)">+ Row</button>
+                      <button class="sub-del-btn" onclick="deleteSubBlock(this)">✕</button>
+                    </div>
                   </div>
+                  <table class="t3-data-table sortable-rows">
+                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Designation</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">B.P</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Duration</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">3 Month</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                  </table>
                 </div>
 
-                <div style="margin-top: 8px;">
-                  <div style="font-weight:700; font-size:12px; margin-bottom:4px;" onclick="openTextEditor(this)">Organization Name: Robi Axiata Ltd.</div>
-                  <div style="margin-left: 14px;">
-                    <div onclick="openTextEditor(this)">Designation: B.P</div>
-                    <div onclick="openTextEditor(this)">Duration: 3 Month</div>
+                <!-- Org 3 (Included on Page 1) -->
+                <div class="t3-sub-block">
+                  <div class="t3-sub-title-row">
+                    <span onclick="openTextEditor(this)">🏢 Organization Name: British American Tobacco Ltd.</span>
+                    <div class="sub-block-actions">
+                      <button class="sub-add-btn" onclick="addTableRowToBlock(this)">+ Row</button>
+                      <button class="sub-del-btn" onclick="deleteSubBlock(this)">✕</button>
+                    </div>
                   </div>
+                  <table class="t3-data-table sortable-rows">
+                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Designation</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">B.P</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                    <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Duration</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">2 Month</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                  </table>
                 </div>
               </div>
             </div>
 
           </div>
 
-          <div style="text-align:center; font-size:10px; color:#999; margin-top:auto; padding-top:10px;">
+          <div style="text-align:center; font-size:10px; color:#999; margin-top:auto; padding-top:6px;">
             Page 1
           </div>
         </div>
@@ -799,60 +933,53 @@
 
           <div class="sortable-section-list">
             
-            <!-- Experience Continuation -->
-            <div class="t3-section-wrapper" data-title="WORK EXPERIENCE (CONT.)">
-              <div class="t3-content">
-                <div style="font-weight:700; font-size:12px; margin-bottom:4px;" onclick="openTextEditor(this)">Organization Name: British American Tobacco Ltd.</div>
-                <div style="margin-left: 14px;">
-                  <div onclick="openTextEditor(this)">Designation: B.P</div>
-                  <div onclick="openTextEditor(this)">Duration: 2 Month</div>
-                </div>
-              </div>
-            </div>
-
             <!-- Language Proficiency -->
             <div class="t3-section-wrapper" data-title="LANGUAGE PROFICIENCY">
               <div class="section-hover-bar">
-                <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕</button>
+                <button class="sec-btn" onclick="addBulletItem(this)">+ Bullet</button>
+                <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕ Del</button>
               </div>
               <div class="t3-sec-title" onclick="openTextEditor(this)">LANGUAGE PROFICIENCY</div>
               <div class="t3-blue-bar"></div>
 
-              <div class="t3-content">
+              <div class="t3-content bullet-items-container">
                 <div class="t3-bullet-item">
                   <span class="t3-diamond">❖</span>
                   <span onclick="openTextEditor(this)">Bengali (Mother Tongue)</span>
+                  <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
                 </div>
                 <div class="t3-bullet-item">
                   <span class="t3-diamond">❖</span>
                   <span onclick="openTextEditor(this)">English</span>
+                  <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
                 </div>
               </div>
             </div>
 
-            <!-- Personal Information -->
+            <!-- Personal Information (Aligned Table) -->
             <div class="t3-section-wrapper" data-title="PERSONAL INFORMATION">
               <div class="section-hover-bar">
-                <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕</button>
+                <button class="sec-btn" onclick="addTableRowToSection(this)">+ Row</button>
+                <button class="sec-btn sec-btn-del" onclick="deleteSection(this)">✕ Del</button>
               </div>
               <div class="t3-sec-title" onclick="openTextEditor(this)">PERSONAL INFORMATION</div>
               <div class="t3-blue-bar"></div>
 
               <div class="t3-content">
-                <table class="t3-data-table" style="margin-left:0; width:100%;">
-                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Name</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Hemel Ahmed</td></tr>
-                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Father's Name</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Late. S.M Sahinul Islam</td></tr>
-                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Mother's Name</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Mst. Hira Begum</td></tr>
-                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Date of Birth</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">17 August 2009</td></tr>
-                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Present & Permanent Address</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Vill: Balitita Islampur, P.O: Lalpur, P.S: Lalpur, Dist: Natore</td></tr>
-                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Gender</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Male</td></tr>
-                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Mobile</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">01845-167570</td></tr>
-                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Blood group</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">B (Positive)</td></tr>
-                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Religion</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Islam</td></tr>
-                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Marital status</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Unmarried</td></tr>
-                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Nationality</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Bangladeshi (By Birth)</td></tr>
-                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Height</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">5.04 ft</td></tr>
-                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Weight</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">53 kg</td></tr>
+                <table class="t3-data-table sortable-rows">
+                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Name</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Hemel Ahmed</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Father's Name</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Late. S.M Sahinul Islam</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Mother's Name</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Mst. Hira Begum</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Date of Birth</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">17 August 2009</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Present & Permanent Address</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Vill: Balitita Islampur, P.O: Lalpur, P.S: Lalpur, Dist: Natore</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Gender</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Male</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Mobile</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">01845-167570</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Blood group</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">B (Positive)</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Religion</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Islam</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Marital status</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Unmarried</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Nationality</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Bangladeshi (By Birth)</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Height</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">5.04 ft</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+                  <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Weight</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">53 kg</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
                 </table>
               </div>
             </div>
@@ -866,19 +993,27 @@
                 I do hereby declare that the above information is true and correct to the best of my knowledge.
               </div>
 
-              <!-- Signature Area -->
-              <div class="t3-signature-area">
-                <div style="font-size:12px; font-weight:700;" onclick="openTextEditor(this)">Signature</div>
-                <div class="t3-sig-line" onclick="openSignatureChoiceModal()">
-                  <div class="t3-sig-font" id="sigTextDisplay">(Hemel)</div>
-                  <img src="" id="sigImgDisplay" style="display:none; max-height:40px; max-width:140px; object-fit:contain;" alt="Signature">
+              <!-- Corrected Signature Area: Signature on top, line in middle, name below -->
+              <div class="t3-signature-container">
+                <div class="t3-sig-title" onclick="openTextEditor(this)">Signature</div>
+                
+                <!-- Signature itself (ON TOP of the line) -->
+                <div class="t3-signature-box" onclick="openSignatureChoiceModal()" title="Click to edit or upload signature">
+                  <div class="t3-sig-font" id="sigTextDisplay">Hemel</div>
+                  <img src="" id="sigImgDisplay" class="t3-sig-img" style="display:none;" alt="Signature">
                 </div>
+                
+                <!-- Dotted Line (In the middle) -->
+                <div class="t3-sig-line"></div>
+                
+                <!-- Name below the line -->
+                <div class="t3-sig-name" onclick="openTextEditor(this)">(Hemel)</div>
               </div>
             </div>
 
           </div>
 
-          <div style="text-align:center; font-size:10px; color:#999; margin-top:auto; padding-top:10px;">
+          <div style="text-align:center; font-size:10px; color:#999; margin-top:auto; padding-top:6px;">
             Page 2
           </div>
         </div>
@@ -896,6 +1031,10 @@
     <button class="mob-action-btn" onclick="openMobilePhotoChoiceModal()">
       <i class="fa-solid fa-camera"></i>
       <span>Photo</span>
+    </button>
+    <button class="mob-action-btn" onclick="openAddSectionModal('page-1')">
+      <i class="fa-solid fa-layer-group"></i>
+      <span>Add Sec</span>
     </button>
     <button class="mob-action-btn" onclick="addNewPage()">
       <i class="fa-solid fa-file-circle-plus"></i>
@@ -919,11 +1058,11 @@
   <div class="custom-modal-overlay" id="mobilePhotoChoiceModal">
     <div class="custom-modal-card" style="width:380px;">
       <div class="modal-head">
-        <span><i class="fa-solid fa-images"></i> Select Image To Edit</span>
+        <span><i class="fa-solid fa-images"></i> Select Item To Update</span>
         <button onclick="closeCustomModal('mobilePhotoChoiceModal')">✕</button>
       </div>
       <div class="modal-body" style="text-align:center; padding: 25px 20px;">
-        <p style="font-size:13px; color:#475569; margin-bottom: 18px;">Which item would you like to update?</p>
+        <p style="font-size:13px; color:#475569; margin-bottom: 18px;">Which image would you like to update?</p>
         <div style="display:flex; gap:12px; justify-content:center;">
           <button class="nav-btn" style="background:#009fe3; flex:1; justify-content:center;" onclick="closeCustomModal('mobilePhotoChoiceModal'); openPhotoEditor('profile')">
             <i class="fa-solid fa-user"></i> Profile Photo
@@ -1056,7 +1195,7 @@
 
     workspaceContainer.addEventListener('touchstart', (e) => {
       if (isSortingActive) return;
-      if (e.target.closest('button, input, .modal-actions, .dropdown-item')) return;
+      if (e.target.closest('button, input, .modal-actions, .dropdown-item, .sec-btn, .sub-add-btn, .sub-del-btn')) return;
 
       if (e.touches.length === 1) {
         isDragging = true;
@@ -1098,7 +1237,7 @@
 
     workspaceContainer.addEventListener('mousedown', (e) => {
       if (isSortingActive) return;
-      if (e.target.closest('button, input, .t3-sec-title')) return;
+      if (e.target.closest('button, input, .t3-sec-title, .t-label, .sec-btn')) return;
       isDragging = true;
       startX = e.clientX - panX;
       startY = e.clientY - panY;
@@ -1129,9 +1268,9 @@
     });
 
     // 2. SORTABLE ENGINE
-    function getSortableOptions(handleSelector) {
+    function getSortableOptions(handleSelector, groupName) {
       return {
-        group: 'shared-sections',
+        group: groupName,
         animation: 150,
         handle: handleSelector,
         ghostClass: 'sortable-ghost',
@@ -1141,12 +1280,131 @@
     }
 
     function initAllSortables() {
+      // 1. Sections sortable across pages
       document.querySelectorAll('.sortable-section-list').forEach(list => {
-        new Sortable(list, getSortableOptions('.t3-sec-title'));
+        new Sortable(list, getSortableOptions('.t3-sec-title', 'shared-t3-sections'));
+      });
+
+      // 2. Sub-blocks (Degrees / Orgs) sortable
+      document.querySelectorAll('.sub-blocks-container').forEach(list => {
+        new Sortable(list, getSortableOptions('.t3-sub-title-row', 'sub-blocks-group'));
+      });
+
+      // 3. Table Rows sortable
+      document.querySelectorAll('.sortable-rows').forEach(tbody => {
+        new Sortable(tbody, getSortableOptions('.t-label', 'table-rows-group'));
+      });
+
+      // 4. Bullet Items sortable
+      document.querySelectorAll('.bullet-items-container').forEach(list => {
+        new Sortable(list, getSortableOptions('.t3-diamond', 'bullet-items-group'));
       });
     }
 
-    // 3. UI HANDLERS & MODALS
+    // 3. ADDING DYNAMIC FIELDS & SUB-SECTIONS
+    function addTableRowToBlock(btn) {
+      const block = btn.closest('.t3-sub-block');
+      const table = block.querySelector('.sortable-rows') || block.querySelector('.t3-data-table');
+      if (table) {
+        const row = `
+          <tr>
+            <td class="t-icon">❖</td>
+            <td class="t-label" onclick="openTextEditor(this)">New Field</td>
+            <td class="t-sep">:</td>
+            <td class="t-val" onclick="openTextEditor(this)">Details</td>
+            <td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
+          </tr>
+        `;
+        table.insertAdjacentHTML('beforeend', row);
+        initAllSortables();
+      }
+    }
+
+    function addTableRowToSection(btn) {
+      const section = btn.closest('.t3-section-wrapper');
+      const table = section.querySelector('.sortable-rows') || section.querySelector('.t3-data-table');
+      if (table) {
+        const row = `
+          <tr>
+            <td class="t-icon">❖</td>
+            <td class="t-label" onclick="openTextEditor(this)">New Item</td>
+            <td class="t-sep">:</td>
+            <td class="t-val" onclick="openTextEditor(this)">Details</td>
+            <td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td>
+          </tr>
+        `;
+        table.insertAdjacentHTML('beforeend', row);
+        initAllSortables();
+      }
+    }
+
+    function addBulletItem(btn) {
+      const section = btn.closest('.t3-section-wrapper');
+      const container = section.querySelector('.bullet-items-container') || section.querySelector('.t3-content');
+      if (container) {
+        const bullet = `
+          <div class="t3-bullet-item">
+            <span class="t3-diamond">❖</span>
+            <span onclick="openTextEditor(this)">New bullet description point</span>
+            <button class="row-del-btn" onclick="deleteRow(this)">✕</button>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', bullet);
+        initAllSortables();
+      }
+    }
+
+    function addDegreeSubBlock(btn) {
+      const container = btn.closest('.t3-section-wrapper').querySelector('.sub-blocks-container');
+      const block = `
+        <div class="t3-sub-block">
+          <div class="t3-sub-title-row">
+            <span onclick="openTextEditor(this)">📁 Degree / Exam Title</span>
+            <div class="sub-block-actions">
+              <button class="sub-add-btn" onclick="addTableRowToBlock(this)">+ Row</button>
+              <button class="sub-del-btn" onclick="deleteSubBlock(this)">✕</button>
+            </div>
+          </div>
+          <table class="t3-data-table sortable-rows">
+            <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Institution</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Institute Name</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+            <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Board</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Board Name</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+            <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Result</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Result / GPA</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+            <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Year of Passing</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Year</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+          </table>
+        </div>
+      `;
+      container.insertAdjacentHTML('beforeend', block);
+      initAllSortables();
+    }
+
+    function addOrgSubBlock(btn) {
+      const container = btn.closest('.t3-section-wrapper').querySelector('.sub-blocks-container');
+      const block = `
+        <div class="t3-sub-block">
+          <div class="t3-sub-title-row">
+            <span onclick="openTextEditor(this)">🏢 Organization Name: Company Name</span>
+            <div class="sub-block-actions">
+              <button class="sub-add-btn" onclick="addTableRowToBlock(this)">+ Row</button>
+              <button class="sub-del-btn" onclick="deleteSubBlock(this)">✕</button>
+            </div>
+          </div>
+          <table class="t3-data-table sortable-rows">
+            <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Designation</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Job Title</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+            <tr><td class="t-icon">❖</td><td class="t-label" onclick="openTextEditor(this)">Duration</td><td class="t-sep">:</td><td class="t-val" onclick="openTextEditor(this)">Duration Period</td><td><button class="row-del-btn" onclick="deleteRow(this)">✕</button></td></tr>
+          </table>
+        </div>
+      `;
+      container.insertAdjacentHTML('beforeend', block);
+      initAllSortables();
+    }
+
+    function deleteRow(btn) { btn.closest('tr, .t3-bullet-item').remove(); }
+    function deleteSubBlock(btn) { btn.closest('.t3-sub-block').remove(); }
+    function deleteSection(btn) {
+      if (confirm('Are you sure you want to delete this section?')) btn.closest('.t3-section-wrapper').remove();
+    }
+
+    // 4. UI HANDLERS & MODALS
     function toggleDropdown() { document.getElementById('downloadDropdown').classList.toggle('show'); }
     function toggleMobileExportPopup(e) { e.stopPropagation(); document.getElementById('mobileExportPopup').classList.toggle('show'); }
     function openMobilePhotoChoiceModal() { document.getElementById('mobilePhotoChoiceModal').classList.add('active'); }
@@ -1298,16 +1556,12 @@
       closeCustomModal('imageStudioModal');
     }
 
-    function deleteSection(btn) {
-      if (confirm('Are you sure you want to delete this section?')) btn.closest('.t3-section-wrapper').remove();
-    }
-
     function addNewPage() {
       const count = document.querySelectorAll('.cv-page').length + 1;
       const html = `
         <div class="cv-page" id="page-${count}" onpointerdown="handlePointerDown(event, this)" onpointerup="handlePointerUp(event, this)">
           <div class="sortable-section-list"></div>
-          <div style="text-align:center; font-size:10px; color:#999; margin-top:auto; padding-top:10px;">
+          <div style="text-align:center; font-size:10px; color:#999; margin-top:auto; padding-top:6px;">
             Page ${count}
           </div>
         </div>
@@ -1317,7 +1571,7 @@
       resetZoomScale();
     }
 
-    // 4. CLEAN EXPORT ENGINE (2480x3508 HD)
+    // 5. CLEAN EXPORT ENGINE (2480x3508 HD)
     const TARGET_WIDTH = 2480;
     const TARGET_HEIGHT = 3508;
     const SCREEN_WIDTH = 794;
@@ -1334,6 +1588,8 @@
       offscreenContainer.style.zIndex = '-9999';
 
       const clone = pageElement.cloneNode(true);
+      clone.querySelectorAll('.page-quick-bar, .section-hover-bar, .row-del-btn, .sub-add-btn, .sub-del-btn').forEach(el => el.remove());
+      
       clone.style.transform = 'none';
       clone.style.margin = '0';
       clone.style.boxShadow = 'none';
