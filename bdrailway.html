@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Demo E-Ticket Template</title>
 
-<!-- ইংরেজি অক্ষরের জন্য Roboto এবং বাংলা লেখার জন্য আসল Kalpurush, SolaimanLipi ও Hind Siliguri Bold -->
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@500;600;700&display=swap" rel="stylesheet">
+<!-- আসল রেলওয়ে টিকেটের ফন্ট -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <link href="https://fonts.maateen.me/kalpurush/font.css" rel="stylesheet">
 <link href="https://fonts.maateen.me/solaiman-lipi/font.css" rel="stylesheet">
 
@@ -20,19 +20,30 @@
 }
 *{box-sizing:border-box}
 
+/* পুরো পেজের আসল ফন্ট স্টাইল */
 body{
   margin:0;
   background:#e6e9ed;
-  font-family: Roboto, 'Kalpurush', 'SolaimanLipi', 'Hind Siliguri', sans-serif;
+  font-family: Roboto, 'Kalpurush', 'SolaimanLipi', sans-serif;
   color:#222;
 }
 
-.bar{text-align:center;padding:10px;font-size:13px}
+.bar{
+  text-align:center;
+  padding:10px;
+  font-size:13px;
+  background:#dce1e6;
+  border-bottom:1px solid #c2c9d1;
+}
 .bar button{
   background:var(--g);color:#fff;border:0;border-radius:6px;
-  padding:9px 18px;font:700 14px 'Hind Siliguri',Roboto,sans-serif;
-  cursor:pointer;margin-left:8px;
+  padding:8px 16px;font:700 13.5px Roboto,'Kalpurush',sans-serif;
+  cursor:pointer;margin:0 5px;
 }
+.bar button.native{
+  background:#1a62b8;
+}
+
 .holder{margin:0 auto}
 .wrap{width:794px;transform-origin:top left}
 #page{width:794px;height:1122px;background:#fff;padding:48px 50px 0;position:relative;overflow:hidden}
@@ -83,10 +94,10 @@ body{
 .pw-dv{
   font-family:Roboto,sans-serif;
   font-size:27px;
-  font-weight:400; /* আন-বোল্ড */
+  font-weight:400;
   color:var(--g);
   line-height:0.82;
-  margin-left:-1px; /* Synesis Vincen এর দিকে সরানো */
+  margin-left:-1px;
   letter-spacing:-0.5px;
 }
 #qr{
@@ -164,25 +175,27 @@ body.x .ed:hover{background:none}
 .note ul{margin:0;padding:0;list-style:none}
 .note li{margin-bottom:2px}
 
-/* Warning & Hotline Boxes: Hind Siliguri Bold ব্যবহার করায় PDF-এ যুক্তাক্ষর ভাঙবে না */
+/* Warning & Hotline Boxes: মূল ফন্ট অক্ষুণ্ণ রেখে লেখাগুলোকে যথেষ্ট মোটা (Bold) করা হয়েছে */
 .n1,.n2{
   text-align:center;
-  font-family:'Hind Siliguri', sans-serif;
+  font-family: inherit; /* পেজের নিজস্ব ফন্ট স্টাইল */
+  font-size:13.5px;
   font-weight:700;
-  font-size:13px;
-  padding:9px 14px;
+  padding:10px 14px;
   margin-top:6px;
-  line-height:1.42;
+  line-height:1.4;
   letter-spacing:0.1px;
 }
 .n1{
   background:#e6f3e8;
   color:#e8470a;
+  text-shadow: 0.35px 0 0 #e8470a, -0.35px 0 0 #e8470a; /* মূল ফন্টকে নিখুঁতভাবে মোটা করার নিয়ম */
 }
 .n2{
   background:#fbeadb;
   color:#d3260f;
-  font-size:13.2px;
+  font-size:13.5px;
+  text-shadow: 0.35px 0 0 #d3260f, -0.35px 0 0 #d3260f; /* মূল ফন্টকে নিখুঁতভাবে মোটা করার নিয়ম */
 }
 
 /* Footer */
@@ -197,26 +210,70 @@ body.x .ed:hover{background:none}
 
 /* Modal */
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:50;padding:12px}
-.m{background:#fff;border-radius:10px;padding:18px;width:100%;max-width:380px;font-family:'Hind Siliguri',Roboto,sans-serif}
+.m{background:#fff;border-radius:10px;padding:18px;width:100%;max-width:380px;font-family:'Kalpurush',Roboto,sans-serif}
 .m h3{margin:0 0 12px;font-size:16px}
 .m label{display:block;font-size:13px;margin:10px 0 3px;color:#444}
 .m input{width:100%;padding:9px 10px;font-size:15px;border:1.5px solid #9aa;border-radius:6px}
 .m .r{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
-.m button{padding:8px 16px;border-radius:6px;border:1.5px solid var(--g);background:#fff;font:700 14px 'Hind Siliguri',Roboto;cursor:pointer}
+.m button{padding:8px 16px;border-radius:6px;border:1.5px solid var(--g);background:#fff;font:700 14px 'Kalpurush',Roboto;cursor:pointer}
 .m button.s{background:var(--g);color:#fff}
+
+/* @media print: ব্রাউজার দিয়ে প্রিন্ট/PDF সেভ করলে ১০০% ভেক্টর কোয়ালিটি */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+  html, body {
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .bar, .ov {
+    display: none !important;
+  }
+  .holder {
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .wrap {
+    transform: none !important;
+    width: 794px !important;
+    margin: 0 auto !important;
+  }
+  #page {
+    width: 794px !important;
+    height: 1122px !important;
+    padding: 48px 50px 0 !important;
+    margin: 0 auto !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+  }
+  .frame {
+    height: 1026px !important;
+  }
+}
 </style>
 </head>
 <body>
 
-<div class="bar">ডেমো টিকিট টেমপ্লেট — যেকোনো ঘরে ট্যাপ করে এডিট করুন। <button id="dl">PDF ডাউনলোড</button></div>
+<div class="bar">
+  ডেমো টিকিট টেমপ্লেট — যেকোনো ঘরে ট্যাপ করে এডিট করুন। 
+  <button id="dl">PDF ডাউনলোড</button>
+  <button id="pr" class="native" title="যুক্তবর্ণ না ভেঙে ১০০% নিখুঁত PDF পেতে এটি ব্যবহার করুন">১০০% নিখুঁত PDF / প্রিন্ট</button>
+</div>
 
 <div class="holder" id="holder">
   <div class="wrap" id="wrap">
     <div id="page">
       <div class="frame">
         <div class="hd">
-          <!-- লোগোতে ক্লিক করে সরাসরি ফাইলও নির্বাচন করা যাবে -->
-          <img class="logo" id="ticket-logo" src="https://eticket.railway.gov.bd/assets/img/home/bangladesh-railway.png" alt="Bangladesh Railway Logo" title="লোগো পরিবর্তন করতে ক্লিক করুন">
+          <!-- লোগো: demo-logo.png লোড না হলে ব্যাকআপ হিসেবে রেলওয়ের সিল দেখাবে -->
+          <img class="logo" id="ticket-logo" src="demo-logo.png" alt="Bangladesh Railway Logo" title="ছবি পরিবর্তন করতে ক্লিক করুন">
           <input type="file" id="logo-uploader" accept="image/*" style="display:none">
           
           <div class="ttl">
@@ -230,11 +287,11 @@ body.x .ed:hover{background:none}
               <span class="pw-lbl">Powered by</span>
               <div class="pw-inner">
                 <div class="pw-txt">
-                  <div>Shohoz</div>
+                  <div>Demo</div>
                   <div>Synesis</div>
                   <div>Vincen</div>
                 </div>
-                <div class="pw-dv">JV</div>
+                <div class="pw-dv">DV</div>
               </div>
             </div>
             <div id="qr" class="ed" title="QR"></div>
@@ -273,11 +330,11 @@ body.x .ed:hover{background:none}
           </div>
         </div>
 
-        <!-- হটলাইন বক্স: বোল্ড এবং 'যোগাযোগ করুন।' দ্বিতীয় লাইনে -->
-        <div class="n1">রেলওয়ে সেবার জন্য ১৩১ এবং আইন শৃঙ্খলা বিষয়ক সহায়তার জন্য রেলওয়ে পুলিশ হটলাইন ০১৩২০১৭৭৫৯৮ নম্বরে<br>যোগাযোগ করুন।</div>
+        <!-- মূল ফন্টে যথেষ্ট মোটা ও বোল্ড হটলাইন বক্স -->
+        <div class="n1"><b>রেলওয়ে সেবার জন্য ১৩১ এবং আইন শৃঙ্খলা বিষয়ক সহায়তার জন্য রেলওয়ে পুলিশ হটলাইন ০১৩২০১৭৭৫৯৮ নম্বরে<br>যোগাযোগ করুন।</b></div>
         
-        <!-- ধূমপান বক্স: বোল্ড -->
-        <div class="n2">"ধূমপান ও তামাকজাত দ্রব্য ব্যবহার হইতে বিরত থাকুন, ইহা শাস্তিযোগ্য অপরাধ"</div>
+        <!-- মূল ফন্টে যথেষ্ট মোটা ও বোল্ড ধূমপান বক্স -->
+        <div class="n2"><b>"ধূমপান ও তামাকজাত দ্রব্য ব্যবহার হইতে বিরত থাকুন, ইহা শাস্তিযোগ্য অপরাধ"</b></div>
 
         <div class="ft">
           <div>Wishing you a pleasant and safe journey-<b>Bangladesh Railway</b></div>
@@ -392,9 +449,15 @@ function render(){
   document.getElementById('qr').innerHTML=q.createImgTag(4,2);
 }
 
-// Logo click upload
+// লোগো যাতে গায়েব না হয় তার জন্য ব্যাকআপ
+const fallbackLogoSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="%23fff" stroke="%23b8860b" stroke-width="4"/><circle cx="50" cy="50" r="39" fill="%230b7d3f" stroke="%23b8860b" stroke-width="1.5"/><circle cx="50" cy="50" r="31" fill="%23fff"/><path d="M30 46 h40 v20 h-40 z" fill="%230b7d3f"/><circle cx="40" cy="66" r="4.5" fill="%23b8860b"/><circle cx="60" cy="66" r="4.5" fill="%23b8860b"/><path d="M35 52 h30 v6 h-30 z" fill="%23fff"/><path d="M22 76 h56 M30 72 l-4 8 M70 72 l4 8" stroke="%23b8860b" stroke-width="3" stroke-linecap="round"/></svg>`;
+
 const logoEl = document.getElementById('ticket-logo');
 const uploader = document.getElementById('logo-uploader');
+
+logoEl.onerror = function() {
+  this.src = fallbackLogoSvg;
+};
 logoEl.onclick = () => uploader.click();
 uploader.onchange = (e) => {
   const file = e.target.files[0];
@@ -450,11 +513,15 @@ addEventListener('resize',fit);
 
 const r=n=>{let s='';while(s.length<n)s+=Math.floor(Math.random()*10);return s};
 
-// পিডিএফ রেন্ডারিং ফিক্স (স্কেল রিসেট ও সেফ এক্সপোর্ট)
+// অপশন ১: ব্রাউজারের নেটিভ প্রিন্ট
+document.getElementById('pr').onclick=()=>{
+  window.print();
+};
+
+// অপশন ২: সরাসরি PDF ডাউনলোড
 document.getElementById('dl').onclick=async()=>{
   document.body.classList.add('x');
   
-  // পিডিএফ তৈরির সময় রেসপন্সিভ স্কেল সাময়িক রিসেট করা
   const prevTransform = wrap.style.transform;
   const prevWidth = holder.style.width;
   const prevHeight = holder.style.height;
@@ -463,30 +530,24 @@ document.getElementById('dl').onclick=async()=>{
   holder.style.height = '1122px';
 
   await document.fonts.ready;
-  
-  // সমস্ত ছবি লোড সম্পন্ন হওয়া নিশ্চিত করা
-  await Promise.all(Array.from(document.images).map(img => {
-    if (img.complete) return Promise.resolve();
-    return new Promise(res => { img.onload = img.onerror = res; });
-  }));
 
   const fn=`DEMO_TICKET${r(14)}-${r(4)}-${r(6)}-${r(5)}-${r(18)}.pdf`;
   try{
     await html2pdf().set({
-      margin:0,
-      filename:fn,
-      image:{type:'jpeg',quality:0.98},
-      html2canvas:{
-        scale:2,
-        useCORS:true,
-        allowTaint:true,
-        scrollX:0,
-        scrollY:0
+      margin: 0,
+      filename: fn,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        foreignObjectRendering: true,
+        scrollX: 0,
+        scrollY: 0
       },
-      jsPDF:{unit:'px',format:[794,1122],orientation:'portrait',hotfixes:['px_scaling']}
+      jsPDF: { unit: 'px', format: [794, 1122], orientation: 'portrait', hotfixes: ['px_scaling'] }
     }).from(document.getElementById('page')).save();
   } finally {
-    // আগের স্ক্রিন স্কেল ফিরিয়ে আনা
     wrap.style.transform = prevTransform;
     holder.style.width = prevWidth;
     holder.style.height = prevHeight;
