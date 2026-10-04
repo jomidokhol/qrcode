@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Demo E-Ticket Template</title>
+
+<!-- ইংরেজি অক্ষরের জন্য Roboto এবং বাংলা লেখার জন্য Kalpurush ও SolaimanLipi -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.maateen.me/kalpurush/font.css" rel="stylesheet">
+<link href="https://fonts.maateen.me/solaiman-lipi/font.css" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<style>
+:root{
+  --g: #087d3f;
+  --g-border: #087d3f;
+  --title-blue: #1a62b8;
+}
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:#e6e9ed;
+  font-family: Roboto, 'Kalpurush', 'SolaimanLipi', sans-serif;
+  color:#222;
+}
+
+.bar{text-align:center;padding:10px;font-size:13px}
+.bar button{
+  background:var(--g);color:#fff;border:0;border-radius:6px;
+  padding:9px 18px;font:700 14px 'Kalpurush',Roboto,sans-serif;
+  cursor:pointer;margin-left:8px;
+}
+.holder{margin:0 auto}
+.wrap{width:794px;transform-origin:top left}
+#page{width:794px;height:1122px;background:#fff;padding:48px 50px 0;position:relative;overflow:hidden}
+.frame{border:4px solid var(--g-border);height:1026px;padding:11px 13px;position:relative}
+
+/* Header Area */
+.hd{position:relative;height:146px}
+.logo{position:absolute;left:2px;top:0;width:52px;height:52px;object-fit:contain}
+.ttl{text-align:center;padding-top:2px;color:var(--title-blue)}
+.ttl .en{font:700 20.5px Roboto,sans-serif;letter-spacing:0.2px}
+.ttl .bn{font-family:'Kalpurush','SolaimanLipi',sans-serif;font-weight:700;font-size:19.5px;margin-top:-1px}
+
+/* Top Right: Powered by + QR Code */
+.top-right{
+  position:absolute;
+  right:0;
+  top:0;
+  width:86px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+}
+.pw-box{
+  margin-bottom:6px;
+  width:100%;
+}
+.pw-lbl{
+  font-size:8px;
+  color:#555;
+  line-height:1.1;
+  margin-bottom:2px;
+  display:block;
+  font-family:Roboto,sans-serif;
+}
+.pw-inner{
+  display:flex;
+  align-items:flex-end;
+  justify-content:flex-start;
+  gap:0px; /* একদম কাছাকাছি নেওয়ার জন্য গ্যাপ কমানো হয়েছে */
+}
+.pw-txt{
+  font-family:Roboto,sans-serif;
+  font-size:9.5px;
+  line-height:1.15;
+  color:var(--g);
+  font-weight:500;
+}
+/* DV লেখাটি আন-বোল্ড (regular) এবং লেখার দিকে সরানো হয়েছে */
+.pw-dv{
+  font-family:Roboto,sans-serif;
+  font-size:28px;
+  font-weight:400; /* বোল্ড সরানো হয়েছে */
+  color:var(--g);
+  line-height:0.82;
+  margin-left:-1px; /* লেখার দিকে আরো কাছে সরানো হয়েছে */
+  letter-spacing:-0.5px;
+}
+#qr{
+  width:84px;
+  height:84px;
+}
+#qr img{
+  width:84px;
+  height:84px;
+  image-rendering:pixelated;
+  display:block;
+}
+
+/* Greeting / Intro */
+.intro{
+  position:absolute;
+  left:0;
+  top:58px;
+  width:555px;
+  font-size:9.3px;
+  line-height:1.32;
+  color:#222;
+}
+.intro p{margin:0 0 6px}
+.intro .en-p{font-family:Roboto,sans-serif}
+.intro .bn-p{font-family:'Kalpurush','SolaimanLipi',sans-serif}
+
+/* Section Bars */
+.sec{
+  background:var(--g);
+  color:#fff;
+  font-weight:700;
+  font-size:14px;
+  padding:3.5px 8px;
+  letter-spacing:0.1px;
+}
+
+/* Tables */
+table{width:100%;border-collapse:collapse;border:1px solid #bfbfbf;margin-bottom:12px}
+td{
+  border-top:1px solid #c7c7c7;
+  border-left:1px solid #c7c7c7;
+  padding:2px 8px;
+  font-size:10.4px;
+  height:17.8px;
+  line-height:1.2;
+  width:50%;
+  color:#111;
+}
+td.v{border-left:1px solid #959595}
+tr.b td{font-weight:700}
+td.fn{
+  font-size:7.6px;
+  height:14px;
+  color:#111;
+  padding:2px 8px;
+  line-height:1.2;
+}
+
+.ed{cursor:pointer}
+.ed:hover{background:#fff6c9}
+body.x .ed:hover{background:none}
+
+/* Note Section */
+.note{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  font-size:10.5px;
+  line-height:1.36;
+  padding:2px 6px 4px;
+  gap:0 14px;
+  color:#111;
+}
+.note p{margin:0 0 4px;font-size:11px}
+.note ul{margin:0;padding:0;list-style:none}
+.note li{margin-bottom:2px}
+
+/* Warning & Hotline Boxes - ছবির মতো অতিরিক্ত গাঢ়/মোটা (Heavy Bold) */
+.n1,.n2{
+  text-align:center;
+  font-size:13px;
+  padding:10px 14px;
+  margin-top:6px;
+  line-height:1.42;
+  font-family:'Kalpurush','SolaimanLipi',sans-serif;
+  letter-spacing:0.15px;
+}
+.n1{
+  background:#e6f3e8;
+  color:#e8470a;
+  font-weight:800;
+  -webkit-text-stroke:0.35px #e8470a; /* ছবির মতো অতিরিক্ত মোটা টেক্সট */
+  text-shadow:0 0 0.2px #e8470a;
+}
+.n2{
+  background:#fbeadb;
+  color:#d3260f;
+  font-size:13.2px;
+  font-weight:800;
+  -webkit-text-stroke:0.35px #d3260f; /* ছবির মতো অতিরিক্ত মোটা টেক্সট */
+  text-shadow:0 0 0.2px #d3260f;
+}
+
+/* Footer */
+.ft{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  padding:12px 6px 0;
+  font-size:11px;
+  color:#222;
+}
+.ft b{display:block;font-size:13px;font-weight:700;color:#000;margin-top:2px}
+
+/* Modal */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:50;padding:12px}
+.m{background:#fff;border-radius:10px;padding:18px;width:100%;max-width:380px;font-family:'Kalpurush',Roboto,sans-serif}
+.m h3{margin:0 0 12px;font-size:16px}
+.m label{display:block;font-size:13px;margin:10px 0 3px;color:#444}
+.m input{width:100%;padding:9px 10px;font-size:15px;border:1.5px solid #9aa;border-radius:6px}
+.m .r{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.m button{padding:8px 16px;border-radius:6px;border:1.5px solid var(--g);background:#fff;font:700 14px 'Kalpurush',Roboto;cursor:pointer}
+.m button.s{background:var(--g);color:#fff}
+</style>
+</head>
+<body>
+
+<div class="bar">ডেমো টিকিট টেমপ্লেট — যেকোনো ঘরে ট্যাপ করে এডিট করুন। <button id="dl">PDF ডাউনলোড</button></div>
+
+<div class="holder" id="holder">
+  <div class="wrap" id="wrap">
+    <div id="page">
+      <div class="frame">
+        <div class="hd">
+          <img class="logo" src="demo-logo.png" alt="Bangladesh Railway Logo">
+          
+          <div class="ttl">
+            <div class="en">BANGLADESH RAILWAY</div>
+            <div class="bn">বাংলাদেশ রেলওয়ে</div>
+          </div>
+
+          <!-- Powered by Demo Synesis Vincen DV + QR Block -->
+          <div class="top-right">
+            <div class="pw-box">
+              <span class="pw-lbl">Powered by</span>
+              <div class="pw-inner">
+                <div class="pw-txt">
+                  <div>Demo</div>
+                  <div>Synesis</div>
+                  <div>Vincen</div>
+                </div>
+                <div class="pw-dv">DV</div>
+              </div>
+            </div>
+            <div id="qr" class="ed" title="QR"></div>
+          </div>
+
+          <div class="intro">
+            <p class="en-p">Dear <span id="dn"></span>,<br>Your request to book e-ticket for your journey in Bangladesh Railway was successful. You can travel on the train mentioned in the ticket subject to showing your NID or Photo ID card. The details of your e-ticket are as below:</p>
+            <p class="bn-p">বাংলাদেশ রেলওয়েতে ভ্রমণের জন্য আপনার চাহিত ই-টিকিট সফলভাবে প্রদান করা হয়েছে। আপনার এনআইডি কিংবা ছবি সম্বলিত আইডি দেখানো সাপেক্ষে আপনি টিকিটে বর্ণিত ট্রেনে যাত্রা করতে পারবেন। ই-টিকিটের বিস্তারিত নিম্নে দেয়া হল:-</p>
+          </div>
+        </div>
+
+        <div class="sec">Journey Information (যাত্রার তথ্য)</div>
+        <table id="tj"></table>
+
+        <div class="sec">Passenger Information (যাত্রীর তথ্য)</div>
+        <table id="tp" style="margin-bottom:4px"></table>
+
+        <div class="note">
+          <div>
+            <p>Please Note:-</p>
+            <ul>
+              <li>• Carrying NID or Photo ID while travelling is mandatory for each passenger.</li>
+              <li>• You can carry either soft copy or printed copy of your e-ticket while travelling.</li>
+              <li>• No need to print e-ticket from the counter.</li>
+              <li>• It is mandatory for children between 3 to 12 years old to purchase minor tickets.</li>
+            </ul>
+          </div>
+          <div>
+            <p>খেয়াল করুনঃ-</p>
+            <ul>
+              <li>- ভ্রমণের সময় প্রত্যেক যাত্রী এনআইডি/ ছবি সম্বলিত পরিচয়পত্র সাথে রাখা বাধ্যতামূলক।</li>
+              <li>- ট্রেন ভ্রমণে আপনার ই-টিকিটের প্রিন্টেড কপি অথবা অনলাইন কপি সাথে রাখুন।</li>
+              <li>- কাউন্টার থেকে টিকিট প্রিন্ট করার প্রয়োজন নেই।</li>
+              <li>- তিন থেকে বারো বছরের শিশুদের জন্য অপ্রাপ্ত বয়স্ক টিকিট ক্রয় বাধ্যতামূলক।</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- অতিরিক্ত গাঢ় এবং নিচে 'যোগাযোগ করুন।' সহ হটলাইন বক্স -->
+        <div class="n1">রেলওয়ে সেবার জন্য ১৩১ এবং আইন শৃঙ্খলা বিষয়ক সহায়তার জন্য রেলওয়ে পুলিশ হটলাইন ০১৩২০১৭৭৫৯৮ নম্বরে<br>যোগাযোগ করুন।</div>
+        
+        <!-- অতিরিক্ত গাঢ় ধূমপান বক্স -->
+        <div class="n2">"ধূমপান ও তামাকজাত দ্রব্য ব্যবহার হইতে বিরত থাকুন, ইহা শাস্তিযোগ্য অপরাধ"</div>
+
+        <div class="ft">
+          <div>Wishing you a pleasant and safe journey-<b>Bangladesh Railway</b></div>
+          <div>আপনার ভ্রমণ সুখকর ও নিরাপদ হোক, এই কামনায়-<b>বাংলাদেশ রেলওয়ে</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="ov">
+  <div class="m" role="dialog" aria-modal="true">
+    <h3 id="mt"></h3>
+    <div id="mf"></div>
+    <div class="r">
+      <button id="mc">বাতিল</button>
+      <button class="s" id="ms">সেভ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const J=[
+  ['Issue Date & Time','প্রদানের তারিখ ও সময়','issue','dt'],
+  ['Journey Date & Time','যাত্রার তারিখ ও সময়','jdate','dt'],
+  ['Train Name & Number','ট্রেন নম্বর ও নাম','train','t'],
+  ['From Station','প্রারম্ভিক স্টেশন','from','t'],
+  ['To Station','গন্তব্য স্টেশন','to','t'],
+  ['Class Name','শ্রেণির নাম','cls','t'],
+  ['Coach Name / Seat(s)','কোচের নাম / আসন','seat','t'],
+  ['No. of Seats','আসন সংখ্যা','ns','n'],
+  ['No. of Adult Passenger(s)','প্রাপ্তবয়স্ক যাত্রীর সংখ্যা','na','n'],
+  ['No. of Senior Citizen Passenger(s)','প্রবীণ যাত্রীর সংখ্যা','nsr','n'],
+  ['No. of Child Passenger(s)','শিশু যাত্রীর সংখ্যা','nc','n'],
+  ['Fare','ভাড়া','fare','f'],
+  ['VAT','ভ্যাট','vat','f'],
+  ['Service Charge','সেবা খরচ','sc','f'],
+  ['Total Fare','মোট ভাড়া','tot','f']
+];
+
+const P=[
+  ['Passenger Name','যাত্রীর নাম','name','t'],
+  ['Identification Type','পরিচয়পত্র ধরণ','idt','t'],
+  ['Identification Number','পরিচয়পত্র নম্বর','idn','m'],
+  ['Mobile Number','মোবাইল নম্বর','mob','m'],
+  ['PNR Number','পিএনআর নম্বর','pnr','p']
+];
+
+const L={};
+[...J,...P].forEach(r=>L[r[2]]=r[0]+' ('+r[1]+')');
+L.cpnr='Custom PNR';
+
+const S={
+  issue:'02-10-2026 16:48',
+  jdate:'03-10-2026 06:00',
+  train:'SAGARDARI EXPRESS [762] (সাগরদাঁড়ি এক্সপ্রেস [৭৬২])',
+  from:'Rajshahi (রাজশাহী)',
+  to:'Azim Nagar (আজিম নগর)',
+  cls:'S_CHAIR (শো_চেয়ার)',
+  seat:'GA-101 (গ-১০১)',
+  ns:'1',
+  na:'1',
+  nsr:'0',
+  nc:'0',
+  fare:'60.00',
+  vat:'0.00',
+  sc:'20.00',
+  tot:'80.00',
+  name:'MST AZMIRA BEGUM',
+  idt:'NID (এন আই ডি)',
+  idn:'596441',
+  mob:'018615',
+  pnr:'6ABF8C09A7A7F',
+  cpnr:''
+};
+
+const bn=s=>String(s).replace(/\d/g,d=>'০১২৩৪৫৬৭৮৯'[d]);
+const mask=v=>v.length>6?v.slice(0,3)+'*'.repeat(v.length-6)+v.slice(-3):v;
+
+function fmt(k,t){
+  const v=S[k];
+  if(t=='dt'||t=='n')return v+' ('+bn(v)+')';
+  if(t=='f'){const n=(+v||0).toFixed(2);return 'BDT '+n+' ('+bn(n)+' টাকা)'}
+  if(t=='m'){
+    if(k==='idn') return '596****541 (৫৯৬****৫৪১)';
+    if(k==='mob') return '018*****615 (০১৮*****৬১৫)';
+    const m=mask(v);return m+' ('+bn(m)+')';
+  }
+  return v;
+}
+
+function build(id,rows,foot){
+  let h='';
+  rows.forEach(([en,b,k,t])=>{
+    const bold=(k=='tot'||k=='mob'||k=='pnr')?' class="b"':'';
+    const star=(k=='tot')?'**':'';
+    h+=`<tr${bold}><td>${en} (${b})${star}</td><td class="v ed" data-k="${k}" data-t="${t}" tabindex="0"></td></tr>`;
+  });
+  if(foot) h+='<tr><td class="fn" colspan="2">** Total Fare includes BDT 50 Bedding Charges per seat for AC_B and F_BERTH seat classes. (এসি_বি এবং এফ_বার্থ সিট ক্লাসের প্রতি সিটে মোট ভাড়ার সাথে ৳৫০ বেডিং চার্জ অন্তর্ভুক্ত)</td></tr>';
+  document.getElementById(id).innerHTML=h;
+}
+
+build('tj',J,1);
+build('tp',P);
+
+function render(){
+  document.querySelectorAll('td.ed').forEach(td=>td.textContent=fmt(td.dataset.k,td.dataset.t));
+  document.getElementById('dn').textContent=S.name;
+  const q=qrcode(0,'M');
+  q.addData(JSON.stringify({pnr:S.pnr,custom_pnr:S.cpnr,mobile_number:S.mob}));
+  q.make();
+  document.getElementById('qr').innerHTML=q.createImgTag(4,2);
+}
+
+const ov=document.getElementById('ov'),mf=document.getElementById('mf');
+let cur=[];
+
+function openEd(keys){
+  cur=keys;
+  document.getElementById('mt').textContent=keys.length>1?'QR / PNR / মোবাইল এডিট':'এডিট করুন';
+  mf.innerHTML=keys.map(k=>`<label for="f_${k}">${L[k]}</label><input id="f_${k}" value="${S[k].replace(/"/g,'&quot;')}">`).join('');
+  ov.style.display='flex';
+  mf.querySelector('input').focus();
+}
+
+function save(){
+  cur.forEach(k=>S[k]=document.getElementById('f_'+k).value.trim());
+  if(cur.some(k=>['fare','vat','sc'].includes(k))) S.tot=String((+S.fare||0)+(+S.vat||0)+(+S.sc||0));
+  ov.style.display='none';
+  render();
+}
+
+document.addEventListener('click',e=>{
+  const c=e.target.closest('.ed');
+  if(!c)return;
+  const k=c.dataset.k;
+  openEd(!k||k=='pnr'||k=='mob'?['pnr','mob','cpnr']:[k]);
+});
+
+document.addEventListener('keydown',e=>{
+  if(e.key=='Enter'&&ov.style.display=='flex')save();
+  else if(e.key=='Escape')ov.style.display='none';
+  else if(e.key=='Enter'&&e.target.classList.contains('ed'))e.target.click();
+});
+
+document.getElementById('ms').onclick=save;
+document.getElementById('mc').onclick=()=>ov.style.display='none';
+
+const wrap=document.getElementById('wrap'),holder=document.getElementById('holder');
+function fit(){
+  const s=Math.min(1,(innerWidth-12)/794);
+  wrap.style.transform=`scale(${s})`;
+  holder.style.width=794*s+'px';
+  holder.style.height=1122*s+'px';
+}
+addEventListener('resize',fit);
+
+const r=n=>{let s='';while(s.length<n)s+=Math.floor(Math.random()*10);return s};
+document.getElementById('dl').onclick=async()=>{
+  document.body.classList.add('x');
+  await document.fonts.ready;
+  const fn=`DEMO_TICKET${r(14)}-${r(4)}-${r(6)}-${r(5)}-${r(18)}.pdf`;
+  try{
+    await html2pdf().set({
+      margin:0,
+      filename:fn,
+      image:{type:'jpeg',quality:0.98},
+      html2canvas:{scale:2,useCORS:true,scrollX:0,scrollY:0},
+      jsPDF:{unit:'px',format:[794,1122],orientation:'portrait',hotfixes:['px_scaling']}
+    }).from(document.getElementById('page')).save();
+  } finally {
+    document.body.classList.remove('x');
+  }
+};
+
+render();
+fit();
+</script>
+</body>
+</html>
