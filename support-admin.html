@@ -1,0 +1,1603 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NurTech Support Agent Control Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f1f5f9;
+      --surface: #ffffff;
+      --muted-bg: #f8fafc;
+      --ink: #0f172a;
+      --ink-2: #475569;
+      --ink-muted: #64748b;
+      --border: #e2e8f0;
+      --accent: #075e54;
+      --accent-hover: #064e46;
+      --accent-soft: #ecfdf5;
+      --info: #0284c7;
+      --danger: #dc2626;
+      --warn: #d97706;
+      --radius: 12px;
+      --font: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      flex-direction: column;
+    }
+    .hidden { display: none !important; }
+    code, .mono { font-family: var(--mono); }
+
+    header {
+      background: linear-gradient(135deg, #064e46 0%, #0f172a 100%);
+      color: #fff;
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      flex-shrink: 0;
+      z-index: 20;
+    }
+    .hdr-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .hdr-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .brand-pill {
+      background: #10b981;
+      color: #022c22;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .agent-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      object-fit: cover;
+      border: 1.5px solid #34d399;
+      background: #064e46;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all .15s ease;
+    }
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
+    .btn.primary { background: var(--accent); color: #fff; }
+    .btn.primary:hover:not(:disabled) { background: var(--accent-hover); }
+    .btn.blue { background: var(--info); color: #fff; }
+    .btn.blue:hover:not(:disabled) { background: #0369a1; }
+    .btn.danger { background: var(--danger); color: #fff; }
+    .btn.danger:hover:not(:disabled) { background: #b91c1c; }
+    .btn.warn { background: var(--warn); color: #fff; }
+    .btn.warn:hover:not(:disabled) { background: #b45309; }
+    .btn.ghost { background: #fff; color: var(--ink); border: 1px solid var(--border); }
+    .btn.ghost:hover:not(:disabled) { background: #f8fafc; border-color: #cbd5e1; }
+    .btn.hdr { background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.22); }
+    .btn.hdr:hover:not(:disabled) { background: rgba(255,255,255,0.2); }
+    .btn.sm { padding: 5px 9px; font-size: 11px; border-radius: 7px; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: #e2e8f0;
+      color: #334155;
+      white-space: nowrap;
+    }
+    .badge.ok { background: #dcfce7; color: #166534; }
+    .badge.warn { background: #fef3c7; color: #92400e; }
+    .badge.err { background: #fee2e2; color: #991b1b; }
+    .badge.info { background: #e0f2fe; color: #075985; }
+
+    label { display: block; font-size: 12px; font-weight: 600; color: var(--ink-2); margin-bottom: 4px; }
+    input, textarea, select {
+      width: 100%;
+      padding: 8px 11px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--ink);
+      background: #fff;
+      outline: none;
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(7, 94, 84, 0.12);
+    }
+
+    #loginView {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .login-card {
+      width: 100%;
+      max-width: 430px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 26px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    }
+    .pw-wrap { position: relative; }
+    .pw-wrap input { padding-right: 64px; }
+    .pw-toggle {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #334155;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #deskShell {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 310px minmax(360px, 1fr) 340px;
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .col-queue {
+      border-right: 1px solid var(--border);
+      background: var(--muted-bg);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .queue-top {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      background: #fff;
+      display: grid;
+      gap: 9px;
+    }
+    .queue-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+    }
+    .q-tab {
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: var(--ink-2);
+      border-radius: 8px;
+      padding: 6px 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    .q-tab.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .q-tab .cnt {
+      background: rgba(15,23,42,0.12);
+      padding: 1px 6px;
+      border-radius: 999px;
+      font-size: 10px;
+    }
+    .q-tab.active .cnt { background: rgba(255,255,255,0.22); }
+    .lock-banner {
+      padding: 7px 11px;
+      font-size: 11px;
+      color: #065f46;
+      background: #ecfdf5;
+      border-bottom: 1px solid #a7f3d0;
+      font-weight: 600;
+    }
+    #threadList {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .thread-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 11px;
+      cursor: pointer;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .thread-card:hover { border-color: #94a3b8; }
+    .thread-card.active {
+      border-color: var(--accent);
+      background: #f0fdf4;
+      box-shadow: 0 0 0 2px rgba(7, 94, 84, 0.14);
+    }
+    .thread-row-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+    .thread-name { font-size: 13px; font-weight: 700; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .thread-sub { font-size: 11px; color: var(--ink-muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .thread-preview { font-size: 12px; color: var(--ink-2); margin-top: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+    .col-chat {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      background: #efeae2;
+      position: relative;
+    }
+    .chat-hdr {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 11px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+    #chatBody {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      min-height: 0;
+    }
+    .msg-row { display: flex; flex-direction: column; max-width: 78%; }
+    .msg-row.in { align-self: flex-start; }
+    .msg-row.out { align-self: flex-end; }
+    .msg-bubble {
+      border-radius: 11px;
+      padding: 9px 12px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+    .msg-row.out .msg-bubble.admin { background: #d9fdd3; border-color: #86efac; }
+    .msg-row.out .msg-bubble.ai { background: #eff6ff; border-color: #bfdbfe; }
+    .msg-row.out .msg-bubble.auto { background: #fffbeb; border-color: #fde68a; }
+    .msg-row.out .msg-bubble.offline { background: #fef2f2; border-color: #fecaca; }
+    .msg-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; font-size: 11px; }
+    .msg-text { font-size: 13px; color: var(--ink); white-space: pre-wrap; word-break: break-word; }
+    .msg-time { font-size: 10px; color: var(--ink-muted); text-align: right; margin-top: 4px; }
+
+    .composer-wrap {
+      background: #f8fafc;
+      border-top: 1px solid var(--border);
+      padding: 9px 12px 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .quick-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+    .quick-chip {
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      color: #0f172a;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .quick-chip:hover { border-color: var(--accent); background: #ecfdf5; color: #065f46; }
+    .slash-popup {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 100%;
+      margin-bottom: 6px;
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.14);
+      max-height: 210px;
+      overflow-y: auto;
+      z-index: 30;
+    }
+    .slash-item {
+      padding: 8px 12px;
+      border-bottom: 1px solid #f1f5f9;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+    }
+    .slash-item:hover { background: #f0fdf4; }
+
+    .col-inspector {
+      border-left: 1px solid var(--border);
+      background: var(--muted-bg);
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
+    }
+    .insp-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 12px;
+    }
+    .insp-card h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .kv-list { display: grid; gap: 6px; font-size: 12px; }
+    .kv-row { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 4px; }
+    .kv-row span:first-child { color: var(--ink-muted); font-weight: 600; flex-shrink: 0; }
+    .kv-row span:last-child { color: var(--ink); text-align: right; word-break: break-word; }
+
+    .order-item {
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 9px 10px;
+      background: #f8fafc;
+      margin-top: 7px;
+      font-size: 12px;
+    }
+    .mod-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 60;
+    }
+    .modal-box {
+      width: 100%;
+      max-width: 560px;
+      max-height: 85vh;
+      overflow-y: auto;
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      padding: 18px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.2);
+    }
+    #toastBox {
+      position: fixed;
+      bottom: 18px;
+      right: 18px;
+      background: #0f172a;
+      color: #fff;
+      padding: 10px 15px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.22);
+      z-index: 90;
+    }
+
+    @media (max-width: 1120px) {
+      #deskShell { grid-template-columns: 270px minmax(300px, 1fr) 300px; }
+    }
+    @media (max-width: 880px) {
+      #deskShell { grid-template-columns: 1fr; overflow-y: auto; }
+      .col-queue, .col-chat, .col-inspector { max-height: none; border-left: 0; border-right: 0; border-bottom: 1px solid var(--border); }
+      .col-chat { min-height: 460px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-left">
+    <span class="brand-pill">Support Desk</span>
+    <div>
+      <strong style="font-size:15px;display:block">NurTech Live Support Agent Panel</strong>
+      <span style="font-size:11px;color:#cbd5e1">Real-Time Queue Lock · Agent Identity Badge · Customer Orders &amp; Ban Control</span>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <img id="hdrAgentAvatar" class="agent-avatar hidden" alt="Agent" referrerpolicy="no-referrer" />
+    <span id="hdrAgentBadge" class="badge info hidden">Agent Online</span>
+    <span id="hdrAgentName" style="font-size:12px;color:#e2e8f0">Connecting...</span>
+    <button id="btnToggleAlerts" type="button" class="btn hdr sm hidden">Sound: ON</button>
+    <button id="btnSupportLogout" type="button" class="btn danger sm hidden">Sign Out</button>
+  </div>
+</header>
+
+<section id="loginView">
+  <div class="login-card">
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:800;color:#075e54;text-transform:uppercase;letter-spacing:.05em">Firebase Live Support Desk</div>
+      <h2 style="margin:4px 0 6px;font-size:21px;font-weight:800">Support Agent Sign In</h2>
+      <p style="margin:0;font-size:12.5px;color:#475569">Enter the Support Agent Login ID (or staff email) and Password provisioned in Head Office Admin.</p>
+    </div>
+
+    <form id="supportLoginForm" style="display:grid;gap:14px">
+      <div>
+        <label for="inpLoginId">Support Agent Login ID or Staff Email</label>
+        <input id="inpLoginId" type="text" required autocomplete="username" placeholder="e.g. support_agent_01 or support_agent_01@nurtech.com" />
+      </div>
+      <div>
+        <label for="inpPassword">Support Agent Password</label>
+        <div class="pw-wrap">
+          <input id="inpPassword" type="password" required autocomplete="current-password" placeholder="Enter your password" />
+          <button id="btnTogglePw" type="button" class="pw-toggle" aria-label="Show password">Show</button>
+        </div>
+      </div>
+
+      <div id="loginErrorBox" class="hidden" style="padding:10px 12px;border-radius:8px;background:#fee2e2;color:#991b1b;font-size:12px;font-weight:600"></div>
+
+      <button id="btnLoginSubmit" type="submit" class="btn primary" style="width:100%;padding:11px">Sign In to Support Desk</button>
+    </form>
+  </div>
+</section>
+
+<div id="deskShell" class="hidden">
+  <!-- LEFT COLUMN: SUPPORT QUEUE -->
+  <aside class="col-queue">
+    <div class="queue-top">
+      <input id="inpQueueSearch" placeholder="Search customer name, email, UID..." />
+      <div class="queue-tabs">
+        <button type="button" class="q-tab active" data-tab="open">Open <span id="cntOpenQueue" class="cnt">0</span></button>
+        <button type="button" class="q-tab" data-tab="mine">My Chats <span id="cntMyActive" class="cnt">0</span></button>
+        <button type="button" class="q-tab" data-tab="resolved">Resolved <span id="cntResolved" class="cnt">0</span></button>
+      </div>
+    </div>
+    <div class="lock-banner">
+      Once you Pick, Type, or Reply, that customer immediately disappears from every other agent's queue.
+    </div>
+    <div id="threadList"></div>
+  </aside>
+
+  <!-- CENTER COLUMN: LIVE CONVERSATION -->
+  <section class="col-chat">
+    <div class="chat-hdr">
+      <div style="min-width:0">
+        <strong id="chatTitle" style="font-size:15px">Select a customer request</strong>
+        <div id="chatSubtitle" style="font-size:11.5px;color:#64748b">Open Requests appear on the left. Pick any conversation to chat privately with that customer.</div>
+      </div>
+      <div id="chatActions" class="hidden" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <button id="btnClaimThread" type="button" class="btn primary sm">Pick Customer</button>
+        <button id="btnReleaseThread" type="button" class="btn ghost sm">Release to Queue</button>
+        <button id="btnToggleResolve" type="button" class="btn blue sm">Mark Resolved</button>
+      </div>
+    </div>
+
+    <div id="chatBody">
+      <div style="margin:auto;text-align:center;max-width:340px;color:#475569;font-size:13px;background:rgba(255,255,255,0.88);padding:20px;border-radius:12px;border:1px solid #cbd5e1">
+        <strong>Ready for Live Support</strong>
+        <p style="margin:6px 0 0;font-size:12px;color:#64748b">Choose a customer from Open Queue to view their message history, profile &amp; orders, then pick and reply.</p>
+      </div>
+    </div>
+
+    <div id="composerWrap" class="composer-wrap">
+      <div id="slashPopup" class="slash-popup hidden"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <div id="quickReplyChips" class="quick-bar" style="flex:1"></div>
+        <button id="btnManageShortcuts" type="button" class="btn ghost sm" style="flex-shrink:0">+ Shortcuts</button>
+      </div>
+      <form id="replyForm" style="display:flex;gap:8px;align-items:flex-end">
+        <textarea id="inpReply" rows="2" placeholder="Write reply to customer... (Type / for canned shortcuts · Enter to send, Shift+Enter for new line)" style="flex:1;resize:none;min-height:44px;max-height:110px"></textarea>
+        <button id="btnSendReply" type="submit" class="btn primary" style="height:44px;padding:0 18px">Send</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- RIGHT COLUMN: CUSTOMER INSPECTOR & MODERATION -->
+  <aside class="col-inspector">
+    <div id="inspEmpty" class="insp-card" style="text-align:center;color:#64748b;font-size:12.5px;padding:28px 14px">
+      Select any customer on the left to inspect their profile, complete order history, and account moderation controls.
+    </div>
+
+    <div id="inspContent" class="hidden" style="display:flex;flex-direction:column;gap:12px">
+      <div class="insp-card">
+        <h3>
+          <span>Customer Details</span>
+          <span id="custLockBadge" class="badge ok">Active</span>
+        </h3>
+        <div id="custProfileKv" class="kv-list"></div>
+      </div>
+
+      <div class="insp-card">
+        <h3>
+          <span>Customer Orders</span>
+          <span id="custOrdersCount" class="badge">0</span>
+        </h3>
+        <div id="custOrdersList" style="max-height:290px;overflow-y:auto"></div>
+      </div>
+
+      <div class="insp-card">
+        <h3>
+          <span>Block / Ban Account</span>
+          <span id="custStrikeBadge" class="badge">0 strikes</span>
+        </h3>
+        <div id="modStatusSummary" style="font-size:11.5px;color:#475569;margin-bottom:8px"></div>
+        <label for="modReasonInput">Enforcement / Unban Reason</label>
+        <input id="modReasonInput" placeholder="e.g. Policy violation, spam, or unblocked after review" />
+        <div class="mod-grid">
+          <button type="button" class="btn warn sm mod-act" data-mode="next_strike">Next Strike (+1)</button>
+          <button type="button" class="btn warn sm mod-act" data-mode="1">Block 1 Day</button>
+          <button type="button" class="btn warn sm mod-act" data-mode="3">Block 3 Days</button>
+          <button type="button" class="btn warn sm mod-act" data-mode="7">Block 7 Days</button>
+          <button type="button" class="btn warn sm mod-act" data-mode="30">Block 30 Days</button>
+          <button type="button" class="btn danger sm mod-act" data-mode="ban">Permanent Ban</button>
+          <button type="button" class="btn primary sm mod-act" data-mode="unban">Unban</button>
+          <button type="button" class="btn ghost sm mod-act" data-mode="reset">Unban &amp; Reset</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- CANNED SHORTCUTS MODAL -->
+<div id="shortcutModal" class="modal-backdrop hidden">
+  <div class="modal-box">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px">
+      <div>
+        <h3 style="margin:0;font-size:16px">Canned Quick-Reply Shortcuts</h3>
+        <div style="font-size:11.5px;color:#64748b">Type <code>/shortcut</code> in chat or click a chip to insert instantly. Synced to your agent profile.</div>
+      </div>
+      <button id="btnCloseShortcutModal" type="button" class="btn ghost sm">Close</button>
+    </div>
+
+    <form id="shortcutForm" style="display:grid;gap:8px;background:#f8fafc;padding:12px;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:12px">
+      <div style="display:grid;grid-template-columns:130px 1fr;gap:8px">
+        <div>
+          <label for="scShortCode">Slash Code</label>
+          <input id="scShortCode" required placeholder="e.g. promo" maxlength="24" />
+        </div>
+        <div>
+          <label for="scTitle">Button Label</label>
+          <input id="scTitle" required placeholder="e.g. Promo Delivery Info" maxlength="80" />
+        </div>
+      </div>
+      <div>
+        <label for="scText">Reply Message</label>
+        <textarea id="scText" rows="2" required placeholder="Full reply text inserted on click or /code..."></textarea>
+      </div>
+      <div style="display:flex;justify-content:flex-end">
+        <button type="submit" class="btn primary sm">Save Shortcut</button>
+      </div>
+    </form>
+
+    <div id="shortcutManageList" style="display:grid;gap:6px"></div>
+  </div>
+</div>
+
+<div id="toastBox" class="hidden"></div>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js';
+  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
+  import { initializeFirestore, getFirestore, collection, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
+
+  const firebaseConfig = {
+  "apiKey": "AIzaSyBHAKOedStIoujkdD3o-dH1OvU3E6eIE-o",
+  "authDomain": "nurtech-bd.firebaseapp.com",
+  "projectId": "nurtech-bd",
+  "storageBucket": "nurtech-bd.firebasestorage.app",
+  "messagingSenderId": "1022912213159",
+  "appId": "1:1022912213159:web:fdf11116b2bbd69981eb82",
+  "measurementId": "G-6VLZTDDZ1F"
+};
+  const DEFAULT_APP_ORIGIN = "https://ais-dev-pqvtxlfg4aibojguhtbjs6-21232009521.asia-east1.run.app";
+  const RETENTION_MS = 2592000000;
+  const SEED_CANNED = [{"id":"cr_greet","shortcut":"hi","title":"Warm Greeting","text":"Hello! Thank you for contacting NurTech Live Support. How can I assist you today?"},{"id":"cr_order","shortcut":"order","title":"Order Verification","text":"Please share your Order Number (#NT-...) and registered phone number so I can check live dispatch status for you."},{"id":"cr_delivery","shortcut":"delivery","title":"Delivery Timeline","text":"Inside Dhaka deliveries take 24-48 hours, and nationwide courier deliveries take 2-4 business days."},{"id":"cr_warranty","shortcut":"warranty","title":"Warranty Assistance","text":"Every component carries official brand warranty. Please keep your invoice/Order ID ready for verification."}];
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  let db;
+  try {
+    db = initializeFirestore(app, {
+      experimentalAutoDetectLongPolling: true,
+      experimentalLongPollingOptions: { timeoutSeconds: 8 }
+    });
+  } catch {
+    db = getFirestore(app);
+  }
+
+  let soundAlertsEnabled = true;
+  let typingTimer = null;
+  let lastOpenCount = -1;
+
+  const state = {
+    user: null,
+    agent: null,
+    activeTab: 'open',
+    threads: [],
+    openQueue: [],
+    myActiveChats: [],
+    myResolvedChats: [],
+    cannedReplies: [...SEED_CANNED],
+    usersMap: {},
+    privateMap: {},
+    moderationMap: {},
+    orders: [],
+    activeUid: '',
+    activeMessages: [],
+    activeMsgUnsub: null,
+    searchQuery: '',
+    unsubs: [],
+    _lastMsgCount: 0
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  const fmtBdt = (n) => '৳' + Math.round(Number(n || 0)).toLocaleString('en-US');
+  const cleanObj = (obj) => Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
+
+  function toast(msg, isErr) {
+    const box = $('toastBox');
+    box.textContent = msg;
+    box.style.background = isErr ? '#991b1b' : '#0f172a';
+    box.classList.remove('hidden');
+    window.clearTimeout(toast._t);
+    toast._t = window.setTimeout(() => box.classList.add('hidden'), 3500);
+  }
+
+  function playAlertTone() {
+    if (!soundAlertsEnabled) return;
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      const ctx = new Ctx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = 740;
+      gain.gain.value = 0.05;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.12);
+    } catch {}
+  }
+
+  function clearListeners() {
+    state.unsubs.forEach((fn) => { try { fn(); } catch {} });
+    state.unsubs = [];
+    if (state.activeMsgUnsub) {
+      try { state.activeMsgUnsub(); } catch {}
+      state.activeMsgUnsub = null;
+    }
+  }
+
+  function resetUiSignedOut(errMsg) {
+    clearListeners();
+    state.user = null;
+    state.agent = null;
+    state.activeUid = '';
+    state.activeMessages = [];
+    state.threads = [];
+    state.openQueue = [];
+    state.myActiveChats = [];
+    state.myResolvedChats = [];
+    lastOpenCount = -1;
+    $('deskShell').classList.add('hidden');
+    $('loginView').classList.remove('hidden');
+    $('hdrAgentBadge').classList.add('hidden');
+    $('hdrAgentAvatar').classList.add('hidden');
+    $('btnToggleAlerts').classList.add('hidden');
+    $('btnSupportLogout').classList.add('hidden');
+    $('hdrAgentName').textContent = 'Signed out';
+    $('inpPassword').value = '';
+    if (errMsg) {
+      $('loginErrorBox').textContent = errMsg;
+      $('loginErrorBox').classList.remove('hidden');
+    } else {
+      $('loginErrorBox').classList.add('hidden');
+    }
+  }
+
+  $('btnTogglePw').addEventListener('click', () => {
+    const inp = $('inpPassword');
+    const show = inp.type === 'password';
+    inp.type = show ? 'text' : 'password';
+    $('btnTogglePw').textContent = show ? 'Hide' : 'Show';
+  });
+
+  $('btnToggleAlerts').addEventListener('click', () => {
+    soundAlertsEnabled = !soundAlertsEnabled;
+    $('btnToggleAlerts').textContent = 'Sound: ' + (soundAlertsEnabled ? 'ON' : 'OFF');
+  });
+
+  $('btnSupportLogout').addEventListener('click', async () => {
+    await signOut(auth).catch(() => {});
+  });
+
+  $('supportLoginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const rawId = ($('inpLoginId').value || '').trim();
+    const password = $('inpPassword').value;
+    $('loginErrorBox').classList.add('hidden');
+    if (!rawId || !password) return;
+    const email = rawId.includes('@')
+      ? rawId.toLowerCase()
+      : (rawId.toLowerCase().replace(/[^a-z0-9._-]/g, '') + '@nurtech.com');
+    const btn = $('btnLoginSubmit');
+    btn.disabled = true;
+    btn.textContent = 'Signing in...';
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+      const code = err?.code || '';
+      const msg = code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found'
+        ? 'Invalid Support Agent Login ID or Password.'
+        : (err?.message || 'Sign in failed.');
+      $('loginErrorBox').textContent = msg;
+      $('loginErrorBox').classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Sign In to Support Desk';
+    }
+  });
+
+  onAuthStateChanged(auth, async (u) => {
+    clearListeners();
+    if (!u) {
+      resetUiSignedOut('');
+      return;
+    }
+    try {
+      const agSnap = await getDoc(doc(db, 'support_agents', u.uid));
+      if (!agSnap.exists()) {
+        await signOut(auth);
+        resetUiSignedOut('This account (' + (u.email || u.uid) + ') is not registered as a Support Agent.');
+        return;
+      }
+      const ag = agSnap.data() || {};
+      if (ag.active === false) {
+        await signOut(auth);
+        resetUiSignedOut('This Support Agent account has been disabled by Head Office.');
+        return;
+      }
+      state.user = u;
+      state.agent = { ...ag, uid: u.uid };
+      state.cannedReplies = Array.isArray(ag.cannedReplies) && ag.cannedReplies.length ? ag.cannedReplies : [...SEED_CANNED];
+      $('loginErrorBox').classList.add('hidden');
+      $('loginView').classList.add('hidden');
+      $('deskShell').classList.remove('hidden');
+      renderHeader();
+      renderQuickChips();
+      startSupportListeners();
+      toast('Signed in as ' + (ag.name || ag.loginId || 'Support Agent'));
+    } catch (err) {
+      await signOut(auth).catch(() => {});
+      resetUiSignedOut('Verification error: ' + (err?.message || 'Unable to verify Support Agent access.'));
+    }
+  });
+
+  function startSupportListeners() {
+    const sub = (refOrQ, fn) => {
+      state.unsubs.push(onSnapshot(refOrQ, fn, (err) => toast('Sync error: ' + err.message, true)));
+    };
+
+    // Watch own support_agents doc live for photo/name/cannedReplies/active status changes
+    sub(doc(db, 'support_agents', state.user.uid), (snap) => {
+      if (!snap.exists() || snap.data().active === false) {
+        signOut(auth).catch(() => {});
+        return;
+      }
+      const ag = snap.data();
+      state.agent = { ...ag, uid: state.user.uid };
+      if (Array.isArray(ag.cannedReplies) && ag.cannedReplies.length) {
+        state.cannedReplies = ag.cannedReplies;
+      }
+      renderHeader();
+      renderQuickChips();
+      if (!$('shortcutModal').classList.contains('hidden')) renderShortcutManager();
+    });
+
+    sub(collection(db, 'users'), (snap) => {
+      const map = {};
+      snap.docs.forEach((d) => { map[d.id] = { ...d.data(), uid: d.id }; });
+      state.usersMap = map;
+      renderQueue();
+      renderChatAndInspector();
+    });
+
+    sub(collection(db, 'moderation'), (snap) => {
+      const map = {};
+      snap.docs.forEach((d) => { map[d.id] = { ...d.data(), uid: d.id }; });
+      state.moderationMap = map;
+      renderQueue();
+      renderChatAndInspector();
+    });
+
+    sub(query(collection(db, 'orders'), orderBy('createdAt', 'desc')), (snap) => {
+      state.orders = snap.docs.map((d) => ({ ...d.data(), id: d.id }));
+      renderChatAndInspector();
+    });
+
+    sub(collection(db, 'support_chats'), (snap) => {
+      const myUid = state.user?.uid || '';
+      const raw = snap.docs.map((d) => ({ ...d.data(), uid: d.data().uid || d.id }));
+      raw.sort((a, b) => (b.updatedAt?.seconds || 0) - (a.updatedAt?.seconds || 0));
+      state.threads = raw;
+
+      const openQ = raw.filter((t) => t.status !== 'resolved' && !t.assignedAgentId);
+      const mine = raw.filter((t) => t.status !== 'resolved' && t.assignedAgentId === myUid);
+      const resolved = raw.filter((t) => t.status === 'resolved' && (!t.assignedAgentId || t.assignedAgentId === myUid));
+
+      if (lastOpenCount >= 0 && openQ.length > lastOpenCount) {
+        playAlertTone();
+      }
+      lastOpenCount = openQ.length;
+
+      state.openQueue = openQ;
+      state.myActiveChats = mine;
+      state.myResolvedChats = resolved;
+
+      if (state.activeUid) {
+        const cur = raw.find((t) => t.uid === state.activeUid);
+        if (cur && cur.assignedAgentId && cur.assignedAgentId !== myUid) {
+          toast('Customer was picked up by ' + (cur.assignedAgentName || 'another Support Agent'), true);
+          state.activeUid = '';
+          state.activeMessages = [];
+          if (state.activeMsgUnsub) { try { state.activeMsgUnsub(); } catch {} state.activeMsgUnsub = null; }
+        }
+      }
+
+      renderQueue();
+      renderChatAndInspector();
+    });
+  }
+
+  function renderHeader() {
+    if (!state.agent) return;
+    const ag = state.agent;
+    $('hdrAgentBadge').classList.remove('hidden');
+    $('btnToggleAlerts').classList.remove('hidden');
+    $('btnSupportLogout').classList.remove('hidden');
+    $('hdrAgentName').textContent = (ag.name || 'Support Agent') + (ag.district ? ' · ' + ag.district : '') + ' (' + (ag.loginId || ag.email) + ')';
+    if (ag.photoUrl) {
+      $('hdrAgentAvatar').src = ag.photoUrl;
+      $('hdrAgentAvatar').classList.remove('hidden');
+    } else {
+      $('hdrAgentAvatar').classList.add('hidden');
+    }
+  }
+
+  function buildAgentAssignmentFields() {
+    const ag = state.agent || {};
+    return {
+      assignedAgentId: state.user.uid,
+      assignedAgentName: String(ag.name || ag.loginId || 'Support Agent').slice(0, 80),
+      assignedAgentPhotoUrl: String(ag.photoUrl || '').slice(0, 500),
+      assignedAgentPhone: String(ag.phone || '').slice(0, 40),
+      assignedAgentDistrict: String(ag.district || '').slice(0, 80),
+      assignedAtMs: Math.floor(Date.now())
+    };
+  }
+
+  function getThreadByUid(uid) {
+    return (state.threads || []).find((t) => t.uid === uid) || null;
+  }
+
+  function renderQueue() {
+    $('cntOpenQueue').textContent = String(state.openQueue.length);
+    $('cntMyActive').textContent = String(state.myActiveChats.length);
+    $('cntResolved').textContent = String(state.myResolvedChats.length);
+
+    document.querySelectorAll('.q-tab').forEach((btn) => {
+      btn.classList.toggle('active', btn.getAttribute('data-tab') === state.activeTab);
+    });
+
+    const source = state.activeTab === 'open'
+      ? state.openQueue
+      : state.activeTab === 'mine'
+        ? state.myActiveChats
+        : state.myResolvedChats;
+
+    const q = state.searchQuery.trim().toLowerCase();
+    const list = source.filter((t) => {
+      if (!q) return true;
+      const u = state.usersMap[t.uid] || {};
+      const priv = state.privateMap[t.uid] || {};
+      const hay = [t.userName, t.userEmail, u.displayName, priv.phone, t.uid, t.lastMessage].join(' ').toLowerCase();
+      return hay.includes(q);
+    });
+
+    const box = $('threadList');
+    if (!list.length) {
+      const msg = state.activeTab === 'open'
+        ? 'No open customer requests waiting right now.'
+        : state.activeTab === 'mine'
+          ? 'No customers currently picked by you. Check Open Queue.'
+          : 'No resolved conversations yet.';
+      box.innerHTML = '<div style="padding:24px 12px;text-align:center;color:#64748b;font-size:12px">' + esc(msg) + '</div>';
+      return;
+    }
+
+    box.innerHTML = list.map((t) => {
+      const isSelected = t.uid === state.activeUid;
+      const ms = t.updatedAt?.toMillis ? t.updatedAt.toMillis() : (t.updatedAt?.seconds ? t.updatedAt.seconds * 1000 : 0);
+      const timeTxt = ms ? new Date(ms).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+      const mod = state.moderationMap[t.uid] || null;
+      const isBanned = mod?.status === 'banned';
+      const isBlocked = mod?.status === 'blocked' && (!mod.blockedUntilMs || Number(mod.blockedUntilMs) > Date.now());
+      const lockTag = isBanned
+        ? '<span class="badge err">Banned</span>'
+        : (isBlocked || t.isLockedAccount)
+          ? '<span class="badge warn">Blocked</span>'
+          : '';
+      const unreadTag = Number(t.unreadByAdmin || 0) > 0
+        ? '<span class="badge warn">' + Number(t.unreadByAdmin) + ' new</span>'
+        : '';
+      const pickBtn = state.activeTab === 'open'
+        ? '<button type="button" class="btn primary sm btn-pick-inline" data-uid="' + esc(t.uid) + '">Pick Chat</button>'
+        : '';
+      return '<div class="thread-card' + (isSelected ? ' active' : '') + '" data-uid="' + esc(t.uid) + '">' +
+        '<div class="thread-row-top">' +
+          '<span class="thread-name">' + esc(t.userName || 'Customer') + '</span>' +
+          '<span style="font-size:10.5px;color:#64748b">' + esc(timeTxt) + '</span>' +
+        '</div>' +
+        '<div class="thread-sub">' + esc(t.userEmail || t.uid) + '</div>' +
+        '<div class="thread-preview">' + esc(t.lastMessage || 'Started conversation') + '</div>' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:7px">' +
+          '<div style="display:flex;gap:4px;flex-wrap:wrap">' + unreadTag + lockTag + '</div>' +
+          pickBtn +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    box.querySelectorAll('.thread-card').forEach((card) => {
+      card.addEventListener('click', (e) => {
+        if (e.target && e.target.closest('.btn-pick-inline')) return;
+        const uid = card.getAttribute('data-uid');
+        if (uid) selectThread(uid);
+      });
+    });
+    box.querySelectorAll('.btn-pick-inline').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const uid = btn.getAttribute('data-uid');
+        if (uid) claimThread(uid);
+      });
+    });
+  }
+
+  function renderQuickChips() {
+    const bar = $('quickReplyChips');
+    bar.innerHTML = (state.cannedReplies || []).map((r) =>
+      '<button type="button" class="quick-chip" data-cr-id="' + esc(r.id) + '" title="' + esc(r.text) + '">/' + esc(r.shortcut) + ' · ' + esc(r.title) + '</button>'
+    ).join('');
+    bar.querySelectorAll('.quick-chip').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-cr-id');
+        const found = (state.cannedReplies || []).find((x) => x.id === id);
+        if (found) insertCannedText(found.text);
+      });
+    });
+  }
+
+  function renderShortcutManager() {
+    const list = $('shortcutManageList');
+    list.innerHTML = (state.cannedReplies || []).map((r) =>
+      '<div style="border:1px solid #e2e8f0;border-radius:9px;padding:9px 11px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;background:#fff">' +
+        '<div style="min-width:0">' +
+          '<div><code>/' + esc(r.shortcut) + '</code> · <strong style="font-size:12.5px">' + esc(r.title) + '</strong></div>' +
+          '<div style="font-size:12px;color:#475569;margin-top:3px;white-space:pre-wrap">' + esc(r.text) + '</div>' +
+        '</div>' +
+        '<button type="button" class="btn danger sm btn-del-cr" data-id="' + esc(r.id) + '">Delete</button>' +
+      '</div>'
+    ).join('');
+    list.querySelectorAll('.btn-del-cr').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const rid = btn.getAttribute('data-id');
+        const nextList = (state.cannedReplies || []).filter((x) => x.id !== rid);
+        try {
+          await updateDoc(doc(db, 'support_agents', state.user.uid), {
+            cannedReplies: nextList,
+            updatedAt: serverTimestamp()
+          });
+          state.cannedReplies = nextList;
+          renderQuickChips();
+          renderShortcutManager();
+          toast('Shortcut removed.');
+        } catch (err) {
+          toast(err.message, true);
+        }
+      });
+    });
+  }
+
+  function insertCannedText(text) {
+    const inp = $('inpReply');
+    const cur = inp.value || '';
+    inp.value = cur.trim().startsWith('/') ? text : (cur ? cur + ' ' + text : text);
+    $('slashPopup').classList.add('hidden');
+    inp.focus();
+  }
+
+  function renderChatAndInspector() {
+    const t = state.activeUid ? getThreadByUid(state.activeUid) : null;
+    if (!t) {
+      $('chatTitle').textContent = 'Select a customer request';
+      $('chatSubtitle').textContent = 'Open Requests appear on the left. Pick any conversation to chat privately with that customer.';
+      $('chatActions').classList.add('hidden');
+      $('chatBody').innerHTML = '<div style="margin:auto;text-align:center;max-width:340px;color:#475569;font-size:13px;background:rgba(255,255,255,0.88);padding:20px;border-radius:12px;border:1px solid #cbd5e1"><strong>Ready for Live Support</strong><p style="margin:6px 0 0;font-size:12px;color:#64748b">Choose a customer from Open Queue to view history, customer orders &amp; moderation controls.</p></div>';
+      $('inspEmpty').classList.remove('hidden');
+      $('inspContent').classList.add('hidden');
+      return;
+    }
+
+    const myUid = state.user?.uid || '';
+    const isMine = Boolean(t.assignedAgentId && t.assignedAgentId === myUid);
+    const isResolved = t.status === 'resolved';
+
+    $('chatTitle').textContent = (t.userName || 'Customer') + (isResolved ? ' · [Resolved]' : '');
+    $('chatSubtitle').innerHTML =
+      'UID: <code>' + esc(t.uid) + '</code>' +
+      (t.userEmail ? ' · ' + esc(t.userEmail) : '') +
+      (isMine ? ' · <span class="badge ok">Assigned to You</span>' : ' · <span class="badge warn">Unassigned in Queue</span>');
+
+    $('chatActions').classList.remove('hidden');
+    $('btnClaimThread').classList.toggle('hidden', isMine);
+    $('btnReleaseThread').classList.toggle('hidden', !isMine || isResolved);
+    $('btnToggleResolve').textContent = isResolved ? 'Reopen Chat' : 'Mark Resolved';
+
+    const body = $('chatBody');
+    const prevScrollBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 60;
+    const msgs = Array.isArray(state.activeMessages) ? state.activeMessages : [];
+    const labelMap = {
+      user: { tag: 'Customer', cls: 'ok' },
+      admin: { tag: 'Support Agent', cls: 'info' },
+      ai: { tag: 'AI Assistant', cls: 'info' },
+      auto: { tag: 'Auto Reply', cls: 'warn' },
+      offline: { tag: 'Offline Notice', cls: 'err' }
+    };
+
+    if (!msgs.length) {
+      body.innerHTML = '<div style="margin:auto;color:#64748b;font-size:12.5px;background:rgba(255,255,255,0.85);padding:14px 18px;border-radius:10px">No chat messages recorded in the last 30 days.</div>';
+    } else {
+      body.innerHTML = msgs.map((m) => {
+        const isIn = m.senderType === 'user';
+        const meta = labelMap[m.senderType] || labelMap.user;
+        const ts = m.createdAtMs ? new Date(Number(m.createdAtMs)).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+        const avatarHtml = m.senderPhotoUrl
+          ? '<img src="' + esc(m.senderPhotoUrl) + '" referrerpolicy="no-referrer" style="width:18px;height:18px;border-radius:999px;object-fit:cover" />'
+          : '';
+        return '<div class="msg-row ' + (isIn ? 'in' : 'out') + '">' +
+          '<div class="msg-bubble ' + esc(m.senderType) + '">' +
+            '<div class="msg-meta">' +
+              '<span class="badge ' + meta.cls + '">' + avatarHtml + esc(m.senderLabel || meta.tag) + '</span>' +
+              (m.matchedKeyword ? '<span class="badge">' + esc(m.matchedKeyword) + '</span>' : '') +
+            '</div>' +
+            '<div class="msg-text">' + esc(m.text) + '</div>' +
+            '<div class="msg-time">' + esc(ts) + '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+      if (prevScrollBottom || state._lastMsgCount !== msgs.length) {
+        body.scrollTop = body.scrollHeight;
+      }
+      state._lastMsgCount = msgs.length;
+    }
+
+    // Inspector: Customer Profile
+    $('inspEmpty').classList.add('hidden');
+    $('inspContent').classList.remove('hidden');
+
+    const u = state.usersMap[t.uid] || {};
+    const priv = state.privateMap[t.uid] || {};
+    const mod = state.moderationMap[t.uid] || { status: 'active', strikeCount: 0, blockedUntilMs: 0, reason: '' };
+    const isPermBanned = mod.status === 'banned';
+    const isTempBlocked = mod.status === 'blocked' && (!mod.blockedUntilMs || Number(mod.blockedUntilMs) > Date.now());
+
+    $('custLockBadge').textContent = isPermBanned ? 'Permanently Banned' : isTempBlocked ? 'Blocked' : 'Active';
+    $('custLockBadge').className = 'badge ' + (isPermBanned ? 'err' : isTempBlocked ? 'warn' : 'ok');
+
+    $('custProfileKv').innerHTML = [
+      ['Name', u.displayName || t.userName || 'Customer'],
+      ['UID', t.uid],
+      ['Email', priv.email || t.userEmail || 'Not set'],
+      ['Phone', priv.phone || 'Not set'],
+      ['District', priv.district || 'Not set'],
+      ['Address', [priv.address, priv.city].filter(Boolean).join(', ') || 'Not provided'],
+    ].map(([k, v]) => '<div class="kv-row"><span>' + esc(k) + '</span><span>' + esc(v) + '</span></div>').join('');
+
+    // Inspector: Orders
+    const custOrders = (state.orders || []).filter((o) => o.userId === t.uid);
+    $('custOrdersCount').textContent = String(custOrders.length);
+    $('custOrdersList').innerHTML = custOrders.length
+      ? custOrders.map((o) => {
+          const stCls = o.status === 'delivered' ? 'ok' : o.status === 'cancelled' ? 'err' : 'info';
+          const modeTxt = o.fulfillmentMode === 'pickup' ? ('Pickup · ' + (o.branchName || o.branchCode || 'Branch')) : 'Home Delivery';
+          const ms = o.createdAt?.toMillis ? o.createdAt.toMillis() : (o.createdAt?.seconds ? o.createdAt.seconds * 1000 : 0);
+          const dt = ms ? new Date(ms).toLocaleDateString() : '';
+          return '<div class="order-item">' +
+            '<div style="display:flex;justify-content:space-between;align-items:center;gap:6px">' +
+              '<strong>#' + esc(o.orderNumber || o.id) + '</strong>' +
+              '<span class="badge ' + stCls + '">' + esc(String(o.status || 'pending').toUpperCase()) + '</span>' +
+            '</div>' +
+            '<div style="color:#475569;margin-top:3px">' + esc(o.itemSummary || 'Order items') + '</div>' +
+            '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;font-size:11px;color:#64748b">' +
+              '<span>' + esc(modeTxt) + ' · ' + esc(String(o.paymentMethod || 'cod').toUpperCase()) + (dt ? ' · ' + esc(dt) : '') + '</span>' +
+              '<strong style="color:#0f172a">' + fmtBdt(o.total) + '</strong>' +
+            '</div>' +
+          '</div>';
+        }).join('')
+      : '<div style="font-size:12px;color:#64748b">No orders recorded under this account yet.</div>';
+
+    // Inspector: Moderation
+    $('custStrikeBadge').textContent = Number(mod.strikeCount || 0) + ' strike(s)';
+    let modDesc = 'Account is currently Active.';
+    if (isPermBanned) {
+      modDesc = 'Permanently Banned. Reason: ' + (mod.reason || 'Admin action');
+    } else if (isTempBlocked) {
+      const untilTxt = mod.blockedUntilMs ? new Date(Number(mod.blockedUntilMs)).toLocaleString() : 'Indefinite';
+      modDesc = 'Blocked until ' + untilTxt + '. Reason: ' + (mod.reason || 'Violation');
+    } else if (mod.reason) {
+      modDesc = 'Last note: ' + mod.reason;
+    }
+    $('modStatusSummary').textContent = modDesc;
+  }
+
+  async function selectThread(uid) {
+    const t = getThreadByUid(uid);
+    if (t && t.assignedAgentId && t.assignedAgentId !== state.user?.uid) {
+      toast('Handled by ' + (t.assignedAgentName || 'another Support Agent'), true);
+      return;
+    }
+    state.activeUid = uid;
+    state._lastMsgCount = 0;
+    if (state.activeMsgUnsub) {
+      try { state.activeMsgUnsub(); } catch {}
+      state.activeMsgUnsub = null;
+    }
+
+    // Load private PII profile once for inspector
+    if (!state.privateMap[uid]) {
+      getDoc(doc(db, 'users', uid, 'private', 'profile')).then((ps) => {
+        if (ps.exists()) {
+          state.privateMap[uid] = ps.data();
+          if (state.activeUid === uid) renderChatAndInspector();
+        }
+      }).catch(() => {});
+    }
+
+    const qRef = query(collection(db, 'support_chats', uid, 'messages'), orderBy('createdAtMs', 'asc'));
+    state.activeMsgUnsub = onSnapshot(qRef, (snap) => {
+      const cutoff = Date.now() - RETENTION_MS;
+      const list = [];
+      snap.docs.forEach((d) => {
+        const m = { ...d.data(), id: d.id };
+        if (Number(m.createdAtMs || 0) > 0 && Number(m.createdAtMs) <= cutoff) {
+          deleteDoc(doc(db, 'support_chats', uid, 'messages', d.id)).catch(() => {});
+        } else {
+          list.push(m);
+        }
+      });
+      state.activeMessages = list;
+      if (state.activeUid === uid) renderChatAndInspector();
+    });
+
+    if (t && t.assignedAgentId === state.user?.uid && Number(t.unreadByAdmin || 0) > 0) {
+      updateDoc(doc(db, 'support_chats', uid), {
+        unreadByAdmin: 0,
+        adminLastReadAtMs: Math.floor(Date.now()),
+        updatedAt: serverTimestamp()
+      }).catch(() => {});
+    }
+
+    renderQueue();
+    renderChatAndInspector();
+  }
+
+  async function claimThread(uid) {
+    try {
+      const ref = doc(db, 'support_chats', uid);
+      const snap = await getDoc(ref);
+      const cur = snap.exists() ? snap.data() : null;
+      if (cur && cur.assignedAgentId && cur.assignedAgentId !== state.user.uid) {
+        toast('Already picked by ' + (cur.assignedAgentName || 'another Support Agent'), true);
+        if (state.activeUid === uid) {
+          state.activeUid = '';
+          renderChatAndInspector();
+        }
+        return;
+      }
+      const nowMs = Math.floor(Date.now());
+      await updateDoc(ref, {
+        ...buildAgentAssignmentFields(),
+        status: 'open',
+        unreadByAdmin: 0,
+        adminLastReadAtMs: nowMs,
+        updatedAt: serverTimestamp()
+      });
+      state.activeTab = 'mine';
+      await selectThread(uid);
+      toast('Customer assigned to you & removed from other agents.');
+      $('inpReply').focus();
+    } catch (err) {
+      toast(err.message || 'Pick failed', true);
+    }
+  }
+
+  // Queue UI Events
+  document.querySelectorAll('.q-tab').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.activeTab = btn.getAttribute('data-tab') || 'open';
+      renderQueue();
+    });
+  });
+  $('inpQueueSearch').addEventListener('input', () => {
+    state.searchQuery = $('inpQueueSearch').value || '';
+    renderQueue();
+  });
+
+  // Thread Action Events
+  $('btnClaimThread').addEventListener('click', () => {
+    if (state.activeUid) claimThread(state.activeUid);
+  });
+
+  $('btnReleaseThread').addEventListener('click', async () => {
+    if (!state.activeUid) return;
+    try {
+      await updateDoc(doc(db, 'support_chats', state.activeUid), {
+        assignedAgentId: '',
+        assignedAgentName: '',
+        assignedAgentPhotoUrl: '',
+        assignedAgentPhone: '',
+        assignedAgentDistrict: '',
+        assignedAtMs: 0,
+        adminTyping: false,
+        adminTypingAtMs: 0,
+        updatedAt: serverTimestamp()
+      });
+      state.activeTab = 'open';
+      renderQueue();
+      renderChatAndInspector();
+      toast('Customer returned to shared Open Queue.');
+    } catch (err) {
+      toast(err.message, true);
+    }
+  });
+
+  $('btnToggleResolve').addEventListener('click', async () => {
+    if (!state.activeUid) return;
+    const t = getThreadByUid(state.activeUid);
+    if (!t) return;
+    const nextStatus = t.status === 'resolved' ? 'open' : 'resolved';
+    try {
+      await updateDoc(doc(db, 'support_chats', state.activeUid), {
+        status: nextStatus,
+        ...(nextStatus === 'open' ? buildAgentAssignmentFields() : { adminTyping: false, adminTypingAtMs: 0 }),
+        updatedAt: serverTimestamp()
+      });
+      state.activeTab = nextStatus === 'resolved' ? 'resolved' : 'mine';
+      renderQueue();
+      renderChatAndInspector();
+      toast('Thread marked ' + nextStatus + '.');
+    } catch (err) {
+      toast(err.message, true);
+    }
+  });
+
+  // Live Typing & Auto-Claim
+  async function sendTypingSignal(isTyping) {
+    if (!state.activeUid || !state.user) return;
+    const uid = state.activeUid;
+    const t = getThreadByUid(uid);
+    if (t && t.assignedAgentId && t.assignedAgentId !== state.user.uid) return;
+    const nowMs = Math.floor(Date.now());
+    try {
+      const patch = {
+        adminTyping: Boolean(isTyping),
+        adminTypingAtMs: isTyping ? nowMs : 0,
+        updatedAt: serverTimestamp()
+      };
+      if (isTyping && (!t || !t.assignedAgentId)) {
+        Object.assign(patch, buildAgentAssignmentFields(), {
+          status: 'open',
+          unreadByAdmin: 0,
+          adminLastReadAtMs: nowMs
+        });
+        state.activeTab = 'mine';
+      }
+      await updateDoc(doc(db, 'support_chats', uid), patch);
+    } catch {}
+  }
+
+  $('inpReply').addEventListener('input', () => {
+    const val = $('inpReply').value || '';
+    const trimmed = val.trim();
+
+    if (val.startsWith('/')) {
+      const q = val.slice(1).toLowerCase();
+      const matches = (state.cannedReplies || []).filter((r) =>
+        !q || r.shortcut.toLowerCase().includes(q) || r.title.toLowerCase().includes(q)
+      );
+      if (matches.length > 0) {
+        const pop = $('slashPopup');
+        pop.innerHTML = matches.map((r) =>
+          '<div class="slash-item" data-cr-id="' + esc(r.id) + '">' +
+            '<div><code>/' + esc(r.shortcut) + '</code> <strong>' + esc(r.title) + '</strong></div>' +
+            '<span style="color:#64748b;font-size:11px;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(r.text) + '</span>' +
+          '</div>'
+        ).join('');
+        pop.classList.remove('hidden');
+        pop.querySelectorAll('.slash-item').forEach((el) => {
+          el.addEventListener('click', () => {
+            const cr = (state.cannedReplies || []).find((x) => x.id === el.getAttribute('data-cr-id'));
+            if (cr) insertCannedText(cr.text);
+          });
+        });
+      } else {
+        $('slashPopup').classList.add('hidden');
+      }
+    } else {
+      $('slashPopup').classList.add('hidden');
+    }
+
+    if (!state.activeUid) return;
+    if (trimmed) {
+      window.clearTimeout(typingTimer);
+      sendTypingSignal(true);
+      typingTimer = window.setTimeout(() => sendTypingSignal(false), 4500);
+    } else {
+      window.clearTimeout(typingTimer);
+      sendTypingSignal(false);
+    }
+  });
+
+  $('inpReply').addEventListener('keydown', (e) => {
+    if ((e.key === 'Enter' && !e.shiftKey) || (e.key === 'Enter' && (e.ctrlKey || e.metaKey))) {
+      e.preventDefault();
+      $('replyForm').requestSubmit();
+    }
+  });
+
+  $('replyForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!state.activeUid) return toast('Select a customer conversation first.', true);
+    const uid = state.activeUid;
+    const text = ($('inpReply').value || '').trim().slice(0, 2000);
+    if (!text) return;
+    const btn = $('btnSendReply');
+    btn.disabled = true;
+    window.clearTimeout(typingTimer);
+    try {
+      const threadRef = doc(db, 'support_chats', uid);
+      const snap = await getDoc(threadRef);
+      const cur = snap.exists() ? snap.data() : {};
+      if (cur.assignedAgentId && cur.assignedAgentId !== state.user.uid) {
+        toast('Conflict: ' + (cur.assignedAgentName || 'another Support Agent') + ' is already handling this customer.', true);
+        state.activeUid = '';
+        renderChatAndInspector();
+        return;
+      }
+
+      const ag = state.agent || {};
+      const nowMs = Math.floor(Date.now());
+      const msgId = 'msg_' + nowMs + '_' + Math.random().toString(36).slice(2, 7);
+
+      await setDoc(doc(db, 'support_chats', uid, 'messages', msgId), cleanObj({
+        id: msgId,
+        uid,
+        senderType: 'admin',
+        senderLabel: String(ag.name || ag.loginId || 'Support Agent').slice(0, 60),
+        ...(ag.photoUrl ? { senderPhotoUrl: String(ag.photoUrl).slice(0, 500) } : {}),
+        text,
+        createdAtMs: nowMs,
+        createdAt: serverTimestamp()
+      }));
+
+      await updateDoc(threadRef, {
+        ...buildAgentAssignmentFields(),
+        status: 'open',
+        lastMessage: text.slice(0, 500),
+        lastSender: 'admin',
+        unreadByAdmin: 0,
+        unreadByUser: Math.min(1000, Math.round(Number(cur.unreadByUser || 0) + 1)),
+        adminLastReadAtMs: nowMs,
+        adminTyping: false,
+        adminTypingAtMs: 0,
+        updatedAt: serverTimestamp()
+      });
+
+      $('inpReply').value = '';
+      $('slashPopup').classList.add('hidden');
+      state.activeTab = 'mine';
+      renderQueue();
+    } catch (err) {
+      toast(err.message || 'Reply failed', true);
+    } finally {
+      btn.disabled = false;
+      $('inpReply').focus();
+    }
+  });
+
+  // Moderation actions (Firestore direct)
+  const STRIKE_DAYS = [1, 3, 7, 30];
+  document.querySelectorAll('.mod-act').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      if (!state.activeUid) return;
+      const uid = state.activeUid;
+      const mode = btn.getAttribute('data-mode');
+      const reasonInp = ($('modReasonInput').value || '').trim().slice(0, 500);
+      const u = state.usersMap[uid] || {};
+      const priv = state.privateMap[uid] || {};
+      const t = getThreadByUid(uid) || {};
+      const existing = state.moderationMap[uid] || {};
+      const curStrikes = Math.round(Number(existing.strikeCount || 0));
+      const nowMs = Math.floor(Date.now());
+      const history = Array.isArray(existing.violationHistory) ? [...existing.violationHistory] : [];
+
+      let nextStatus = 'active';
+      let nextStrikes = curStrikes;
+      let days = 0;
+      let blockedUntilMs = 0;
+      let blockedAtMs = 0;
+      let lastType = 'support_action';
+      let reason = reasonInp || existing.reason || '';
+
+      if (mode === 'unban' || mode === 'reset') {
+        nextStatus = 'active';
+        nextStrikes = mode === 'reset' ? 0 : curStrikes;
+        reason = reasonInp || (mode === 'reset' ? 'Unbanned & strikes reset by Support Agent' : 'Unbanned by Support Agent');
+        lastType = mode === 'reset' ? 'reset' : 'unban';
+      } else if (mode === 'ban') {
+        nextStatus = 'banned';
+        nextStrikes = Math.max(5, curStrikes + 1);
+        days = 3650;
+        blockedAtMs = nowMs;
+        reason = reasonInp || 'Permanent Ban applied by Support Desk';
+        lastType = 'permanent_ban';
+      } else {
+        const idx = mode === 'next_strike' ? Math.min(curStrikes, 4) : -1;
+        if (mode === 'next_strike' && idx >= 4) {
+          nextStatus = 'banned';
+          nextStrikes = curStrikes + 1;
+          days = 3650;
+          blockedAtMs = nowMs;
+          reason = reasonInp || '5th strike automatic permanent ban';
+          lastType = 'permanent_ban';
+        } else {
+          days = mode === 'next_strike' ? STRIKE_DAYS[idx] : Math.max(1, Math.min(365, parseInt(mode || '1', 10)));
+          nextStatus = 'blocked';
+          nextStrikes = curStrikes + 1;
+          blockedAtMs = nowMs;
+          blockedUntilMs = nowMs + days * 86400000;
+          reason = reasonInp || ('Blocked for ' + days + ' day(s) by Support Desk');
+          lastType = 'temp_block_' + days + 'd';
+        }
+      }
+
+      history.unshift({
+        type: lastType,
+        reason,
+        atMs: nowMs,
+        actor: state.agent?.name || state.agent?.loginId || 'Support Agent'
+      });
+
+      try {
+        await setDoc(doc(db, 'moderation', uid), cleanObj({
+          uid,
+          email: String(priv.email || t.userEmail || '').slice(0, 160),
+          displayName: String(u.displayName || t.userName || 'Customer').slice(0, 80),
+          status: nextStatus,
+          strikeCount: Math.max(0, Math.min(100, Math.round(nextStrikes))),
+          lastBlockDays: Math.max(0, Math.min(3650, Math.round(days))),
+          blockedAtMs,
+          blockedUntilMs,
+          reason,
+          lastViolationType: lastType.slice(0, 60),
+          violationHistory: history.slice(0, 30),
+          updatedAt: serverTimestamp()
+        }));
+
+        await updateDoc(doc(db, 'support_chats', uid), {
+          isLockedAccount: nextStatus === 'blocked' || nextStatus === 'banned',
+          updatedAt: serverTimestamp()
+        }).catch(() => {});
+
+        $('modReasonInput').value = '';
+        toast('Moderation updated (' + nextStatus + ').');
+      } catch (err) {
+        toast(err.message || 'Moderation update failed', true);
+      }
+    });
+  });
+
+  // Shortcuts Modal
+  $('btnManageShortcuts').addEventListener('click', () => {
+    renderShortcutManager();
+    $('shortcutModal').classList.remove('hidden');
+  });
+  $('btnCloseShortcutModal').addEventListener('click', () => {
+    $('shortcutModal').classList.add('hidden');
+  });
+  $('shortcutForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const shortcut = $('scShortCode').value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    const title = $('scTitle').value.trim();
+    const text = $('scText').value.trim();
+    if (!shortcut || !title || !text) return;
+    const item = { id: 'cr_' + Date.now().toString(36), shortcut, title, text };
+    const nextList = [...(state.cannedReplies || []).filter((x) => x.shortcut !== shortcut), item].slice(0, 40);
+    try {
+      await updateDoc(doc(db, 'support_agents', state.user.uid), {
+        cannedReplies: nextList,
+        updatedAt: serverTimestamp()
+      });
+      state.cannedReplies = nextList;
+      $('shortcutForm').reset();
+      renderQuickChips();
+      renderShortcutManager();
+      toast('Saved quick-reply shortcut.');
+    } catch (err) {
+      toast(err.message, true);
+    }
+  });
+</script>
+</body>
+</html>
