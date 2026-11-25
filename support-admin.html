@@ -9,13 +9,14 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #f1f5f9;
+      --bg: #f4f6f8;
       --surface: #ffffff;
       --muted-bg: #f8fafc;
       --ink: #0f172a;
       --ink-2: #475569;
       --ink-muted: #64748b;
       --border: #e2e8f0;
+      --border-strong: #cbd5e1;
       --accent: #075e54;
       --accent-hover: #064e46;
       --accent-soft: #ecfdf5;
@@ -37,58 +38,86 @@
       -webkit-font-smoothing: antialiased;
       display: flex;
       flex-direction: column;
+      font-variant-numeric: tabular-nums;
     }
     .hidden { display: none !important; }
-    code, .mono { font-family: var(--mono); }
+    code, .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+    svg.ico { width: 15px; height: 15px; flex-shrink: 0; display: inline-block; vertical-align: middle; }
 
     header {
-      background: linear-gradient(135deg, #064e46 0%, #0f172a 100%);
+      background: #0f172a;
       color: #fff;
-      padding: 10px 18px;
+      padding: 0 18px;
+      min-height: 56px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      flex-wrap: wrap;
-      border-bottom: 1px solid rgba(255,255,255,0.12);
+      border-bottom: 1px solid #1e293b;
       flex-shrink: 0;
-      z-index: 20;
+      z-index: 30;
     }
     .hdr-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
-    .hdr-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .brand-pill {
-      background: #10b981;
-      color: #022c22;
-      font-size: 11px;
+    .hdr-brand-mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #075e54 0%, #10b981 100%);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
       font-weight: 800;
-      padding: 3px 9px;
-      border-radius: 999px;
-      text-transform: uppercase;
-      letter-spacing: .04em;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .hdr-title { font-size: 14.5px; font-weight: 700; letter-spacing: -0.01em; white-space: nowrap; }
+    .hdr-sep { color: #475569; font-size: 12px; }
+    .hdr-sub { font-size: 12px; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .hdr-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .agent-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 3px 8px 3px 4px;
+      border-radius: 9px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      max-width: 260px;
     }
     .agent-avatar {
-      width: 28px;
-      height: 28px;
+      width: 26px;
+      height: 26px;
       border-radius: 999px;
       object-fit: cover;
       border: 1.5px solid #34d399;
       background: #064e46;
+      flex-shrink: 0;
+    }
+    #hdrAgentName {
+      font-size: 12px;
+      color: #e2e8f0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .btn {
-      border: 0;
+      border: 1px solid transparent;
       border-radius: 8px;
-      padding: 7px 12px;
+      padding: 7px 13px;
       font-family: inherit;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
-      transition: all .15s ease;
+      white-space: nowrap;
+      transition: background .15s ease, border-color .15s ease, transform .1s ease;
     }
+    .btn:active:not(:disabled) { transform: scale(0.98); }
     .btn:disabled { opacity: .55; cursor: not-allowed; }
     .btn.primary { background: var(--accent); color: #fff; }
     .btn.primary:hover:not(:disabled) { background: var(--accent-hover); }
@@ -98,21 +127,21 @@
     .btn.danger:hover:not(:disabled) { background: #b91c1c; }
     .btn.warn { background: var(--warn); color: #fff; }
     .btn.warn:hover:not(:disabled) { background: #b45309; }
-    .btn.ghost { background: #fff; color: var(--ink); border: 1px solid var(--border); }
-    .btn.ghost:hover:not(:disabled) { background: #f8fafc; border-color: #cbd5e1; }
-    .btn.hdr { background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.22); }
-    .btn.hdr:hover:not(:disabled) { background: rgba(255,255,255,0.2); }
-    .btn.sm { padding: 5px 9px; font-size: 11px; border-radius: 7px; }
+    .btn.ghost { background: #fff; color: var(--ink); border-color: var(--border-strong); }
+    .btn.ghost:hover:not(:disabled) { background: #f8fafc; border-color: #94a3b8; }
+    .btn.hdr { background: rgba(255,255,255,0.09); color: #fff; border-color: rgba(255,255,255,0.18); }
+    .btn.hdr:hover:not(:disabled) { background: rgba(255,255,255,0.18); }
+    .btn.sm { padding: 6px 10px; font-size: 11.5px; border-radius: 7px; }
 
     .badge {
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      padding: 2px 8px;
-      border-radius: 999px;
+      padding: 2px 7px;
+      border-radius: 6px;
       font-size: 11px;
       font-weight: 700;
-      background: #e2e8f0;
+      background: #f1f5f9;
       color: #334155;
       white-space: nowrap;
     }
@@ -121,17 +150,18 @@
     .badge.err { background: #fee2e2; color: #991b1b; }
     .badge.info { background: #e0f2fe; color: #075985; }
 
-    label { display: block; font-size: 12px; font-weight: 600; color: var(--ink-2); margin-bottom: 4px; }
+    label { display: block; font-size: 11.5px; font-weight: 700; color: var(--ink-2); margin-bottom: 4px; }
     input, textarea, select {
       width: 100%;
-      padding: 8px 11px;
-      border: 1px solid #cbd5e1;
+      padding: 9px 11px;
+      border: 1px solid var(--border-strong);
       border-radius: 8px;
       font-family: inherit;
       font-size: 13px;
       color: var(--ink);
       background: #fff;
       outline: none;
+      transition: border-color .15s, box-shadow .15s;
     }
     input:focus, textarea:focus, select:focus {
       border-color: var(--accent);
@@ -143,16 +173,16 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 24px 16px;
     }
     .login-card {
       width: 100%;
-      max-width: 430px;
+      max-width: 420px;
       background: #fff;
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 26px;
-      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      padding: 28px;
+      box-shadow: 0 16px 38px -12px rgba(15, 23, 42, 0.12);
     }
     .pw-wrap { position: relative; }
     .pw-wrap input { padding-right: 64px; }
@@ -161,12 +191,12 @@
       right: 6px;
       top: 50%;
       transform: translateY(-50%);
-      border: 1px solid #cbd5e1;
+      border: 1px solid var(--border-strong);
       background: #f8fafc;
       color: #334155;
       font-size: 11px;
       font-weight: 700;
-      padding: 4px 8px;
+      padding: 5px 9px;
       border-radius: 6px;
       cursor: pointer;
     }
@@ -175,7 +205,7 @@
       flex: 1;
       min-height: 0;
       display: grid;
-      grid-template-columns: 310px minmax(360px, 1fr) 340px;
+      grid-template-columns: 316px minmax(360px, 1fr) 348px;
       background: var(--surface);
       overflow: hidden;
     }
@@ -192,45 +222,54 @@
       border-bottom: 1px solid var(--border);
       background: #fff;
       display: grid;
-      gap: 9px;
+      gap: 10px;
     }
+    .search-box { position: relative; }
+    .search-box input { padding-left: 32px; background: #f8fafc; }
+    .search-box .search-ico { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #64748b; pointer-events: none; }
     .queue-tabs {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 5px;
+      gap: 4px;
+      padding: 3px;
+      background: #f1f5f9;
+      border-radius: 9px;
     }
     .q-tab {
-      border: 1px solid var(--border);
-      background: #f8fafc;
+      border: none;
+      background: transparent;
       color: var(--ink-2);
-      border-radius: 8px;
-      padding: 6px 6px;
-      font-size: 11px;
+      border-radius: 7px;
+      padding: 7px 6px;
+      font-size: 11.5px;
       font-weight: 700;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 4px;
+      gap: 5px;
+      white-space: nowrap;
+      transition: background .15s, color .15s, box-shadow .15s;
     }
     .q-tab.active {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
+      background: #fff;
+      color: var(--ink);
+      box-shadow: 0 1px 2px rgba(15,23,42,0.08);
     }
     .q-tab .cnt {
-      background: rgba(15,23,42,0.12);
+      background: rgba(15,23,42,0.08);
       padding: 1px 6px;
-      border-radius: 999px;
-      font-size: 10px;
+      border-radius: 6px;
+      font-size: 10.5px;
+      font-family: var(--mono);
     }
-    .q-tab.active .cnt { background: rgba(255,255,255,0.22); }
+    .q-tab.active .cnt { background: var(--accent); color: #fff; }
     .lock-banner {
-      padding: 7px 11px;
+      padding: 7px 12px;
       font-size: 11px;
       color: #065f46;
       background: #ecfdf5;
-      border-bottom: 1px solid #a7f3d0;
+      border-bottom: 1px solid #d1fae5;
       font-weight: 600;
     }
     #threadList {
@@ -239,21 +278,21 @@
       padding: 8px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 7px;
     }
     .thread-card {
       background: #fff;
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 10px 11px;
+      padding: 11px 12px;
       cursor: pointer;
-      transition: border-color .15s, box-shadow .15s;
+      transition: border-color .15s, box-shadow .15s, background .15s;
     }
     .thread-card:hover { border-color: #94a3b8; }
     .thread-card.active {
       border-color: var(--accent);
       background: #f0fdf4;
-      box-shadow: 0 0 0 2px rgba(7, 94, 84, 0.14);
+      box-shadow: 0 0 0 2px rgba(7, 94, 84, 0.12);
     }
     .thread-row-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
     .thread-name { font-size: 13px; font-weight: 700; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -270,7 +309,7 @@
     .chat-hdr {
       background: #ffffff;
       border-bottom: 1px solid var(--border);
-      padding: 11px 16px;
+      padding: 10px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -278,6 +317,7 @@
       flex-wrap: wrap;
       flex-shrink: 0;
     }
+    .mobile-back-btn, .mobile-insp-btn { display: none; }
     #chatBody {
       flex: 1;
       overflow-y: auto;
@@ -287,11 +327,11 @@
       gap: 9px;
       min-height: 0;
     }
-    .msg-row { display: flex; flex-direction: column; max-width: 78%; }
+    .msg-row { display: flex; flex-direction: column; max-width: 76%; }
     .msg-row.in { align-self: flex-start; }
     .msg-row.out { align-self: flex-end; }
     .msg-bubble {
-      border-radius: 11px;
+      border-radius: 12px;
       padding: 9px 12px;
       border: 1px solid #cbd5e1;
       background: #ffffff;
@@ -303,15 +343,15 @@
     .msg-row.out .msg-bubble.offline { background: #fef2f2; border-color: #fecaca; }
     .msg-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; font-size: 11px; }
     .msg-text { font-size: 13px; color: var(--ink); white-space: pre-wrap; word-break: break-word; }
-    .msg-time { font-size: 10px; color: var(--ink-muted); text-align: right; margin-top: 4px; }
+    .msg-time { font-size: 10px; color: var(--ink-muted); text-align: right; margin-top: 4px; font-family: var(--mono); }
 
     .composer-wrap {
       background: #f8fafc;
       border-top: 1px solid var(--border);
-      padding: 9px 12px 11px;
+      padding: 10px 12px 12px;
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 8px;
       position: relative;
       flex-shrink: 0;
     }
@@ -321,13 +361,14 @@
       gap: 6px;
       overflow-x: auto;
       padding-bottom: 2px;
+      -webkit-overflow-scrolling: touch;
     }
     .quick-chip {
-      border: 1px solid #cbd5e1;
+      border: 1px solid var(--border-strong);
       background: #fff;
       color: #0f172a;
-      border-radius: 999px;
-      padding: 4px 10px;
+      border-radius: 8px;
+      padding: 5px 10px;
       font-size: 11px;
       font-weight: 600;
       cursor: pointer;
@@ -342,7 +383,7 @@
       bottom: 100%;
       margin-bottom: 6px;
       background: #fff;
-      border: 1px solid #cbd5e1;
+      border: 1px solid var(--border-strong);
       border-radius: 10px;
       box-shadow: 0 12px 24px rgba(15, 23, 42, 0.14);
       max-height: 210px;
@@ -350,7 +391,7 @@
       z-index: 30;
     }
     .slash-item {
-      padding: 8px 12px;
+      padding: 9px 12px;
       border-bottom: 1px solid #f1f5f9;
       cursor: pointer;
       display: flex;
@@ -374,11 +415,11 @@
     .insp-card {
       background: #fff;
       border: 1px solid var(--border);
-      border-radius: 11px;
-      padding: 12px;
+      border-radius: 12px;
+      padding: 13px;
     }
     .insp-card h3 {
-      margin: 0 0 8px;
+      margin: 0 0 9px;
       font-size: 13px;
       font-weight: 800;
       color: var(--ink);
@@ -403,9 +444,11 @@
     .mod-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 6px;
+      gap: 7px;
       margin-top: 8px;
     }
+
+    #mobileSupportNav { display: none; }
 
     .modal-backdrop {
       position: fixed;
@@ -442,13 +485,80 @@
       z-index: 90;
     }
 
-    @media (max-width: 1120px) {
-      #deskShell { grid-template-columns: 270px minmax(300px, 1fr) 300px; }
+    @media (max-width: 1140px) {
+      #deskShell { grid-template-columns: 276px minmax(300px, 1fr) 304px; }
     }
-    @media (max-width: 880px) {
-      #deskShell { grid-template-columns: 1fr; overflow-y: auto; }
-      .col-queue, .col-chat, .col-inspector { max-height: none; border-left: 0; border-right: 0; border-bottom: 1px solid var(--border); }
-      .col-chat { min-height: 460px; }
+    @media (max-width: 900px) {
+      header { padding: 0 12px; min-height: 52px; }
+      .hdr-sep, .hdr-sub { display: none; }
+      .agent-chip { display: none; }
+      #deskShell {
+        display: flex;
+        flex-direction: column;
+        height: calc(100dvh - 52px - 58px);
+        overflow: hidden;
+      }
+      .col-queue, .col-chat, .col-inspector {
+        display: none;
+        flex: 1;
+        min-height: 0;
+        border: 0;
+      }
+      #deskShell[data-mobile-view="queue"] .col-queue { display: flex; }
+      #deskShell[data-mobile-view="chat"] .col-chat { display: flex; }
+      #deskShell[data-mobile-view="inspector"] .col-inspector { display: flex; }
+      .mobile-back-btn, .mobile-insp-btn { display: inline-flex; min-height: 36px; }
+      .btn { min-height: 40px; }
+      .btn.sm { min-height: 36px; }
+      .q-tab { min-height: 38px; }
+      .msg-row { max-width: 88%; }
+      #mobileSupportNav {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        height: 58px;
+        background: #ffffff;
+        border-top: 1px solid var(--border);
+        flex-shrink: 0;
+        z-index: 35;
+      }
+      .mob-tab {
+        border: none;
+        background: transparent;
+        color: var(--ink-muted);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        font-family: inherit;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        position: relative;
+      }
+      .mob-tab.active { color: var(--accent); }
+      .mob-tab.active::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 24%;
+        right: 24%;
+        height: 2.5px;
+        border-radius: 0 0 3px 3px;
+        background: var(--accent);
+      }
+      .mob-tab-cnt {
+        font-family: var(--mono);
+        font-size: 10px;
+        font-weight: 700;
+        padding: 0 5px;
+        border-radius: 6px;
+        background: #f1f5f9;
+        color: var(--ink);
+        margin-left: 3px;
+      }
+      .mob-tab.active .mob-tab-cnt { background: #ecfdf5; color: var(--accent); }
+      #toastBox { bottom: 68px; left: 12px; right: 12px; text-align: center; }
     }
   </style>
 </head>
@@ -456,17 +566,21 @@
 
 <header>
   <div class="hdr-left">
-    <span class="brand-pill">Support Desk</span>
-    <div>
-      <strong style="font-size:15px;display:block">NurTech Live Support Agent Panel</strong>
-      <span style="font-size:11px;color:#cbd5e1">Real-Time Queue Lock · Agent Identity Badge · Customer Orders &amp; Ban Control</span>
-    </div>
+    <span class="hdr-brand-mark">S</span>
+    <span class="hdr-title">NurTech Support Desk</span>
+    <span class="hdr-sep">·</span>
+    <span class="hdr-sub">Live Queue &amp; Customer Inspector</span>
   </div>
   <div class="hdr-right">
-    <img id="hdrAgentAvatar" class="agent-avatar hidden" alt="Agent" referrerpolicy="no-referrer" />
-    <span id="hdrAgentBadge" class="badge info hidden">Agent Online</span>
-    <span id="hdrAgentName" style="font-size:12px;color:#e2e8f0">Connecting...</span>
-    <button id="btnToggleAlerts" type="button" class="btn hdr sm hidden">Sound: ON</button>
+    <div id="hdrAgentChip" class="agent-chip hidden">
+      <img id="hdrAgentAvatar" class="agent-avatar hidden" alt="Agent" referrerpolicy="no-referrer" />
+      <span id="hdrAgentName">Connecting...</span>
+    </div>
+    <span id="hdrAgentBadge" class="hidden"></span>
+    <button id="btnToggleAlerts" type="button" class="btn hdr sm hidden">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      <span id="lblAlertsText">Sound ON</span>
+    </button>
     <button id="btnSupportLogout" type="button" class="btn danger sm hidden">Sign Out</button>
   </div>
 </header>
@@ -499,11 +613,14 @@
   </div>
 </section>
 
-<div id="deskShell" class="hidden">
+<div id="deskShell" class="hidden" data-mobile-view="queue">
   <!-- LEFT COLUMN: SUPPORT QUEUE -->
   <aside class="col-queue">
     <div class="queue-top">
-      <input id="inpQueueSearch" placeholder="Search customer name, email, UID..." />
+      <div class="search-box">
+        <svg class="ico search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="inpQueueSearch" placeholder="Search customer name, email, UID..." />
+      </div>
       <div class="queue-tabs">
         <button type="button" class="q-tab active" data-tab="open">Open <span id="cntOpenQueue" class="cnt">0</span></button>
         <button type="button" class="q-tab" data-tab="mine">My Chats <span id="cntMyActive" class="cnt">0</span></button>
@@ -511,7 +628,7 @@
       </div>
     </div>
     <div class="lock-banner">
-      Once you Pick, Type, or Reply, that customer immediately disappears from every other agent's queue.
+      Pick, Type, or Reply to claim a customer privately from the shared queue.
     </div>
     <div id="threadList"></div>
   </aside>
@@ -519,19 +636,29 @@
   <!-- CENTER COLUMN: LIVE CONVERSATION -->
   <section class="col-chat">
     <div class="chat-hdr">
-      <div style="min-width:0">
-        <strong id="chatTitle" style="font-size:15px">Select a customer request</strong>
-        <div id="chatSubtitle" style="font-size:11.5px;color:#64748b">Open Requests appear on the left. Pick any conversation to chat privately with that customer.</div>
+      <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1">
+        <button id="btnMobileBackQueue" type="button" class="btn ghost sm mobile-back-btn" aria-label="Back to Queue">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+          <span>Queue</span>
+        </button>
+        <div style="min-width:0;flex:1">
+          <strong id="chatTitle" style="font-size:15px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Select a customer request</strong>
+          <div id="chatSubtitle" style="font-size:11.5px;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Pick any conversation from the queue to chat privately.</div>
+        </div>
+        <button id="btnMobileOpenInspector" type="button" class="btn ghost sm mobile-insp-btn" aria-label="Customer Info">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+          <span>Info</span>
+        </button>
       </div>
       <div id="chatActions" class="hidden" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
         <button id="btnClaimThread" type="button" class="btn primary sm">Pick Customer</button>
-        <button id="btnReleaseThread" type="button" class="btn ghost sm">Release to Queue</button>
+        <button id="btnReleaseThread" type="button" class="btn ghost sm">Release</button>
         <button id="btnToggleResolve" type="button" class="btn blue sm">Mark Resolved</button>
       </div>
     </div>
 
     <div id="chatBody">
-      <div style="margin:auto;text-align:center;max-width:340px;color:#475569;font-size:13px;background:rgba(255,255,255,0.88);padding:20px;border-radius:12px;border:1px solid #cbd5e1">
+      <div style="margin:auto;text-align:center;max-width:340px;color:#475569;font-size:13px;background:rgba(255,255,255,0.92);padding:20px;border-radius:12px;border:1px solid #cbd5e1">
         <strong>Ready for Live Support</strong>
         <p style="margin:6px 0 0;font-size:12px;color:#64748b">Choose a customer from Open Queue to view their message history, profile &amp; orders, then pick and reply.</p>
       </div>
@@ -544,8 +671,11 @@
         <button id="btnManageShortcuts" type="button" class="btn ghost sm" style="flex-shrink:0">+ Shortcuts</button>
       </div>
       <form id="replyForm" style="display:flex;gap:8px;align-items:flex-end">
-        <textarea id="inpReply" rows="2" placeholder="Write reply to customer... (Type / for canned shortcuts · Enter to send, Shift+Enter for new line)" style="flex:1;resize:none;min-height:44px;max-height:110px"></textarea>
-        <button id="btnSendReply" type="submit" class="btn primary" style="height:44px;padding:0 18px">Send</button>
+        <textarea id="inpReply" rows="2" placeholder="Write reply to customer... (Type / for canned shortcuts)" style="flex:1;resize:none;min-height:44px;max-height:110px"></textarea>
+        <button id="btnSendReply" type="submit" class="btn primary" style="height:44px;padding:0 16px">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+          <span>Send</span>
+        </button>
       </form>
     </div>
   </section>
@@ -595,6 +725,21 @@
     </div>
   </aside>
 </div>
+
+<nav id="mobileSupportNav" class="hidden" aria-label="Mobile Support Workspace Navigation">
+  <button type="button" class="mob-tab active" data-mob-view="queue">
+    <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span>Queue <span id="mobQueueCnt" class="mob-tab-cnt">0</span></span>
+  </button>
+  <button type="button" class="mob-tab" data-mob-view="chat">
+    <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/></svg>
+    <span>Active Chat</span>
+  </button>
+  <button type="button" class="mob-tab" data-mob-view="inspector">
+    <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+    <span>Customer</span>
+  </button>
+</nav>
 
 <!-- CANNED SHORTCUTS MODAL -->
 <div id="shortcutModal" class="modal-backdrop hidden">
@@ -647,7 +792,7 @@
   "appId": "1:1022912213159:web:fdf11116b2bbd69981eb82",
   "measurementId": "G-6VLZTDDZ1F"
 };
-  const DEFAULT_APP_ORIGIN = "https://ais-dev-pqvtxlfg4aibojguhtbjs6-21232009521.asia-east1.run.app";
+  const DEFAULT_APP_ORIGIN = "https://admin24.vercel.app";
   const RETENTION_MS = 2592000000;
   const SEED_CANNED = [{"id":"cr_greet","shortcut":"hi","title":"Warm Greeting","text":"Hello! Thank you for contacting NurTech Live Support. How can I assist you today?"},{"id":"cr_order","shortcut":"order","title":"Order Verification","text":"Please share your Order Number (#NT-...) and registered phone number so I can check live dispatch status for you."},{"id":"cr_delivery","shortcut":"delivery","title":"Delivery Timeline","text":"Inside Dhaka deliveries take 24-48 hours, and nationwide courier deliveries take 2-4 business days."},{"id":"cr_warranty","shortcut":"warranty","title":"Warranty Assistance","text":"Every component carries official brand warranty. Please keep your invoice/Order ID ready for verification."}];
 
@@ -729,6 +874,27 @@
     }
   }
 
+  function setMobileSupportView(viewName) {
+    const shell = $('deskShell');
+    if (shell) shell.setAttribute('data-mobile-view', viewName || 'queue');
+    document.querySelectorAll('#mobileSupportNav .mob-tab').forEach((btn) => {
+      btn.classList.toggle('active', btn.getAttribute('data-mob-view') === viewName);
+    });
+  }
+
+  document.querySelectorAll('#mobileSupportNav .mob-tab').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      setMobileSupportView(btn.getAttribute('data-mob-view') || 'queue');
+    });
+  });
+
+  if ($('btnMobileBackQueue')) {
+    $('btnMobileBackQueue').addEventListener('click', () => setMobileSupportView('queue'));
+  }
+  if ($('btnMobileOpenInspector')) {
+    $('btnMobileOpenInspector').addEventListener('click', () => setMobileSupportView('inspector'));
+  }
+
   function resetUiSignedOut(errMsg) {
     clearListeners();
     state.user = null;
@@ -741,6 +907,8 @@
     state.myResolvedChats = [];
     lastOpenCount = -1;
     $('deskShell').classList.add('hidden');
+    if ($('mobileSupportNav')) $('mobileSupportNav').classList.add('hidden');
+    if ($('hdrAgentChip')) $('hdrAgentChip').classList.add('hidden');
     $('loginView').classList.remove('hidden');
     $('hdrAgentBadge').classList.add('hidden');
     $('hdrAgentAvatar').classList.add('hidden');
@@ -765,7 +933,8 @@
 
   $('btnToggleAlerts').addEventListener('click', () => {
     soundAlertsEnabled = !soundAlertsEnabled;
-    $('btnToggleAlerts').textContent = 'Sound: ' + (soundAlertsEnabled ? 'ON' : 'OFF');
+    const lbl = $('lblAlertsText');
+    if (lbl) lbl.textContent = soundAlertsEnabled ? 'Sound ON' : 'Sound OFF';
   });
 
   $('btnSupportLogout').addEventListener('click', async () => {
@@ -824,6 +993,8 @@
       $('loginErrorBox').classList.add('hidden');
       $('loginView').classList.add('hidden');
       $('deskShell').classList.remove('hidden');
+      if ($('mobileSupportNav')) $('mobileSupportNav').classList.remove('hidden');
+      setMobileSupportView('queue');
       renderHeader();
       renderQuickChips();
       startSupportListeners();
@@ -913,10 +1084,10 @@
   function renderHeader() {
     if (!state.agent) return;
     const ag = state.agent;
-    $('hdrAgentBadge').classList.remove('hidden');
+    if ($('hdrAgentChip')) $('hdrAgentChip').classList.remove('hidden');
     $('btnToggleAlerts').classList.remove('hidden');
     $('btnSupportLogout').classList.remove('hidden');
-    $('hdrAgentName').textContent = (ag.name || 'Support Agent') + (ag.district ? ' · ' + ag.district : '') + ' (' + (ag.loginId || ag.email) + ')';
+    $('hdrAgentName').textContent = (ag.name || 'Support Agent') + (ag.district ? ' · ' + ag.district : '');
     if (ag.photoUrl) {
       $('hdrAgentAvatar').src = ag.photoUrl;
       $('hdrAgentAvatar').classList.remove('hidden');
@@ -945,6 +1116,9 @@
     $('cntOpenQueue').textContent = String(state.openQueue.length);
     $('cntMyActive').textContent = String(state.myActiveChats.length);
     $('cntResolved').textContent = String(state.myResolvedChats.length);
+    if ($('mobQueueCnt')) {
+      $('mobQueueCnt').textContent = String(state.openQueue.length + state.myActiveChats.length);
+    }
 
     document.querySelectorAll('.q-tab').forEach((btn) => {
       btn.classList.toggle('active', btn.getAttribute('data-tab') === state.activeTab);
@@ -1250,6 +1424,9 @@
 
     renderQueue();
     renderChatAndInspector();
+    if (window.innerWidth <= 900) {
+      setMobileSupportView('chat');
+    }
   }
 
   async function claimThread(uid) {
